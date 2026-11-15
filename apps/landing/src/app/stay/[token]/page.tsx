@@ -221,15 +221,20 @@ function StayCard({ stay }: { stay: Stay }) {
 				)}
 			</section>
 
-			{h && (tel || mapsUrl || h.email) && (
+			{h && (
 				<section className="rounded-[16px] border border-line bg-card px-5 py-5">
 					<h2 className="text-[15px] font-bold text-ink">
 						Getting there and getting in touch
 					</h2>
-					{where && (
+					{where ? (
 						<p className="mt-2 flex gap-2 text-[14px] leading-[1.5] text-ink-2">
 							<MapPinIcon className="mt-[2px] size-4 shrink-0 text-ink-3" />
 							{where}
+						</p>
+					) : (
+						<p className="mt-2 text-[14px] leading-[1.5] text-ink-2">
+							{h.name} hasn't added its address yet. Contact the hotel for
+							directions.
 						</p>
 					)}
 					<div className="mt-4 grid gap-2 sm:grid-cols-2">
