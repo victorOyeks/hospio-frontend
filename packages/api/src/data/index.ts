@@ -45,7 +45,11 @@ import {
 	type SetupListName,
 	toSetupSections,
 } from "./mappers/hotel-config";
-import { toPortalUserRow, toRolesAccessRow, toStaffRow } from "./mappers/identity";
+import {
+	toPortalUserRow,
+	toRolesAccessRow,
+	toStaffRow,
+} from "./mappers/identity";
 import { lagosDate, lagosDay } from "./mappers/finance";
 import { fnbData } from "./fnb";
 import { inventoryData } from "./inventory";
@@ -187,25 +191,37 @@ function demoPaymentPage(q: PaymentQuery): PageResult<PaymentRow> {
 			(!q.method || p.method === q.method) &&
 			(!q.from || lagosDayOf(p.createdAt) >= q.from) &&
 			(!q.to || lagosDayOf(p.createdAt) <= q.to) &&
-			(has(p.guestName, q.q) || has(p.reference, q.q) || has(p.description, q.q)),
+			(has(p.guestName, q.q) ||
+				has(p.reference, q.q) ||
+				has(p.description, q.q)),
 	);
 	const rows = base
 		.filter((p) => !statuses || statuses.includes(p.status))
 		.sort((a, b) => b.createdAt.localeCompare(a.createdAt));
 	const counts: Record<string, number> = { all: base.length };
 	for (const p of base) counts[p.status] = (counts[p.status] ?? 0) + 1;
-	counts.toVerify = base.filter((p) => ["PENDING", "PROCESSING", "NO_RESPONSE"].includes(p.status)).length;
-	counts.attention = base.filter((p) => ["DECLINED", "NO_RESPONSE", "PROCESSING"].includes(p.status)).length;
+	counts.toVerify = base.filter((p) =>
+		["PENDING", "PROCESSING", "NO_RESPONSE"].includes(p.status),
+	).length;
+	counts.attention = base.filter((p) =>
+		["DECLINED", "NO_RESPONSE", "PROCESSING"].includes(p.status),
+	).length;
 	counts.today = base.filter((p) => lagosDayOf(p.createdAt) === today).length;
 	counts.mine = base.length;
 	const ok = (p: PaymentRow, day: (d: string) => boolean, m?: string) =>
-		p.status === "APPROVED" && day(lagosDayOf(p.createdAt)) && (!m || p.method === m);
+		p.status === "APPROVED" &&
+		day(lagosDayOf(p.createdAt)) &&
+		(!m || p.method === m);
 	const sum = (day: (d: string) => boolean, m?: string) =>
-		stay.demoPayments.filter((p) => ok(p, day, m)).reduce((s, p) => s + p.amount, 0);
+		stay.demoPayments
+			.filter((p) => ok(p, day, m))
+			.reduce((s, p) => s + p.amount, 0);
 	const isToday = (d: string) => d === today;
 	const isMonth = (d: string) => d.slice(0, 7) === today.slice(0, 7);
 	const totals: Record<string, number> = {
-		approved: base.filter((p) => p.status === "APPROVED").reduce((s, p) => s + p.amount, 0),
+		approved: base
+			.filter((p) => p.status === "APPROVED")
+			.reduce((s, p) => s + p.amount, 0),
 		approvedToday: sum(isToday),
 		approvedTodayCount: stay.demoPayments.filter((p) => ok(p, isToday)).length,
 		todayCard: sum(isToday, "CARD"),
@@ -217,13 +233,20 @@ function demoPaymentPage(q: PaymentQuery): PageResult<PaymentRow> {
 		monthTransfer: sum(isMonth, "TRANSFER"),
 		monthCash: sum(isMonth, "CASH"),
 	};
-	return { ok: true, data: slicePage(rows, q.page, q.size, { counts, totals }) };
+	return {
+		ok: true,
+		data: slicePage(rows, q.page, q.size, { counts, totals }),
+	};
 }
 
 function inView(b: BookingRow, v: BookingView, today: string) {
 	switch (v) {
 		case "arrivals":
-			return b.checkInDate === today && b.status !== "CANCELLED" && b.status !== "CHECKED_OUT";
+			return (
+				b.checkInDate === today &&
+				b.status !== "CANCELLED" &&
+				b.status !== "CHECKED_OUT"
+			);
 		case "departures":
 			return b.checkOutDate === today && b.status === "CHECKED_IN";
 		case "in-house":
@@ -231,7 +254,11 @@ function inView(b: BookingRow, v: BookingView, today: string) {
 		case "upcoming":
 			return b.status === "BOOKED" && b.checkInDate > today;
 		case "past":
-			return b.status === "CHECKED_OUT" || b.status === "CANCELLED" || (b.status === "NO_SHOW" && b.checkInDate < today);
+			return (
+				b.status === "CHECKED_OUT" ||
+				b.status === "CANCELLED" ||
+				(b.status === "NO_SHOW" && b.checkInDate < today)
+			);
 		default:
 			return true;
 	}
@@ -242,49 +269,89 @@ function demoBookingPage(q: BookingQuery): PageResult<BookingRow> {
 	const statuses = q.status?.split(",");
 	const base = stay.demoBookings.filter(
 		(b) =>
-			(has(b.guestName, q.q) || has(b.reference, q.q) || has(b.roomNumber, q.q) || has(b.guestPhone, q.q)) &&
+			(has(b.guestName, q.q) ||
+				has(b.reference, q.q) ||
+				has(b.roomNumber, q.q) ||
+				has(b.guestPhone, q.q)) &&
 			(!q.from || b.checkOutDate >= q.from) &&
 			(!q.to || b.checkInDate <= q.to) &&
 			(!q.arrivingFrom || b.checkInDate >= q.arrivingFrom) &&
 			(!q.arrivingTo || b.checkInDate <= q.arrivingTo) &&
 			(!q.guestId || b.guestId === q.guestId),
 	);
-	const views: BookingView[] = ["arrivals", "departures", "in-house", "upcoming", "past", "all"];
+	const views: BookingView[] = [
+		"arrivals",
+		"departures",
+		"in-house",
+		"upcoming",
+		"past",
+		"all",
+	];
 	const counts: Record<string, number> = {};
-	for (const v of views) counts[v] = base.filter((b) => inView(b, v, today)).length;
+	for (const v of views)
+		counts[v] = base.filter((b) => inView(b, v, today)).length;
 	const rows = base
-		.filter((b) => (!q.view || inView(b, q.view, today)) && (!statuses || statuses.includes(b.status)))
-		.sort((a, b) => b.checkInDate.localeCompare(a.checkInDate) || b.createdAt.localeCompare(a.createdAt));
-	const live = stay.demoBookings.filter((b) => b.status !== "CANCELLED" && b.status !== "NO_SHOW");
-	const owing = live.filter((b) => b.paymentPlan !== "ORGANIZATION" && b.totalAmount - b.paid > 0);
-	const arrivals = stay.demoBookings.filter((b) => inView(b, "arrivals", today));
+		.filter(
+			(b) =>
+				(!q.view || inView(b, q.view, today)) &&
+				(!statuses || statuses.includes(b.status)),
+		)
+		.sort(
+			(a, b) =>
+				b.checkInDate.localeCompare(a.checkInDate) ||
+				b.createdAt.localeCompare(a.createdAt),
+		);
+	const live = stay.demoBookings.filter(
+		(b) => b.status !== "CANCELLED" && b.status !== "NO_SHOW",
+	);
+	const owing = live.filter(
+		(b) => b.paymentPlan !== "ORGANIZATION" && b.totalAmount - b.paid > 0,
+	);
+	const arrivals = stay.demoBookings.filter((b) =>
+		inView(b, "arrivals", today),
+	);
 	return {
 		ok: true,
 		data: slicePage(rows, q.page, q.size, {
 			counts,
 			totals: {
-				booked: live.reduce((s, b) => s + (b.priceKind === "COMPLIMENTARY" ? 0 : b.totalAmount), 0),
+				booked: live.reduce(
+					(s, b) => s + (b.priceKind === "COMPLIMENTARY" ? 0 : b.totalAmount),
+					0,
+				),
 				bookedCount: live.length,
 				unpaid: owing.reduce((s, b) => s + (b.totalAmount - b.paid), 0),
 				unpaidCount: owing.length,
-				arrivalsCheckedIn: arrivals.filter((b) => b.status === "CHECKED_IN").length,
+				arrivalsCheckedIn: arrivals.filter((b) => b.status === "CHECKED_IN")
+					.length,
 				arrivalsToCome: arrivals.filter((b) => b.status === "BOOKED").length,
 				paidThisMonth: live
-					.filter((b) => b.checkInDate.slice(0, 7) <= today.slice(0, 7) && b.checkOutDate.slice(0, 7) >= today.slice(0, 7))
+					.filter(
+						(b) =>
+							b.checkInDate.slice(0, 7) <= today.slice(0, 7) &&
+							b.checkOutDate.slice(0, 7) >= today.slice(0, 7),
+					)
 					.reduce((s, b) => s + b.paid, 0),
 				inHouseUnpaid: owing
 					.filter((b) => b.status === "CHECKED_IN")
 					.reduce((s, b) => s + (b.totalAmount - b.paid), 0),
-				inHouseUnpaidCount: owing.filter((b) => b.status === "CHECKED_IN").length,
+				inHouseUnpaidCount: owing.filter((b) => b.status === "CHECKED_IN")
+					.length,
 			},
 		}),
 	};
 }
 
 function demoGuestPage(q: GuestQuery): PageResult<GuestRow> {
-	const inHouse = new Set(stay.demoBookings.filter((b) => b.status === "CHECKED_IN").map((b) => b.guestId));
+	const inHouse = new Set(
+		stay.demoBookings
+			.filter((b) => b.status === "CHECKED_IN")
+			.map((b) => b.guestId),
+	);
 	const base = stay.demoGuests
-		.filter((g) => has(g.fullName, q.q) || has(g.phone, q.q) || has(g.email, q.q))
+		.filter(
+			(g) => has(g.fullName, q.q) || has(g.phone, q.q) || has(g.email, q.q),
+		)
 		.map((g) => ({ ...g, inHouse: inHouse.has(g.id) }));
 	const views: Record<GuestView, (g: GuestRow) => boolean> = {
 		all: () => true,
@@ -294,7 +361,12 @@ function demoGuestPage(q: GuestQuery): PageResult<GuestRow> {
 	};
 	const counts: Record<string, number> = {};
 	for (const [k, f] of Object.entries(views)) counts[k] = base.filter(f).length;
-	return { ok: true, data: slicePage(base.filter(views[q.view ?? "all"]), q.page, q.size, { counts }) };
+	return {
+		ok: true,
+		data: slicePage(base.filter(views[q.view ?? "all"]), q.page, q.size, {
+			counts,
+		}),
+	};
 }
 
 /** identity users for the caller's business, or a named business for platform callers. */
@@ -675,45 +747,48 @@ export const data = {
 		 * What the hotel's settings say about spending: APPROVAL_LIMITS and the default till float. Above
 		 * `managerExpenseLimit` an expense needs the owner; `ownerExpenseLimit` 0 means no ceiling.
 		 */
-		limits: perHotel(async (): Promise<{
-			limits: ApprovalLimits;
-			tillFloat: number;
-		}> => {
-			const fallback = {
-				limits: {
-					managerExpenseLimit: 500_000,
-					ownerExpenseLimit: 0,
-					discountPct: 10,
-					refundsNeedOwner: false,
-				},
-				tillFloat: 50_000,
-			};
-			if (!live("hotel-config")) return give(fallback);
-			const sections = await setupSettings();
-			const value = (section: string, key: string) =>
-				sections
-					.find((x) => x.key === section)
-					?.fields.find((f) => f.key === key)?.value;
-			const n = (v: unknown, d: number) =>
-				typeof v === "number" && Number.isFinite(v) ? v : d;
-			return {
-				limits: {
-					managerExpenseLimit: n(
-						value("approvals", "managerExpenseLimit"),
-						fallback.limits.managerExpenseLimit,
-					),
-					ownerExpenseLimit: n(value("approvals", "ownerExpenseLimit"), 0),
-					discountPct: n(
-						value("approvals", "discountPct"),
-						fallback.limits.discountPct,
-					),
-					refundsNeedOwner: value("approvals", "refundsNeedOwner") === true,
-					rateChangesNeedOwner: value("approvals", "rateChangesNeedOwner") !== false,
-					rateChangeOwnerPct: n(value("approvals", "rateChangeOwnerPct"), 0),
-				},
-				tillFloat: n(value("money", "tillFloat"), 0),
-			};
-		}),
+		limits: perHotel(
+			async (): Promise<{
+				limits: ApprovalLimits;
+				tillFloat: number;
+			}> => {
+				const fallback = {
+					limits: {
+						managerExpenseLimit: 500_000,
+						ownerExpenseLimit: 0,
+						discountPct: 10,
+						refundsNeedOwner: false,
+					},
+					tillFloat: 50_000,
+				};
+				if (!live("hotel-config")) return give(fallback);
+				const sections = await setupSettings();
+				const value = (section: string, key: string) =>
+					sections
+						.find((x) => x.key === section)
+						?.fields.find((f) => f.key === key)?.value;
+				const n = (v: unknown, d: number) =>
+					typeof v === "number" && Number.isFinite(v) ? v : d;
+				return {
+					limits: {
+						managerExpenseLimit: n(
+							value("approvals", "managerExpenseLimit"),
+							fallback.limits.managerExpenseLimit,
+						),
+						ownerExpenseLimit: n(value("approvals", "ownerExpenseLimit"), 0),
+						discountPct: n(
+							value("approvals", "discountPct"),
+							fallback.limits.discountPct,
+						),
+						refundsNeedOwner: value("approvals", "refundsNeedOwner") === true,
+						rateChangesNeedOwner:
+							value("approvals", "rateChangesNeedOwner") !== false,
+						rateChangeOwnerPct: n(value("approvals", "rateChangeOwnerPct"), 0),
+					},
+					tillFloat: n(value("money", "tillFloat"), 0),
+				};
+			},
+		),
 		summaries: async (): Promise<HotelSummary[]> => {
 			if (!live("tenant")) return give(hotel.demoHotelSummaries);
 			const [hotels, managers] = await Promise.all([
@@ -727,17 +802,21 @@ export const data = {
 		 * into the sections the screen renders. The catalogue lives in mappers/hotel-config.
 		 */
 		/**
-		 * The active hotel's brand (Hotel setup → Brand & colours) for the dashboard shell: colour, sidebar, short name, logo.
-		 * Hospio360's own look when it can't be read (demo, hotel-config down, no hotel).
+		 * The active hotel's brand (Hotel setup → Brand & colours): colour, sidebar, short name, logo. Null when it can't be
+		 * read (demo, hotel-config down, no hotel yet), so the caller keeps the look it already has rather than maroon.
 		 */
-		brand: async (): Promise<Brand> => {
-			if (!live("hotel-config")) return brandFromSettings(null);
+		brand: async (): Promise<Brand | null> => {
+			if (!live("hotel-config")) return null;
 			try {
 				const s = await withSession();
-				const r = await api("@get/hotel-config/setup/:section", { ...s, params: { section: "BRAND" } });
-				return brandFromSettings((r.data?.data as Record<string, unknown> | undefined) ?? null);
+				const r = await api("@get/hotel-config/setup/:section", {
+					...s,
+					params: { section: "BRAND" },
+				});
+				const d = r.data?.data as Record<string, unknown> | undefined;
+				return d ? brandFromSettings(d) : null;
 			} catch {
-				return brandFromSettings(null);
+				return null;
 			}
 		},
 		setup: async (hotelId?: string): Promise<HotelSetupSection[]> => {
@@ -1010,10 +1089,7 @@ export const data = {
 			});
 			if (error || !res) {
 				console.error("reservation-service bookings:", error);
-				return failedPage(
-					errorMessage(error, "Bookings didn't load"),
-					q.size,
-				);
+				return failedPage(errorMessage(error, "Bookings didn't load"), q.size);
 			}
 			return {
 				ok: true,
@@ -1025,7 +1101,9 @@ export const data = {
 		 * mention (not every account of the hotel).
 		 */
 		named: async <T extends BookingRow>(rows: T[]): Promise<T[]> => {
-			const missing = rows.filter((b) => b.organizationId && !b.organizationName);
+			const missing = rows.filter(
+				(b) => b.organizationId && !b.organizationName,
+			);
 			if (missing.length === 0) return rows;
 			// Accounts belong to a hotel: each row's account is read at the row's hotel (the owner's rows span hotels).
 			const byHotel = new Map<string, string[]>();
@@ -1172,13 +1250,16 @@ export const data = {
 		 * The open folios without their lines (balances, pickers, "who owes"): folio-service's list still sends every line,
 		 * so they are dropped here, before anything reaches the page. Read once per request and hotel.
 		 */
-		summaries: perHotel(async (): Promise<FolioSummary[]> =>
-			(await data.folios.list()).map(toFolioSummary),
+		summaries: perHotel(
+			async (): Promise<FolioSummary[]> =>
+				(await data.folios.list()).map(toFolioSummary),
 		),
 		/** The stay's folio with its lines (null before check-in): the booking panels' folio tab and check-out. */
 		forBooking: async (bookingId: string): Promise<FolioRow | null> => {
 			if (!live("folio"))
-				return give(stay.demoFolios.find((f) => f.bookingId === bookingId) ?? null);
+				return give(
+					stay.demoFolios.find((f) => f.bookingId === bookingId) ?? null,
+				);
 			if (noId(bookingId)) return null;
 			const { data: res } = await api(
 				"@get/folio/folios/by-booking/:bookingId",
@@ -1219,10 +1300,7 @@ export const data = {
 			});
 			if (error || !res) {
 				console.error("payment-service payments:", error);
-				return failedPage(
-					errorMessage(error, "Payments didn't load"),
-					q.size,
-				);
+				return failedPage(errorMessage(error, "Payments didn't load"), q.size);
 			}
 			return { ok: true, data: toPaged(res.data, toPaymentRow) };
 		},
@@ -1324,10 +1402,7 @@ export const data = {
 			});
 			if (error || !res) {
 				console.error("payment-service disputes:", error);
-				return failedPage(
-					errorMessage(error, "Disputes didn't load"),
-					q.size,
-				);
+				return failedPage(errorMessage(error, "Disputes didn't load"), q.size);
 			}
 			return {
 				ok: true,
@@ -1422,13 +1497,17 @@ export const data = {
 		 * Names for the company accounts a page of bookings mentions (reservation-service sends only the id): one summary
 		 * read per account on the page, instead of every account of the hotel.
 		 */
-		names: async (ids: (string | null | undefined)[]): Promise<Map<string, string>> => {
+		names: async (
+			ids: (string | null | undefined)[],
+		): Promise<Map<string, string>> => {
 			const wanted = [...new Set(ids.filter((id): id is string => !noId(id)))];
 			const found = await Promise.all(
 				wanted.map((id) => organizationById(id).catch(() => null)),
 			);
 			return new Map(
-				found.filter((o): o is OrganizationRow => !!o).map((o) => [o.id, o.name]),
+				found
+					.filter((o): o is OrganizationRow => !!o)
+					.map((o) => [o.id, o.name]),
 			);
 		},
 		/** One account with its figures (GET /folio/organizations/:id/summary). */
@@ -1611,18 +1690,28 @@ export const data = {
 					}),
 				});
 			}
-			const [active, hotels] = await Promise.all([getActiveHotel(), getHotels()]);
+			const [active, hotels] = await Promise.all([
+				getActiveHotel(),
+				getHotels(),
+			]);
 			if (!active) return failedPage("Choose a hotel first");
 			const r = await usersPage({ ...query, hotelId: active.id });
 			if (!r.ok) return failedPage(r.error);
 			const names = hotelNameMap(hotels);
-			return { ok: true, data: toPaged(r.page, (u) => toStaffRow(u, active.id, names)) };
+			return {
+				ok: true,
+				data: toPaged(r.page, (u) => toStaffRow(u, active.id, names)),
+			};
 		},
 		/** One person at the active hotel (GET /identity/users/:id), for a profile opened from a link; null when not found. */
 		one: async (id: string): Promise<StaffRow | null> => {
-			if (!live("identity")) return give(hotel.demoStaff.find((s) => s.id === id) ?? null);
+			if (!live("identity"))
+				return give(hotel.demoStaff.find((s) => s.id === id) ?? null);
 			if (noId(id)) return null;
-			const [active, hotels] = await Promise.all([getActiveHotel(), getHotels()]);
+			const [active, hotels] = await Promise.all([
+				getActiveHotel(),
+				getHotels(),
+			]);
 			if (!active) return null;
 			const { data: res, error } = await api("@get/identity/users/:id", {
 				...(await withSession()),
@@ -1638,8 +1727,13 @@ export const data = {
 		 * Roles & permissions · Staff access, a page at a time: the active hotel's people with their roles here, searched and
 		 * filtered (`holds` a role, `status`) in identity-service. Counts carry ROLE_<ROLE> (holders, not paused) for the role cards.
 		 */
-		accessPage: async (query: ListQuery = {}): Promise<PageResult<RolesAccessRow>> => {
-			const [active, session] = await Promise.all([getActiveHotel(), getSession()]);
+		accessPage: async (
+			query: ListQuery = {},
+		): Promise<PageResult<RolesAccessRow>> => {
+			const [active, session] = await Promise.all([
+				getActiveHotel(),
+				getSession(),
+			]);
 			// `holds` is the role filter (the URL's `role` opens a role's panel on the same screen).
 			const { holds, ...rest } = query;
 			if (!live("identity")) {
@@ -1652,8 +1746,14 @@ export const data = {
 				const counts: Record<string, number> = { all: all.length };
 				for (const a of all)
 					for (const g of a.grants)
-						if (!g.paused) counts[`ROLE_${g.role}`] = (counts[`ROLE_${g.role}`] ?? 0) + 1;
-				return { ok: true, data: slicePage(rows, query.page ?? 0, query.size ?? PAGE_SIZE, { counts }) };
+						if (!g.paused)
+							counts[`ROLE_${g.role}`] = (counts[`ROLE_${g.role}`] ?? 0) + 1;
+				return {
+					ok: true,
+					data: slicePage(rows, query.page ?? 0, query.size ?? PAGE_SIZE, {
+						counts,
+					}),
+				};
 			}
 			if (!active) return failedPage("Choose a hotel first");
 			const r = await usersPage({
@@ -1663,24 +1763,42 @@ export const data = {
 				roleCounts: true,
 			});
 			if (!r.ok) return failedPage(r.error);
-			return { ok: true, data: toPaged(r.page, (u) => toRolesAccessRow(u, active.id, session?.sub)) };
+			return {
+				ok: true,
+				data: toPaged(r.page, (u) =>
+					toRolesAccessRow(u, active.id, session?.sub),
+				),
+			};
 		},
 		/**
 		 * Roles & permissions · Staff access: everyone with a role at the active hotel (GET /identity/users?hotelId=),
 		 * with their roles here and the business-wide ones. Managers and the owner only; empty for anyone else.
 		 */
 		access: async (): Promise<RolesAccessRow[]> => {
-			const [active, session] = await Promise.all([getActiveHotel(), getSession()]);
+			const [active, session] = await Promise.all([
+				getActiveHotel(),
+				getSession(),
+			]);
 			if (!live("identity")) {
-				const { demoStaffAccess } = await import("@hospio/api/demo/fixtures/manager-admin");
+				const { demoStaffAccess } = await import(
+					"@hospio/api/demo/fixtures/manager-admin"
+				);
 				return give(
 					demoStaffAccess.map((a) => ({
 						id: a.id,
 						fullName: a.fullName,
 						email: "",
 						department: a.department,
-						status: a.grants.every((g) => g.paused) ? ("PAUSED" as const) : ("ACTIVE" as const),
-						grants: a.grants.map((g, i) => ({ id: `${a.id}-${i}`, role: g.role, level: g.level, paused: !!g.paused, until: g.until?.slice(0, 10) })),
+						status: a.grants.every((g) => g.paused)
+							? ("PAUSED" as const)
+							: ("ACTIVE" as const),
+						grants: a.grants.map((g, i) => ({
+							id: `${a.id}-${i}`,
+							role: g.role,
+							level: g.level,
+							paused: !!g.paused,
+							until: g.until?.slice(0, 10),
+						})),
 						otherHotelRoles: 0,
 						self: false,
 					})),
@@ -1713,7 +1831,9 @@ export const data = {
 		 * messaging-service's notifications for the signed-in person (their own plus their roles' at this hotel), a page at a
 		 * time, newest first: `unread` ("true"), `q`, `from`/`to` (90 days back by default on the server). Counts all/unread.
 		 */
-		page: async (query: ListQuery = {}): Promise<PageResult<NotificationRow>> => {
+		page: async (
+			query: ListQuery = {},
+		): Promise<PageResult<NotificationRow>> => {
 			if (!live("messaging")) {
 				const rows = ops.demoNotifications.filter(
 					(n) =>
@@ -1742,7 +1862,10 @@ export const data = {
 				return failedPage(errorMessage(error, "Notifications didn't load"));
 			}
 			const role = await getActiveRole();
-			return { ok: true, data: toPaged(res.data, (n) => toNotificationRow(role, n)) };
+			return {
+				ok: true,
+				data: toPaged(res.data, (n) => toNotificationRow(role, n)),
+			};
 		},
 		/** The bell's badge: how many are unread (a count from the service, not the list). */
 		unreadCount: async (): Promise<number> => {
@@ -2153,7 +2276,12 @@ const SCREEN_ALIASES: Record<string, Record<string, string>> = {
 	FINANCE: { financials: "", "night-audit": "night-audit" },
 	MANAGER: { repairs: "tasks", inventory: "inventory", messages: "messaging" },
 	FRONT_OFFICE: { orders: "", menu: "" },
-	HOUSEKEEPING: { rooms: "", "my-rooms": "", inventory: "store", laundry: "linen" },
+	HOUSEKEEPING: {
+		rooms: "",
+		"my-rooms": "",
+		inventory: "store",
+		laundry: "linen",
+	},
 	MAINTENANCE: { repairs: "", inventory: "store" },
 	LAUNDRY: { inventory: "store", laundry: "linen" },
 	INVENTORY: { inventory: "requests" },

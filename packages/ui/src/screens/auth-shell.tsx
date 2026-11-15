@@ -244,7 +244,6 @@ export async function AuthShell({ children }: PropsWithChildren) {
 		: ["Front desk", "Restaurant & bar", "Housekeeping", "Finance"];
 	return (
 		<main className="flex min-h-screen bg-card">
-			<RememberedBrandStyle remembered={remembered} />
 			<aside
 				className="relative hidden w-[46%] max-w-[640px] min-w-[480px] shrink-0 flex-col overflow-hidden bg-brand px-12 py-11 text-white lg:flex xl:px-14"
 				style={panel ? { background: panel } : undefined}
