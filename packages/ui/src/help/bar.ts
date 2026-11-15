@@ -22,7 +22,7 @@ export const barHelp: HelpModule = {
 				"In a happy hour the discount is taken off each drink added in that window.",
 				"Cash goes into your till, so open your till first.",
 				"If you close the payment without paying, the sale stays “To pay”. Collect it from “Sales”.",
-				"Only email receipts are really sent. WhatsApp is coming soon.",
+				"Receipts go by email when the guest has one. A guest with no email gets it by WhatsApp. You can always print it.",
 			],
 			route: "/dashboard",
 			screen: "Bar today",
@@ -287,6 +287,24 @@ export const barHelp: HelpModule = {
 				"“No PIN yet · sign in” means you need to sign in once and set a PIN. You can change it on “My shifts” with “Change PIN”.",
 				"The tablet locks by itself after a set time without use. Unsaved work is lost.",
 			],
+		},
+		{
+			id: "bar-card-waiting",
+			title: "Wait for a card payment on the POS",
+			when: "You sent a card payment to the terminal and the guest is paying.",
+			topic: "Sales",
+			steps: [
+				"After you tap “Send to POS”, the screen says “Sent to the POS” and checks every few seconds.",
+				"Let the guest tap or insert their card. The screen changes to approved or declined as soon as the POS answers.",
+				"No answer after 3 minutes? It shows “Still waiting for the POS”. Tap “Check again” to keep waiting, or “Continue to receipt” to carry on.",
+				"If the guest paid, the payment appears in “My payments” and on the folio as soon as the POS confirms.",
+			],
+			goodToKnow: [
+				"Don't send a second charge while one is waiting.",
+				"Card terminals are still being connected. Until then, if the POS doesn't answer, take cash or a transfer.",
+			],
+			route: "/dashboard/payments",
+			screen: "My payments",
 		},
 	],
 };

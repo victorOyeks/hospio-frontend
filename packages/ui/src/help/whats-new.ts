@@ -1,9 +1,49 @@
 import type { WhatsNewItem } from "./types";
 
 /** This week's changes, in the user's words. Newest first; keep it to the last week or two. */
-export const whatsNewWeek = "Week of 10 November 2026";
+export const whatsNewWeek = "Week of 15 November 2026";
 
 export const whatsNew: WhatsNewItem[] = [
+	{
+		title: "Your hotel's colours everywhere",
+		body: "Hotel setup → “Brand & colours” sets the brand colour, a short name, the logo and a dark or white sidebar. You see the change straight away; after “Save changes” it is used within a minute for every role, on the guest's booking page, in booking emails and on WhatsApp messages.",
+		audience: ["MANAGER", "OWNER"],
+	},
+	{
+		title: "Sign-in keeps your hotel's look",
+		body: "After you sign out, this browser's sign-in, password and lock screens keep your hotel's colours and name. “Use the Hospio360 look” under the sign-in form resets it.",
+		audience: ["EVERYONE"],
+	},
+	{
+		title: "Guests get WhatsApp and their own booking page",
+		body: "When a booking is made, moved or cancelled, the guest gets a WhatsApp, and an email if they have one, with a “View booking” button. Their booking page shows the stay, directions and ways to call or chat with the hotel. A guest with no email gets receipts by WhatsApp.",
+		audience: ["FRONT_OFFICE", "MANAGER", "OWNER"],
+	},
+	{
+		title: "Choose what guests are sent",
+		body: "Hotel setup → “Guest messaging” has your hotel's WhatsApp number, booking confirmations, a reminder the day before arrival and automatic receipts.",
+		audience: ["MANAGER", "OWNER"],
+	},
+	{
+		title: "The rota and Staff & shifts",
+		body: "Plan the week on Staff → “Rota” and use “Copy last week”. Add your own shifts and departments in Hotel setup → “Staff & shifts”, or start from Morning, Afternoon and Night.",
+		audience: ["MANAGER", "OWNER"],
+	},
+	{
+		title: "How long things are kept",
+		body: "Notifications are kept for 30 days. Inbox and guest Messaging conversations are deleted 30 days after their last message. The activity log keeps entries for 6 months.",
+		audience: ["EVERYONE"],
+	},
+	{
+		title: "Card payments update on their own",
+		body: "After “Send to POS” the screen checks every few seconds and shows approved or declined as soon as the POS answers. After 3 minutes it shows “Still waiting for the POS” with “Check again”. Don't send a second charge while one is waiting.",
+		audience: ["FRONT_OFFICE", "BAR", "KITCHEN", "LAUNDRY", "MANAGER"],
+	},
+	{
+		title: "Name the vendor you paid",
+		body: "When you complete a work order with a vendor cost, add the vendor's name. “Mark done” stays greyed out until you do.",
+		audience: ["MAINTENANCE"],
+	},
 	{
 		title: "SMS is only for sign-in codes",
 		body: "Messages to guests and staff now go by WhatsApp and email; SMS is only for sign-in codes.",
@@ -13,101 +53,5 @@ export const whatsNew: WhatsNewItem[] = [
 		title: "A room stays the guest's until check-out",
 		body: "A guest keeps the room until you check them out, even after their check-out date. Rooms show “Due out” or “Past departure”, and “Today” lists guests past departure under “Leaving today”. Checking someone else into a room with a guest still in it is refused: check that guest out first, or choose another room.",
 		audience: ["FRONT_OFFICE", "MANAGER", "OWNER"],
-	},
-	{
-		title: "Housekeeping reports, notes and linen requests are real",
-		body: "“Report a problem → Now” makes an urgent work order, can take the room out of order and tells the front office, with an optional photo. Your note for the supervisor and “Try again at” are saved and shown on Inspect. Minibar prices come from Hotel setup, and linen you ask for shows on the laundry's Linen screen with “Mark sent”.",
-		audience: ["HOUSEKEEPING", "LAUNDRY", "MANAGER", "FRONT_OFFICE"],
-	},
-	{
-		title: "Receipts go by email or print",
-		body: "Taking a payment offers “Email” (picked when the guest has one) or “Print”; WhatsApp is coming soon. Invites say the address they were emailed to. Front desk to-dos now come from today's bookings, and a stuck card has “Check with the POS”.",
-		audience: ["FRONT_OFFICE", "MANAGER", "OWNER", "BAR", "KITCHEN", "LAUNDRY"],
-	},
-	{
-		title: "Approvals in the manager's sidebar",
-		body: "Managers have “Approvals” in the sidebar with the number waiting for a decision.",
-		audience: ["MANAGER"],
-	},
-	{
-		title: "Shared tablets with a PIN",
-		body: "A manager can make a tablet a shared device from the menu under their name. Staff switch in with their own PIN, and the tablet locks itself when nobody uses it.",
-		audience: [
-			"OWNER",
-			"MANAGER",
-			"FRONT_OFFICE",
-			"HOUSEKEEPING",
-			"LAUNDRY",
-			"MAINTENANCE",
-			"KITCHEN",
-			"BAR",
-			"INVENTORY",
-			"FINANCE",
-		],
-	},
-	{
-		title: "Sales history for the bar and kitchen",
-		body: "A new “Sales” screen lists every sale by day or range, with search and filters. The menu shows how many sales are still unpaid, and you can collect them from there.",
-		audience: ["KITCHEN", "BAR", "MANAGER", "OWNER"],
-	},
-	{
-		title: "Your profile and 2-step sign-in",
-		body: "Add your photo, change your password, see where you're signed in and turn on 2-step sign-in with an authenticator app.",
-		audience: ["EVERYONE", "PLATFORM", "MARKETER"],
-	},
-	{
-		title: "Emails to guests are sent for real",
-		body: "Guest messages, receipts and folios go out by email in your hotel's name. WhatsApp is coming soon.",
-		audience: ["OWNER", "MANAGER", "FRONT_OFFICE"],
-	},
-	{
-		title: "Roles & permissions on real staff",
-		body: "Give someone a role with a level and an optional last day, change it, pause it or remove it.",
-		audience: ["OWNER", "MANAGER"],
-	},
-	{
-		title: "Work orders, laundry and linen are live",
-		body: "Raise a fault, take or assign a job, put it on hold, complete it with parts from the store. Guest laundry can be charged to the room or paid, and linen batches are counted in and sent back.",
-		audience: [
-			"MAINTENANCE",
-			"LAUNDRY",
-			"HOUSEKEEPING",
-			"FRONT_OFFICE",
-			"MANAGER",
-		],
-	},
-	{
-		title: "Stores and stock are live",
-		body: "Requests, purchase orders, deliveries and stock counts now use your real stock, with low-stock reorders.",
-		audience: [
-			"INVENTORY",
-			"MANAGER",
-			"OWNER",
-			"HOUSEKEEPING",
-			"LAUNDRY",
-			"MAINTENANCE",
-			"KITCHEN",
-			"BAR",
-		],
-	},
-	{
-		title: "Room price changes can need the owner",
-		body: "A room price change above the owner's limit goes to the owner to approve before it applies.",
-		audience: ["OWNER", "MANAGER"],
-	},
-	{
-		title: "Long lists load a page at a time",
-		body: "Bookings, payments, guests, sales and more show 25 at a time with page numbers, so big hotels load quickly.",
-		audience: ["EVERYONE"],
-	},
-	{
-		title: "Help is real",
-		body: "These guides now match the screens you use, and “Contact support” opens a real ticket with Hospio360.",
-		audience: ["EVERYONE", "PLATFORM", "MARKETER"],
-	},
-	{
-		title: "Support queue and change undo",
-		body: "Owners can ask support to undo a change Hospio360 made, and ask to hand the business to a new owner. Both arrive as high-priority tickets in Support.",
-		audience: ["PLATFORM"],
 	},
 ];

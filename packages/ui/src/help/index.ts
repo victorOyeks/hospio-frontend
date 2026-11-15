@@ -211,13 +211,13 @@ export function helpFor(
 	// Shifts, PIN and Inbox are for hotel staff; the owner has no shifts or PIN.
 	if (app === "hotel" && [...held].some((a) => a !== "OWNER"))
 		sections.push(withOpen(staffHelp, "STAFF"));
-	// Platform staff are the support desk, so the admin app has no "Contact support" guide.
+	// Platform staff are the support desk, so the admin app has no "Contact support" guide, nor the hotel's sign-in look.
 	const account =
 		app === "admin"
 			? {
 					...accountHelp,
 					guides: accountHelp.guides.filter(
-						(g) => g.id !== "all-contact-support",
+						(g) => g.id !== "all-contact-support" && g.id !== "all-hotel-look",
 					),
 				}
 			: accountHelp;
