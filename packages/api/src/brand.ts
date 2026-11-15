@@ -103,6 +103,9 @@ export function brandVars(b: Brand): Record<string, string> {
 		"--accent-foreground": textShade(p),
 		"--secondary-foreground": textShade(p),
 		"--sidebar-primary-foreground": textShade(p),
+		// The page behind the cards and the backdrop behind modals were tinted maroon too: a whisper of the brand instead.
+		"--surface-page": mix(p, 0.975),
+		"--overlay-scrim": mix(p, -0.8),
 	};
 	if (b.darkNav) {
 		vars["--nav-background"] = p;
