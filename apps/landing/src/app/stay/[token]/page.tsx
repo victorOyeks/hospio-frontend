@@ -3,6 +3,7 @@ import {
 	CalendarDaysIcon,
 	MailIcon,
 	MapPinIcon,
+	MessageCircleIcon,
 	PhoneIcon,
 	UsersIcon,
 } from "lucide-react";
@@ -47,6 +48,8 @@ type Stay = {
 	roomType?: string | null;
 	cancellationReason?: string | null;
 	hotel?: Hotel | null;
+	/** The hotel's own WhatsApp (Hotel setup → Guest messaging), wa.me digits. */
+	hotelWhatsApp?: string | null;
 };
 type Loaded =
 	| { ok: true; stay: Stay }
@@ -140,6 +143,9 @@ function StayCard({ stay }: { stay: Stay }) {
 		? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${h?.name ?? ""} ${where}`)}`
 		: null;
 	const tel = h?.phone?.replace(/[^\d+]/g, "");
+	const whatsApp = stay.hotelWhatsApp
+		? `https://wa.me/${stay.hotelWhatsApp}?text=${encodeURIComponent(`Hello, about my booking ${stay.reference}`)}`
+		: null;
 	const guests = [
 		plural(stay.adults, "adult"),
 		stay.children > 0
@@ -238,11 +244,26 @@ function StayCard({ stay }: { stay: Stay }) {
 						</p>
 					)}
 					<div className="mt-4 grid gap-2 sm:grid-cols-2">
+						{whatsApp && (
+							<a
+								href={whatsApp}
+								target="_blank"
+								rel="noopener noreferrer"
+								className={cn(
+									btn.primary,
+									btn.large,
+									"flex items-center justify-center gap-2 sm:col-span-2",
+								)}
+							>
+								<MessageCircleIcon className="size-4" />
+								Chat with the hotel on WhatsApp
+							</a>
+						)}
 						{tel && (
 							<a
 								href={`tel:${tel}`}
 								className={cn(
-									btn.primary,
+									whatsApp ? btn.secondary : btn.primary,
 									btn.large,
 									"flex items-center justify-center gap-2",
 								)}
