@@ -1360,6 +1360,11 @@ function CompleteModal({
 						value={vendor}
 						onChange={setVendor}
 						placeholder="e.g. CoolAir Services"
+						error={
+							vendorCost && !vendor.trim()
+								? "Name the vendor you paid"
+								: undefined
+						}
 					/>
 					<MoneyField
 						label="Vendor cost"
@@ -1375,7 +1380,9 @@ function CompleteModal({
 									`Room ${w.roomNumber} goes back in service and housekeeping cleans it`,
 								]
 							: []),
-						`${w.reportedByName} is told it is done`,
+						w.reportedByName && w.reportedByName !== "Someone"
+							? `${w.reportedByName} is told it is done`
+							: "Whoever reported it is told it is done",
 					]}
 				/>
 			</div>
