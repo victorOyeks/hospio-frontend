@@ -180,7 +180,6 @@ export async function DashboardShell({ children }: PropsWithChildren) {
 						role={role}
 						hotels={hotels}
 						activeHotel={activeHotel}
-						brandName={brand?.shortName ?? null}
 						brandLogo={brand?.logoUrl ?? null}
 						badges={badges}
 						supervisor={
