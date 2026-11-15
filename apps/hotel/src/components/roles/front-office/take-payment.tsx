@@ -8,6 +8,7 @@ import {
 	MailIcon,
 	MessageCircleIcon,
 	XCircleIcon,
+	ClockIcon,
 } from "lucide-react";
 import { type ReactNode, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
@@ -24,7 +25,7 @@ import { PanelSection, SidePanel } from "@hospio/ui/shared/side-panel";
 import { StatusPill } from "@hospio/ui/shared/status-pill";
 import { btn } from "@hospio/ui/shared/ui";
 import { useHotelActions } from "@hospio/api/actions/hotel-scope";
-import { verifyPayment } from "@hospio/api/actions/payment";
+import { paymentStatus, verifyPayment } from "@hospio/api/actions/payment";
 import { emailReceipt } from "@hospio/api/actions/ml";
 import { withDeliveries } from "@hospio/ui/shared/deliveries-store";
 import type {
@@ -72,6 +73,8 @@ type CardState =
 	| "waiting"
 	| "paying"
 	| "sent"
+	/** Sent, and the POS hasn't answered for a few minutes: polling stops, the desk can check again or move on. */
+	| "stalled"
 	| "approved"
 	| "declined"
 	| "no_response";
@@ -242,6 +245,43 @@ export function usePaymentSteps(
 	}, [step, attempt]);
 
 	/**
+	 * Sent to the POS: every 4 seconds ask our backend (payment-service) for the payment's status, nothing else; the browser
+	 * never talks to the POS provider. The backend learns the answer from the provider's webhook, and its own pending-payment
+	 * check asks the provider when a webhook is late. Approved or declined shows at once; after 3 minutes without an answer
+	 * the spinner stops ("Still waiting for the POS"), and the folio still updates on its own when the POS confirms.
+	 */
+	const recordedId = recorded?.id;
+	useEffect(() => {
+		if (step !== "card" || card !== "sent" || !recordedId) return;
+		let stopped = false;
+		let busy = false;
+		const started = Date.now();
+		const timer = setInterval(async () => {
+			if (stopped || busy) return;
+			busy = true;
+			try {
+				const r = await paymentStatus(recordedId).catch(() => null);
+				if (stopped) return;
+				const status = r?.ok ? (r.data.status as string) : null;
+				if (status === "APPROVED") {
+					setRecorded((x) => (x ? { ...x, status: "APPROVED" } : x));
+					setCard("approved");
+				} else if (status === "DECLINED" || status === "FAILED" || status === "CANCELLED") {
+					setCard("declined");
+				} else if (Date.now() - started > 180_000) {
+					setCard("stalled");
+				}
+			} finally {
+				busy = false;
+			}
+		}, 4000);
+		return () => {
+			stopped = true;
+			clearInterval(timer);
+		};
+	}, [step, card, recordedId]);
+
+	/**
 	 * "Try again on POS": a payment the terminal didn't answer may still be charged. Ask payment-service first: approved →
 	 * done; still waiting at the terminal → don't send a second one; declined/failed (or never sent) → send a new attempt.
 	 */
@@ -285,7 +325,9 @@ export function usePaymentSteps(
 							: "No response from the terminal"
 						: card === "sent"
 							? "Sent to the POS"
-							: "Waiting for the guest on the POS",
+							: card === "stalled"
+								? "Still waiting for the POS"
+								: "Waiting for the guest on the POS",
 		transfer: "Bank transfer",
 		cash: "Cash",
 		receipt: "Send a receipt",
@@ -427,6 +469,25 @@ export function usePaymentSteps(
 					</>
 				);
 			case "card":
+				if (card === "stalled")
+					return (
+						<>
+							<button
+								type="button"
+								className={btn.secondary}
+								onClick={() => setCard("sent")}
+							>
+								Check again
+							</button>
+							<button
+								type="button"
+								className={btn.primary}
+								onClick={() => setStep("receipt")}
+							>
+								Continue to receipt
+							</button>
+						</>
+					);
 				if (card === "approved" || card === "sent")
 					return (
 						<button
@@ -694,6 +755,8 @@ export function usePaymentSteps(
 						<CheckCircle2Icon className="size-16 text-success" />
 					) : card === "declined" || card === "no_response" ? (
 						<XCircleIcon className="size-16 text-danger" />
+					) : card === "stalled" ? (
+						<ClockIcon className="size-16 text-warning" />
 					) : (
 						<span className="relative flex size-16 items-center justify-center">
 							<span className="absolute inset-0 animate-ping rounded-full bg-brand-soft" />
@@ -710,6 +773,8 @@ export function usePaymentSteps(
 										? `${naira(amt)} approved`
 										: card === "sent"
 											? `${naira(amt)} sent to the POS`
+											: card === "stalled"
+												? "The POS hasn't answered yet"
 											: card === "declined"
 												? "The bank declined this card"
 												: cardError
@@ -720,7 +785,9 @@ export function usePaymentSteps(
 							{card === "approved"
 								? `${recorded?.id ? `Payment ${recorded.id.slice(0, 8).toUpperCase()} · ` : ""}posted to the folio.`
 								: card === "sent"
-									? "The guest taps or inserts the card. The payment stays as processing in My payments until the POS confirms it; the folio updates on its own."
+									? "The guest taps or inserts the card. Checking with the POS every few seconds: this changes to approved or declined as soon as it answers."
+									: card === "stalled"
+										? "No answer for 3 minutes. If the guest paid, it shows in My payments and on the folio as soon as the POS confirms. Check again, or continue and find it in My payments."
 									: card === "declined"
 										? "Nothing was charged. Ask the guest for another card, or take a transfer or cash."
 										: card === "no_response"
@@ -737,7 +804,7 @@ export function usePaymentSteps(
 							tone={
 								card === "waiting"
 									? "grey"
-									: card === "sent"
+									: card === "sent" || card === "stalled"
 										? "info"
 										: "warning"
 							}
@@ -748,7 +815,7 @@ export function usePaymentSteps(
 							tone={
 								card === "approved"
 									? "success"
-									: card === "paying" || card === "waiting" || card === "sent"
+									: card === "paying" || card === "waiting" || card === "sent" || card === "stalled"
 										? "grey"
 										: "danger"
 							}

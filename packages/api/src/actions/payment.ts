@@ -269,6 +269,29 @@ export async function verifyPayment(
 	return { ok: true, data: { id: data.data.id, status: data.data.status } };
 }
 
+/**
+ * A payment's status as payment-service holds it (set by the POS provider's webhook): cheap enough to ask every few seconds
+ * while the guest is at the terminal, unlike verifyPayment, which asks the provider itself.
+ */
+export async function paymentStatus(
+	paymentId: string,
+): Promise<ActionResult<{ id: string; status: PaymentStatus }>> {
+	if (!live("payment")) {
+		await demoDelay(400);
+		return { ok: true, data: { id: paymentId, status: "APPROVED" } };
+	}
+	const { data, error } = await api("@get/payment/payments/:id", {
+		...(await withSession()),
+		params: { id: paymentId },
+	});
+	if (error || !data)
+		return {
+			ok: false,
+			error: errorMessage(error, "The payment could not be read"),
+		};
+	return { ok: true, data: { id: data.data.id, status: data.data.status } };
+}
+
 export type TerminalRole = "FRONT_OFFICE" | "BAR" | "KITCHEN" | "LAUNDRY";
 
 function refreshTerminals() {
