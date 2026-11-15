@@ -23,7 +23,7 @@ export default async function NotificationsPage({
 		<>
 			<PageHeader
 				title="Notifications"
-				subtitle={`${unread} unread · approvals, payments, repairs, stock and messages`}
+				subtitle={`${unread} unread · approvals, payments, repairs, stock and messages · kept for 30 days`}
 			/>
 			<NotificationsList result={result} />
 		</>

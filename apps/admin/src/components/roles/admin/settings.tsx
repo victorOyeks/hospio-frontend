@@ -302,10 +302,11 @@ export function SettingsScreen({
 						/>
 						<SelectField
 							label="Keep activity logs for"
-							value={str(sec.auditRetentionDays, "365")}
+							value={str(sec.auditRetentionDays, "183")}
 							onChange={(v) => set("security", "auditRetentionDays", num(v))}
 							options={[
 								{ value: "90", label: "90 days" },
+								{ value: "183", label: "6 months" },
 								{ value: "365", label: "1 year" },
 								{ value: "1825", label: "5 years" },
 							]}
