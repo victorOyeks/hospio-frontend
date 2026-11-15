@@ -341,7 +341,7 @@ export const SETUP_CATALOGUE: SectionDef[] = [
 				label: "Shifts",
 				type: "list",
 				format: "shift",
-				help: "A name and the times, e.g. Early 07:00–15:00 (a night shift can end the next morning). These are the shifts offered on the rota. Leave empty for Morning 6am–2pm, Afternoon 2pm–10pm and Night 10pm–6am.",
+				help: "The shifts the rota offers when adding a shift. Changing them never moves shifts already on the rota.",
 				default: [],
 			},
 			{
@@ -350,7 +350,7 @@ export const SETUP_CATALOGUE: SectionDef[] = [
 				label: "Departments",
 				type: "list",
 				format: "department",
-				help: "A name and the roles in it, e.g. Food & drink: Kitchen, Bar. The rota groups staff under these headings, in this order; roles not listed keep their own heading. Roles: Management, Front office, Housekeeping, Laundry, Maintenance, Kitchen, Bar, Store, Finance.",
+				help: "The headings the rota groups staff under, top to bottom. Roles you don't put in a department keep their own heading.",
 				default: [],
 			},
 			{
