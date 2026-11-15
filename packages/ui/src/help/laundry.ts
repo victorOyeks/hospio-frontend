@@ -81,7 +81,7 @@ export const laundryHelp: HelpModule = {
 			goodToKnow: [
 				"If a card payment is still processing, the order says so. Tap “Check it now” later to record it.",
 				"Cash goes into your till.",
-				"The receipt is emailed when you pick “Email” (the default when the guest has an email), or printed. WhatsApp is coming soon and can't be picked.",
+				"The receipt is emailed when you pick “Email” (the default when the guest has an email), or printed. The WhatsApp button is greyed out, but a guest with no email gets the receipt by WhatsApp.",
 			],
 			route: "/dashboard",
 			screen: "Jobs",
@@ -246,6 +246,24 @@ export const laundryHelp: HelpModule = {
 			goodToKnow: [
 				"If the terminal never answered, check the last transaction on the POS before charging the guest again.",
 				"A transfer stays in “To verify” until Finance matches it with the bank statement.",
+			],
+			route: "/dashboard/payments",
+			screen: "My payments",
+		},
+		{
+			id: "lau-card-waiting",
+			title: "Wait for a card payment on the POS",
+			when: "You sent a card payment to the terminal and the guest is paying.",
+			topic: "Money",
+			steps: [
+				"After you tap “Send to POS”, the screen says “Sent to the POS” and checks every few seconds.",
+				"Let the guest tap or insert their card. The screen changes to approved or declined as soon as the POS answers.",
+				"No answer after 3 minutes? It shows “Still waiting for the POS”. Tap “Check again” to keep waiting, or “Continue to receipt” to carry on.",
+				"If the guest paid, the payment appears in “My payments” and on the folio as soon as the POS confirms.",
+			],
+			goodToKnow: [
+				"Don't send a second charge while one is waiting.",
+				"Card terminals are still being connected. Until then, if the POS doesn't answer, take cash or a transfer.",
 			],
 			route: "/dashboard/payments",
 			screen: "My payments",

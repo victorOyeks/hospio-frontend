@@ -76,9 +76,26 @@ export const accountHelp: HelpModule = {
 			goodToKnow: [
 				"Approvals, leave decisions and requests from other teams all land here.",
 				"Choose what you're told about on your profile, in “Notification settings”.",
+				"Notifications are kept for 30 days, then they go.",
 			],
 			route: "/dashboard/notifications",
 			screen: "Notifications",
+		},
+		{
+			id: "all-hotel-look",
+			title: "See your hotel's look on the sign-in screen",
+			when: "The sign-in screen shows your hotel's colours and name, or another hotel's.",
+			topic: "Signing in",
+			steps: [
+				"After you sign out, this browser's sign-in, password and lock screens keep your hotel's colours and name.",
+				"They stay until someone from another hotel signs in on this browser.",
+				"If the screen shows a hotel that isn't yours, find “Not” and that hotel's name under the sign-in form, and tap “Use the Hospio360 look”.",
+				"Sign in as usual. Your hotel's look comes back.",
+			],
+			goodToKnow: [
+				"The colours and name are set by your managers in Hotel setup → “Brand & colours”.",
+				"Green, amber and red status colours never change.",
+			],
 		},
 		{
 			id: "all-contact-support",
@@ -154,7 +171,7 @@ export const staffHelp: HelpModule = {
 			],
 			goodToKnow: [
 				"Your manager approves, declines or suggests other dates.",
-				"Approved leave cancels your shifts on those days.",
+				"Approved leave cancels your shifts on those days, and nobody can put you on the rota on those days.",
 				"See your requests under “My leave”.",
 			],
 			route: "/dashboard/shifts",
@@ -190,8 +207,11 @@ export const staffHelp: HelpModule = {
 				"Type your answer and tap “Send”.",
 			],
 			goodToKnow: [
+				"The Inbox is for messages between staff, from the owner and managers. Messages from guests are under “Messaging” or “Messages”, not here.",
+				"New messages show when you open another page or reload this one.",
 				"Use “Search people and messages” to find an old conversation.",
 				"Only you and the people in the conversation see it.",
+				"A conversation is deleted 30 days after its last message.",
 			],
 			route: "/dashboard/inbox",
 			screen: "Inbox",
