@@ -48,15 +48,14 @@ import type {
 	StoreRow,
 } from "@hospio/api/data/types";
 import { SharedDevicesSection } from "./hotel-setup-devices";
+import {
+	DepartmentListEditor,
+	ShiftListEditor,
+} from "./hotel-setup-staff-lists";
 import { GuestMessagesSection } from "./hotel-setup-guest-messages";
 import { MinibarPricesSection } from "./hotel-setup-minibar";
 import { RestaurantsSection } from "./hotel-setup-restaurants";
 import { cn } from "@hospio/ui/utils";
-import {
-	checkEntry,
-	parseDepartment,
-	parseShift,
-} from "@hospio/api/data/rota-setup";
 
 const icons: Record<string, LucideIcon> = {
 	building: BuildingIcon,
@@ -541,18 +540,20 @@ export function SetupField({
 					onChange={disabled ? () => undefined : onChange}
 				/>
 			);
-		case "list":
-			return (
-				<ChipList
-					className={cls}
-					label={field.label}
-					hint={field.help}
-					format={field.format}
-					items={(value as string[]) ?? []}
-					onChange={onChange}
-					disabled={disabled}
-				/>
-			);
+		case "list": {
+			const props = {
+				className: cls,
+				label: field.label,
+				hint: field.help,
+				items: (value as string[]) ?? [],
+				onChange,
+				disabled,
+			};
+			if (field.format === "shift") return <ShiftListEditor {...props} />;
+			if (field.format === "department")
+				return <DepartmentListEditor {...props} />;
+			return <ChipList {...props} />;
+		}
 		default:
 			return null;
 	}
@@ -565,7 +566,6 @@ function ChipList({
 	onChange,
 	disabled,
 	className,
-	format,
 }: {
 	label: string;
 	hint?: string;
@@ -573,30 +573,13 @@ function ChipList({
 	onChange: (v: string[]) => void;
 	disabled: boolean;
 	className?: string;
-	/** Entries must read as a shift or a department; they are checked and tidied as they are added. */
-	format?: "shift" | "department";
 }) {
 	const [draft, setDraft] = useState("");
-	const [error, setError] = useState("");
-	const unread = (it: string) =>
-		format === "shift"
-			? !parseShift(it)
-			: format === "department"
-				? !parseDepartment(it)
-				: false;
 	const add = () => {
 		const v = draft.trim();
 		if (!v) return;
-		if (format) {
-			const r = checkEntry(format, v, items);
-			if ("error" in r) {
-				setError(r.error);
-				return;
-			}
-			onChange([...items, r.label]);
-		} else onChange([...items, v]);
+		onChange([...items, v]);
 		setDraft("");
-		setError("");
 	};
 	return (
 		<Field
@@ -608,15 +591,7 @@ function ChipList({
 				{items.map((it, i) => (
 					<span
 						key={`${it}-${i}`}
-						className={cn(
-							"inline-flex items-center gap-1 rounded-pill bg-subtle px-3 py-1 text-xs font-medium text-ink",
-							unread(it) && "bg-warning-soft text-warning",
-						)}
-						title={
-							unread(it)
-								? "Not used: this entry can't be read. Remove it and add it again."
-								: undefined
-						}
+						className="inline-flex items-center gap-1 rounded-pill bg-subtle px-3 py-1 text-xs font-medium text-ink"
 					>
 						{it}
 						{!disabled && (
@@ -635,27 +610,15 @@ function ChipList({
 					<span className="inline-flex items-center gap-1">
 						<input
 							value={draft}
-							onChange={(e) => {
-								setDraft(e.target.value);
-								setError("");
-							}}
+							onChange={(e) => setDraft(e.target.value)}
 							onKeyDown={(e) => {
 								if (e.key === "Enter") {
 									e.preventDefault();
 									add();
 								}
 							}}
-							placeholder={
-								format === "shift"
-									? "e.g. Early 07:00–15:00"
-									: format === "department"
-										? "e.g. Food & drink: Kitchen, Bar"
-										: "Add…"
-							}
-							className={cn(
-								format ? "w-56" : "w-32",
-								"bg-transparent text-xs text-ink outline-none placeholder:text-ink-3",
-							)}
+							placeholder="Add…"
+							className="w-32 bg-transparent text-xs text-ink outline-none placeholder:text-ink-3"
 						/>
 						<button
 							type="button"
@@ -668,7 +631,6 @@ function ChipList({
 					</span>
 				)}
 			</div>
-			{error && <p className="mt-1 text-xs text-danger">{error}</p>}
 		</Field>
 	);
 }

@@ -66,6 +66,19 @@ const ROLE_WORDS: Record<string, string> = {
 	accounts: "FINANCE",
 };
 
+/** The roles a department can hold, as the setup page offers them. */
+export const ROLE_OPTIONS: { role: string; label: string }[] = [
+	{ role: "MANAGER", label: "Management" },
+	{ role: "FRONT_OFFICE", label: "Front office" },
+	{ role: "HOUSEKEEPING", label: "Housekeeping" },
+	{ role: "LAUNDRY", label: "Laundry" },
+	{ role: "MAINTENANCE", label: "Maintenance" },
+	{ role: "KITCHEN", label: "Kitchen" },
+	{ role: "BAR", label: "Bar" },
+	{ role: "INVENTORY", label: "Store" },
+	{ role: "FINANCE", label: "Finance" },
+];
+
 export const ROLE_WORD_HINT =
 	"Management, Front office, Housekeeping, Laundry, Maintenance, Kitchen, Bar, Store, Finance";
 
@@ -118,14 +131,11 @@ export function parseDepartment(label: string): DepartmentDef | null {
 
 export const departmentLabel = (d: DepartmentDef) => {
 	const words = d.roles.map(
-		(r) =>
-			Object.entries(ROLE_WORDS).find(([, v]) => v === r)?.[0] ??
-			r.toLowerCase(),
+		(r) => ROLE_OPTIONS.find((o) => o.role === r)?.label ?? r.toLowerCase(),
 	);
-	const cap = (w: string) => w.charAt(0).toUpperCase() + w.slice(1);
 	return d.roles.length === 1 && roleOf(d.name) === d.roles[0]
 		? d.name
-		: `${d.name}: ${words.map(cap).join(", ")}`;
+		: `${d.name}: ${words.join(", ")}`;
 };
 
 /**

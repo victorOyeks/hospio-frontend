@@ -31,7 +31,7 @@ refreshing or going back in the middle of a flow.
 | 20 | `20-concurrency-and-scale.md` | Two people at once (check-in, folio money, card retry, bar orders, stock, tills, refunds) done once with correct totals; busy screens with a lot of data | Ready |
 | 21 | `21-clock-in-and-leave.md` | Clock in/out (My shifts and the desk's Today), who is on shift, late / not-in / forgot-to-clock-out notices, the every-clock-in switch, leave to owners and withdrawing a request | Ready |
 | 22 | `22-rota.md` | Rota tab: everyone listed by department, + in an empty day adds a shift, Copy last week (skips people already on, leave, past days, suspended staff; copying twice adds nothing), week navigation | Ready |
-| 23 | `23-shift-and-department-setup.md` | Hotel setup → Staff & shifts: the hotel's own shifts (offered on the rota and Add to the rota) and departments (the rota's headings); entries checked as they are added; empty lists keep the built-in ones | Ready |
+| 23 | `23-shift-and-department-setup.md` | Hotel setup → Staff & shifts: the hotel's own shifts (offered on the rota and Add to the rota) and departments (the rota's headings) added with forms (name + times; name + role buttons), never free text; empty lists keep the built-in ones | Ready |
 
 ## Before you start
 
