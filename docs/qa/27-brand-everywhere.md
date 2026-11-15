@@ -53,6 +53,15 @@ name or logo).
    - **View booking** opens the booking page in teal, with "Simpas" at the top and "with Hospio360".
 4. Open the banner check link with the colour and name you saved: a teal banner with the hotel's name.
 
+## 2b. The sidebar
+
+1. The sidebar starts with the **branch box** (hotel name, "1 of 1 branch"). There is no Hospio360 row above it.
+2. With a **Logo URL** saved, the logo shows in the branch box instead of the building icon.
+3. The Brand section's field is called **Short name**; its hint says it appears on the sign-in screen and the guest's
+   booking page.
+4. **Dark sidebar** off: the sidebar is white, the house and branch icons stay visible, and the page you're on is
+   highlighted in the hotel's tint (not a grey box).
+
 ## 3. After logout, the sign-in screens keep the hotel's look
 
 1. Signed in as Tunde with the teal brand saved, open any page, then **Log out**.
@@ -72,7 +81,8 @@ With the hotel's own colour saved (e.g. sky blue), sign in as someone with two r
 2. Any **dropdown** (e.g. Shared device → Lock after): the hovered option is the hotel's tint, with readable text.
 3. A **modal**: the backdrop behind it is a deep shade of the hotel's colour, not maroon.
 4. **Lock**, **Sign in**, **Forgot password**, an **invite link** and a **receipt** page all carry the colour.
-5. Switch to a hotel that kept Hospio360 maroon on the same browser: everything turns maroon, with no sky-blue leftovers
+5. With a pale colour (sky blue): buttons have dark text, and links are a deeper shade of the colour, readable on white.
+6. Switch to a hotel that kept Hospio360 maroon on the same browser: everything turns maroon, with no sky-blue leftovers
    (the sidebar text stays white).
 
 Only the browser tab's small icon stays Hospio360.

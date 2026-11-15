@@ -35,6 +35,8 @@ Password for every account: `Hospio123!`.
 1. **Notifications:** the subtitle ends with "kept for 30 days".
 2. **Inbox:** the subtitle says conversations go 30 days after the last message.
 3. **Messaging** (guest conversations): the subtitle says the same.
+4. **Activity log** (manager): open any entry. The footer says "Entries are kept for 6 months and cannot be edited",
+   and an entry from Hotel setup has the button **Open in Hotel setup** (not "Hotel-setup").
 
 ## 2. The activity log setting
 

@@ -37,6 +37,7 @@ refreshing or going back in the middle of a flow.
 | 26 | `26-guest-messaging-settings.md` | Hotel setup → Guest messaging works: the hotel's WhatsApp (Chat on WhatsApp on the booking page and in emails), booking confirmation on/off, the day-before-arrival reminder (once per booking), automatic receipts on/off | Ready |
 | 27 | `27-brand-everywhere.md` | Brand & colours: live preview before saving (whole page, pale-colour warning, white sidebar), then the colour, short name and logo in the app for every role, the booking page, booking emails and the WhatsApp banner | Ready |
 | 28 | `28-retention.md` | Notifications and chats (staff Inbox and guest conversations) deleted 30 days after creation / last message; activity log kept six months (admin Settings → Security, at least 30 days); the screens say so | Ready |
+| 29 | `29-card-payment-status.md` | Card payment at the POS: the screen asks our backend every 4 s and shows approved / declined at once; "Still waiting for the POS" after 3 min with Check again; Moniepoint / OPay placeholders refuse clearly | Ready |
 
 ## Before you start
 
