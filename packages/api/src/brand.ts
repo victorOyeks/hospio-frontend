@@ -125,7 +125,10 @@ export function brandStyle(b: Brand): string {
 		navMode(b) === "light"
 			? `:root:not(.dark) :is(${sidebar}){--color-white:#212121}` +
 				`:root:not(.dark) [data-slot="sidebar-container"]{border-right:1px solid var(--border-default)}` +
-				`:root:not(.dark) :is(${sidebar}) .rounded-pill{--color-white:#ffffff}`
+				`:root:not(.dark) :is(${sidebar}) .rounded-pill{--color-white:#ffffff}` +
+				// The page you're on: the brand's soft tint with the brand colour, not a grey box.
+				`:root:not(.dark) :is(${sidebar}) [data-active="true"]{background:var(--brand-primary-soft);color:var(--brand-primary)}` +
+				`:root:not(.dark) :is(${sidebar}) [data-active="true"] *{--color-white:var(--brand-primary)}`
 			: "";
 	return `:root:not(.dark){${body}}${light}`;
 }
