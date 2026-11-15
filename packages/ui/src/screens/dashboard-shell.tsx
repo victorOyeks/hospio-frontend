@@ -27,6 +27,7 @@ import {
 	tokenIsStale,
 } from "@hospio/api/session-refresh";
 import { cn } from "@hospio/ui/utils";
+import { brandStyle, HOSPIO_MAROON } from "@hospio/api/brand";
 import { getSharedDevice, pinPromptAsked } from "@hospio/api/device";
 import type { Hotel, Me } from "@hospio/api/api/schema";
 import {
@@ -81,31 +82,41 @@ export async function DashboardShell({ children }: PropsWithChildren) {
 
 	// Everything below depends only on who is signed in and the role: one round of calls, not five in a row.
 	const ownerHotel = APP === "hotel" && role === "OWNER";
-	const [business, shared, asked, unread, unpaidSales, inbox, approvals] =
-		await Promise.all([
-			// getBusiness answers from the fixture (LIVE) in demo mode, so nothing changes there.
-			ownerHotel ? getBusiness() : Promise.resolve(null),
-			APP === "hotel" && !DEMO_AUTH ? getSharedDevice() : Promise.resolve(null),
-			pinPromptAsked(),
-			data.notifications.unreadCount().catch(() => 0),
-			// The bar and kitchen see how many sales still owe money next to Sales.
-			role === "BAR" || role === "KITCHEN"
-				? data.outlets.unpaidSales(role).catch(() => null)
-				: Promise.resolve(null),
-			// Every hotel role: unread staff messages next to Inbox (the owner's Messaging).
-			APP === "hotel" && !support
-				? data.owner.inboxUnread().catch(() => null)
-				: Promise.resolve(null),
-			// The manager: approvals waiting for a decision next to Approvals.
-			role === "MANAGER"
-				? data.approvals
-						.page({ tab: "waiting", size: 1 })
-						.then((r) =>
-							r.ok ? (r.data.counts?.waiting ?? r.data.total) : null,
-						)
-						.catch(() => null)
-				: Promise.resolve(null),
-		]);
+	const [
+		business,
+		shared,
+		asked,
+		unread,
+		unpaidSales,
+		inbox,
+		approvals,
+		brand,
+	] = await Promise.all([
+		// getBusiness answers from the fixture (LIVE) in demo mode, so nothing changes there.
+		ownerHotel ? getBusiness() : Promise.resolve(null),
+		APP === "hotel" && !DEMO_AUTH ? getSharedDevice() : Promise.resolve(null),
+		pinPromptAsked(),
+		data.notifications.unreadCount().catch(() => 0),
+		// The bar and kitchen see how many sales still owe money next to Sales.
+		role === "BAR" || role === "KITCHEN"
+			? data.outlets.unpaidSales(role).catch(() => null)
+			: Promise.resolve(null),
+		// Every hotel role: unread staff messages next to Inbox (the owner's Messaging).
+		APP === "hotel" && !support
+			? data.owner.inboxUnread().catch(() => null)
+			: Promise.resolve(null),
+		// The manager: approvals waiting for a decision next to Approvals.
+		role === "MANAGER"
+			? data.approvals
+					.page({ tab: "waiting", size: 1 })
+					.then((r) => (r.ok ? (r.data.counts?.waiting ?? r.data.total) : null))
+					.catch(() => null)
+			: Promise.resolve(null),
+		// Hotel setup → Brand & colours: the hotel's colour, sidebar, short name and logo on every screen.
+		APP === "hotel" && activeHotel
+			? data.hotels.brand().catch(() => null)
+			: Promise.resolve(null),
+	]);
 	if (ownerHotel) {
 		// A self-serve owner still in the wizard goes back to it; one handed over by Hospio360 reviews the
 		// handover first.
@@ -140,6 +151,14 @@ export async function DashboardShell({ children }: PropsWithChildren) {
 	return (
 		<NuqsAdapter>
 			<JotaiProvider>
+				{brand && (brand.primary !== HOSPIO_MAROON || !brand.darkNav) && (
+					<style
+						id="hotel-brand"
+						// Built from a validated #rrggbb only (packages/api/src/brand.ts).
+						// biome-ignore lint/security/noDangerouslySetInnerHtml: generated CSS, no user text
+						dangerouslySetInnerHTML={{ __html: brandStyle(brand) }}
+					/>
+				)}
 				{support && <SupportBar endsAt={support.endsAt} />}
 				<SidebarProvider
 					className={cn(
@@ -152,6 +171,8 @@ export async function DashboardShell({ children }: PropsWithChildren) {
 						role={role}
 						hotels={hotels}
 						activeHotel={activeHotel}
+						brandName={brand?.shortName ?? null}
+						brandLogo={brand?.logoUrl ?? null}
 						badges={badges}
 						supervisor={
 							role !== "HOUSEKEEPING" || isHousekeepingSupervisor(session)

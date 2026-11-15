@@ -8,7 +8,8 @@ import {
 	UsersIcon,
 } from "lucide-react";
 import type { Metadata } from "next";
-import type { ReactNode } from "react";
+import type { CSSProperties, ReactNode } from "react";
+import { brandVars, normalizeHex } from "@hospio/api/brand";
 import { btn } from "@hospio/ui/shared/ui";
 import { cn } from "@hospio/ui/utils";
 import { CONTACT_EMAIL, Wordmark } from "@/components/site";
@@ -50,6 +51,12 @@ type Stay = {
 	hotel?: Hotel | null;
 	/** The hotel's own WhatsApp (Hotel setup → Guest messaging), wa.me digits. */
 	hotelWhatsApp?: string | null;
+	/** Hotel setup → Brand & colours: the page is in the hotel's colour, with its name or logo at the top. */
+	brand?: {
+		colour?: string | null;
+		shortName?: string | null;
+		logoUrl?: string | null;
+	} | null;
 };
 type Loaded =
 	| { ok: true; stay: Stay }
@@ -115,11 +122,44 @@ export default async function StayPage({
 }) {
 	const { token } = await params;
 	const loaded = await load(token);
+	const brand = loaded.ok ? loaded.stay.brand : null;
+	const colour = normalizeHex(brand?.colour);
+	// The hotel's colour on this page only (the same tokens the hotel app uses, packages/api/src/brand.ts).
+	const style = colour
+		? (brandVars({ primary: colour, darkNav: true }) as CSSProperties)
+		: undefined;
+	const hotelName =
+		brand?.shortName || (loaded.ok ? loaded.stay.hotel?.name : null) || null;
 	return (
-		<div className="flex min-h-screen flex-col bg-page">
+		<div className="flex min-h-screen flex-col bg-page" style={style}>
 			<header className="border-b border-line bg-card">
-				<div className="mx-auto flex w-full max-w-[560px] items-center px-4 py-4">
-					<Wordmark />
+				<div className="mx-auto flex w-full max-w-[560px] items-center justify-between gap-3 px-4 py-4">
+					{loaded.ok && (colour || brand?.logoUrl) && hotelName ? (
+						<span className="flex min-w-0 items-center gap-[10px]">
+							{brand?.logoUrl ? (
+								// biome-ignore lint/performance/noImgElement: the hotel's logo from any https address
+								<img
+									src={brand.logoUrl}
+									alt=""
+									className="size-9 rounded-control object-contain"
+								/>
+							) : (
+								<span className="flex size-9 items-center justify-center rounded-control bg-brand text-sm font-bold text-brand-foreground">
+									{hotelName.slice(0, 1).toUpperCase()}
+								</span>
+							)}
+							<span className="truncate text-[18px] font-bold text-brand">
+								{hotelName}
+							</span>
+						</span>
+					) : (
+						<Wordmark />
+					)}
+					{loaded.ok && (colour || brand?.logoUrl) && (
+						<span className="shrink-0 text-[11px] text-ink-3">
+							with Hospio360
+						</span>
+					)}
 				</div>
 			</header>
 			<main className="mx-auto w-full max-w-[560px] flex-1 px-4 py-6 sm:py-10">
@@ -159,7 +199,7 @@ function StayCard({ stay }: { stay: Stay }) {
 	return (
 		<div className="flex flex-col gap-4">
 			<section className="overflow-hidden rounded-[16px] border border-line bg-card">
-				<div className="bg-brand px-5 pt-5 pb-6 text-white">
+				<div className="bg-brand px-5 pt-5 pb-6 text-brand-foreground">
 					<span
 						className={cn(
 							"inline-flex rounded-pill px-[10px] py-[3px] text-[12px] font-semibold",
@@ -168,7 +208,7 @@ function StayCard({ stay }: { stay: Stay }) {
 					>
 						{s.label}
 					</span>
-					<p className="mt-4 text-[14px] text-white/75">
+					<p className="mt-4 text-[14px] text-brand-foreground/75">
 						{stay.guestFirstName
 							? `Hello ${stay.guestFirstName}, your stay at`
 							: "Your stay at"}
@@ -176,9 +216,9 @@ function StayCard({ stay }: { stay: Stay }) {
 					<h1 className="mt-1 text-[26px] font-bold leading-[1.15] tracking-[-0.01em]">
 						{h?.name ?? "your hotel"}
 					</h1>
-					<p className="mt-3 text-[13px] text-white/75">
+					<p className="mt-3 text-[13px] text-brand-foreground/75">
 						Booking reference{" "}
-						<span className="font-mono text-[15px] font-semibold tracking-wider text-white">
+						<span className="font-mono text-[15px] font-semibold tracking-wider text-brand-foreground">
 							{stay.reference}
 						</span>
 					</p>

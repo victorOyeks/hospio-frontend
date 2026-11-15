@@ -6,6 +6,7 @@ import "server-only";
  * matching `api("@get/...")` call and the screen above it does not change.
  */
 
+import { type Brand, brandFromSettings } from "../brand";
 import { cache } from "react";
 import type { z } from "zod";
 import { api } from "@hospio/api/api/client";
@@ -725,6 +726,20 @@ export const data = {
 		 * Hotel setup for the active hotel (or `hotelId`): GET /hotel-config/setup plus the lists, turned
 		 * into the sections the screen renders. The catalogue lives in mappers/hotel-config.
 		 */
+		/**
+		 * The active hotel's brand (Hotel setup → Brand & colours) for the dashboard shell: colour, sidebar, short name, logo.
+		 * Hospio360's own look when it can't be read (demo, hotel-config down, no hotel).
+		 */
+		brand: async (): Promise<Brand> => {
+			if (!live("hotel-config")) return brandFromSettings(null);
+			try {
+				const s = await withSession();
+				const r = await api("@get/hotel-config/setup/:section", { ...s, params: { section: "BRAND" } });
+				return brandFromSettings((r.data?.data as Record<string, unknown> | undefined) ?? null);
+			} catch {
+				return brandFromSettings(null);
+			}
+		},
 		setup: async (hotelId?: string): Promise<HotelSetupSection[]> => {
 			if (!live("hotel-config")) return give(ops.demoHotelSetup);
 			const s = await withSession(hotelId ? { hotelId } : undefined);
