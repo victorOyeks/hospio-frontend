@@ -137,23 +137,25 @@ export function brandStyle(b: Brand): string {
 	const sidebar = '[data-slot="sidebar-container"],[data-sidebar="sidebar"]';
 	const p = normalizeHex(b.primary) ?? HOSPIO_MAROON;
 	const ink = textShade(p);
-	const light =
-		navMode(b) === "light"
-			? `:root:not(.dark) :is(${sidebar}){--color-white:#212121}` +
-				`:root:not(.dark) [data-slot="sidebar-container"]{border-right:1px solid var(--border-default)}` +
-				`:root:not(.dark) :is(${sidebar}) .rounded-pill{--color-white:#ffffff}` +
-				// The page you're on: the brand's soft tint with the brand colour, not a grey box.
-				`:root:not(.dark) :is(${sidebar}) [data-active="true"]{background:var(--brand-primary-soft);color:${ink}}` +
-				`:root:not(.dark) :is(${sidebar}) [data-active="true"] *{--color-white:${ink}}`
-			: "";
-	// A pale colour (sky blue, yellow) keeps its fill, but text on it turns dark and text in it a deeper shade, so buttons,
-	// badges and links stay readable. Elements holding white cards (the sign-in panel) keep their own white.
-	const pale =
-		onColour(p) !== "#ffffff"
-			? `:root:not(.dark) :is(button,a,span,label,div).bg-brand:not(:has(.bg-white,.bg-card)){--color-white:#1a1a1a}` +
-				`:root:not(.dark) .text-brand,:root:not(.dark) .text-primary-1,:root:not(.dark) .hover\\:text-brand:hover{color:${ink}}`
-			: "";
-	return `:root:not(.dark){${body}}${light}${pale}`;
+	const light = navMode(b) === "light";
+	const pale = onColour(p) !== "#ffffff";
+	const r = ":root:not(.dark)";
+	// Every rule is always written, with neutral values when it doesn't apply ("revert-layer" hands back to the utility
+	// classes), so this hotel's sheet fully replaces a look the browser remembered from another hotel.
+	return (
+		`${r}{${body}}` +
+		// A light sidebar (Dark sidebar off, or a pale colour): "white" is ink inside it; count badges keep white.
+		`${r} :is(${sidebar}){--color-white:${light ? "#212121" : "#ffffff"}}` +
+		`${r} [data-slot="sidebar-container"]{border-right:${light ? "1px solid var(--border-default)" : "revert-layer"}}` +
+		`${r} :is(${sidebar}) .rounded-pill{--color-white:#ffffff}` +
+		// The page you're on in a light sidebar: the brand's tint with the readable shade, not a grey box.
+		`${r} :is(${sidebar}) [data-active="true"]{background:${light ? "var(--brand-primary-soft)" : "revert-layer"};color:${light ? ink : "revert-layer"}}` +
+		`${r} :is(${sidebar}) [data-active="true"] *{--color-white:${light ? ink : "#ffffff"}}` +
+		// A pale colour keeps its fill, but text on it turns dark (elements holding white cards keep their white) and text in
+		// it a deeper shade; for any other colour the shade is the colour itself.
+		`${r} :is(button,a,span,label,div).bg-brand:not(:has(.bg-white,.bg-card)){--color-white:${pale ? "#1a1a1a" : "#ffffff"}}` +
+		`${r} .text-brand,${r} .text-primary-1,${r} .hover\\:text-brand:hover{color:${ink}}`
+	);
 }
 
 /** Brand from the BRAND setup section's API keys (primaryColour, darkSidebar, shortName, logoUrl). */

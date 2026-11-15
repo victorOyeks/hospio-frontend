@@ -1,8 +1,4 @@
 import { redirect } from "next/navigation";
-import {
-	RememberedBrandStyle,
-	rememberedBrand,
-} from "@hospio/ui/screens/auth-shell";
 import { LockScreen } from "@/components/shared-device/lock-screen";
 import { getSharedDevice } from "@hospio/api/device";
 
@@ -36,12 +32,6 @@ export default async function LockPage({
 			</main>
 		);
 	}
-	// The shared device's hotel look, remembered from the last dashboard load (packages/api/src/brand.ts).
-	const remembered = await rememberedBrand();
-	return (
-		<>
-			<RememberedBrandStyle remembered={remembered} />
-			<LockScreen device={device} reason={reason} />
-		</>
-	);
+	// The hotel's look comes from the root layout (remembered by this browser, packages/api/src/brand.ts).
+	return <LockScreen device={device} reason={reason} />;
 }

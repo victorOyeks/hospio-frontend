@@ -27,11 +27,7 @@ import {
 	tokenIsStale,
 } from "@hospio/api/session-refresh";
 import { cn } from "@hospio/ui/utils";
-import {
-	brandStyle,
-	encodeBrandCookie,
-	HOSPIO_MAROON,
-} from "@hospio/api/brand";
+import { brandStyle, encodeBrandCookie } from "@hospio/api/brand";
 import { RememberBrand } from "@hospio/ui/shared/remember-brand";
 import { getSharedDevice, pinPromptAsked } from "@hospio/api/device";
 import type { Hotel, Me } from "@hospio/api/api/schema";
@@ -156,7 +152,8 @@ export async function DashboardShell({ children }: PropsWithChildren) {
 	return (
 		<NuqsAdapter>
 			<JotaiProvider>
-				{brand && (brand.primary !== HOSPIO_MAROON || !brand.darkNav) && (
+				{/* Always the hotel's own brand, Hospio360 maroon included, so it replaces a look this browser remembered. */}
+				{brand && (
 					<style
 						id="hotel-brand"
 						// Built from a validated #rrggbb only (packages/api/src/brand.ts).
