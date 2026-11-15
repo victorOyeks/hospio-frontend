@@ -32,6 +32,7 @@ refreshing or going back in the middle of a flow.
 | 21 | `21-clock-in-and-leave.md` | Clock in/out (My shifts and the desk's Today), who is on shift, late / not-in / forgot-to-clock-out notices, the every-clock-in switch, leave to owners and withdrawing a request | Ready |
 | 22 | `22-rota.md` | Rota tab: everyone listed by department, + in an empty day adds a shift, Copy last week (skips people already on, leave, past days, suspended staff; copying twice adds nothing), week navigation | Ready |
 | 23 | `23-shift-and-department-setup.md` | Hotel setup → Staff & shifts: the hotel's own shifts (offered on the rota and Add to the rota) and departments (the rota's headings) added with forms (name + times; name + role buttons), never free text; empty lists keep the built-in ones | Ready |
+| 24 | `24-whatsapp-booking-messages.md` | WhatsApp from Hospio360 for booking confirmed, dates changed, cancelled and receipts: banner, details line by line, hotel phone, View booking button; the guest's booking page (no sign-in, call and directions, refuses altered links) | Ready |
 
 ## Before you start
 
