@@ -13,8 +13,8 @@ from **Hospio360**. Each message has:
 dates and check-in and check-out times, room type, guests, and the hotel's address (**Get directions**) and phone
 (**Call the hotel**).
 
-When WhatsApp can't be used (the template isn't approved yet, or WhatsApp refuses the message), the same message goes as
-a one-page SMS.
+When WhatsApp can't be used (the template isn't approved yet, or WhatsApp refuses the message), the WhatsApp is **not**
+sent and nothing goes by SMS: SMS carries only sign-in codes (QA 25). A guest with an email still gets the email.
 
 ## Links
 
@@ -81,12 +81,12 @@ Password for every account: `Hospio123!`.
 3. Add the hotel's phone in Hotel setup and open the page again: **Call the hotel** appears and the WhatsApp messages
    show the number instead of "its front desk number".
 
-## 6. The link in the SMS and the email
+## 6. The link in the email
 
 1. Make a booking for a guest with your own email and the allow-listed phone. The email has a **View booking** button
    that opens the same page.
-2. If a WhatsApp ever arrives as an SMS instead (e.g. before the templates are approved), the SMS ends with "Details and
-   directions: https://hospio360.com/stay/…" and the link opens the page.
+2. Before the WhatsApp templates are approved, nothing arrives on the phone for a booking, and no SMS. That's expected:
+   SMS carries only sign-in codes now.
 
 ## 7. A link that isn't right
 

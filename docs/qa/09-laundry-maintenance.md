@@ -94,6 +94,9 @@ Laundry prices).
    filter once and LED bulb 9W twice → Outside vendor "CoolAir" → Vendor cost 15,000 → **Mark done**. **Expect:**
    "WO-… done · room … back in service · Victor told"; the Done section shows Labour 1 h 15 min, Parts ₦… (= the
    items' costs), Vendor CoolAir · ₦15,000 and Total cost. The Maintenance store shows 1 filter and 2 bulbs fewer.
+   While Vendor cost has an amount and Outside vendor is empty, the vendor field says "Name the vendor you paid" and
+   **Mark done** stays disabled. The "What happens" box names who is told (the person who reported it, or "Whoever
+   reported it is told it is done" when the work order has no reporter's name).
 9. **Expect:** as Grace → My rooms: the room is dirty with a clean on today's list; it goes through cleaning and
    inspection as usual. As Victor the room is bookable again.
 10. **Do:** as Victor → Repairs → Done → open it → **Reopen** → "Warm again overnight" → **Reopen**. **Expect:**
