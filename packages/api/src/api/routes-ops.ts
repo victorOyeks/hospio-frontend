@@ -351,6 +351,22 @@ export const opsRoutes = {
 		input: ShiftBody,
 		output: envelope(z.unknown()),
 	},
+	"@post/finance/workforce/rota/copy": {
+		input: z.object({
+			fromWeek: z.string(),
+			toWeek: z.string(),
+			skipUserIds: z.array(z.string()).optional(),
+		}),
+		output: envelope(
+			z.object({
+				added: z.number(),
+				alreadyOnRota: z.number(),
+				onLeave: z.number(),
+				past: z.number(),
+				skipped: z.number(),
+			}),
+		),
+	},
 	"@put/finance/workforce/shifts/:id": {
 		params: id,
 		input: ShiftBody,

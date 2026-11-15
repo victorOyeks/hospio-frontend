@@ -1,6 +1,7 @@
 import { StaffScreen } from "@/components/roles/manager/staff/screen";
 import { getActiveHotel, getUser } from "@hospio/api/dal";
 import { data } from "@hospio/api/data";
+import { lagosDay } from "@hospio/api/data/mappers/finance";
 import {
 	listQueryFrom,
 	type SearchParamsRecord,
@@ -21,6 +22,25 @@ export default async function StaffPage({
 	const tab = typeof sp.tab === "string" ? sp.tab : "all";
 	const open = typeof sp.open === "string" ? sp.open : undefined;
 	const query = listQueryFrom(sp, ["role"]);
+	// The rota tab shows the week of ?week= (Monday to Sunday, this week by default) and copies from the week before, so
+	// it reads both weeks as well as the usual range.
+	const range = (() => {
+		if (tab !== "rota") return undefined;
+		const day = (d: string, n: number) => {
+			const t = new Date(`${d}T12:00:00Z`);
+			t.setUTCDate(t.getUTCDate() + n);
+			return t.toISOString().slice(0, 10);
+		};
+		const picked =
+			typeof sp.week === "string" && /^\d{4}-\d{2}-\d{2}$/.test(sp.week)
+				? sp.week
+				: lagosDay(0);
+		const weekday = (new Date(`${picked}T12:00:00Z`).getUTCDay() + 6) % 7;
+		const monday = day(picked, -weekday);
+		const from = [lagosDay(-7), day(monday, -7)].sort()[0];
+		const to = [lagosDay(21), day(monday, 6)].sort()[1];
+		return [from, to] as const;
+	})();
 	const [
 		hotel,
 		result,
@@ -37,7 +57,7 @@ export default async function StaffPage({
 		data.staff.page(query),
 		data.staff.page({ size: 1 }),
 		tab === "rota" ? data.staff.list() : Promise.resolve([]),
-		data.staff.shifts(),
+		range ? data.staff.shifts(range[0], range[1]) : data.staff.shifts(),
 		data.staff.leave(),
 		data.staff.shiftRequests(),
 		data.business.mine(),

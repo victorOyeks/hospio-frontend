@@ -62,6 +62,43 @@ export async function addShift(input: ShiftInput): Promise<ActionResult> {
 	return { ok: true, data: null };
 }
 
+export type RotaCopyResult = {
+	added: number;
+	alreadyOnRota: number;
+	onLeave: number;
+	past: number;
+	skipped: number;
+};
+
+/**
+ * "Copy last week": the week starting `fromWeek` onto the week starting `toWeek`, in one call. The service skips
+ * people who already have a shift that day, approved leave, days already gone and `skipUserIds` (suspended or paused).
+ */
+export async function copyRotaWeek(
+	fromWeek: string,
+	toWeek: string,
+	skipUserIds: string[],
+): Promise<ActionResult<RotaCopyResult>> {
+	if (!live("finance")) {
+		await demoDelay(400);
+		return {
+			ok: true,
+			data: { added: 0, alreadyOnRota: 0, onLeave: 0, past: 0, skipped: 0 },
+		};
+	}
+	const { data, error } = await api("@post/finance/workforce/rota/copy", {
+		...(await withSession()),
+		body: { fromWeek, toWeek, skipUserIds },
+	});
+	if (error || !data)
+		return {
+			ok: false,
+			error: errorMessage(error, "Last week could not be copied"),
+		};
+	revalidateOps();
+	return { ok: true, data: data.data };
+}
+
 /** Change a shift's person or times: this is how a manager finds cover. */
 export async function changeShift(
 	id: string,
@@ -294,15 +331,23 @@ export async function requestLeave(input: {
 }
 
 /** The person takes back a leave request nobody has decided yet; the managers and owners are told. */
-export async function withdrawLeave(id: string): Promise<ActionResult<LeaveRow>> {
+export async function withdrawLeave(
+	id: string,
+): Promise<ActionResult<LeaveRow>> {
 	if (!live("finance")) {
 		await demoDelay(300);
-		return { ok: false, error: "Leave requests are not connected in this preview" };
+		return {
+			ok: false,
+			error: "Leave requests are not connected in this preview",
+		};
 	}
-	const { data, error } = await api("@post/finance/workforce/leave/:id/withdraw", {
-		...(await withSession()),
-		params: { id },
-	});
+	const { data, error } = await api(
+		"@post/finance/workforce/leave/:id/withdraw",
+		{
+			...(await withSession()),
+			params: { id },
+		},
+	);
 	if (error || !data)
 		return {
 			ok: false,

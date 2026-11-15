@@ -63,6 +63,7 @@ import {
 	AutoFillModal,
 	FindCoverPanel,
 	RotaGrid,
+	weekOf,
 	SwapShiftModal,
 } from "./rota";
 
@@ -108,6 +109,10 @@ export function StaffScreen({
 	// The tab reloads the page: the rota reads everyone, the list reads one page.
 	const [tab, setTab] = useQueryState(
 		"tab",
+		parseAsString.withOptions({ shallow: false }),
+	);
+	const [weekParam, setWeek] = useQueryState(
+		"week",
 		parseAsString.withOptions({ shallow: false }),
 	);
 	const [openId, setOpenId] = useQueryState("open");
@@ -528,6 +533,8 @@ export function StaffScreen({
 				<RotaGrid
 					staff={staff}
 					shifts={shifts}
+					week={weekOf(weekParam ?? today)}
+					onWeek={(w) => void setWeek(w === weekOf(today) ? null : w)}
 					onFindCover={setCover}
 					onSwap={setSwap}
 					onAutoFill={() => setAutoFill(true)}
@@ -618,12 +625,20 @@ export function StaffScreen({
 						{[...clocked].map((id) => {
 							const p = staff.find((x) => x.id === id);
 							const since = clockedSince[id];
-							const long = since && Date.now() - new Date(since).getTime() > 14 * 3600_000;
+							const long =
+								since && Date.now() - new Date(since).getTime() > 14 * 3600_000;
 							return (
-								<li key={id} className="flex items-center justify-between gap-3 py-3 text-[13px]">
+								<li
+									key={id}
+									className="flex items-center justify-between gap-3 py-3 text-[13px]"
+								>
 									<span>
-										<span className="block font-semibold text-ink">{p?.fullName ?? "Someone not on this page"}</span>
-										<span className="text-ink-3">{p ? `${p.jobTitle} · ${p.department}` : ""}</span>
+										<span className="block font-semibold text-ink">
+											{p?.fullName ?? "Someone not on this page"}
+										</span>
+										<span className="text-ink-3">
+											{p ? `${p.jobTitle} · ${p.department}` : ""}
+										</span>
 									</span>
 									<span className={long ? "text-warning" : "text-ink-2"}>
 										since {since ? fmtWhen(since) : "—"}

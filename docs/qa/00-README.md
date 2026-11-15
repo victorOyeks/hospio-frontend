@@ -30,6 +30,7 @@ refreshing or going back in the middle of a flow.
 | 19 | `19-room-note-def-053.md` | DEF-053 retest: the room's board note is added, changed and removed from the front desk and stays removed | Ready |
 | 20 | `20-concurrency-and-scale.md` | Two people at once (check-in, folio money, card retry, bar orders, stock, tills, refunds) done once with correct totals; busy screens with a lot of data | Ready |
 | 21 | `21-clock-in-and-leave.md` | Clock in/out (My shifts and the desk's Today), who is on shift, late / not-in / forgot-to-clock-out notices, the every-clock-in switch, leave to owners and withdrawing a request | Ready |
+| 22 | `22-rota.md` | Rota tab: everyone listed by department, + in an empty day adds a shift, Copy last week (skips people already on, leave, past days, suspended staff; copying twice adds nothing), week navigation | Ready |
 
 ## Before you start
 
