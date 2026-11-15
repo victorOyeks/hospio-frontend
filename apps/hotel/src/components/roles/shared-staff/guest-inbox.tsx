@@ -151,7 +151,7 @@ export function GuestInbox({
 		<>
 			<PageHeader
 				title="Messages"
-				subtitle={`${hotelName} · guests by email (WhatsApp coming soon)`}
+				subtitle={`${hotelName} · guests by email (WhatsApp coming soon) · conversations go 30 days after the last message`}
 			>
 				{canManage && (
 					<Button

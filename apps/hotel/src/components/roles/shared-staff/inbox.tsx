@@ -25,8 +25,8 @@ export function InboxScreen({
 				title="Inbox"
 				subtitle={
 					unreadHere > 0
-						? `${plural(unreadHere, "unread message")} from your team`
-						: "Messages from the owner and your managers"
+						? `${plural(unreadHere, "unread message")} from your team · conversations go 30 days after the last message`
+						: "Messages from the owner and your managers · conversations go 30 days after the last message"
 				}
 			/>
 			<ThreadsView
