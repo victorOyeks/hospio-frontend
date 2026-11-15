@@ -151,3 +151,64 @@ export function brandFromSettings(
 		logoUrl: logo,
 	};
 }
+
+/**
+ * The browser remembers the last hotel's look, so its sign-in, sign-up, password and lock screens stay in its colours after
+ * logout (no personal data: colour, sidebar style, short name, logo, hotel name). Written by the dashboard shell on every
+ * load, so the next hotel to sign in on this browser replaces it; "Use the Hospio360 look" on the sign-in page clears it.
+ */
+export const BRAND_COOKIE = "hospio_brand";
+export const BRAND_COOKIE_MAX_AGE = 60 * 60 * 24 * 365;
+
+export type RememberedBrand = { brand: Brand; hotelName: string | null };
+
+function safeName(v: unknown, max: number): string | null {
+	if (typeof v !== "string") return null;
+	const s = v
+		.replace(/[^\p{L}\p{N} &'.,()-]/gu, "")
+		.trim()
+		.slice(0, max);
+	return s || null;
+}
+
+export function encodeBrandCookie(b: Brand, hotelName?: string | null): string {
+	return encodeURIComponent(
+		JSON.stringify({
+			c: normalizeHex(b.primary) ?? HOSPIO_MAROON,
+			d: b.darkNav ? 1 : 0,
+			s: safeName(b.shortName, 24),
+			l:
+				b.logoUrl && /^https:\/\/\S+$/.test(b.logoUrl)
+					? b.logoUrl.slice(0, 500)
+					: null,
+			h: safeName(hotelName, 60),
+		}),
+	);
+}
+
+/** The cookie back as a brand, every field checked again (it comes from the browser); null when absent or unreadable. */
+export function decodeBrandCookie(
+	raw: string | null | undefined,
+): RememberedBrand | null {
+	if (!raw) return null;
+	try {
+		const v = JSON.parse(decodeURIComponent(raw));
+		const primary = normalizeHex(v?.c);
+		if (!primary) return null;
+		const logo =
+			typeof v?.l === "string" && /^https:\/\/\S+$/.test(v.l)
+				? v.l.slice(0, 500)
+				: null;
+		return {
+			brand: {
+				primary,
+				darkNav: v?.d !== 0,
+				shortName: safeName(v?.s, 24),
+				logoUrl: logo,
+			},
+			hotelName: safeName(v?.h, 60),
+		};
+	} catch {
+		return null;
+	}
+}
