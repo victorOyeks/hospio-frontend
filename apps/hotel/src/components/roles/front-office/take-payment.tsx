@@ -713,7 +713,12 @@ export function usePaymentSteps(
 								label: "Bank transfer",
 								hint: "Show the account · confirm when it lands",
 							},
-							{ value: "CASH", label: "Cash", hint: "Goes into your till" },
+							{
+								value: "CASH",
+								label: "Cash",
+								// Only the front office, bar and kitchen desks have a till; laundry hands cash in.
+								hint: tgt?.role === "LAUNDRY" ? "Count it and hand it in" : "Goes into your till",
+							},
 						]}
 					/>
 					{method === "CARD" && (

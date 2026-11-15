@@ -57,8 +57,8 @@ export const financeHelp: HelpModule = {
 				"Tap “Print” to print the page.",
 			],
 			goodToKnow: [
-				"“Net” is before payroll and platform fees. Payroll is not connected yet.",
-				"The bank balance is not connected yet, so the month does not show what is in the bank.",
+				"“Net” is before payroll and platform fees.",
+				"The month shows what was recorded in Hospio360, not what is in the bank.",
 			],
 			route: "/dashboard/month",
 			screen: "Month",

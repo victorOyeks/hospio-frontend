@@ -46,7 +46,7 @@ export const platformHelp: HelpModule = {
 				"Each step saves as you go. You can leave and come back to the same step.",
 				"“Hotels” needs at least one hotel before you can continue.",
 				"Temporary passwords are shown once. Write them down or put them in the handover pack.",
-				"To pass an onboarding to a colleague, open the card's details and reassign it.",
+				"To pass an onboarding to a colleague, tap “Details” on the card, then “Reassign”.",
 			],
 			route: "/dashboard/onboarding",
 			screen: "Onboarding",
@@ -130,7 +130,7 @@ export const platformHelp: HelpModule = {
 			goodToKnow: [
 				"Any platform role can use it: Super admin, Support or Finance admin.",
 				"It is read only. You can't save or change anything.",
-				"Every page you open is logged with your name and reason, and the owner sees the visit in their activity log.",
+				"The visit is logged with your name and reason, and the owner can see it.",
 				"The access ends when the time is up. The visit is listed under “Viewed as owner” on the business's “Contract & activity” tab.",
 			],
 			route: "/dashboard/businesses",
@@ -205,7 +205,7 @@ export const platformHelp: HelpModule = {
 			topic: "Money",
 			steps: [
 				"Open “Fees & billing” and tap “Generate this month”.",
-				"Leave “Only this business” empty for every live business, then tap “Generate”.",
+				"Pick the “Month”. Leave “Only this business” empty for every live business, then tap “Generate”.",
 				"Open a statement to see its lines per hotel and its payments.",
 				"Tap “Send statement” to send it to the business.",
 				"When money arrives, tap “Record payment”, enter the “Amount received”, “Received on” and “Reference”, then tap “Record”.",
@@ -315,7 +315,7 @@ export const platformHelp: HelpModule = {
 			],
 			goodToKnow: [
 				"Only a Super admin can change the team. Everyone else sees it read only.",
-				"The temporary password is shown once.",
+				"The invite is emailed to them too. The temporary password and link are shown here once.",
 				"The row menu has “Change role”, “Reset password”, “Resend invite”, “Pause access” and “Remove from team”.",
 				"Support runs businesses, onboarding and tickets. Finance admin runs fees, payouts and commissions. Super admin does everything.",
 			],

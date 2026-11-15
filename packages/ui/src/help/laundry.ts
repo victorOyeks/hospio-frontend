@@ -80,7 +80,6 @@ export const laundryHelp: HelpModule = {
 			],
 			goodToKnow: [
 				"If a card payment is still processing, the order says so. Tap “Check it now” later to record it.",
-				"Cash goes into your till.",
 				"The receipt is emailed when you pick “Email” (the default when the guest has an email), or printed. The WhatsApp button is greyed out, but a guest with no email gets the receipt by WhatsApp.",
 			],
 			route: "/dashboard",
@@ -263,7 +262,7 @@ export const laundryHelp: HelpModule = {
 			],
 			goodToKnow: [
 				"Don't send a second charge while one is waiting.",
-				"Card terminals are still being connected. Until then, if the POS doesn't answer, take cash or a transfer.",
+				"If the POS doesn't answer, take cash or a bank transfer instead. With no terminal linked yet, the card choice says so.",
 			],
 			route: "/dashboard/payments",
 			screen: "My payments",

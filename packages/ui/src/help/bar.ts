@@ -16,7 +16,7 @@ export const barHelp: HelpModule = {
 				"Tap the drinks to add them.",
 				"Under “How they pay”, keep “Pay now” and tap “Take payment”.",
 				"Pick “Card on the POS”, “Bank transfer” or “Cash” and follow the steps.",
-				"Choose the receipt or tap “Skip receipt”, then tap “Record payment”. You see “Sale done”.",
+				"Under “Receipt”, pick “Email” and tap “Email receipt & record”, or pick “Print” and tap “Record payment”. Or tap “Skip receipt”. You see “Sale done”.",
 			],
 			goodToKnow: [
 				"In a happy hour the discount is taken off each drink added in that window.",
@@ -149,8 +149,8 @@ export const barHelp: HelpModule = {
 			when: "A guest asks for a printed receipt.",
 			topic: "Sales",
 			steps: [
-				"Right after a payment is approved, tap “Print receipt” on the done screen.",
-				"For an older sale, open “Sales” and tap the sale.",
+				"When you close a tab or collect a sale from “Sales”, tap “Print receipt” on the done screen once the payment is approved.",
+				"For a sale paid on “Bar today” or an older sale, open it from “Recent sales” or “Sales”.",
 				"Tap “Print receipt”. The receipt opens in a new tab ready to print.",
 			],
 			goodToKnow: [
@@ -202,7 +202,7 @@ export const barHelp: HelpModule = {
 			topic: "Stock",
 			steps: [
 				"Open “Bar stock” and tap “Ask the store” (or “Request these” on the running-low bar).",
-				"Pick items from “Pick from your stock list” and set the quantities.",
+				"Running-low drinks are already added. To add more, pick them under “Add an item” and set the quantities.",
 				"Add a “Note for the store” if needed.",
 				"Tap “Send request”.",
 			],
@@ -301,7 +301,7 @@ export const barHelp: HelpModule = {
 			],
 			goodToKnow: [
 				"Don't send a second charge while one is waiting.",
-				"Card terminals are still being connected. Until then, if the POS doesn't answer, take cash or a transfer.",
+				"If the POS doesn't answer, take cash or a bank transfer instead. With no terminal linked yet, the card choice says so.",
 			],
 			route: "/dashboard/payments",
 			screen: "My payments",

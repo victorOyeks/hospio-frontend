@@ -36,7 +36,7 @@ export const managerHelp: HelpModule = {
 			topic: "Team",
 			steps: [
 				"Open “Roles & Permissions” and tap “Give a role”.",
-				"Choose the “Person”, then the “Role”.",
+				"Type a name, email or phone in “Find a person”, then choose the “Person” and the “Role”.",
 				"Pick a “Level”: “Full”, “Can edit” or “View only”. The panel lists what that level allows.",
 				"For cover or a trainee, set a “Last day (optional)”. Leave it empty for a role with no end.",
 				"Tap “Give role”.",
@@ -58,7 +58,7 @@ export const managerHelp: HelpModule = {
 			topic: "Team",
 			steps: [
 				"Open “Roles & Permissions” and tap the “Staff access” tab.",
-				"Find the person (search by name or role) and tap their row.",
+				"Find the person (search by name, email or phone, or pick a role in the filter) and tap their row.",
 				"Under the role, tap “Change level”, “Make temporary”, “Pause” or “Remove”.",
 				"To change the level, pick it and tap “Save level”.",
 				"To set an end, pick the “Last day” and tap “Set last day”. To take it off, tap “Remove end date”.",
@@ -171,7 +171,7 @@ export const managerHelp: HelpModule = {
 			],
 			goodToKnow: [
 				"Until you decide, the old price stays on the menu.",
-				"Your own price change in “Menus” applies at once: open the item's menu and tap “Change price”.",
+				"Your own price change in “Menus” applies at once: open the item's row menu, tap “Change price”, enter the “New price” and tap “Save price”.",
 				"Staff with Full access on the kitchen or bar also change prices at once. Others send them to you.",
 			],
 			route: "/dashboard/approvals",
@@ -205,7 +205,7 @@ export const managerHelp: HelpModule = {
 			topic: "Money",
 			steps: [
 				"For one payment: open “Payments”, tap the payment and tap “Print receipt”.",
-				"For a whole stay: open “Folios”, open the guest's folio, tap “Print / email”, then “Print receipt”.",
+				"For a whole stay: open “Folios”, open the guest's folio, tap “Print / email”, pick “Print / copy”, then tap “Print receipt”.",
 				"The receipt opens in a new tab. Choose “A4” or “80 mm roll” for a slip printer.",
 				"Tap “Print receipt” to print it.",
 				"To send it instead, type the guest's email and tap “Email receipt”.",
@@ -247,14 +247,14 @@ export const managerHelp: HelpModule = {
 				"Open “Night audit”.",
 				"Go through the checklist. Use the button on any open line, such as “Open arrivals” or “Count the tills”.",
 				"When every till is closed, tap “Close the day”.",
-				"If guests still haven't arrived, tick “Mark the arrivals still waiting as no-shows”, or leave it off to keep them.",
+				"If guests still haven't arrived, turn on “Mark the arrivals still waiting as no-shows”, or leave it off to keep them.",
 				"Add the “Cash counted in the safe (optional)” and any “Notes for the report”.",
 				"Tap “Close the day”. The audit report opens.",
 			],
 			goodToKnow: [
 				"“Close the day” stays off until every till is counted and closed.",
 				"A day can only be closed once. The summary goes to the owner.",
-				"If the outlets still have open tabs, you can carry them to tomorrow with “Close and carry the tabs”.",
+				"If the outlets still have open tabs, settle them first or turn on “Carry open tabs to tomorrow”. The button then says “Close and carry the tabs”.",
 				"Tap “Past audits” to read the report of any closed day.",
 			],
 			route: "/dashboard/night-audit",
@@ -522,7 +522,7 @@ export const managerHelp: HelpModule = {
 			],
 			goodToKnow: [
 				"Don't send a second charge while one is waiting.",
-				"Card terminals are still being connected. Until then, if the POS doesn't answer, take cash or a transfer.",
+				"If the POS doesn't answer, take cash or a bank transfer instead.",
 			],
 		},
 	],

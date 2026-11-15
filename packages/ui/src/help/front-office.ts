@@ -13,14 +13,14 @@ export const frontOfficeHelp: HelpModule = {
 			steps: [
 				"Open “Bookings” and tap “New booking”.",
 				"Under “Guest”, search “Returning guest” by name or phone, or type the “Full name” and “Phone” of a new guest. Add an “Email” if they want the confirmation and receipt by email too.",
-				"Under “Stay”, pick the “Room type”, the “Check-in” and “Check-out” dates and the number of “Adults”.",
+				"Under “Stay”, pick the “Room type”, the “Check-in” and “Check-out” dates, the number of “Adults” and the “Expected arrival time”.",
 				"Under “Price”, keep “Normal”.",
 				"Under “Payment”, choose “Pay in full now”, “50% deposit”, “Pay at check-out” or “Company account” (then pick the “Organization”).",
 				"Tap “Save & take ₦…” to take the money now, “Save, take payment later” to take it another time, or “Save booking” when nothing is due now.",
-				"The panel ends on the booking summary with what is paid and the balance.",
+				"After a payment, tap “Open booking”. The panel ends on the booking summary with what is paid and the balance.",
 			],
 			goodToKnow: [
-				"Save stays greyed out while the name or phone is missing, the check-in date is in the past or the check-out is not after the check-in. The bottom of the panel says why.",
+				"Save stays greyed out while the name, phone, adults or expected arrival time is missing, the check-in date is in the past or the check-out is not after the check-in. The bottom of the panel says why.",
 				"A phone number that already belongs to a guest books that guest, under their saved name.",
 				"“Special rate” and “Complimentary” are for the manager only.",
 				"A company marked “ON HOLD · cannot book” can't be used for a company-account booking.",
@@ -105,8 +105,8 @@ export const frontOfficeHelp: HelpModule = {
 			steps: [
 				"Open “Payments” and tap “Take payment” (it is also on “Today”, or use “Record payment” on a booking).",
 				"Pick the “Guest folio”, check “Who is paying”, the “Amount” and “What for”, then tap “Continue · ₦…”.",
-				"Under “How is the guest paying?”, choose “Card on the POS”, “Bank transfer” or “Cash”.",
-				"Card: pick the “Terminal” and tap “Send to POS”, then hand the guest the POS. Transfer: tap “Show transfer details”, wait for the alert and tap “I've confirmed the transfer”. Cash: tap “Count cash”, enter the “Cash received” and tap “Cash received”.",
+				"On “How is the guest paying?”, pick the “Method”: “Card on the POS”, “Bank transfer” or “Cash”.",
+				"Card: pick the “Terminal” and tap “Send to POS”, then hand the guest the POS. Transfer: tap “Show transfer details”, wait for the alert, type the “Sender's name or bank reference” and tap “I've confirmed the transfer”. Cash: tap “Count cash”, enter the “Cash received” and tap “Cash received”.",
 				"Under “Receipt”, “Email” is picked when the guest has an email: check the “Guest's email” and tap “Email receipt & record”. Or pick “Print” and tap “Record payment”, or tap “Skip receipt”.",
 				"Tap “Done”. The folio and your payments list update.",
 			],
@@ -128,7 +128,7 @@ export const frontOfficeHelp: HelpModule = {
 			topic: "Today",
 			steps: [
 				"Open “Today”. The “Front desk to-dos” card lists what is left.",
-				"Tap a line to go straight to it: an arrival with no room yet, arrivals to check in, departures to check out, or guests in house with a balance.",
+				"Tap a line to go straight to it: an arrival with no room yet, arrivals to check in, departures to check out, guests still in past their departure date, or guests in house with a balance.",
 			],
 			goodToKnow: [
 				"The to-dos come from today's bookings and folios. Each one goes away by itself once the work is done; there is nothing to tick.",
@@ -183,7 +183,7 @@ export const frontOfficeHelp: HelpModule = {
 			topic: "Money",
 			steps: [
 				"For one payment: open “Payments”, open the payment and tap “Print receipt”.",
-				"For the whole stay: open the folio in “Folios”, tap “Print or email”, keep “Print / copy” and tap “Print receipt”. You can also tap “Print receipt” in the check-out panel.",
+				"For the whole stay: open the folio in “Folios”, tap “Print or email”, pick “Print / copy” and tap “Print receipt”. You can also tap “Print receipt” in the check-out panel.",
 				"The receipt opens in a new tab. Pick the paper: “A4” or “80 mm roll” for a slip printer.",
 				"Tap “Print receipt” at the top of that tab.",
 				"To email it instead, type the “Guest's email” and tap “Email receipt”.",
@@ -191,7 +191,7 @@ export const frontOfficeHelp: HelpModule = {
 			goodToKnow: [
 				"Only an approved payment has a receipt to print.",
 				"Right after you take a payment, the last step also has “Print receipt”.",
-				"The folio window is “Print or email the folio”: “Email” is sent for real to the guest's email. WhatsApp is coming soon and greyed out.",
+				"The folio window is “Print or email the folio”: “Email” and “Email folio” send it for real to the guest's email. WhatsApp is coming soon and greyed out.",
 			],
 		},
 		{
@@ -247,7 +247,7 @@ export const frontOfficeHelp: HelpModule = {
 				"Pick the “Category” and the “Priority”.",
 				"Type “What is wrong”, and add “Details (optional)” if it helps.",
 				"Tap “Raise work order”. Maintenance gets an alert.",
-				"Follow it on the “Raised by me” tab. You can add a photo or an update on the work order.",
+				"Follow it on the “Raised by me” tab. Open it to tap “Add a photo” or “Add an update”.",
 			],
 			goodToKnow: [
 				"Priority sets the due time: Urgent 4 hours, High 24 hours, Normal 3 days, Low 7 days.",
@@ -268,7 +268,7 @@ export const frontOfficeHelp: HelpModule = {
 				"Type “What” it is.",
 				"Under “Where”, choose “A room” and pick it, or “A public area” and pick the area.",
 				"Add “Details” that help the owner describe it, and pick who it was “Found by”.",
-				"Add a photo if you have one.",
+				"Add a photo under “Photo (optional)” if you have one.",
 				"Tap “Log item”. It shows on the “Held” tab.",
 			],
 			goodToKnow: [
@@ -305,9 +305,9 @@ export const frontOfficeHelp: HelpModule = {
 			steps: [
 				"For a booked guest, open the booking in “Bookings” and tap “Message guest”. For anyone else, open “Messages” and tap “New message”.",
 				"Under “Send by”, choose “Email”.",
-				"Pick a template under “Start from a template” if one fits, or write your own “Subject” and “Message”.",
+				"From a booking, pick a template under “Start from a template” if one fits. Or write your own “Subject” and “Message”.",
 				"Tap “Send email”.",
-				"In “Messages”, reply in the guest's conversation, then tap “Mark done” when it is handled.",
+				"In “Messages”, reply in the guest's conversation (“Use a template” helps), then tap “Mark done” when it is handled.",
 			],
 			goodToKnow: [
 				"Only email is really sent, in the hotel's name. WhatsApp is coming soon: the text is saved and shown for you to copy.",
@@ -396,7 +396,7 @@ export const frontOfficeHelp: HelpModule = {
 			],
 			goodToKnow: [
 				"Don't send a second charge while one is waiting.",
-				"Card terminals are still being connected. Until then, if the POS doesn't answer, take cash or a transfer.",
+				"If the POS doesn't answer, take cash or a bank transfer instead. With no terminal linked yet, the card choice says so.",
 			],
 			route: "/dashboard/payments",
 			screen: "Payments",

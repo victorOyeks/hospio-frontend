@@ -56,7 +56,7 @@ export const marketerHelp: HelpModule = {
 			],
 			goodToKnow: [
 				"A business pays you from the month it goes live, for the agreed number of months.",
-				"A business only appears here once it is live.",
+				"Every business you brought is listed, whatever its stage.",
 			],
 			route: "/dashboard/businesses",
 			screen: "My businesses",

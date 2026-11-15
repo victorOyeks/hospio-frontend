@@ -15,10 +15,10 @@ export const ownerHelp: HelpModule = {
 				"Tap the “Branch” card at the top of the sidebar.",
 				"Under “Switch branch”, pick the hotel.",
 				"The card now shows that hotel's name.",
-				"On screens with a hotel filter (Bookings, Staff, Payments, Operations, Messaging), pick a hotel there, or leave “All hotels” to see every hotel together.",
+				"On screens with a hotel filter (Bookings, Staff, Financials, Payments, Reports, Operations, Messaging), pick a hotel there, or leave “All hotels” to see every hotel together.",
 			],
 			goodToKnow: [
-				"The branch in the sidebar decides what you edit on Hotel setup, Roles & permissions, Inventory and Settings → “Taxes & currency” and “Approval limits”.",
+				"The branch in the sidebar decides what you edit on Hotel setup, Roles & Permissions, Inventory and Settings → “Taxes & currency” and “Approval limits”.",
 				"The hotel filter on other screens only narrows what you see. “All hotels” is the sum of the single hotels.",
 				"An action on a booking or a staff row always goes to that row's own hotel, whichever branch is in the sidebar.",
 			],
@@ -128,7 +128,7 @@ export const ownerHelp: HelpModule = {
 			goodToKnow: [
 				"The list shows one row per person and hotel, so someone at two hotels appears twice.",
 				"Use the row's menu for “Edit details”, “Message” or “New temporary password”.",
-				"Roles and levels are changed on Roles & permissions, for the hotel in the sidebar.",
+				"Roles and levels are changed on Roles & Permissions, for the hotel in the sidebar.",
 				"“Remove from” a hotel ends their roles there only; roles at your other hotels stay.",
 			],
 			route: "/dashboard/staff",
@@ -162,7 +162,7 @@ export const ownerHelp: HelpModule = {
 			steps: [
 				"Pick the hotel from the “Branch” card in the sidebar.",
 				"Open “Roles & Permissions” and tap “Give a role”.",
-				"Choose the “Person”, then the “Role”.",
+				"Search in “Find a person” by name, email or phone, then choose the “Person” and the “Role”.",
 				"Choose the “Level”: “Full”, “Can edit” or “View only”. The panel lists what they will be able to do.",
 				"For a short cover, set a “Last day (optional)”.",
 				"Tap “Give role”.",
@@ -231,7 +231,7 @@ export const ownerHelp: HelpModule = {
 				"Check the preview, then tap “Download CSV”, or “Email me” to get it by email.",
 			],
 			goodToKnow: [
-				"Reports are built from live figures and download as CSV (opens in Excel). There is no PDF yet.",
+				"Reports are built from live figures and download as CSV (opens in Excel).",
 				"The download holds exactly the rows in the preview.",
 				"“This month” runs from the 1st to today.",
 			],
