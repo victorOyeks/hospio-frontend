@@ -95,8 +95,14 @@ export function brandVars(b: Brand): Record<string, string> {
 		"--primary-2": mix(p, 0.1),
 		"--primary-3": mix(p, 0.22),
 		"--primary-4": mix(p, 0.38),
-		"--primary-5": mix(p, 0.85),
+		"--primary-5": mix(p, 0.55),
+		"--primary-6": mix(p, 0.93),
 		"--primary-foreground": on,
+		// Hovered / selected rows in menus, dropdowns and lists: a soft tint with text in a readable shade (was maroon pink).
+		"--accent": mix(p, 0.9),
+		"--accent-foreground": textShade(p),
+		"--secondary-foreground": textShade(p),
+		"--sidebar-primary-foreground": textShade(p),
 	};
 	if (b.darkNav) {
 		vars["--nav-background"] = p;
@@ -145,7 +151,7 @@ export function brandStyle(b: Brand): string {
 	const pale =
 		onColour(p) !== "#ffffff"
 			? `:root:not(.dark) :is(button,a,span,label,div).bg-brand:not(:has(.bg-white,.bg-card)){--color-white:#1a1a1a}` +
-				`:root:not(.dark) .text-brand,:root:not(.dark) .hover\\:text-brand:hover{color:${ink}}`
+				`:root:not(.dark) .text-brand,:root:not(.dark) .text-primary-1,:root:not(.dark) .hover\\:text-brand:hover{color:${ink}}`
 			: "";
 	return `:root:not(.dark){${body}}${light}${pale}`;
 }

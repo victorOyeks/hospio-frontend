@@ -79,3 +79,12 @@ describe("pale colours stay readable", () => {
 		);
 	});
 });
+
+describe("no maroon left over", () => {
+	test("menus' hover and selected rows take the brand", () => {
+		const css = brandStyle({ primary: "#87cefa", darkNav: true });
+		expect(css).toContain("--accent:");
+		expect(css).not.toMatch(/eb7a9e|4c091e|fceef2/i);
+		expect(css).toMatch(/--accent-foreground:#44677d/);
+	});
+});
