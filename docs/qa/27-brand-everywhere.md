@@ -53,6 +53,17 @@ name or logo).
    - **View booking** opens the booking page in teal, with "Simpas" at the top and "with Hospio360".
 4. Open the banner check link with the colour and name you saved: a teal banner with the hotel's name.
 
+## 3. After logout, the sign-in screens keep the hotel's look
+
+1. Signed in as Tunde with the teal brand saved, open any page, then **Log out**.
+2. The sign-in page shows the teal panel with the hotel's name (or short name and logo) instead of Hospio360. **Forgot
+   password**, **Sign up** and the shared-device **Lock** screen look the same.
+3. Under the form: "Not Simpas Ikeja? **Use the Hospio360 look**". Click it: the page turns maroon with Hospio360.
+4. Sign in again as Tunde, open a page and log out: the teal is back.
+5. Sign in on the same browser as a user of another hotel with a different colour, open a page and log out: the sign-in page
+   now shows that hotel's colour. The last hotel to use the browser wins.
+6. A pale colour (e.g. sky blue) shows as a deep shade of itself on the sign-in panel, so the white text stays readable.
+
 ## Clean up
 
 - Put the brand values back as you found them and save. Within a minute the app, the booking page and emails are maroon

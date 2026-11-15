@@ -1,5 +1,15 @@
+import { cookies } from "next/headers";
 import type { PropsWithChildren, ReactNode } from "react";
 import { APP } from "@hospio/api/app";
+import {
+	BRAND_COOKIE,
+	brandStyle,
+	decodeBrandCookie,
+	mix,
+	onColour,
+	type RememberedBrand,
+} from "@hospio/api/brand";
+import { ForgetBrand } from "../shared/remember-brand";
 import { cn } from "../utils";
 
 /** The bed mark of the Hospio360 wordmark (the same drawing as the landing page's). */
@@ -25,31 +35,68 @@ function Mark({ className }: { className?: string }) {
 export function Wordmark({
 	light = false,
 	className,
+	name,
+	logoUrl,
 }: {
 	light?: boolean;
 	className?: string;
+	/** The remembered hotel's short name or name instead of Hospio360 (packages/api/src/brand.ts). */
+	name?: string | null;
+	logoUrl?: string | null;
 }) {
 	return (
 		<span className={cn("flex items-center gap-[10px]", className)}>
-			<span
-				className={cn(
-					"flex size-9 items-center justify-center rounded-[10px]",
-					light
-						? "bg-white/12 text-white ring-1 ring-white/15"
-						: "bg-brand text-white",
-				)}
-			>
-				<Mark className="size-5" />
-			</span>
+			{logoUrl ? (
+				// biome-ignore lint/performance/noImgElement: the hotel's logo from any https address
+				<img
+					src={logoUrl}
+					alt=""
+					className="size-9 rounded-[10px] object-contain"
+				/>
+			) : (
+				<span
+					className={cn(
+						"flex size-9 items-center justify-center rounded-[10px]",
+						light
+							? "bg-white/12 text-white ring-1 ring-white/15"
+							: "bg-brand text-brand-foreground",
+					)}
+				>
+					<Mark className="size-5" />
+				</span>
+			)}
 			<span
 				className={cn(
 					"text-[20px] font-bold leading-none tracking-[-0.01em]",
 					light ? "text-white" : "text-brand",
 				)}
 			>
-				Hospio360
+				{name || "Hospio360"}
 			</span>
 		</span>
+	);
+}
+
+/** The last hotel's look remembered by this browser (hotel app only); null for the admin portal or none remembered. */
+export async function rememberedBrand(): Promise<RememberedBrand | null> {
+	if (APP !== "hotel") return null;
+	return decodeBrandCookie((await cookies()).get(BRAND_COOKIE)?.value);
+}
+
+/** The remembered hotel's colours on a sign-in or lock screen (the same tokens as the dashboard). */
+export function RememberedBrandStyle({
+	remembered,
+}: {
+	remembered: RememberedBrand | null;
+}) {
+	if (!remembered) return null;
+	return (
+		<style
+			id="remembered-brand"
+			// Built from a validated #rrggbb only (packages/api/src/brand.ts).
+			// biome-ignore lint/security/noDangerouslySetInnerHtml: generated CSS, no user text
+			dangerouslySetInnerHTML={{ __html: brandStyle(remembered.brand) }}
+		/>
 	);
 }
 
@@ -182,19 +229,26 @@ function Chip({ children }: { children: ReactNode }) {
 }
 
 /** The sign-in pages' frame: brand panel on the left, the form on the right. */
-export function AuthShell({ children }: PropsWithChildren) {
+export async function AuthShell({ children }: PropsWithChildren) {
 	const admin = APP === "admin";
+	const remembered = await rememberedBrand();
+	const colour = remembered?.brand.primary;
+	// White text on the panel: a colour too pale for it is shown as a deep shade of itself.
+	const panel =
+		colour && onColour(colour) !== "#ffffff" ? mix(colour, -0.6) : undefined;
+	const hotel = remembered
+		? remembered.brand.shortName || remembered.hotelName
+		: null;
 	const areas = admin
 		? ["Businesses", "Support", "Fees", "Marketers"]
-		: [
-				"Front desk",
-				"Restaurant & bar",
-				"Housekeeping",
-				"Finance",
-			];
+		: ["Front desk", "Restaurant & bar", "Housekeeping", "Finance"];
 	return (
 		<main className="flex min-h-screen bg-card">
-			<aside className="relative hidden w-[46%] max-w-[640px] min-w-[480px] shrink-0 flex-col overflow-hidden bg-brand px-12 py-11 text-white lg:flex xl:px-14">
+			<RememberedBrandStyle remembered={remembered} />
+			<aside
+				className="relative hidden w-[46%] max-w-[640px] min-w-[480px] shrink-0 flex-col overflow-hidden bg-brand px-12 py-11 text-white lg:flex xl:px-14"
+				style={panel ? { background: panel } : undefined}
+			>
 				{/* light from the top right and a faint dot grid, so the colour has depth */}
 				<div
 					aria-hidden="true"
@@ -214,7 +268,12 @@ export function AuthShell({ children }: PropsWithChildren) {
 						maskImage: "linear-gradient(to bottom, black, transparent 75%)",
 					}}
 				/>
-				<Wordmark light className="relative" />
+				<Wordmark
+					light
+					className="relative"
+					name={hotel}
+					logoUrl={remembered?.brand.logoUrl}
+				/>
 				<div className="relative flex min-h-0 flex-1 items-center py-10 [@media(max-height:820px)]:py-6 [@media(max-height:820px)]:[&>*]:scale-90">
 					<Glimpse admin={admin} />
 				</div>
@@ -237,8 +296,19 @@ export function AuthShell({ children }: PropsWithChildren) {
 				</div>
 			</aside>
 			<section className="flex min-h-full flex-1 flex-col items-center justify-center px-4 py-10">
-				<Wordmark className="mb-10 lg:hidden" />
+				<Wordmark
+					className="mb-10 lg:hidden"
+					name={hotel}
+					logoUrl={remembered?.brand.logoUrl}
+				/>
 				<div className="w-full max-w-[420px]">{children}</div>
+				{remembered && (
+					<ForgetBrand
+						hotelName={
+							remembered.hotelName || remembered.brand.shortName || null
+						}
+					/>
+				)}
 			</section>
 		</main>
 	);

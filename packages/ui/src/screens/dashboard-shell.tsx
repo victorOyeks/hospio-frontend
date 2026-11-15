@@ -27,7 +27,12 @@ import {
 	tokenIsStale,
 } from "@hospio/api/session-refresh";
 import { cn } from "@hospio/ui/utils";
-import { brandStyle, HOSPIO_MAROON } from "@hospio/api/brand";
+import {
+	brandStyle,
+	encodeBrandCookie,
+	HOSPIO_MAROON,
+} from "@hospio/api/brand";
+import { RememberBrand } from "@hospio/ui/shared/remember-brand";
 import { getSharedDevice, pinPromptAsked } from "@hospio/api/device";
 import type { Hotel, Me } from "@hospio/api/api/schema";
 import {
@@ -158,6 +163,10 @@ export async function DashboardShell({ children }: PropsWithChildren) {
 						// biome-ignore lint/security/noDangerouslySetInnerHtml: generated CSS, no user text
 						dangerouslySetInnerHTML={{ __html: brandStyle(brand) }}
 					/>
+				)}
+				{/* The sign-in screens keep this hotel's look after logout (not while support views as the owner). */}
+				{brand && activeHotel && !support && (
+					<RememberBrand value={encodeBrandCookie(brand, activeHotel.name)} />
 				)}
 				{support && <SupportBar endsAt={support.endsAt} />}
 				<SidebarProvider
