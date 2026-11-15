@@ -69,7 +69,7 @@ export const ROLE_OPTIONS = [
 	{ value: "FINANCE", label: "Finance" },
 ];
 export const SHIFT_OPTIONS = ["Morning", "Afternoon", "Night"];
-const SHIFT_TIMES: Record<string, [string, string]> = {
+export const SHIFT_TIMES: Record<string, [string, string]> = {
 	Morning: ["06:00", "14:00"],
 	Afternoon: ["14:00", "22:00"],
 	Night: ["22:00", "06:00"],
