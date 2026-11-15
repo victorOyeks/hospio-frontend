@@ -1,5 +1,13 @@
 import { describe, expect, test } from "bun:test";
-import { brandStyle, contrast, decodeBrandCookie, encodeBrandCookie, navMode, normalizeHex, onColour } from "./brand";
+import {
+	brandStyle,
+	contrast,
+	decodeBrandCookie,
+	encodeBrandCookie,
+	navMode,
+	normalizeHex,
+	onColour,
+} from "./brand";
 
 describe("brand", () => {
 	test("colours are read leniently and written strictly", () => {
@@ -17,22 +25,57 @@ describe("brand", () => {
 		expect(navMode({ primary: "#0b4f50", darkNav: true })).toBe("dark");
 	});
 	test("the style sheet only ever holds a validated colour", () => {
-		const css = brandStyle({ primary: "#0b4f50;}body{display:none", darkNav: true });
+		const css = brandStyle({
+			primary: "#0b4f50;}body{display:none",
+			darkNav: true,
+		});
 		expect(css).not.toContain("display:none");
 		expect(css).toContain("--brand-primary:#4c091e");
 	});
 	test("the remembered look survives the cookie and a tampered one is refused", () => {
-		const raw = encodeBrandCookie({ primary: "#0B4F50", darkNav: false, shortName: "Simpas", logoUrl: "https://x.test/l.png" }, "Simpas Ikeja");
+		const raw = encodeBrandCookie(
+			{
+				primary: "#0B4F50",
+				darkNav: false,
+				shortName: "Simpas",
+				logoUrl: "https://x.test/l.png",
+			},
+			"Simpas Ikeja",
+		);
 		expect(decodeBrandCookie(raw)).toEqual({
-			brand: { primary: "#0b4f50", darkNav: false, shortName: "Simpas", logoUrl: "https://x.test/l.png" },
+			brand: {
+				primary: "#0b4f50",
+				darkNav: false,
+				shortName: "Simpas",
+				logoUrl: "https://x.test/l.png",
+			},
 			hotelName: "Simpas Ikeja",
 		});
-		expect(decodeBrandCookie(encodeURIComponent(JSON.stringify({ c: "#zzzzzz" })))).toBeNull();
+		expect(
+			decodeBrandCookie(encodeURIComponent(JSON.stringify({ c: "#zzzzzz" }))),
+		).toBeNull();
 		const evil = decodeBrandCookie(
-			encodeURIComponent(JSON.stringify({ c: "#0b4f50", l: "javascript:alert(1)", h: "<script>Hotel</script>" })),
+			encodeURIComponent(
+				JSON.stringify({
+					c: "#0b4f50",
+					l: "javascript:alert(1)",
+					h: "<script>Hotel</script>",
+				}),
+			),
 		);
 		expect(evil?.brand.logoUrl).toBeNull();
 		expect(evil?.hotelName).toBe("scriptHotelscript");
 		expect(decodeBrandCookie("%%%")).toBeNull();
+	});
+});
+
+describe("pale colours stay readable", () => {
+	test("text on the fill turns dark and text in the colour a deeper shade", () => {
+		const css = brandStyle({ primary: "#87cefa", darkNav: true });
+		expect(css).toContain("--color-white:#1a1a1a");
+		expect(css).toMatch(/\.text-brand[^{]*\{color:#[0-9a-f]{6}\}/);
+		expect(brandStyle({ primary: "#0b4f50", darkNav: true })).not.toContain(
+			"--color-white:#1a1a1a",
+		);
 	});
 });

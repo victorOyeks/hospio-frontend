@@ -66,6 +66,14 @@ export function onColour(hex: string): string {
 	return contrast(hex, "#ffffff") >= 3 ? "#ffffff" : "#1a1a1a";
 }
 
+/** A shade of the colour that reads on white (4.5:1, links and highlighted text): the colour itself when it already does. */
+export function textShade(hex: string): string {
+	let c = hex;
+	for (let k = 0.1; contrast(c, "#ffffff") < 4.5 && k < 0.95; k += 0.1)
+		c = mix(hex, -k);
+	return c;
+}
+
 /** A sentence when white text on this colour would be hard to read (buttons, the dark sidebar), else null. */
 export function readabilityWarning(hex: string): string | null {
 	const c = contrast(hex, "#ffffff");
@@ -121,16 +129,25 @@ export function brandStyle(b: Brand): string {
 		.map(([k, v]) => `${k}:${v}`)
 		.join(";");
 	const sidebar = '[data-slot="sidebar-container"],[data-sidebar="sidebar"]';
+	const p = normalizeHex(b.primary) ?? HOSPIO_MAROON;
+	const ink = textShade(p);
 	const light =
 		navMode(b) === "light"
 			? `:root:not(.dark) :is(${sidebar}){--color-white:#212121}` +
 				`:root:not(.dark) [data-slot="sidebar-container"]{border-right:1px solid var(--border-default)}` +
 				`:root:not(.dark) :is(${sidebar}) .rounded-pill{--color-white:#ffffff}` +
 				// The page you're on: the brand's soft tint with the brand colour, not a grey box.
-				`:root:not(.dark) :is(${sidebar}) [data-active="true"]{background:var(--brand-primary-soft);color:var(--brand-primary)}` +
-				`:root:not(.dark) :is(${sidebar}) [data-active="true"] *{--color-white:var(--brand-primary)}`
+				`:root:not(.dark) :is(${sidebar}) [data-active="true"]{background:var(--brand-primary-soft);color:${ink}}` +
+				`:root:not(.dark) :is(${sidebar}) [data-active="true"] *{--color-white:${ink}}`
 			: "";
-	return `:root:not(.dark){${body}}${light}`;
+	// A pale colour (sky blue, yellow) keeps its fill, but text on it turns dark and text in it a deeper shade, so buttons,
+	// badges and links stay readable. Elements holding white cards (the sign-in panel) keep their own white.
+	const pale =
+		onColour(p) !== "#ffffff"
+			? `:root:not(.dark) :is(button,a,span,label,div).bg-brand:not(:has(.bg-white,.bg-card)){--color-white:#1a1a1a}` +
+				`:root:not(.dark) .text-brand,:root:not(.dark) .hover\\:text-brand:hover{color:${ink}}`
+			: "";
+	return `:root:not(.dark){${body}}${light}${pale}`;
 }
 
 /** Brand from the BRAND setup section's API keys (primaryColour, darkSidebar, shortName, logoUrl). */
