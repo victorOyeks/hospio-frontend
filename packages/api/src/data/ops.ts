@@ -17,6 +17,7 @@ import * as owner from "@hospio/api/demo/fixtures/owner";
 import { demoSales } from "@hospio/api/demo/fixtures/fnb";
 import * as managerOps from "@hospio/api/demo/fixtures/manager-ops";
 import { live } from "./live";
+import { BUILT_IN_ROTA, type RotaSetup, toRotaSetup } from "./rota-setup";
 import {
 	allPages,
 	emptyPage,
@@ -195,6 +196,29 @@ export const opsData = {
 					(a, b) =>
 						a.date.localeCompare(b.date) || a.starts.localeCompare(b.starts),
 				);
+		},
+		/** Hotel setup → Staff & shifts: the hotel's shifts and departments as the rota uses them (built-in when empty). */
+		rotaSetup: async (): Promise<RotaSetup> => {
+			if (!live("hotel-config")) return BUILT_IN_ROTA;
+			const s = await withSession();
+			const read = (listName: "SHIFTS" | "DEPARTMENTS") =>
+				api("@get/hotel-config/setup/lists/:listName", {
+					...s,
+					params: { listName },
+					query: {},
+				})
+					.then((r) =>
+						(r.data?.data ?? [])
+							.filter((i) => i.active)
+							.sort((a, b) => a.sortOrder - b.sortOrder)
+							.map((i) => i.label),
+					)
+					.catch(() => [] as string[]);
+			const [shifts, departments] = await Promise.all([
+				read("SHIFTS"),
+				read("DEPARTMENTS"),
+			]);
+			return toRotaSetup(shifts, departments);
 		},
 		/** The caller's own upcoming shifts. */
 		myShifts: async (staffId?: string): Promise<ShiftRow[]> => {

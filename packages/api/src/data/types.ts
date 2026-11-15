@@ -1365,6 +1365,8 @@ export type HotelSetupSection = {
 		value: unknown;
 		options?: string[];
 		help?: string;
+		/** List fields whose entries must read as a shift or a department (data/rota-setup). */
+		format?: "shift" | "department";
 	}[];
 };
 

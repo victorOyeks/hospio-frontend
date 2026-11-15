@@ -52,6 +52,7 @@ export default async function StaffPage({
 		business,
 		user,
 		clockedIn,
+		rotaSetup,
 	] = await Promise.all([
 		getActiveHotel(),
 		data.staff.page(query),
@@ -63,6 +64,7 @@ export default async function StaffPage({
 		data.business.mine(),
 		getUser(),
 		data.staff.clockedIn(),
+		data.staff.rotaSetup(),
 	]);
 	// A profile opened from a link (?open=) for someone who is not on this page.
 	const opened =
@@ -86,6 +88,7 @@ export default async function StaffPage({
 			inviterName={user?.fullName}
 			clockedIn={[...clockedIn.keys()]}
 			clockedSince={Object.fromEntries(clockedIn)}
+			rotaSetup={rotaSetup}
 		/>
 	);
 }

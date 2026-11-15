@@ -17,6 +17,7 @@ type FieldDef = {
 	default: unknown /** API key when it differs from `key`. */;
 	api?: string /** For `list` fields: the hotel-config list this field edits. */;
 	list?: SetupListName;
+	format?: "shift" | "department";
 };
 type SectionDef = {
 	key: string;
@@ -339,6 +340,8 @@ export const SETUP_CATALOGUE: SectionDef[] = [
 				list: "SHIFTS",
 				label: "Shifts",
 				type: "list",
+				format: "shift",
+				help: "A name and the times, e.g. Early 07:00–15:00 (a night shift can end the next morning). These are the shifts offered on the rota. Leave empty for Morning 6am–2pm, Afternoon 2pm–10pm and Night 10pm–6am.",
 				default: [],
 			},
 			{
@@ -346,6 +349,8 @@ export const SETUP_CATALOGUE: SectionDef[] = [
 				list: "DEPARTMENTS",
 				label: "Departments",
 				type: "list",
+				format: "department",
+				help: "A name and the roles in it, e.g. Food & drink: Kitchen, Bar. The rota groups staff under these headings, in this order; roles not listed keep their own heading. Roles: Management, Front office, Housekeeping, Laundry, Maintenance, Kitchen, Bar, Store, Finance.",
 				default: [],
 			},
 			{
@@ -616,6 +621,7 @@ export function toSetupSections(
 					type: "list",
 					value: items.map((i) => i.label),
 					help: f.help,
+					format: f.format,
 				};
 			}
 			if (def.key === "danger" && f.key === "status")
