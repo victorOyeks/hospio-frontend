@@ -34,6 +34,7 @@ refreshing or going back in the middle of a flow.
 | 23 | `23-shift-and-department-setup.md` | Hotel setup → Staff & shifts: the hotel's own shifts (offered on the rota and Add to the rota) and departments (the rota's headings) added with forms (name + times; name + role buttons), never free text; empty lists keep the built-in ones | Ready |
 | 24 | `24-whatsapp-booking-messages.md` | WhatsApp from Hospio360 for booking confirmed, dates changed, cancelled and receipts: banner, details line by line, hotel phone, View booking button; the guest's booking page (no sign-in, call and directions, refuses altered links) | Ready |
 | 25 | `25-sms-codes-only.md` | SMS only for the phone verification code (Termii once on); nothing else offers or falls back to SMS: receipts, guest messages, invites, temp passwords, purchase orders and staff notices go by WhatsApp or email | Ready |
+| 26 | `26-guest-messaging-settings.md` | Hotel setup → Guest messaging works: the hotel's WhatsApp (Chat on WhatsApp on the booking page and in emails), booking confirmation on/off, the day-before-arrival reminder (once per booking), automatic receipts on/off | Ready |
 
 ## Before you start
 

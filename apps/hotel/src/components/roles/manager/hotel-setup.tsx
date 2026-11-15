@@ -88,7 +88,8 @@ const why: Record<string, string> = {
 		"The checklist is what attendants tick on the tablet; inspections gate rooms as ready.",
 	outlets:
 		"Room charging posts restaurant and bar bills straight to the folio.",
-	messaging: "Automatic messages go out on the channels you turn on here.",
+	messaging:
+		"Guests get these by WhatsApp from Hospio360 and by email from your hotel. Replies to Hospio360's WhatsApp don't reach you, so add your own WhatsApp number for guests to chat with you.",
 	staff:
 		"The rota offers these shifts and groups staff by these departments; the late allowance decides who is told about late and missing clock-ins.",
 	night:
