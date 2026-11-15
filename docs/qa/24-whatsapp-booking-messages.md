@@ -73,7 +73,22 @@ Password for every account: `Hospio123!`.
 3. **View booking** now shows **Cancelled**, the dates struck through, and "This booking has been cancelled: Plans
    changed."
 
-## 5. A link that isn't right
+## 5. Directions for every hotel
+
+1. On the booking page, **Get directions** opens Google Maps at the hotel. For Simpas Ikeja it searches
+   "Simpas Ikeja 12 Allen Avenue, Ikeja, Lagos".
+2. A hotel with only a city (no street address) still shows **Get directions**, which searches its name and city.
+3. Add the hotel's phone in Hotel setup and open the page again: **Call the hotel** appears and the WhatsApp messages
+   show the number instead of "its front desk number".
+
+## 6. The link in the SMS and the email
+
+1. Make a booking for a guest with your own email and the allow-listed phone. The email has a **View booking** button
+   that opens the same page.
+2. If a WhatsApp ever arrives as an SMS instead (e.g. before the templates are approved), the SMS ends with "Details and
+   directions: https://hospio360.com/stay/…" and the link opens the page.
+
+## 7. A link that isn't right
 
 1. Open the link from a message, change one letter in the middle of the address and open it. The page says "This link
    isn't working" and shows no booking.
