@@ -1320,6 +1320,11 @@ export const schema = createSchema({
 
 	// hotel-config
 	"@get/hotel-config/setup": { output: envelope(SetupSection) },
+	/** One section's values (defaults laid over the hotel's own), e.g. BRAND for the shell's colours. */
+	"@get/hotel-config/setup/:section": {
+		params: z.object({ section: z.string() }),
+		output: envelope(JsonObject),
+	},
 	"@put/hotel-config/setup/:section": {
 		params: z.object({ section: z.string() }),
 		input: JsonObject,

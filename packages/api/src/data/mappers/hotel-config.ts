@@ -86,7 +86,7 @@ export const SETUP_CATALOGUE: SectionDef[] = [
 				label: "Brand colour",
 				type: "text",
 				default: "#4c091e",
-				help: "Buttons, the sidebar and highlights",
+				help: "Buttons, the sidebar and highlights · #RRGGBB or pick above",
 			},
 			{
 				key: "logoText",
@@ -95,7 +95,13 @@ export const SETUP_CATALOGUE: SectionDef[] = [
 				type: "text",
 				default: "",
 			},
-			{ key: "logoUrl", label: "Logo URL", type: "text", default: "" },
+			{
+				key: "logoUrl",
+				label: "Logo URL",
+				type: "text",
+				help: "An https link to your logo; a square one looks best",
+				default: "",
+			},
 			{
 				key: "darkNav",
 				api: "darkSidebar",

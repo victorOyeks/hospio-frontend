@@ -35,6 +35,7 @@ refreshing or going back in the middle of a flow.
 | 24 | `24-whatsapp-booking-messages.md` | WhatsApp from Hospio360 for booking confirmed, dates changed, cancelled and receipts: banner, details line by line, hotel phone, View booking button; the guest's booking page (no sign-in, call and directions, refuses altered links) | Ready |
 | 25 | `25-sms-codes-only.md` | SMS only for the phone verification code (Termii once on); nothing else offers or falls back to SMS: receipts, guest messages, invites, temp passwords, purchase orders and staff notices go by WhatsApp or email | Ready |
 | 26 | `26-guest-messaging-settings.md` | Hotel setup → Guest messaging works: the hotel's WhatsApp (Chat on WhatsApp on the booking page and in emails), booking confirmation on/off, the day-before-arrival reminder (once per booking), automatic receipts on/off | Ready |
+| 27 | `27-brand-everywhere.md` | Brand & colours: live preview before saving (whole page, pale-colour warning, white sidebar), then the colour, short name and logo in the app for every role, the booking page, booking emails and the WhatsApp banner | Ready |
 
 ## Before you start
 

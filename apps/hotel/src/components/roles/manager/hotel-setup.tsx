@@ -23,7 +23,15 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import {
+	type Brand,
+	brandStyle,
+	HOSPIO_MAROON,
+	navMode,
+	normalizeHex,
+	readabilityWarning,
+} from "@hospio/api/brand";
 import { saveSetupSection } from "@hospio/api/actions/hotel-config";
 import { setHotelStatus } from "@hospio/api/actions/tenant";
 import { useAction } from "@hospio/api/actions/use-action";
@@ -261,24 +269,12 @@ function SectionForm({
 					</Note>
 				)}
 				{section.key === "brand" && (
-					<div className="flex items-center gap-4 rounded-xl border border-line p-4">
-						<span
-							className="flex size-14 items-center justify-center rounded-xl text-sm font-bold text-white"
-							style={{ background: String(values.primary ?? "#4c091e") }}
-						>
-							{String(values.logoText ?? "Hospio360")}
-						</span>
-						<div className="flex-1">
-							<p className="text-[13px] font-semibold text-ink">Preview</p>
-							<p className="text-xs text-ink-3">
-								Sidebar and buttons use the brand colour · status colours never
-								change
-							</p>
-						</div>
-						<button type="button" className={btn.secondary}>
-							Upload logo
-						</button>
-					</div>
+					<BrandPreview
+						values={values}
+						previewing={dirty}
+						disabled={locked}
+						onPick={(hex) => set("primary", hex)}
+					/>
 				)}
 				<div className="grid gap-4 md:grid-cols-2">
 					{section.fields.map((f) => (
@@ -358,7 +354,11 @@ function SectionForm({
 							run(
 								() => saveSetupSection(section.key, values, hotelId),
 								`${section.title} saved`,
-								() => setDirty(false),
+								() => {
+									setDirty(false);
+									// The brand lives in the shell (sidebar, buttons): re-render it with the saved colours.
+									if (section.key === "brand") router.refresh();
+								},
 							)
 						}
 					>
@@ -633,5 +633,176 @@ function ChipList({
 				)}
 			</div>
 		</Field>
+	);
+}
+
+const BRAND_SWATCHES = [
+	HOSPIO_MAROON,
+	"#0b4f50",
+	"#1d3a6e",
+	"#14532d",
+	"#7c2d12",
+	"#3f3f46",
+];
+
+/**
+ * Hotel setup → Brand & colours: a picture of the sidebar, a button and a highlight in the colour being typed, and the whole
+ * page recoloured live while the change is unsaved (the same style sheet the shell renders, packages/api/src/brand.ts), so the
+ * manager sees it before anyone else does. Discard puts the saved colours back; Save applies them for everyone.
+ */
+function BrandPreview({
+	values,
+	previewing,
+	disabled,
+	onPick,
+}: {
+	values: Record<string, unknown>;
+	previewing: boolean;
+	disabled: boolean;
+	onPick: (hex: string) => void;
+}) {
+	const typed = String(values.primary ?? "");
+	const hex = normalizeHex(typed);
+	const brand: Brand = {
+		primary: hex ?? HOSPIO_MAROON,
+		darkNav: values.darkNav !== false,
+		shortName: String(values.logoText ?? "").trim() || null,
+		logoUrl: /^https:\/\/\S+$/.test(String(values.logoUrl ?? "").trim())
+			? String(values.logoUrl).trim()
+			: null,
+	};
+	const css = hex ? brandStyle(brand) : null;
+	useEffect(() => {
+		if (!previewing || !css) return;
+		// Last in the page, so it wins over the shell's saved colours until Save or Discard.
+		const el = document.createElement("style");
+		el.id = "brand-preview";
+		el.textContent = css;
+		document.body.appendChild(el);
+		return () => el.remove();
+	}, [previewing, css]);
+	const warning = hex ? readabilityWarning(hex) : null;
+	const light = navMode(brand) === "light";
+	const name = brand.shortName || "Hospio360";
+	return (
+		<div className="flex flex-col gap-3 rounded-xl border border-line p-4">
+			<div className="flex flex-wrap items-center justify-between gap-3">
+				<div>
+					<p className="text-[13px] font-semibold text-ink">Preview</p>
+					<p className="text-xs text-ink-3">
+						{previewing
+							? "This page shows your new colours now · only you see them until you save"
+							: "Your sidebar, buttons and highlights · status colours never change"}
+					</p>
+				</div>
+				<div className="flex items-center gap-2">
+					{BRAND_SWATCHES.map((c) => (
+						<button
+							key={c}
+							type="button"
+							disabled={disabled}
+							aria-label={`Use ${c}`}
+							onClick={() => onPick(c)}
+							className={cn(
+								"size-6 rounded-full border border-line",
+								hex === c &&
+									"ring-2 ring-offset-2 ring-[color:var(--brand-primary)]",
+							)}
+							style={{ background: c }}
+						/>
+					))}
+					<label className="relative flex size-8 cursor-pointer items-center justify-center overflow-hidden rounded-full border border-line text-[10px] font-semibold text-ink-2">
+						<span aria-hidden>+</span>
+						<input
+							type="color"
+							aria-label="Pick any colour"
+							disabled={disabled}
+							value={hex ?? HOSPIO_MAROON}
+							onChange={(e) => onPick(e.target.value)}
+							className="absolute inset-0 cursor-pointer opacity-0"
+						/>
+					</label>
+				</div>
+			</div>
+			<div className="flex overflow-hidden rounded-lg border border-line">
+				<div
+					className={cn(
+						"flex w-[150px] shrink-0 flex-col gap-1 p-3",
+						light ? "border-r border-line bg-white" : "bg-nav",
+					)}
+				>
+					<div className="mb-2 flex items-center gap-2">
+						{brand.logoUrl ? (
+							// biome-ignore lint/performance/noImgElement: the hotel's logo from any https address
+							<img
+								src={brand.logoUrl}
+								alt=""
+								className="size-5 rounded object-contain"
+							/>
+						) : (
+							<span
+								className={cn(
+									"size-5 rounded",
+									light ? "bg-brand" : "bg-white/25",
+								)}
+							/>
+						)}
+						<span
+							className={cn(
+								"truncate text-xs font-bold",
+								light ? "text-ink" : "text-white",
+							)}
+						>
+							{name}
+						</span>
+					</div>
+					{["Bookings", "Rooms", "Reports"].map((item, n) => (
+						<span
+							key={item}
+							className={cn(
+								"rounded-md px-2 py-1 text-[11px]",
+								light
+									? n === 0
+										? "bg-brand-soft font-semibold text-brand"
+										: "text-ink-2"
+									: n === 0
+										? "bg-white/15 font-semibold text-white"
+										: "text-white/75",
+							)}
+						>
+							{item}
+						</span>
+					))}
+				</div>
+				<div className="flex flex-1 flex-col gap-3 bg-page p-4">
+					<p className="text-sm font-bold text-ink">Today at {name}</p>
+					<div className="flex flex-wrap items-center gap-2">
+						<span className="rounded-control bg-brand px-3 py-[6px] text-xs font-semibold text-brand-foreground">
+							New booking
+						</span>
+						<span className="rounded-pill bg-brand-soft px-2 py-[2px] text-[11px] font-semibold text-brand">
+							3 arriving
+						</span>
+						<span className="text-xs font-semibold text-brand underline">
+							View all
+						</span>
+					</div>
+					<div className="h-1.5 w-2/3 rounded-full bg-brand-soft">
+						<div className="h-full w-2/3 rounded-full bg-brand" />
+					</div>
+				</div>
+			</div>
+			{!hex && typed.trim() !== "" && (
+				<Note tone="warning">
+					Write the colour as #RRGGBB, for example #4c091e, or pick one above.
+				</Note>
+			)}
+			{warning && <Note tone="warning">{warning}</Note>}
+			<p className="text-[11px] text-ink-3">
+				Saved colours are used everywhere this hotel appears: this app for every
+				role, the guest&apos;s booking page, booking emails and the banner on
+				WhatsApp messages.
+			</p>
+		</div>
 	);
 }

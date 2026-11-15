@@ -19,6 +19,8 @@ export function AppSidebar({
 	role,
 	hotels,
 	activeHotel,
+	brandName,
+	brandLogo,
 	badges,
 	supervisor,
 	...props
@@ -26,21 +28,40 @@ export function AppSidebar({
 	role: HotelRole;
 	hotels: Hotel[];
 	activeHotel: Hotel | null;
+	/** Hotel setup → Brand & colours: the short name and logo at the top of the sidebar (Hospio360 when not set). */
+	brandName?: string | null;
+	brandLogo?: string | null;
 	badges?: React.ComponentProps<typeof NavMain>["badges"];
 	supervisor?: boolean;
 }) {
 	return (
-		<Sidebar {...props} className="border-r-0 bg-nav text-white [&_[data-sidebar=sidebar]]:bg-nav">
+		<Sidebar
+			{...props}
+			className="border-r-0 bg-nav text-white [&_[data-sidebar=sidebar]]:bg-nav"
+		>
 			<SidebarHeader className="gap-2 px-4 pt-8">
 				<SidebarMenu>
 					<SidebarMenuItem>
-						<SidebarMenuButton size="lg" asChild className="h-[46px] rounded-lg px-2 hover:bg-white/10 hover:text-white">
+						<SidebarMenuButton
+							size="lg"
+							asChild
+							className="h-[46px] rounded-lg px-2 hover:bg-white/10 hover:text-white"
+						>
 							<Link href="/dashboard" className="flex items-center gap-[10px]">
 								<span className="flex size-7 items-center justify-center text-white">
-									<HomeIcon />
+									{brandLogo ? (
+										// biome-ignore lint/performance/noImgElement: the hotel's own logo from any https address
+										<img
+											src={brandLogo}
+											alt=""
+											className="size-7 rounded-md object-contain"
+										/>
+									) : (
+										<HomeIcon />
+									)}
 								</span>
-								<span className="text-sm font-bold tracking-[-0.01em] text-white group-data-[collapsible=icon]:hidden">
-									Hospio360
+								<span className="truncate text-sm font-bold tracking-[-0.01em] text-white group-data-[collapsible=icon]:hidden">
+									{brandName || "Hospio360"}
 								</span>
 							</Link>
 						</SidebarMenuButton>
