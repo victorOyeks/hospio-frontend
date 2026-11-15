@@ -81,7 +81,7 @@ export const ownerHelp: HelpModule = {
 				"The invite is emailed to them. If they need it now, copy the invite link and temporary password, or tap “Share in your WhatsApp”, then tap “Done”.",
 			],
 			goodToKnow: [
-				"The invite is emailed to the address you typed, in the hotel's name. SMS and WhatsApp invites are coming soon; “Share in your WhatsApp” opens WhatsApp on your own phone or computer with the message ready.",
+				"The invite is emailed to the address you typed, in the hotel's name. Invites go by email only; “Share in your WhatsApp” opens WhatsApp on your own phone or computer with the message ready.",
 				"The link and temporary password are shown only once.",
 				"Each role is given for one hotel. Add more hotels afterwards with “Change role & hotels”.",
 				"Front desk, housekeeping, kitchen and other tablet staff are added on “Staff”, not here.",

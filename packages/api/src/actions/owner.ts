@@ -323,13 +323,13 @@ export type GuestMessageInput = {
 	guestId?: string;
 	guestName: string;
 	contact: string;
-	channel: "WHATSAPP" | "SMS" | "EMAIL";
+	channel: "WHATSAPP" | "EMAIL";
 	subject?: string;
 	body: string;
 };
 
 /**
- * A message to a guest from the hotel's inbox (at the hotel in scope). Email is sent for real; WhatsApp and SMS are saved
+ * A message to a guest from the hotel's inbox (at the hotel in scope). Email is sent for real; WhatsApp is saved
  * and shown on screen (coming soon). `note` is the service's line ("Email sent to …", "Saved · WhatsApp is coming soon …").
  */
 export async function messageGuest(

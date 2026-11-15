@@ -24,7 +24,7 @@ import { StatusPill } from "./status-pill";
 import { btn } from "./ui";
 
 /**
- * Top-centre notice: one card per batch of messages the platform sent (email, SMS, WhatsApp) or only saved (a channel
+ * Top-centre notice: one card per batch of messages the platform sent (email, WhatsApp, or SMS for a phone code) or only saved (a channel
  * that is switched off here), each with what it said and a Copy button, so the text can also be passed on by hand.
  * Stays until closed. Mount once per layout: `<DeliveryNotice />`.
  */
@@ -80,7 +80,7 @@ function DeliveryCard({ batch }: { batch: DeliveryBatch }) {
 
 /**
  * What happened to one message, in words. SMS_SENT / WHATSAPP_SENT mean handed to the sender: on staging only allow-listed
- * numbers really receive them, and a WhatsApp without an approved template goes as an SMS (docs/sms-whatsapp.md).
+ * numbers really receive them. SMS carries phone verification codes only (docs/sms-whatsapp.md).
  */
 export function deliveryOutcome(d: DeliveryLike): {
 	label: string;
@@ -95,7 +95,7 @@ export function deliveryOutcome(d: DeliveryLike): {
 		return { label: `SMS sending to ${d.to ?? "—"}`, tone: "success" };
 	if (d.status === "WHATSAPP_SENT")
 		return {
-			label: `WhatsApp sending to ${d.to ?? "—"} (SMS if WhatsApp can't)`,
+			label: `WhatsApp sending to ${d.to ?? "—"}`,
 			tone: "success",
 		};
 	return {
@@ -104,7 +104,7 @@ export function deliveryOutcome(d: DeliveryLike): {
 	};
 }
 
-/** "@hotel" in a WhatsApp's SMS text is filled with the hotel's name by messaging-service; on screen it reads "Your hotel". */
+/** "@hotel" in a WhatsApp's text is filled with the hotel's name by messaging-service; on screen it reads "Your hotel". */
 const shown = (text: string) => text.replace(/@hotel/g, "Your hotel");
 
 function DeliveryRow({ delivery: d }: { delivery: DeliveryLike }) {

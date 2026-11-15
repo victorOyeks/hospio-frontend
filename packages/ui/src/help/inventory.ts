@@ -178,7 +178,7 @@ export const inventoryHelp: HelpModule = {
 			],
 			goodToKnow: [
 				"Over the hotel's approval limit, the order goes to the manager first (or the owner when a manager raises it). Nothing goes to the supplier until it is approved.",
-				"Orders go to the supplier by email. SMS is coming soon, so a supplier with no email isn't reached yet.",
+				"Orders go to the supplier by email, so a supplier with no email isn't reached.",
 				"Only a draft can be changed: open it and tap “Edit”.",
 				"“Cancel order” works until something arrives. After a part delivery, use “Close short”.",
 			],
@@ -260,7 +260,7 @@ export const inventoryHelp: HelpModule = {
 			],
 			goodToKnow: [
 				"Phone numbers must look like 0803 123 4567.",
-				"Orders are emailed to the supplier's email. SMS is coming soon.",
+				"Orders are emailed to the supplier's email.",
 				"Switch off “In use” to stop using a supplier, but only once their orders are closed.",
 				"The supplier's panel shows open orders and what was received in the last 30 days.",
 			],

@@ -20,7 +20,7 @@ export const managerHelp: HelpModule = {
 				"Tap “Done”.",
 			],
 			goodToKnow: [
-				"The invite is emailed to the address you typed, in the hotel's name. SMS and WhatsApp invites are coming soon.",
+				"The invite is emailed to the address you typed, in the hotel's name. Invites go by email only.",
 				"The invite link and temporary password are shown here only once.",
 				"“Share in your WhatsApp” opens your own WhatsApp with the message ready. It needs a phone number.",
 				"Shifts, job titles and departments come from Hotel setup.",
@@ -212,7 +212,7 @@ export const managerHelp: HelpModule = {
 			],
 			goodToKnow: [
 				"Only approved payments have a receipt.",
-				"Emails are sent in the hotel's name. WhatsApp and SMS are coming soon.",
+				"Emails are sent in the hotel's name. WhatsApp is coming soon.",
 				"“Email receipt again” in the payment's menu emails it to the guest again. A guest with only a phone can't be sent one yet: print it.",
 				"A sale at the restaurant or bar can be printed from its sale panel too.",
 			],
@@ -315,7 +315,7 @@ export const managerHelp: HelpModule = {
 				"To write to everyone on today's rota, tap “Message everyone on shift”, then “Send to everyone”.",
 			],
 			goodToKnow: [
-				"Only email is really sent, in the hotel's name. WhatsApp and SMS are coming soon: the message is saved for you to copy.",
+				"Only email is really sent, in the hotel's name. WhatsApp is coming soon: the message is saved for you to copy.",
 				"Templates save time: open “Templates” to add your own.",
 				"Messages to your team arrive as a notice in the app.",
 			],

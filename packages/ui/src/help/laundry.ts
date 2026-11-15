@@ -81,7 +81,7 @@ export const laundryHelp: HelpModule = {
 			goodToKnow: [
 				"If a card payment is still processing, the order says so. Tap “Check it now” later to record it.",
 				"Cash goes into your till.",
-				"The receipt is emailed when you pick “Email” (the default when the guest has an email), or printed. WhatsApp and SMS are coming soon and can't be picked.",
+				"The receipt is emailed when you pick “Email” (the default when the guest has an email), or printed. WhatsApp is coming soon and can't be picked.",
 			],
 			route: "/dashboard",
 			screen: "Jobs",

@@ -682,7 +682,7 @@ function InvitePanel({
 						onChange={setPhone}
 						type="tel"
 						placeholder="+234 …"
-						hint="Optional · SMS and WhatsApp invites are coming soon"
+						hint="Optional · the invite goes by email"
 					/>
 					<ChoiceCards
 						label="Role"

@@ -201,7 +201,7 @@ export const demoConversations: ConversationRow[] = [
 		{ id: "m-2", direction: "IN", by: "Ifeoma Nwachukwu", at: at(0, 10, 48), body: "Hi, can I check out at 2pm tomorrow? Meeting runs late." },
 		{ id: "m-3", direction: "IN", by: "Ifeoma Nwachukwu", at: at(0, 10, 50), body: "Also please send the bill so far." },
 	] },
-	{ id: "cv-2", kind: "GUEST", name: "Adebayo Ogunleye", contact: "+234 803 111 2222", channel: "SMS", subject: "Arrival today", lastAt: at(0, 9, 5), unread: 0, preview: "Your room A204 will be ready from 2pm", messages: [
+	{ id: "cv-2", kind: "GUEST", name: "Adebayo Ogunleye", contact: "+234 803 111 2222", channel: "WHATSAPP", subject: "Arrival today", lastAt: at(0, 9, 5), unread: 0, preview: "Your room A204 will be ready from 2pm", messages: [
 		{ id: "m-4", direction: "OUT", by: "System", at: at(0, 9, 5), body: "Hello Adebayo, we're expecting you today at Simpas Ikeja. Room A204 will be ready from 2pm. Reply if you'll be late." },
 	] },
 	{ id: "cv-3", kind: "GUEST", name: "Musa Ibrahim", contact: "+234 808 555 6666", channel: "WHATSAPP", subject: "Outstanding balance", assignedTo: "Toyin Balogun", lastAt: at(-1, 17, 20), unread: 1, preview: "I'll send it tomorrow morning", messages: [
@@ -218,12 +218,12 @@ export const demoConversations: ConversationRow[] = [
 ];
 
 export const demoTemplates: TemplateRow[] = [
-	{ id: "tp-1", key: "booking.confirmed", channel: "WhatsApp · SMS", subject: "Booking confirmed", body: "Hi {{guest}}, your {{room_type}} at {{hotel}} is booked for {{check_in}} → {{check_out}}. Ref {{reference}}. See you soon!", active: true },
-	{ id: "tp-2", key: "arrival.day", channel: "WhatsApp · SMS", subject: "We're expecting you today", body: "Hello {{guest}}, we're expecting you today at {{hotel}}. Your room will be ready from {{check_in_time}}. Reply if you'll be late.", active: true },
+	{ id: "tp-1", key: "booking.confirmed", channel: "WhatsApp · Email", subject: "Booking confirmed", body: "Hi {{guest}}, your {{room_type}} at {{hotel}} is booked for {{check_in}} → {{check_out}}. Ref {{reference}}. See you soon!", active: true },
+	{ id: "tp-2", key: "arrival.day", channel: "WhatsApp · Email", subject: "We're expecting you today", body: "Hello {{guest}}, we're expecting you today at {{hotel}}. Your room will be ready from {{check_in_time}}. Reply if you'll be late.", active: true },
 	{ id: "tp-3", key: "checkin.welcome", channel: "WhatsApp", subject: "Welcome", body: "Welcome to {{hotel}}, {{guest}}! You are in {{room}}. Reply here for anything you need. Wi-Fi: {{wifi}}.", active: true },
 	{ id: "tp-4", key: "receipt", channel: "WhatsApp · Email", subject: "Your receipt from {{hotel}}", body: "Thanks {{guest}}. We received {{amount}} by {{method}}. Receipt {{reference}}.", active: true },
-	{ id: "tp-5", key: "checkout.thanks", channel: "WhatsApp · SMS", subject: "Thank you", body: "Thanks for staying with us, {{guest}}. Your final bill was {{total}}. We hope to see you again at {{hotel}}.", active: true },
-	{ id: "tp-6", key: "balance.reminder", channel: "WhatsApp · SMS", subject: "Outstanding balance", body: "Hello {{guest}}, a reminder that {{balance}} is outstanding from your stay at {{hotel}}. Pay by transfer to {{account}}.", active: false },
+	{ id: "tp-5", key: "checkout.thanks", channel: "WhatsApp · Email", subject: "Thank you", body: "Thanks for staying with us, {{guest}}. Your final bill was {{total}}. We hope to see you again at {{hotel}}.", active: true },
+	{ id: "tp-6", key: "balance.reminder", channel: "WhatsApp · Email", subject: "Outstanding balance", body: "Hello {{guest}}, a reminder that {{balance}} is outstanding from your stay at {{hotel}}. Pay by transfer to {{account}}.", active: false },
 ];
 
 export const demoReports: ReportRow[] = [

@@ -1,6 +1,6 @@
 "use client";
 
-import { MailIcon, MessageCircleIcon, SmartphoneIcon } from "lucide-react";
+import { MailIcon, MessageCircleIcon } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
 import {
@@ -31,7 +31,8 @@ import { cn } from "@hospio/ui/utils";
 /**
  * Guest messages as a paid service, Hospio360's side (hospio-backend docs/guest-message-billing.md): each hotel's plan
  * (on/off, its own prices, suspension) for onboarding and the hotel page, and the default prices and all invoices for
- * Fees & billing.
+ * Fees & billing. Guest messages go by email and WhatsApp only (SMS is for sign-in codes), so SMS prices are not shown
+ * or edited here; saves send the stored SMS price back unchanged.
  */
 
 const monthName = (yyyyMm: string) => {
@@ -56,7 +57,7 @@ export function GuestMessagePlans({
 	businessId,
 	hotels,
 	title = "Guest messages",
-	subtitle = "Paid service: booking emails, SMS and WhatsApp to the hotel's guests, invoiced monthly per hotel",
+	subtitle = "Paid service: booking emails and WhatsApp to the hotel's guests, invoiced monthly per hotel",
 }: {
 	businessId: string;
 	hotels: { id: string; name: string }[];
@@ -110,7 +111,7 @@ export function GuestMessagePlans({
 							<tr>
 								<th className="px-4 py-2 text-left">Hotel</th>
 								<th className="px-4 py-2 text-left">Service</th>
-								<th className="px-4 py-2 text-left">Prices (email · SMS · WhatsApp)</th>
+								<th className="px-4 py-2 text-left">Prices (email · WhatsApp)</th>
 								<th className="px-4 py-2 text-right">This month</th>
 								<th className="px-4 py-2 text-right">Unpaid</th>
 								<th className="px-4 py-2" />
@@ -133,7 +134,7 @@ export function GuestMessagePlans({
 										</div>
 									</td>
 									<td className={cell}>
-										{naira(p.prices.email)} · {naira(p.prices.sms)} · {naira(p.prices.whatsapp)}
+										{naira(p.prices.email)} · {naira(p.prices.whatsapp)}
 										<span className="block text-xs text-ink-3">{p.customPrices ? "The hotel's own prices" : "Default prices"}</span>
 									</td>
 									<td className={cn(cell, "text-right")}>{naira(p.thisMonth.total)}</td>
@@ -185,13 +186,11 @@ function PricesModal({
 	onSaved: () => void;
 }) {
 	const [email, setEmail] = useState<number | "">("");
-	const [sms, setSms] = useState<number | "">("");
 	const [whatsapp, setWhatsapp] = useState<number | "">("");
 	const [busy, setBusy] = useState(false);
 	useEffect(() => {
 		if (!plan) return;
 		setEmail(plan.customPrices ? plan.prices.email : "");
-		setSms(plan.customPrices ? plan.prices.sms : "");
 		setWhatsapp(plan.customPrices ? plan.prices.whatsapp : "");
 	}, [plan]);
 	if (!plan) return null;
@@ -201,7 +200,7 @@ function PricesModal({
 			businessId,
 			useDefaults,
 			email: useDefaults || email === "" ? null : email,
-			sms: useDefaults || sms === "" ? null : sms,
+			sms: useDefaults || !plan.customPrices ? null : plan.prices.sms,
 			whatsapp: useDefaults || whatsapp === "" ? null : whatsapp,
 		});
 		setBusy(false);
@@ -214,7 +213,7 @@ function PricesModal({
 			open
 			onOpenChange={(o) => !o && onClose()}
 			title={`${hotelName} · prices per message`}
-			subtitle={`Empty uses the default (${naira(plan.defaults.email)} · ${naira(plan.defaults.sms)} · ${naira(plan.defaults.whatsapp)}). Applies to messages sent from now on.`}
+			subtitle={`Empty uses the default (${naira(plan.defaults.email)} · ${naira(plan.defaults.whatsapp)}). Applies to messages sent from now on.`}
 			footer={
 				<>
 					<Button variant="outline" className={btn.secondary} disabled={busy} onClick={() => void save(true)}>
@@ -226,9 +225,8 @@ function PricesModal({
 				</>
 			}
 		>
-			<div className="grid gap-4 sm:grid-cols-3">
+			<div className="grid gap-4 sm:grid-cols-2">
 				<MoneyField label="Email" value={email} onChange={setEmail} placeholder={String(plan.defaults.email)} />
-				<MoneyField label="SMS" value={sms} onChange={setSms} placeholder={String(plan.defaults.sms)} />
 				<MoneyField label="WhatsApp" value={whatsapp} onChange={setWhatsapp} placeholder={String(plan.defaults.whatsapp)} />
 			</div>
 		</Modal>
@@ -238,7 +236,7 @@ function PricesModal({
 /** Fees & billing → Guest messages: the default prices and every hotel's invoices. */
 export function GuestMessageBilling() {
 	const [prices, setPrices] = useState<CommPriceSet | null>(null);
-	const [edit, setEdit] = useState<{ email: number | ""; sms: number | ""; whatsapp: number | "" } | null>(null);
+	const [edit, setEdit] = useState<{ email: number | ""; whatsapp: number | "" } | null>(null);
 	const [status, setStatus] = useState<string>("");
 	const [page, setPage] = useState(0);
 	const [invoices, setInvoices] = useState<Paged<CommInvoiceRow> | null>(null);
@@ -258,8 +256,8 @@ export function GuestMessageBilling() {
 	}, [load]);
 
 	async function savePrices() {
-		if (!edit || edit.email === "" || edit.sms === "" || edit.whatsapp === "") return toast.error("Enter all three prices");
-		const r = await setDefaultMessagePrices({ email: edit.email, sms: edit.sms, whatsapp: edit.whatsapp });
+		if (!prices || !edit || edit.email === "" || edit.whatsapp === "") return toast.error("Enter both prices");
+		const r = await setDefaultMessagePrices({ email: edit.email, sms: prices.sms, whatsapp: edit.whatsapp });
 		if (!r.ok) return toast.error(r.error);
 		toast.success("Default prices saved");
 		setEdit(null);
@@ -293,16 +291,15 @@ export function GuestMessageBilling() {
 					<Button
 						variant="outline"
 						className={btn.secondary}
-						onClick={() => prices && setEdit({ email: prices.email, sms: prices.sms, whatsapp: prices.whatsapp })}
+						onClick={() => prices && setEdit({ email: prices.email, whatsapp: prices.whatsapp })}
 					>
 						Change prices
 					</Button>
 				}
 			>
-				<div className="grid gap-3 pt-2 sm:grid-cols-3">
+				<div className="grid gap-3 pt-2 sm:grid-cols-2">
 					{[
 						{ icon: MailIcon, label: "Email", v: prices?.email },
-						{ icon: SmartphoneIcon, label: "SMS", v: prices?.sms },
 						{ icon: MessageCircleIcon, label: "WhatsApp", v: prices?.whatsapp },
 					].map(({ icon: Icon, label, v }) => (
 						<div key={label} className="flex items-center gap-3 rounded-xl border border-line px-4 py-3">
@@ -418,9 +415,8 @@ export function GuestMessageBilling() {
 						</>
 					}
 				>
-					<div className="grid gap-4 sm:grid-cols-3">
+					<div className="grid gap-4 sm:grid-cols-2">
 						<MoneyField label="Email" value={edit.email} onChange={(v) => setEdit({ ...edit, email: v })} />
-						<MoneyField label="SMS" value={edit.sms} onChange={(v) => setEdit({ ...edit, sms: v })} />
 						<MoneyField label="WhatsApp" value={edit.whatsapp} onChange={(v) => setEdit({ ...edit, whatsapp: v })} />
 					</div>
 				</Modal>

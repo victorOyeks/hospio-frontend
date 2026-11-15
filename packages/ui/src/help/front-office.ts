@@ -115,7 +115,7 @@ export const frontOfficeHelp: HelpModule = {
 				"A card stays “Processing” until the POS answers. If it is declined, tap “Try another way” or “Try again on POS”. Nothing was charged.",
 				"A card still “Processing” later: open it in “Payments” and tap “Check with the POS”. It is approved only when the POS says so.",
 				"Transfers are matched to the bank by finance later.",
-				"The receipt email is sent for real. WhatsApp and SMS receipts are coming soon, so they are greyed out. Without an email, print the receipt from the done screen.",
+				"The receipt email is sent for real. WhatsApp receipts are coming soon, so WhatsApp is greyed out. Without an email, print the receipt from the done screen.",
 				"To give money back, open the payment in “Payments” and tap “Request refund”. A manager approves refunds.",
 			],
 			route: "/dashboard/payments",
@@ -310,7 +310,7 @@ export const frontOfficeHelp: HelpModule = {
 				"In “Messages”, reply in the guest's conversation, then tap “Mark done” when it is handled.",
 			],
 			goodToKnow: [
-				"Only email is really sent, in the hotel's name. WhatsApp and SMS are coming soon: the text is saved and shown for you to copy.",
+				"Only email is really sent, in the hotel's name. WhatsApp is coming soon: the text is saved and shown for you to copy.",
 				"If the guest answered by phone or at the desk, tap “Add what the guest said” so the conversation is complete.",
 				"The “Unanswered” tab shows guests still waiting for a reply.",
 			],

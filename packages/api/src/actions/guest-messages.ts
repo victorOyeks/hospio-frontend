@@ -20,7 +20,7 @@ import { live } from "@hospio/api/data/live";
 
 /**
  * Guest messaging (Manager · Messaging, Front office · Messages, the booking's Message guest): messaging-service at
- * the sidebar's hotel. Email is sent for real; WhatsApp and SMS are saved and shown on screen (coming soon).
+ * the sidebar's hotel. Email is sent for real; WhatsApp is saved and shown on screen (coming soon).
  */
 
 const NOT_LIVE: ActionResult<never> = {
