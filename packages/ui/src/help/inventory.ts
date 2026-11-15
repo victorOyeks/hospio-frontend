@@ -155,7 +155,7 @@ export const inventoryHelp: HelpModule = {
 				"Open “Requests” and tap the request.",
 				"Tap “Decline” (or “Close the rest” on a part-issued request).",
 				"Type the “Reason”, for example when the stock is due.",
-				"Confirm. The team is told, with your reason.",
+				"Tap “Decline request” (or “Close the rest”). The team is told, with your reason.",
 			],
 			goodToKnow: [
 				"A reason is required so the team knows why.",

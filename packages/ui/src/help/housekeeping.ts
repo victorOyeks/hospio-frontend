@@ -12,7 +12,7 @@ export const housekeepingHelp: HelpModule = {
 			when: "You are starting one of the rooms on your list for today.",
 			topic: "My rooms",
 			steps: [
-				"Open “My rooms” and find the room. Rush rooms and rooms with a guest arriving today are near the top.",
+				"Open “My rooms” and find the room. The room you are cleaning is at the top, then “Rush” rooms, then rooms sent back.",
 				"Tap “Start” on the room. The checklist opens.",
 				"Tap each line of the checklist as you finish it. Your ticks are saved as you go.",
 				"If you leave the room and come back, tap “Continue” to open the checklist again.",
@@ -182,7 +182,7 @@ export const housekeepingHelp: HelpModule = {
 			],
 			goodToKnow: [
 				"Check the person's ID before you hand anything over, and note it under “ID shown”.",
-				"Items are kept for the hotel's hold period (90 days unless the manager changed it). “Dispose” stays grey until then, and the panel shows the date it can be disposed of.",
+				"Items are kept for the hotel's hold period (90 days unless the manager changed it). The panel shows the date it can be disposed of, and until then “Dispose” can't be confirmed.",
 				"Disposing is for the housekeeping supervisor (Full access) or a manager, and it can't be undone. Others don't see the “Dispose” button.",
 			],
 			route: "/dashboard/lost-found",

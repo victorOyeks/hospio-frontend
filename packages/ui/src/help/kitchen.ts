@@ -41,7 +41,7 @@ export const kitchenHelp: HelpModule = {
 				"To mark one dish at a time, tap the card to open the ticket and tap “Ready” or “Served” beside that dish.",
 			],
 			goodToKnow: [
-				"The time on each card is minutes since the order was opened. It turns amber after 15 minutes of cooking.",
+				"The time on each card is minutes since the order was opened. On a cooking order it turns amber once that passes 15 minutes.",
 				"When an order is ready, the person who opened it gets a notification.",
 				"Served cards show “to pay”, “paid” or “on room”.",
 			],
@@ -58,8 +58,8 @@ export const kitchenHelp: HelpModule = {
 				"Tap “Take payment”.",
 				"Pick the method: “Card on the POS”, “Bank transfer” or “Cash”.",
 				"Card: tap “Send to POS” and wait for the result. Transfer: tap “Show transfer details”, then “I've confirmed the transfer” when it lands. Cash: tap “Count cash”, enter the cash received, then “Cash received”.",
-				"Choose how to send the receipt, or tap “Skip receipt”.",
-				"Tap “Record payment” (or “Send receipt & record”). You see “Sale done”.",
+				"Under “Receipt”, pick “Email” and tap “Email receipt & record”, or pick “Print” and tap “Record payment”. Or tap “Skip receipt”.",
+				"You see “Sale done”.",
 			],
 			goodToKnow: [
 				"Cash goes into your till, so open your till first.",
@@ -156,8 +156,8 @@ export const kitchenHelp: HelpModule = {
 			when: "A guest asks for a printed receipt.",
 			topic: "Money",
 			steps: [
-				"Right after a payment is approved, tap “Print receipt” on the done screen.",
-				"For an older sale, open “Sales” and tap the sale.",
+				"When you collect a sale from “Sales”, tap “Print receipt” on the done screen once the payment is approved.",
+				"For an order paid on “Orders” or an older sale, open it from “Recent sales” or “Sales”.",
 				"Tap “Print receipt”. The receipt opens in a new tab ready to print.",
 			],
 			goodToKnow: [
@@ -230,7 +230,7 @@ export const kitchenHelp: HelpModule = {
 			steps: [
 				"Open “Kitchen store”.",
 				"Tap “Ask the store” (or “Request these” on the running-low bar).",
-				"Pick items from “Pick from your stock list” and set the quantities.",
+				"Running-low items are already added. To add more, pick them under “Add an item” and set the quantities.",
 				"Add a “Note for the store” if needed, then tap “Send request”.",
 			],
 			goodToKnow: [
@@ -307,7 +307,7 @@ export const kitchenHelp: HelpModule = {
 			],
 			goodToKnow: [
 				"Don't send a second charge while one is waiting.",
-				"Card terminals are still being connected. Until then, if the POS doesn't answer, take cash or a transfer.",
+				"If the POS doesn't answer, take cash or a bank transfer instead. With no terminal linked yet, the card choice says so.",
 			],
 			route: "/dashboard/payments",
 			screen: "My payments",

@@ -13,7 +13,7 @@ export const accountHelp: HelpModule = {
 			topic: "Security",
 			steps: [
 				"Put an authenticator app on your phone (Google Authenticator, Microsoft Authenticator, 1Password or similar).",
-				"Open your profile from the menu under your name and choose the “Security” tab.",
+				"Tap your name at the top, choose “My profile & security”, then the “Security” tab.",
 				"In “2-step sign-in”, tap “Turn on”.",
 				"Scan the QR code with the app. If you can't scan it, type the key shown under it into the app.",
 				"Type the 6-digit code the app shows into “6-digit code from the app” and tap “Turn on”.",
@@ -38,7 +38,7 @@ export const accountHelp: HelpModule = {
 				"Open your profile and choose the “Security” tab.",
 				"Tap “Change password”.",
 				"Type your “Current password”, then the new one in “New password” and “New password again”.",
-				"Save it.",
+				"Tap “Change password”.",
 			],
 			goodToKnow: [
 				"Use at least 8 characters.",
@@ -55,7 +55,7 @@ export const accountHelp: HelpModule = {
 			topic: "Profile",
 			steps: [
 				"Open your profile on the “My profile” tab.",
-				"Tap “Choose a photo” and pick a picture.",
+				"Under “Photo”, tap “Upload” (or “Replace”) and pick a picture.",
 				"Wait for “Photo saved”.",
 			],
 			goodToKnow: ["Use a JPEG or PNG under 2 MB."],
@@ -65,17 +65,17 @@ export const accountHelp: HelpModule = {
 		{
 			id: "all-notifications",
 			title: "Read your notifications",
-			when: "The bell shows a number, or you're waiting for a decision.",
+			when: "The bell shows a red dot, or you're waiting for a decision.",
 			topic: "Notifications",
 			steps: [
 				"Tap the bell at the top, or open “Notifications”.",
 				"Use “Unread” to see only what's new.",
 				"Use “Search notifications…” to find an old one.",
-				"Tap a notification to open what it's about.",
+				"Tap “Open →” on a notification to go to what it's about.",
 			],
 			goodToKnow: [
 				"Approvals, leave decisions and requests from other teams all land here.",
-				"Choose what you're told about on your profile, in “Notification settings”.",
+				"In-app alerts are always on. On your profile, in “Notification settings”, choose what is also sent to you by email.",
 				"Notifications are kept for 30 days, then they go.",
 			],
 			route: "/dashboard/notifications",
@@ -147,14 +147,14 @@ export const staffHelp: HelpModule = {
 			when: "You can't work a shift on the rota.",
 			topic: "Shifts",
 			steps: [
-				"Open “My shifts” and tap the shift under “Shifts on the rota”.",
-				"Tap “Ask to swap” and choose who to swap with, or tap “Ask for cover”.",
-				"Add a note if it helps, and send it.",
+				"Open “My shifts” and tap the shift in the “My shifts” list.",
+				"To swap, tap “Ask to swap”, pick who in “Swap with”, add a reason in “Why (they'll see this)” if it helps, and tap “Send request”.",
+				"To ask for cover instead, tap “Ask for cover”. It is sent straight away.",
 			],
 			goodToKnow: [
 				"Swaps need your manager's approval. Once approved the shift moves to them on the rota.",
 				"You get an alert in Notifications when it's decided.",
-				"See what you've asked for under “Requests sent”.",
+				"“Requests sent” counts the swaps and cover waiting on your manager.",
 			],
 			route: "/dashboard/shifts",
 			screen: "My shifts",
@@ -166,8 +166,8 @@ export const staffHelp: HelpModule = {
 			topic: "Shifts",
 			steps: [
 				"Open “My shifts” and tap “Ask for leave”.",
-				"Choose the type and the dates.",
-				"Add a note and send it.",
+				"Pick the “From” and “To” dates and the “Type”.",
+				"Add a “Note” if it helps, and tap “Send request”.",
 			],
 			goodToKnow: [
 				"Your manager approves, declines or suggests other dates.",
@@ -186,7 +186,7 @@ export const staffHelp: HelpModule = {
 				"Open your profile and choose the “Security” tab.",
 				"In “PIN for shared devices”, tap “Set PIN” (or “Change PIN”).",
 				"Type your “New PIN” and “New PIN again”, then “Your password”.",
-				"Save it.",
+				"Tap “Set PIN” (or “Change PIN”) to save it.",
 			],
 			goodToKnow: [
 				"Use 6 digits.",
