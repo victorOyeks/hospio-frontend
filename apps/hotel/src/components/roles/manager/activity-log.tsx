@@ -283,14 +283,20 @@ export function ActivityLogScreen({
 				footer={
 					entry && (
 						<Link href={linkFor(entry)} className={btn.primary}>
-							Open in {humanize(linkFor(entry).split("/").pop() || "dashboard")}
+							Open in{" "}
+							{humanize(
+								(linkFor(entry).split("/").pop() || "dashboard").replace(
+									/-/g,
+									"_",
+								),
+							)}
 						</Link>
 					)
 				}
 				footerInfo={
 					entry?.byPlatform
 						? "Made by Hospio support on your behalf"
-						: "Entries are kept for 2 years and cannot be edited"
+						: "Entries are kept for 6 months and cannot be edited"
 				}
 			>
 				{entry && (
@@ -304,7 +310,9 @@ export function ActivityLogScreen({
 									{ label: "When", value: fmtWhen(entry.at) },
 									{
 										label: "Source",
-										value: entry.byPlatform ? "Hospio360 support" : "This hotel",
+										value: entry.byPlatform
+											? "Hospio360 support"
+											: "This hotel",
 									},
 								]}
 							/>
