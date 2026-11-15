@@ -64,7 +64,7 @@ export const kitchenHelp: HelpModule = {
 			goodToKnow: [
 				"Cash goes into your till, so open your till first.",
 				"A card that the POS has not confirmed stays “Processing” and the order stays unpaid until it is confirmed.",
-				"Only email receipts are really sent. WhatsApp and SMS are coming soon.",
+				"Only email receipts are really sent. WhatsApp is coming soon.",
 				"Once paid and served, tap “Close ticket” to clear it from the board.",
 			],
 			route: "/dashboard",

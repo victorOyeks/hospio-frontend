@@ -1,7 +1,6 @@
 "use client";
 
 import {
-	BanknoteIcon,
 	CheckCircle2Icon,
 	PrinterIcon,
 	CreditCardIcon,
@@ -148,7 +147,7 @@ export function usePaymentSteps(
 	const [card, setCard] = useState<CardState>("waiting");
 	const [attempt, setAttempt] = useState(0);
 	const [tendered, setTendered] = useState<number | "">("");
-	// Email is the receipt that is sent for real; without the guest's email the desk prints it (WhatsApp and SMS are coming soon).
+	// Email is the receipt that is sent for real; without the guest's email the desk prints it (WhatsApp is coming soon).
 	const [receipt, setReceipt] = useState<"EMAIL" | "NONE">(
 		target?.guestEmail ? "EMAIL" : "NONE",
 	);
@@ -831,7 +830,7 @@ export function usePaymentSteps(
 						]}
 					/>
 					<Field label="Receipt">
-						<div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+						<div className="grid grid-cols-3 gap-2">
 							{(
 								[
 									["EMAIL", "Email", MailIcon, false],
@@ -842,7 +841,6 @@ export function usePaymentSteps(
 										MessageCircleIcon,
 										true,
 									],
-									["SMS", "SMS · coming soon", BanknoteIcon, true],
 								] as const
 							).map(([key, label, Icon, soon]) => (
 								<button

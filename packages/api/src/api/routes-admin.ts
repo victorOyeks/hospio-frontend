@@ -36,7 +36,7 @@ const JsonMap = z.record(z.string(), z.unknown());
 
 // ---- deliveries (cross-cutting) ------------------------------------------------------------------
 
-/** A message the platform would have sent; echoed in responses while email and SMS are not connected. */
+/** A message the platform would have sent; echoed in responses while email or WhatsApp are not connected. */
 export const Delivery = z.object({
 	channel: z.string(),
 	to: z.string().nullable(),

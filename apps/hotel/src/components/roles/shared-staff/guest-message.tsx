@@ -33,7 +33,7 @@ export type GuestToMessage = {
 	reference?: string;
 };
 
-/** The channel choices: email is sent; WhatsApp and SMS are saved and shown on screen (coming soon). */
+/** The channel choices: email is sent; WhatsApp is saved and shown on screen (coming soon). */
 export function channelOptions(email?: string | null, phone?: string | null) {
 	return [
 		{
@@ -45,12 +45,6 @@ export function channelOptions(email?: string | null, phone?: string | null) {
 		{
 			value: "WHATSAPP" as GuestChannel,
 			label: "WhatsApp · coming soon",
-			hint: phone ? "Shown on screen to copy" : "No phone on file",
-			disabled: !phone,
-		},
-		{
-			value: "SMS" as GuestChannel,
-			label: "SMS · coming soon",
 			hint: phone ? "Shown on screen to copy" : "No phone on file",
 			disabled: !phone,
 		},
@@ -168,13 +162,13 @@ export function GuestMessageModal({
 					label="Send by"
 					value={channel}
 					onChange={setChannel}
-					columns={3}
+					columns={2}
 					options={channelOptions(guest.guestEmail, guest.guestPhone)}
 				/>
 				{!connected && (
 					<Note tone="warning">
-						WhatsApp and SMS are coming soon. The message is saved in the
-						conversation and shown on screen so you can copy it to the guest.
+						WhatsApp is coming soon. The message is saved in the conversation
+						and shown on screen so you can copy it to the guest.
 					</Note>
 				)}
 				<SelectField

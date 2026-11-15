@@ -163,7 +163,7 @@ export function ConnectionsStep({ ctx }: { ctx: WizardCtx }) {
 			onBack={() => ctx.goTo(prevStep("connections"))}
 			onContinue={ctx.editable ? save : undefined}
 			pending={pending}
-			footerNote="WhatsApp numbers are saved for every hotel when you continue. SMS sender names and email are set up later in Hotel setup → Guest messaging."
+			footerNote="WhatsApp numbers are saved for every hotel when you continue. Email is set up later in Hotel setup → Guest messaging."
 		>
 			{hotels.length > 1 && (
 				<PillTabs

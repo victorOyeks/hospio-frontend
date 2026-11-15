@@ -5,6 +5,11 @@ export const whatsNewWeek = "Week of 10 November 2026";
 
 export const whatsNew: WhatsNewItem[] = [
 	{
+		title: "SMS is only for sign-in codes",
+		body: "Messages to guests and staff now go by WhatsApp and email; SMS is only for sign-in codes.",
+		audience: ["EVERYONE"],
+	},
+	{
 		title: "A room stays the guest's until check-out",
 		body: "A guest keeps the room until you check them out, even after their check-out date. Rooms show “Due out” or “Past departure”, and “Today” lists guests past departure under “Leaving today”. Checking someone else into a room with a guest still in it is refused: check that guest out first, or choose another room.",
 		audience: ["FRONT_OFFICE", "MANAGER", "OWNER"],
@@ -16,7 +21,7 @@ export const whatsNew: WhatsNewItem[] = [
 	},
 	{
 		title: "Receipts go by email or print",
-		body: "Taking a payment offers “Email” (picked when the guest has one) or “Print”; WhatsApp and SMS are coming soon. Invites say the address they were emailed to. Front desk to-dos now come from today's bookings, and a stuck card has “Check with the POS”.",
+		body: "Taking a payment offers “Email” (picked when the guest has one) or “Print”; WhatsApp is coming soon. Invites say the address they were emailed to. Front desk to-dos now come from today's bookings, and a stuck card has “Check with the POS”.",
 		audience: ["FRONT_OFFICE", "MANAGER", "OWNER", "BAR", "KITCHEN", "LAUNDRY"],
 	},
 	{
@@ -52,7 +57,7 @@ export const whatsNew: WhatsNewItem[] = [
 	},
 	{
 		title: "Emails to guests are sent for real",
-		body: "Guest messages, receipts and folios go out by email in your hotel's name. SMS and WhatsApp are coming soon.",
+		body: "Guest messages, receipts and folios go out by email in your hotel's name. WhatsApp is coming soon.",
 		audience: ["OWNER", "MANAGER", "FRONT_OFFICE"],
 	},
 	{

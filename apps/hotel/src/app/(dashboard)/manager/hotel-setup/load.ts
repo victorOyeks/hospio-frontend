@@ -38,7 +38,7 @@ export async function loadSetup() {
 		key: "guest-messages",
 		title: "Guest messages",
 		description:
-			"Emails, SMS and WhatsApp to your guests: switch on, prices, usage and invoices",
+			"Emails and WhatsApp to your guests: switch on, prices, usage and invoices",
 		icon: "message",
 		fields: [],
 	};

@@ -9,7 +9,7 @@ import type {
 import { type Assignable, GuestInbox } from "../shared-staff/guest-inbox";
 
 /**
- * Manager · Messaging: the hotel's guest conversations (email sent for real; WhatsApp and SMS coming soon), reassign,
+ * Manager · Messaging: the hotel's guest conversations (email sent for real; WhatsApp coming soon), reassign,
  * mark done, templates and a message to everyone on today's rota. Staff conversations are in Inbox.
  */
 export function MessagingScreen({

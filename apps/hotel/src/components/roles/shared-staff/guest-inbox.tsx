@@ -82,7 +82,7 @@ export type Assignable = { userId: string; name: string; hint?: string };
 
 /**
  * Guest messages at the sidebar's hotel (messaging-service): conversations per booking with what went out and what the
- * guest said, the channel of each, who has it and whether it is done. Email is sent for real; WhatsApp and SMS are saved
+ * guest said, the channel of each, who has it and whether it is done. Email is sent for real; WhatsApp is saved
  * and shown on screen to copy (coming soon). Managers also reassign, edit templates and message everyone on shift.
  * Manager · Messaging and Front office · Messages both use it; the list is paged on the server (`?tab=&q=&page=`).
  */
@@ -151,7 +151,7 @@ export function GuestInbox({
 		<>
 			<PageHeader
 				title="Messages"
-				subtitle={`${hotelName} · guests by email (WhatsApp and SMS coming soon)`}
+				subtitle={`${hotelName} · guests by email (WhatsApp coming soon)`}
 			>
 				{canManage && (
 					<Button
@@ -208,7 +208,6 @@ export function GuestInbox({
 							<option value="">Every channel</option>
 							<option value="EMAIL">Email</option>
 							<option value="WHATSAPP">WhatsApp</option>
-							<option value="SMS">SMS</option>
 						</select>
 						<SearchBox
 							value={list.search}
@@ -418,7 +417,11 @@ function ConversationPane({
 		setDraft("");
 		setSubject(c.subject ?? "");
 		setChannel(
-			(c.channel as GuestChannel) ?? (c.guestEmail ? "EMAIL" : "WHATSAPP"),
+			c.channel === "EMAIL" || c.channel === "WHATSAPP"
+				? c.channel
+				: c.guestEmail
+					? "EMAIL"
+					: "WHATSAPP",
 		);
 	}, [cid]);
 
@@ -1064,7 +1067,7 @@ function NewMessagePanel({
 			footerInfo={
 				connected
 					? "The email goes out from the hotel's name; replies come to the front desk email"
-					: "WhatsApp and SMS are coming soon: the text is shown on screen to copy"
+					: "WhatsApp is coming soon: the text is shown on screen to copy"
 			}
 			footer={
 				<>
@@ -1115,13 +1118,13 @@ function NewMessagePanel({
 					value={phone}
 					onChange={setPhone}
 					placeholder="0803 000 0000"
-					hint="For WhatsApp or SMS (coming soon)"
+					hint="For WhatsApp (coming soon)"
 				/>
 				<ChoiceCards
 					label="Send by"
 					value={channel}
 					onChange={setChannel}
-					columns={3}
+					columns={2}
 					options={channelOptions(email.trim() || null, phone.trim() || null)}
 				/>
 				{connected && (

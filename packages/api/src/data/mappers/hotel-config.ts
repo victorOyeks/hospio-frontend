@@ -18,6 +18,8 @@ type FieldDef = {
 	api?: string /** For `list` fields: the hotel-config list this field edits. */;
 	list?: SetupListName;
 	format?: "shift" | "department";
+	/** Saved values no longer offered (receipts by SMS): shown as `default`. */
+	retired?: string[];
 };
 type SectionDef = {
 	key: string;
@@ -198,8 +200,9 @@ export const SETUP_CATALOGUE: SectionDef[] = [
 				key: "receipts",
 				label: "Default receipt channel",
 				type: "select",
-				options: ["WHATSAPP", "EMAIL", "SMS", "PRINT", "NONE"],
+				options: ["WHATSAPP", "EMAIL", "PRINT", "NONE"],
 				default: "WHATSAPP",
+				retired: ["SMS"],
 			},
 			{
 				key: "depositPct",
@@ -420,8 +423,9 @@ export const SETUP_CATALOGUE: SectionDef[] = [
 				key: "receiptChannel",
 				label: "Default receipt channel",
 				type: "select",
-				options: ["PRINT", "WHATSAPP", "EMAIL", "SMS", "NONE"],
+				options: ["PRINT", "WHATSAPP", "EMAIL", "NONE"],
 				default: "PRINT",
+				retired: ["SMS"],
 			},
 		],
 	},
@@ -633,7 +637,10 @@ export function toSetupSections(
 					options: f.options,
 				};
 			const raw = values[f.api ?? f.key];
-			const value = raw === undefined || raw === null ? f.default : raw;
+			const value =
+				raw === undefined || raw === null || f.retired?.includes(String(raw))
+					? f.default
+					: raw;
 			const options =
 				f.type === "select" && f.options
 					? Array.from(new Set([...f.options, String(value)]))

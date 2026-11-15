@@ -135,7 +135,8 @@ const OnShift = z.object({
 	clockedIn: z.boolean().nullable().optional(),
 });
 
-const channelInput = z.enum(["EMAIL", "WHATSAPP", "SMS"]);
+/** Channels staff send guest messages on; SMS is only for phone verification codes. */
+const channelInput = z.enum(["EMAIL", "WHATSAPP"]);
 
 export const SettlementItem = z.object({
 	id: z.string(),

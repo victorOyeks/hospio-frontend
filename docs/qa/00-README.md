@@ -33,6 +33,7 @@ refreshing or going back in the middle of a flow.
 | 22 | `22-rota.md` | Rota tab: everyone listed by department, + in an empty day adds a shift, Copy last week (skips people already on, leave, past days, suspended staff; copying twice adds nothing), week navigation | Ready |
 | 23 | `23-shift-and-department-setup.md` | Hotel setup → Staff & shifts: the hotel's own shifts (offered on the rota and Add to the rota) and departments (the rota's headings) added with forms (name + times; name + role buttons), never free text; empty lists keep the built-in ones | Ready |
 | 24 | `24-whatsapp-booking-messages.md` | WhatsApp from Hospio360 for booking confirmed, dates changed, cancelled and receipts: banner, details line by line, hotel phone, View booking button; the guest's booking page (no sign-in, call and directions, refuses altered links) | Ready |
+| 25 | `25-sms-codes-only.md` | SMS only for the phone verification code (Termii once on); nothing else offers or falls back to SMS: receipts, guest messages, invites, temp passwords, purchase orders and staff notices go by WhatsApp or email | Ready |
 
 ## Before you start
 
@@ -42,6 +43,6 @@ refreshing or going back in the middle of a flow.
 
 - **Emails are real.** Invites, receipts and guest messages go to the address typed. Use your own inbox, or `@hospio-qa.test` for throwaway accounts.
 - **Accept invites in a private window**, not the owner's browser; accepting signs the invited person in on that browser.
-- **SMS and WhatsApp are live, but staging texts only allow-listed numbers**; other numbers show "Held back: not on this environment's allow-list" (expected). Phone codes on staging are `123456`.
+- **SMS is only for sign-in codes; WhatsApp is live. Staging texts only allow-listed numbers**; other numbers show "Held back: not on this environment's allow-list" (expected). Phone codes on staging are `123456`.
 - **Card payments can't complete on staging** (the test terminal never confirms). Test cash, transfer and charge to room.
 - **Don't change the shared accounts** (tunde, godwin, victor, grace, segun, mariam, femi, jide): no role, password or 2-step changes. Invite your own staff for anything that changes an account.

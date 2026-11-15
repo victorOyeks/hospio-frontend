@@ -154,7 +154,7 @@ export const UserCreated = z.object({
 	temporaryPasswordExpiresAt: z.string().nullable(),
 	inviteToken: z.string().nullable().optional(),
 	inviteExpiresAt: z.string().nullable().optional(),
-	/** The invite email and SMS the platform would have sent (echoed while no provider is connected). */
+	/** The invite email the platform would have sent (echoed while no provider is connected). */
 	deliveries: Deliveries,
 });
 

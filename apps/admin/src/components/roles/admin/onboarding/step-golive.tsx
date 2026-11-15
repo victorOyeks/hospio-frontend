@@ -224,7 +224,7 @@ export function GoLiveStep({ ctx }: { ctx: WizardCtx }) {
 				businessId={ctx.business.id}
 				hotels={ctx.hotels.map((h) => ({ id: h.id, name: h.name }))}
 				title="Guest messages · opt in?"
-				subtitle="Ask the owner: booking emails, SMS and WhatsApp to guests are a paid service, billed monthly per hotel. Switch on the hotels that want it."
+				subtitle="Ask the owner: booking emails and WhatsApp to guests are a paid service, billed monthly per hotel. Switch on the hotels that want it."
 			/>
 		</StepFrame>
 	);

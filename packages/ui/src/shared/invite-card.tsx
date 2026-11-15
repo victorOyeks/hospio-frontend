@@ -15,7 +15,7 @@ import { btn } from "./ui";
 
 /**
  * A new login's temporary password and invite link, shown once (owner Users, manager Staff, the
- * onboarding wizards). Identity emails the invite for real (docs/email.md); SMS and WhatsApp invites are coming soon, so
+ * onboarding wizards). Identity emails the invite (docs/email.md); invites go by email only, so
  * "Share in your WhatsApp" opens the person's own WhatsApp with the invite email's wording, the link and the temporary password.
  */
 
@@ -197,9 +197,8 @@ export function InviteCard({
 				</p>
 			</div>
 			<p className="text-xs text-ink-2">
-				The invite was emailed to {email}. SMS and WhatsApp invites are coming
-				soon. The link and temporary password are also shown here, only this
-				once, if you want to pass them on yourself.
+				The invite was emailed to {email}. The link and temporary password are
+				also shown here, only this once, if you want to pass them on yourself.
 			</p>
 			{inviteToken && (
 				<CopyValue

@@ -427,7 +427,7 @@ function SupplierPanel({
 						label="Email"
 						value={form.email}
 						onChange={set("email")}
-						hint="Orders are emailed here (SMS is coming soon)"
+						hint="Purchase orders are emailed here"
 					/>
 					<SelectField
 						label="Payment terms"

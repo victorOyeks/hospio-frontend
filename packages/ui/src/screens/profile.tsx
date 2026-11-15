@@ -522,7 +522,7 @@ export function ProfileScreen({
 							</>
 						)}
 						<p className="text-xs text-ink-3">
-							SMS and WhatsApp codes are coming soon. A PIN on a shared device
+							Codes come from your authenticator app. A PIN on a shared device
 							doesn&apos;t ask for a code: that device was set up with a full
 							sign-in.
 						</p>
@@ -612,7 +612,6 @@ export function ProfileScreen({
 									<th className="px-5 py-3">Event</th>
 									<th className="py-3 text-center">In app</th>
 									<th className="py-3 text-center">Email</th>
-									<th className="py-3 text-center">SMS</th>
 									<th className="py-3 text-center">WhatsApp</th>
 								</tr>
 							</thead>
@@ -642,11 +641,6 @@ export function ProfileScreen({
 												}
 												className="data-[state=checked]:bg-brand"
 											/>
-										</td>
-										<td className="py-3 text-center">
-											<StatusPill dot={false} tone="grey">
-												Coming soon
-											</StatusPill>
 										</td>
 										<td className="py-3 text-center">
 											<StatusPill dot={false} tone="grey">

@@ -607,7 +607,7 @@ export function StaffFormPanel({
 							value={form.phone}
 							onChange={(v) => set("phone", v)}
 							placeholder="+234 …"
-							hint="Optional · SMS and WhatsApp invites are coming soon"
+							hint="Optional · the invite goes by email"
 						/>
 						<TextField
 							label="Email"

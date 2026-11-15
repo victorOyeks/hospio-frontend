@@ -118,7 +118,7 @@ function statusOf(s: OwnerStaffRow): {
 
 /**
  * Hotel Owner · Staff: everyone with a role at each hotel, one row per person and hotel, live from identity. Add with an
- * invite, edit details, pause for some days, suspend and reinstate, a new temporary password (email and SMS), remove
+ * invite, edit details, pause for some days, suspend and reinstate, a new temporary password (by email), remove
  * from the hotel and message them. Roles and levels are changed on Roles & permissions.
  */
 export function OwnerStaffScreen({
@@ -827,7 +827,7 @@ function AddStaffPanel({
 							value={form.phone}
 							onChange={(v) => set("phone", v)}
 							placeholder="+234 …"
-							hint="Optional · SMS and WhatsApp invites are coming soon"
+							hint="Optional · the invite goes by email"
 						/>
 					</FieldRow>
 					<SelectField
@@ -871,8 +871,7 @@ function AddStaffPanel({
 						]}
 					/>
 					<Note tone="info">
-						The invite is emailed to them for real. SMS and WhatsApp invites
-						are coming soon.
+						The invite is emailed to them.
 					</Note>
 				</div>
 			)}

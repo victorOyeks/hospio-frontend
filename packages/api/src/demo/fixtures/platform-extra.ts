@@ -131,7 +131,7 @@ export const demoIntegrations: IntegrationRow[] = [
 	{ key: "opay", name: "OPay", kind: "POS & settlements", status: "CONNECTED", maskedKey: "op_sk_••••••••91QZ", lastCheck: at(0, 7, 0), detail: "Settlement webhook healthy" },
 	{ key: "whatsapp", name: "WhatsApp Business", kind: "Guest messaging", status: "ERROR", maskedKey: "EAAG••••••••pXt1", lastCheck: at(0, 9, 10), detail: "1 hotel number disconnected (Pearl Inn Enugu)" },
 	{ key: "email", name: "Postmark", kind: "Email", status: "CONNECTED", maskedKey: "pm_••••••••c81d", lastCheck: at(0, 6, 0), detail: "99.2% delivered this week" },
-	{ key: "sms", name: "Termii", kind: "SMS", status: "DISCONNECTED", maskedKey: "—", detail: "Not configured · SMS fallback off" },
+	{ key: "sms", name: "Termii", kind: "SMS", status: "DISCONNECTED", maskedKey: "—", detail: "Not configured · phone verification codes" },
 ];
 
 export const demoPlatformSettings = {

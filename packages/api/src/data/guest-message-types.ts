@@ -3,7 +3,8 @@
  * docs/email.md). A plain module: safe to import from server components and "use client" files alike.
  */
 
-export type GuestChannel = "EMAIL" | "WHATSAPP" | "SMS";
+/** The channels staff can send on. Past messages may still carry "SMS" (shown with CHANNEL_LABEL). */
+export type GuestChannel = "EMAIL" | "WHATSAPP";
 
 export type GuestConversationRow = {
 	id: string;
@@ -79,7 +80,7 @@ export const CHANNEL_LABEL: Record<string, string> = {
 	IN_APP: "In app",
 };
 
-/** WhatsApp and SMS are not connected yet: messages on them are saved and shown, not sent. */
+/** WhatsApp is not connected yet: messages on it are saved and shown, not sent. */
 export const CONNECTED_CHANNELS: readonly string[] = ["EMAIL"];
 
 /** What a message's status means, in words. */

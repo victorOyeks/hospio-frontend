@@ -1,8 +1,8 @@
 /**
- * The receipt and folio channels a screen offers: email is sent for real (docs/email.md in hospio-backend); WhatsApp and SMS
- * are coming soon, so they are shown greyed out and never chosen. Plain module so any screen can import it.
+ * The receipt and folio channels a screen offers: email is sent for real (docs/email.md in hospio-backend); WhatsApp
+ * is coming soon, so it is shown greyed out and never chosen. Receipts never go by SMS. Plain module so any screen can import it.
  */
-export type ReceiptChoice = "EMAIL" | "NONE" | "WHATSAPP" | "SMS";
+export type ReceiptChoice = "EMAIL" | "NONE" | "WHATSAPP";
 
 export function receiptOptions(email?: string | null, none = "Print") {
 	return [

@@ -5,7 +5,6 @@ import {
 	MailIcon,
 	MessageCircleIcon,
 	ReceiptIcon,
-	SmartphoneIcon,
 } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
@@ -38,7 +37,7 @@ import { btn, cell, tableHead, tableRow } from "@hospio/ui/shared/ui";
 import { cn } from "@hospio/ui/utils";
 
 /**
- * Hotel setup → Guest messages (hospio-backend docs/guest-message-billing.md): booking emails, SMS and WhatsApp to guests
+ * Hotel setup → Guest messages (hospio-backend docs/guest-message-billing.md): booking emails and WhatsApp to guests
  * as a paid service. The owner or manager switches it on, sees the prices and this month's usage, and pays the monthly
  * invoices through Paystack. An invoice unpaid ten days after issue pauses guest messages until it is paid.
  */
@@ -119,7 +118,7 @@ export function GuestMessagesSection({ isOwner }: { isOwner: boolean }) {
 
 			<SectionCard
 				title="Guest messages"
-				subtitle="Booking confirmations, receipts and other messages to your guests, companies and suppliers, by email, SMS and WhatsApp"
+				subtitle="Booking confirmations, receipts and other messages to your guests, companies and suppliers, by email and WhatsApp"
 			>
 				<div className="flex flex-col gap-4 pt-2">
 					<div className="flex items-start gap-4 rounded-xl border border-line p-4">
@@ -151,9 +150,8 @@ export function GuestMessagesSection({ isOwner }: { isOwner: boolean }) {
 						/>
 					</div>
 
-					<div className="grid gap-3 sm:grid-cols-3">
+					<div className="grid gap-3 sm:grid-cols-2">
 						<Price icon={MailIcon} label="Email" value={plan.prices.email} />
-						<Price icon={SmartphoneIcon} label="SMS" value={plan.prices.sms} />
 						<Price
 							icon={MessageCircleIcon}
 							label="WhatsApp"
@@ -164,24 +162,17 @@ export function GuestMessagesSection({ isOwner }: { isOwner: boolean }) {
 						{plan.customPrices
 							? "Your hotel's own prices, agreed with Hospio360."
 							: "Hospio360's standard prices."}{" "}
-						A WhatsApp that can't be delivered as WhatsApp goes as an SMS and is
-						charged as an SMS. A message the network rejects costs nothing.
+						A message the network rejects costs nothing.
 					</p>
 				</div>
 			</SectionCard>
 
-			<div className="grid gap-4 sm:grid-cols-4">
+			<div className="grid gap-4 sm:grid-cols-3">
 				<KpiCard
 					label="Emails this month"
 					value={u.emailCount}
 					icon={MailIcon}
 					hint={naira(u.emailAmount)}
-				/>
-				<KpiCard
-					label="SMS this month"
-					value={u.smsCount}
-					icon={SmartphoneIcon}
-					hint={naira(u.smsAmount)}
 				/>
 				<KpiCard
 					label="WhatsApp this month"
@@ -274,7 +265,7 @@ export function GuestMessagesSection({ isOwner }: { isOwner: boolean }) {
 				open={confirmOff}
 				onOpenChange={setConfirmOff}
 				title="Turn guest messages off?"
-				subtitle="Guests stop getting booking confirmations, receipts and other messages from your hotel by email, SMS and WhatsApp. Codes and sign-in still work. You can turn it back on any time."
+				subtitle="Guests stop getting booking confirmations, receipts and other messages from your hotel by email and WhatsApp. Codes and sign-in still work. You can turn it back on any time."
 				confirmLabel="Turn off"
 				tone="danger"
 				onConfirm={() => void toggle(false)}
@@ -438,7 +429,10 @@ function InvoicePanel({
 									label: `${i.emailCount} email${i.emailCount === 1 ? "" : "s"}`,
 									value: naira(i.emailAmount),
 								},
-								{ label: `${i.smsCount} SMS`, value: naira(i.smsAmount) },
+								// SMS shows only on older invoices that charged for it.
+								...(i.smsCount
+									? [{ label: `${i.smsCount} SMS`, value: naira(i.smsAmount) }]
+									: []),
 								{
 									label: `${i.whatsappCount} WhatsApp`,
 									value: naira(i.whatsappAmount),

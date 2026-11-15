@@ -213,7 +213,7 @@ export function ManagerStep({
 								onChange={(v) => set("phone", v)}
 								placeholder="+234 807 220 1145"
 								error={errors.phone}
-								hint="Optional · SMS and WhatsApp invites are coming soon"
+								hint="Optional · the invite goes by email"
 							/>
 						</FieldRow>
 						<TextField

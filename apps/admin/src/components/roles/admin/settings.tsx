@@ -278,7 +278,7 @@ export function SettingsScreen({
 				>
 					<ToggleField
 						label="Require 2-step sign-in for every admin"
-						hint="Authenticator app or SMS code"
+						hint="Authenticator app"
 						checked={bool(sec.require2Step)}
 						onChange={(v) => editable && set("security", "require2Step", v)}
 					/>
@@ -321,8 +321,9 @@ export function SettingsScreen({
 					<div className="flex items-center justify-between">
 						<p className="text-sm text-ink-2">
 							Checked on the server when this page loads. Email goes out for
-							real through Brevo; SMS and WhatsApp are coming soon, so those
-							messages are recorded and shown on screen, not sent.
+							real through Brevo. SMS (Termii) carries phone verification codes
+							only. WhatsApp is coming soon, so those messages are recorded and
+							shown on screen, not sent.
 						</p>
 						<button
 							type="button"

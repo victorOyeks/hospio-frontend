@@ -22,7 +22,7 @@ export const barHelp: HelpModule = {
 				"In a happy hour the discount is taken off each drink added in that window.",
 				"Cash goes into your till, so open your till first.",
 				"If you close the payment without paying, the sale stays “To pay”. Collect it from “Sales”.",
-				"Only email receipts are really sent. WhatsApp and SMS are coming soon.",
+				"Only email receipts are really sent. WhatsApp is coming soon.",
 			],
 			route: "/dashboard",
 			screen: "Bar today",
