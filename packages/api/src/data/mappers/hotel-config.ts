@@ -91,8 +91,9 @@ export const SETUP_CATALOGUE: SectionDef[] = [
 			{
 				key: "logoText",
 				api: "shortName",
-				label: "Short name on the sidebar",
+				label: "Short name",
 				type: "text",
+				help: "On the sign-in screen and the guest's booking page; your hotel's name when empty",
 				default: "",
 			},
 			{
