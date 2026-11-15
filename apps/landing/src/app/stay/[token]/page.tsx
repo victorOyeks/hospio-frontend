@@ -8,8 +8,8 @@ import {
 	UsersIcon,
 } from "lucide-react";
 import type { Metadata } from "next";
-import type { CSSProperties, ReactNode } from "react";
-import { brandVars, normalizeHex } from "@hospio/api/brand";
+import type { ReactNode } from "react";
+import { brandStyle, normalizeHex } from "@hospio/api/brand";
 import { btn } from "@hospio/ui/shared/ui";
 import { cn } from "@hospio/ui/utils";
 import { CONTACT_EMAIL, Wordmark } from "@/components/site";
@@ -125,13 +125,19 @@ export default async function StayPage({
 	const brand = loaded.ok ? loaded.stay.brand : null;
 	const colour = normalizeHex(brand?.colour);
 	// The hotel's colour on this page only (the same tokens the hotel app uses, packages/api/src/brand.ts).
-	const style = colour
-		? (brandVars({ primary: colour, darkNav: true }) as CSSProperties)
-		: undefined;
+	// The hotel's colour on this page (the same style sheet as the hotel app, with its readable shades for pale colours).
+	const css = colour ? brandStyle({ primary: colour, darkNav: true }) : null;
 	const hotelName =
 		brand?.shortName || (loaded.ok ? loaded.stay.hotel?.name : null) || null;
 	return (
-		<div className="flex min-h-screen flex-col bg-page" style={style}>
+		<div className="flex min-h-screen flex-col bg-page">
+			{css && (
+				<style
+					// Built from a validated #rrggbb only (packages/api/src/brand.ts).
+					// biome-ignore lint/security/noDangerouslySetInnerHtml: generated CSS, no user text
+					dangerouslySetInnerHTML={{ __html: css }}
+				/>
+			)}
 			<header className="border-b border-line bg-card">
 				<div className="mx-auto flex w-full max-w-[560px] items-center justify-between gap-3 px-4 py-4">
 					{loaded.ok && (colour || brand?.logoUrl) && hotelName ? (
