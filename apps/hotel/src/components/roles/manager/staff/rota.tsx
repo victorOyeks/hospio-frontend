@@ -34,7 +34,12 @@ import {
 import { useAction } from "@hospio/api/actions/use-action";
 import type { ShiftRow, StaffRow } from "@hospio/api/data/types";
 import { cn } from "@hospio/ui/utils";
-import { SHIFT_OPTIONS, SHIFT_TIMES } from "./panels";
+import {
+	departmentFor,
+	type RotaSetup,
+	type ShiftPreset,
+	shiftsSentence,
+} from "@hospio/api/data/rota-setup";
 
 /** The shift as the actions want it: who, when, and the times to keep. */
 const asInput = (s: ShiftRow) => ({
@@ -56,18 +61,6 @@ const today = () =>
 export const weekOf = (day: string) =>
 	format(startOfWeek(parseISO(day), { weekStartsOn: 1 }), "yyyy-MM-dd");
 
-const DEPT_ORDER = [
-	"Management",
-	"Front office",
-	"Housekeeping",
-	"Laundry",
-	"Maintenance",
-	"Kitchen",
-	"Bar",
-	"Store",
-	"Finance",
-];
-
 type Person = {
 	key: string;
 	fullName: string;
@@ -80,7 +73,11 @@ type Person = {
  * Everyone who can work a shift, grouped by department: active staff (owners only when they hold a shift), plus anyone
  * holding a shift this week who is not in the staff list any more, so no shift goes unseen.
  */
-function rotaPeople(staff: StaffRow[], weekShifts: ShiftRow[]) {
+function rotaPeople(
+	staff: StaffRow[],
+	weekShifts: ShiftRow[],
+	setup: RotaSetup,
+) {
 	const holds = new Set(weekShifts.map((s) => s.staffId));
 	const people: Person[] = staff
 		.filter((s) => {
@@ -93,7 +90,7 @@ function rotaPeople(staff: StaffRow[], weekShifts: ShiftRow[]) {
 			key: s.userId ?? s.id,
 			fullName: s.fullName,
 			role: s.role,
-			department: s.department || "Other",
+			department: departmentFor(setup, s.role).name,
 			status: s.status,
 		}));
 	const known = new Set(people.map((p) => p.key));
@@ -104,14 +101,14 @@ function rotaPeople(staff: StaffRow[], weekShifts: ShiftRow[]) {
 			key: s.staffId,
 			fullName: s.staffName,
 			role: s.role,
-			department: "Other",
+			department: departmentFor(setup, s.role).name,
 			status: "ACTIVE",
 		});
 	}
-	const rank = (d: string) => {
-		const i = DEPT_ORDER.indexOf(d);
-		return i < 0 ? DEPT_ORDER.length : i;
-	};
+	const rankOf = new Map(
+		people.map((p) => [p.department, departmentFor(setup, p.role).rank]),
+	);
+	const rank = (d: string) => rankOf.get(d) ?? Number.MAX_SAFE_INTEGER;
 	const groups = new Map<string, Person[]>();
 	for (const p of [...people].sort(
 		(a, b) =>
@@ -132,9 +129,12 @@ export function RotaGrid({
 	onFindCover,
 	onSwap,
 	onAutoFill,
+	setup,
 }: {
 	staff: StaffRow[];
 	shifts: ShiftRow[];
+	/** The hotel's shifts and departments (Hotel setup → Staff & shifts). */
+	setup: RotaSetup;
 	/** The Monday of the week on show (yyyy-MM-dd). */
 	week: string;
 	onWeek: (monday: string) => void;
@@ -154,7 +154,7 @@ export function RotaGrid({
 	const inWeek = shifts.filter(
 		(s) => s.date >= days[0] && s.date <= days[6] && s.status !== "CANCELLED",
 	);
-	const groups = rotaPeople(staff, inWeek);
+	const groups = rotaPeople(staff, inWeek, setup);
 	const gaps = shifts.filter(
 		(s) => s.status === "ABSENT" && s.date >= now,
 	).length;
@@ -264,11 +264,15 @@ export function RotaGrid({
 			</div>
 			<p className="text-xs text-ink-3">
 				Tap + in an empty day to add a shift, a shift to swap or cancel it, or a
-				gap to find cover. Shifts are Morning 6am–2pm, Afternoon 2pm–10pm and
-				Night 10pm–6am (ends the next morning); late after the minutes set in
-				Hotel setup → Staff & shifts.
+				gap to find cover. Shifts: {shiftsSentence(setup.shifts)}. Change them,
+				the departments and when someone counts as late in Hotel setup → Staff &
+				shifts.
 			</p>
-			<AddShiftModal target={adding} onClose={() => setAdding(null)} />
+			<AddShiftModal
+				target={adding}
+				shifts={setup.shifts}
+				onClose={() => setAdding(null)}
+			/>
 			<CopyWeekModal
 				open={copying}
 				week={week}
@@ -415,24 +419,32 @@ const CUSTOM = "Custom";
 /** One shift for one person on one day, from an empty cell on the rota. */
 function AddShiftModal({
 	target,
+	shifts,
 	onClose,
 }: {
 	target: { person: Person; date: string } | null;
+	shifts: ShiftPreset[];
 	onClose: () => void;
 }) {
 	const { run, pending } = useAction();
-	const [kind, setKind] = useState("Morning");
+	const first = shifts[0]?.name ?? CUSTOM;
+	const [kind, setKind] = useState(first);
 	const [starts, setStarts] = useState("09:00");
 	const [ends, setEnds] = useState("17:00");
 	const times: [string, string] | undefined =
-		kind === CUSTOM ? [starts, ends] : SHIFT_TIMES[kind];
+		kind === CUSTOM
+			? [starts, ends]
+			: (() => {
+					const p = shifts.find((s) => s.name === kind);
+					return p ? [p.starts, p.ends] : undefined;
+				})();
 	const valid =
 		!!times &&
 		/^\d\d:\d\d$/.test(times[0]) &&
 		/^\d\d:\d\d$/.test(times[1]) &&
 		times[0] !== times[1];
 	const close = () => {
-		setKind("Morning");
+		setKind(first);
 		onClose();
 	};
 	return (
@@ -482,14 +494,14 @@ function AddShiftModal({
 					value={kind}
 					onChange={setKind}
 					columns={2}
-					options={[...SHIFT_OPTIONS, CUSTOM].map((s) => ({
-						value: s,
-						label: s,
-						hint:
-							s === CUSTOM
-								? "Set the times"
-								: `${SHIFT_TIMES[s][0]} – ${SHIFT_TIMES[s][1]}`,
-					}))}
+					options={[
+						...shifts.map((s) => ({
+							value: s.name,
+							label: s.name,
+							hint: `${s.starts} – ${s.ends}${s.ends < s.starts ? " (next morning)" : ""}`,
+						})),
+						{ value: CUSTOM, label: CUSTOM, hint: "Set the times" },
+					]}
 				/>
 				{kind === CUSTOM && (
 					<FieldRow>

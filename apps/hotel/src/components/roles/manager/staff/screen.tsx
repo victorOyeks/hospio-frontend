@@ -43,6 +43,7 @@ import type {
 	ShiftRow,
 	StaffRow,
 } from "@hospio/api/data/types";
+import type { RotaSetup } from "@hospio/api/data/rota-setup";
 import { LeaveTable, RequestsTable } from "./leave";
 import {
 	EditDetailsModal,
@@ -82,6 +83,7 @@ export function StaffScreen({
 	hotelId,
 	businessName,
 	inviterName,
+	rotaSetup,
 	clockedIn = [],
 	clockedSince = {},
 }: {
@@ -103,6 +105,7 @@ export function StaffScreen({
 	hotelId?: string;
 	businessName?: string;
 	inviterName?: string;
+	rotaSetup: RotaSetup;
 }) {
 	const router = useRouter();
 	const list = useListParams({ extra: ["role"] });
@@ -535,6 +538,7 @@ export function StaffScreen({
 					shifts={shifts}
 					week={weekOf(weekParam ?? today)}
 					onWeek={(w) => void setWeek(w === weekOf(today) ? null : w)}
+					setup={rotaSetup}
 					onFindCover={setCover}
 					onSwap={setSwap}
 					onAutoFill={() => setAutoFill(true)}
@@ -573,6 +577,7 @@ export function StaffScreen({
 				/>
 			)}
 			<ChangeShiftModal
+				shifts={rotaSetup.shifts}
 				staff={modal?.kind === "shift" ? modal.staff : null}
 				onClose={() => setModal(null)}
 			/>

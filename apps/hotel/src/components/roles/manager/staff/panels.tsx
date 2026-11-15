@@ -27,6 +27,7 @@ import {
 } from "@hospio/api/actions/owner";
 import { useAction } from "@hospio/api/actions/use-action";
 import { addShift } from "@hospio/api/actions/workforce";
+import { ampm, type ShiftPreset } from "@hospio/api/data/rota-setup";
 import type { UserCreated } from "@hospio/api/api/schema";
 import { isHotelRole, roleLabels } from "@hospio/api/roles";
 import { Button } from "@hospio/ui/primitives/button";
@@ -69,11 +70,6 @@ export const ROLE_OPTIONS = [
 	{ value: "FINANCE", label: "Finance" },
 ];
 export const SHIFT_OPTIONS = ["Morning", "Afternoon", "Night"];
-export const SHIFT_TIMES: Record<string, [string, string]> = {
-	Morning: ["06:00", "14:00"],
-	Afternoon: ["14:00", "22:00"],
-	Night: ["22:00", "06:00"],
-};
 export const DEPARTMENTS = [
 	"Management",
 	"Front office",
@@ -716,16 +712,20 @@ export function StaffFormPanel({
 
 export function ChangeShiftModal({
 	staff,
+	shifts,
 	onClose,
 }: {
 	staff: StaffRow | null;
+	/** The hotel's shifts (Hotel setup → Staff & shifts), or the built-in three. */
+	shifts: ShiftPreset[];
 	onClose: () => void;
 }) {
 	const { run, pending } = useAction();
 	const [shift, setShift] = useState("");
 	const [from, setFrom] = useState(new Date().toISOString().slice(0, 10));
 	const [days, setDays] = useState("1");
-	const times = SHIFT_TIMES[shift];
+	const preset = shifts.find((s) => s.name === shift);
+	const times = preset ? ([preset.starts, preset.ends] as const) : undefined;
 	return (
 		<Modal
 			open={!!staff}
@@ -782,15 +782,10 @@ export function ChangeShiftModal({
 					value={shift}
 					onChange={setShift}
 					columns={3}
-					options={SHIFT_OPTIONS.map((s) => ({
-						value: s,
-						label: s,
-						hint:
-							s === "Morning"
-								? "6am – 2pm"
-								: s === "Afternoon"
-									? "2pm – 10pm"
-									: "10pm – 6am",
+					options={shifts.map((s) => ({
+						value: s.name,
+						label: s.name,
+						hint: `${ampm(s.starts)} – ${ampm(s.ends)}`,
 					}))}
 				/>
 				<FieldRow>
