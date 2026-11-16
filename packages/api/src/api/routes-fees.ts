@@ -122,5 +122,9 @@ export const feeRoutes = {
 		input: z.object({ businessId: z.string(), provider: z.string(), fields: z.record(z.string(), z.string()) }),
 		output: envelope(PosConfig),
 	},
+	"@delete/payment/admin/hotels/:hotelId/pos-config": {
+		params: z.object({ hotelId: z.string() }),
+		output: envelope(PosConfig),
+	},
 	"@get/payment/pos-config": { output: envelope(PosConfig) },
 };

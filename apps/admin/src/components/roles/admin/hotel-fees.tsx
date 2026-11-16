@@ -11,6 +11,7 @@ import {
 	feeCollection,
 	type PosConfigView,
 	redoFeeDay,
+	removeAdminPosConfig,
 	runFeeDay,
 	runFeeDebit,
 	saveAdminPosConfig,
@@ -115,9 +116,28 @@ export function HotelFeesPanel({ businessId, hotelId, role }: { businessId: stri
 					title="POS provider"
 					subtitle="The hotel's own Moniepoint or OPay keys: card payments go to its terminals, and the daily fee is debited from its account"
 					headerRight={
-						<button type="button" className={`${btn.secondary} ${btn.small}`} onClick={() => setEditing(true)}>
-							<KeyRoundIcon className="mr-1 inline size-4" /> {pos?.provider ? "Change keys" : "Add keys"}
-						</button>
+						<div className="flex gap-2">
+							{pos?.provider && (
+								<button
+									type="button"
+									className={`${btn.secondary} ${btn.small}`}
+									onClick={async () => {
+										if (!window.confirm("Remove this hotel's POS keys? Its card payments go back to the server's POS setting.")) return;
+										const r = await removeAdminPosConfig(hotelId);
+										if (r.ok) {
+											setPos(r.data);
+											toast.success("POS keys removed");
+											void load();
+										} else toast.error(r.error);
+									}}
+								>
+									Remove keys
+								</button>
+							)}
+							<button type="button" className={`${btn.secondary} ${btn.small}`} onClick={() => setEditing(true)}>
+								<KeyRoundIcon className="mr-1 inline size-4" /> {pos?.provider ? "Change keys" : "Add keys"}
+							</button>
+						</div>
 					}
 				>
 					{!pos ? (
