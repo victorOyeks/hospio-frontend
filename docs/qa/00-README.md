@@ -7,6 +7,11 @@ also be covered beyond them: positive and negative scenarios and any edge cases 
 values, empty or invalid input, wrong roles, another hotel's data, repeated or cancelled actions, and
 refreshing or going back in the middle of a flow.
 
+**Messages (from 16 Nov 2026).** Staging no longer shows a copy of each email, WhatsApp or SMS on screen (the yellow
+"on their way · the text is here to copy too" box). Where a script says to read or copy a message from that box, check the
+real email inbox or the phone instead. Emails go to the address on the account. WhatsApp and SMS on staging go only to the
+allow-listed number 09035911994, so sign-up and phone codes for any other number won't arrive until texts are opened up.
+
 | # | Script | What it covers | Status |
 |---|---|---|---|
 | 01 | `01-onboarding.md` | Sign-up, phone code, the 4 setup steps, invite acceptance | Tested (29 defects closed) |
