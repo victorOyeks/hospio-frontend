@@ -108,5 +108,5 @@ export function CheckItem({
 	);
 }
 
-/** The deep, soft maroon shadow under the product shots. */
-export const shotShadow = "shadow-[0_24px_60px_rgba(77,8,31,0.1)]";
+/** The deep, soft navy shadow under the product shots. */
+export const shotShadow = "shadow-[0_24px_60px_rgba(17,26,51,0.12)]";

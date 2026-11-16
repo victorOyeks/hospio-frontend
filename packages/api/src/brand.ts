@@ -5,7 +5,28 @@
  * live in the browser (the Brand section's preview). Status colours (green, amber, red) never change.
  */
 
-export const HOSPIO_MAROON = "#4c091e";
+/**
+ * Hospio360's own look, used by every hotel that hasn't set a colour: indigo for buttons, links and highlights, on deep navy
+ * (the sidebar, the sign-in panel, the WhatsApp banner). A hotel's own colour replaces both.
+ */
+export const HOSPIO_DEFAULT = "#4338ca";
+/** The navy that goes with the default indigo: the sidebar. */
+export const HOSPIO_NAVY = "#111a33";
+/** The navy panel (sign-in screens, banner, landing page): darkest top left to indigo-tinted bottom right. */
+export const HOSPIO_PANEL = "linear-gradient(160deg, #0b1220 0%, #111a33 55%, #1e1b4b 100%)";
+/** Hospio360's colour until November 2026: hotels that saved it explicitly are treated as having no colour of their own. */
+export const HOSPIO_OLD_MAROON = "#4c091e";
+
+/** The colour to paint with: the hotel's own, or Hospio360's default when it has none (or saved the old default). */
+export function effectiveColour(colour: string | null | undefined): string {
+	return isHospioDefault(colour) ? HOSPIO_DEFAULT : (normalizeHex(colour ?? undefined) as string);
+}
+
+/** True when the colour is Hospio360's default (or the old default some hotels saved), not a hotel's own choice. */
+export function isHospioDefault(colour: string | null | undefined): boolean {
+	const c = normalizeHex(colour ?? undefined);
+	return c === null || c === HOSPIO_DEFAULT || c === HOSPIO_OLD_MAROON;
+}
 
 export type Brand = {
 	/** "#rrggbb". */
@@ -85,7 +106,8 @@ export function readabilityWarning(hex: string): string | null {
 
 /** The CSS custom properties for a brand (light theme). */
 export function brandVars(b: Brand): Record<string, string> {
-	const p = normalizeHex(b.primary) ?? HOSPIO_MAROON;
+	// Hospio360's default (or the old maroon a hotel saved without choosing it): indigo with the navy sidebar.
+	const p = effectiveColour(b.primary);
 	const on = onColour(p);
 	const vars: Record<string, string> = {
 		"--brand-primary": p,
@@ -108,7 +130,7 @@ export function brandVars(b: Brand): Record<string, string> {
 		"--overlay-scrim": mix(p, -0.8),
 	};
 	if (b.darkNav) {
-		vars["--nav-background"] = p;
+		vars["--nav-background"] = p === HOSPIO_DEFAULT ? HOSPIO_NAVY : p;
 		vars["--nav-text"] = on === "#ffffff" ? mix(p, 0.8) : "#3a3a3a";
 		vars["--nav-active"] = on;
 	} else {
@@ -124,7 +146,7 @@ export function brandVars(b: Brand): Record<string, string> {
  * colour is too pale for white text. The shell puts it on `data-nav`, and the stylesheet turns the sidebar's white text dark.
  */
 export function navMode(b: Brand): "dark" | "light" {
-	const p = normalizeHex(b.primary) ?? HOSPIO_MAROON;
+	const p = effectiveColour(b.primary);
 	return b.darkNav && onColour(p) === "#ffffff" ? "dark" : "light";
 }
 
@@ -138,7 +160,7 @@ export function brandStyle(b: Brand): string {
 		.map(([k, v]) => `${k}:${v}`)
 		.join(";");
 	const sidebar = '[data-slot="sidebar-container"],[data-sidebar="sidebar"]';
-	const p = normalizeHex(b.primary) ?? HOSPIO_MAROON;
+	const p = effectiveColour(b.primary);
 	const ink = textShade(p);
 	const light = navMode(b) === "light";
 	const pale = onColour(p) !== "#ffffff";
@@ -170,7 +192,7 @@ export function brandFromSettings(
 			? s.logoUrl.trim()
 			: null;
 	return {
-		primary: normalizeHex(s?.primaryColour) ?? HOSPIO_MAROON,
+		primary: effectiveColour(normalizeHex(s?.primaryColour)),
 		darkNav: s?.darkSidebar !== false,
 		shortName:
 			typeof s?.shortName === "string" && s.shortName.trim()
@@ -202,7 +224,7 @@ function safeName(v: unknown, max: number): string | null {
 export function encodeBrandCookie(b: Brand, hotelName?: string | null): string {
 	return encodeURIComponent(
 		JSON.stringify({
-			c: normalizeHex(b.primary) ?? HOSPIO_MAROON,
+			c: effectiveColour(b.primary),
 			d: b.darkNav ? 1 : 0,
 			s: safeName(b.shortName, 24),
 			l:

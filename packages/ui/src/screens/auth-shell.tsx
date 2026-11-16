@@ -5,6 +5,8 @@ import {
 	BRAND_COOKIE,
 	brandStyle,
 	decodeBrandCookie,
+	HOSPIO_PANEL,
+	isHospioDefault,
 	mix,
 	onColour,
 	type RememberedBrand,
@@ -234,8 +236,12 @@ export async function AuthShell({ children }: PropsWithChildren) {
 	const remembered = await rememberedBrand();
 	const colour = remembered?.brand.primary;
 	// White text on the panel: a colour too pale for it is shown as a deep shade of itself.
-	const panel =
-		colour && onColour(colour) !== "#ffffff" ? mix(colour, -0.6) : undefined;
+	// No hotel remembered (or one on Hospio360's default): the navy panel, as on the admin sign-in.
+	const panel = isHospioDefault(colour)
+		? HOSPIO_PANEL
+		: colour && onColour(colour) !== "#ffffff"
+			? mix(colour, -0.6)
+			: undefined;
 	const hotel = remembered
 		? remembered.brand.shortName || remembered.hotelName
 		: null;

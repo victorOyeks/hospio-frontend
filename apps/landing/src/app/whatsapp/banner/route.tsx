@@ -1,5 +1,5 @@
 import { ImageResponse } from "next/og";
-import { HOSPIO_MAROON, mix, normalizeHex, onColour } from "@hospio/api/brand";
+import { HOSPIO_PANEL, effectiveColour, isHospioDefault, mix, onColour } from "@hospio/api/brand";
 
 /**
  * A hotel's WhatsApp banner (hospio-backend docs/sms-whatsapp.md): the image at the top of its booking WhatsApp messages, in
@@ -11,7 +11,9 @@ export const runtime = "edge";
 
 export function GET(req: Request) {
 	const url = new URL(req.url);
-	const colour = normalizeHex(url.searchParams.get("c")) ?? HOSPIO_MAROON;
+	// Hospio360's default (no colour, or the old maroon) is the navy panel; a hotel's own colour is its gradient.
+	const hospio = isHospioDefault(url.searchParams.get("c"));
+	const colour = effectiveColour(url.searchParams.get("c"));
 	const name =
 		(url.searchParams.get("n") ?? "")
 			.replace(/[^\p{L}\p{N} &'.,-]/gu, "")
@@ -28,7 +30,7 @@ export function GET(req: Request) {
 				flexDirection: "column",
 				justifyContent: "center",
 				padding: "0 110px",
-				background: `linear-gradient(135deg, ${mix(colour, -0.25)} 0%, ${colour} 55%, ${mix(colour, 0.15)} 100%)`,
+				background: hospio ? HOSPIO_PANEL : `linear-gradient(135deg, ${mix(colour, -0.25)} 0%, ${colour} 55%, ${mix(colour, 0.15)} 100%)`,
 				color: on,
 				position: "relative",
 			}}

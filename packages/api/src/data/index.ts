@@ -803,7 +803,7 @@ export const data = {
 		 */
 		/**
 		 * The active hotel's brand (Hotel setup → Brand & colours): colour, sidebar, short name, logo. Null when it can't be
-		 * read (demo, hotel-config down, no hotel yet), so the caller keeps the look it already has rather than maroon.
+		 * read (demo, hotel-config down, no hotel yet), so the caller keeps the look it already has rather than Hospio360's default.
 		 */
 		brand: async (): Promise<Brand | null> => {
 			if (!live("hotel-config")) return null;

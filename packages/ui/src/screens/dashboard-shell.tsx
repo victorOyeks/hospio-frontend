@@ -152,7 +152,7 @@ export async function DashboardShell({ children }: PropsWithChildren) {
 	return (
 		<NuqsAdapter>
 			<JotaiProvider>
-				{/* Always the hotel's own brand, Hospio360 maroon included, so it replaces a look this browser remembered. */}
+				{/* Always the hotel's own brand, Hospio360's default included, so it replaces a look this browser remembered. */}
 				{brand && (
 					<style
 						id="hotel-brand"
