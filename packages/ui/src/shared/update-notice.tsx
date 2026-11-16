@@ -86,9 +86,8 @@ export function UpdateNotice() {
 			<div className="min-w-0 flex-1 text-[13px]">
 				<p className="font-semibold text-ink">Reload Hospio360 to carry on</p>
 				<p className="text-ink-2">
-					A new version is out, or this page has been open a long time. Steps
-					you already saved are kept; anything typed on this screen since the
-					last save is not.
+					A new version of Hospio360 is out. Steps you already saved are kept;
+					anything typed on this screen since the last save is not.
 				</p>
 			</div>
 			<button
