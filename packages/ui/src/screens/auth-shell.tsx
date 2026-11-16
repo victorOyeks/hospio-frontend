@@ -8,6 +8,7 @@ import {
 	mix,
 	onColour,
 	type RememberedBrand,
+	HOSPIO_MAROON,
 } from "@hospio/api/brand";
 import { ForgetBrand } from "../shared/remember-brand";
 import { cn } from "../utils";
@@ -314,26 +315,34 @@ export async function AuthShell({ children }: PropsWithChildren) {
 	);
 }
 
-/** The admin portal's colour: indigo on deep slate, so it never looks like a hotel's sign-in. */
-const ADMIN_ACCENT = "#4338ca";
+/** The admin portal keeps Hospio360's own maroon: its layout, not its colour, sets it apart from a hotel's sign-in. */
+const ADMIN_ACCENT = HOSPIO_MAROON;
 
 /**
  * The admin portal's sign-in (admin-*.hospio360.com): its own look so Hospio360 staff and hotel staff can't confuse the two.
- * Deep slate and indigo instead of a hotel's colour, a "Platform console · Staff only" badge, and the console's own words.
+ * Hospio360's maroon (never a remembered hotel's colour), a grid panel, a "Platform console · Staff only" badge, the form in a
+ * card, and the console's own words.
  * Never takes a remembered hotel's look.
  */
 function AdminAuthShell({ children }: PropsWithChildren) {
 	return (
-		<main className="flex min-h-screen bg-[#f6f7fb]">
+		<main className="flex min-h-screen bg-page">
 			{/* The console's accent on buttons, links and focus rings, whatever the browser remembered. */}
 			<style
 				// biome-ignore lint/security/noDangerouslySetInnerHtml: our own CSS, built from a fixed colour
 				dangerouslySetInnerHTML={{ __html: brandStyle({ primary: ADMIN_ACCENT, darkNav: true }) }}
 			/>
 			<aside
-				className="relative hidden w-[46%] max-w-[640px] min-w-[480px] shrink-0 flex-col overflow-hidden px-12 py-11 text-white lg:flex xl:px-14"
-				style={{ background: "linear-gradient(160deg, #0b1220 0%, #111a33 55%, #1e1b4b 100%)" }}
+				className="relative hidden w-[46%] max-w-[640px] min-w-[480px] shrink-0 flex-col overflow-hidden bg-brand px-12 py-11 text-white lg:flex xl:px-14"
 			>
+				<div
+					aria-hidden="true"
+					className="pointer-events-none absolute inset-0"
+					style={{
+						background:
+							"radial-gradient(900px 520px at 100% 0%, rgba(255,255,255,0.13), transparent 60%), radial-gradient(700px 500px at 0% 100%, rgba(0,0,0,0.28), transparent 60%)",
+					}}
+				/>
 				<div
 					aria-hidden="true"
 					className="pointer-events-none absolute inset-0 opacity-[0.10]"
@@ -345,7 +354,7 @@ function AdminAuthShell({ children }: PropsWithChildren) {
 				/>
 				<div className="relative flex items-center gap-3">
 					<Wordmark light />
-					<span className="rounded-pill border border-indigo-300/40 bg-indigo-400/15 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.08em] text-indigo-100">
+					<span className="rounded-pill border border-white/25 bg-white/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.08em] text-white/90">
 						Platform console
 					</span>
 				</div>
@@ -367,18 +376,18 @@ function AdminAuthShell({ children }: PropsWithChildren) {
 			<section className="flex min-h-full flex-1 flex-col items-center justify-center px-4 py-10">
 				<div className="mb-8 flex flex-col items-center gap-3 lg:hidden">
 					<span className="flex items-center gap-[10px]">
-						<span className="flex size-9 items-center justify-center rounded-[10px] bg-[#0b1220] text-white">
+						<span className="flex size-9 items-center justify-center rounded-[10px] bg-brand text-brand-foreground">
 							<Mark className="size-5" />
 						</span>
-						<span className="text-[20px] font-bold text-[#0b1220]">Hospio360</span>
+						<span className="text-[20px] font-bold text-brand">Hospio360</span>
 					</span>
-					<span className="rounded-pill bg-indigo-100 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.08em] text-indigo-800">
+					<span className="rounded-pill bg-brand-soft px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.08em] text-brand">
 						Platform console
 					</span>
 				</div>
 				<div className="w-full max-w-[420px] rounded-card border border-line bg-card p-8 shadow-sm">
-					<p className="mb-6 inline-flex items-center gap-2 rounded-pill bg-indigo-50 px-3 py-1 text-[12px] font-semibold text-indigo-800">
-						<span aria-hidden="true" className="size-2 rounded-full bg-indigo-600" /> Hospio360 staff only
+					<p className="mb-6 inline-flex items-center gap-2 rounded-pill bg-brand-soft px-3 py-1 text-[12px] font-semibold text-brand">
+						<span aria-hidden="true" className="size-2 rounded-full bg-brand" /> Hospio360 staff only
 					</p>
 					{children}
 				</div>
