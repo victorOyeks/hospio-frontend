@@ -24,10 +24,11 @@ import { fmtDay, fmtWhen, naira, plural } from "@hospio/ui/shared/format";
 import { PanelSection, SidePanel } from "@hospio/ui/shared/side-panel";
 import { StatusPill } from "@hospio/ui/shared/status-pill";
 import { btn } from "@hospio/ui/shared/ui";
-import type {
-	BookingRow,
-	FolioRow,
-	FolioSummary,
+import {
+	type BookingRow,
+	type FolioRow,
+	type FolioSummary,
+	stayBill,
 } from "@hospio/api/data/types";
 import { cn } from "@hospio/ui/utils";
 import {
@@ -76,11 +77,14 @@ export function BookingDetailsPanel({
 	const status = bookingStatus(b);
 	const pay = paymentStatus(b);
 	const due = balance(b);
-	// Paid more than the stay: the rest is the guest's credit.
-	const credit = Math.max(0, b.paid - b.totalAmount);
+	// The stay's bill: the folio's once the guest is in (extras, tax, discounts, every payment), the booking's before.
+	const bill = stayBill(b);
+	const extras = b.bill ? bill.total - b.totalAmount : 0;
+	// Paid more than the bill: the rest is the guest's credit.
+	const credit = b.status === "CANCELLED" ? 0 : Math.max(0, -bill.balance);
 	const paidPct =
-		b.totalAmount > 0
-			? Math.min(100, Math.round((b.paid / b.totalAmount) * 100))
+		bill.total > 0
+			? Math.min(100, Math.round((bill.paid / bill.total) * 100))
 			: 100;
 
 	return (
@@ -258,9 +262,17 @@ export function BookingDetailsPanel({
 										label: `${plural(b.nights, "night")} × ${naira(b.nightlyRate)} · ${priceKindLabels[b.priceKind]}`,
 										value: naira(b.totalAmount),
 									},
+									...(extras !== 0
+										? [
+												{
+													label: "Extras, tax and discounts on the folio",
+													value: naira(extras),
+												},
+											]
+										: []),
 									{
 										label: `Paid so far · ${planLabels[b.paymentPlan]}`,
-										value: `– ${naira(b.paid)}`,
+										value: `– ${naira(bill.paid)}`,
 										tone: "success",
 									},
 									{

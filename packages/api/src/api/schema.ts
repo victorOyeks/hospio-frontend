@@ -556,6 +556,10 @@ export const Booking = z.object({
 	nightlyRate: z.number(),
 	totalAmount: z.number(),
 	amountPaid: z.number().nullable().optional(),
+	// The stay's bill: the folio's once the guest is in, else the booking's (reservation-service, FolioTotals).
+	billTotal: z.number().nullable().optional(),
+	billPaid: z.number().nullable().optional(),
+	balance: z.number().nullable().optional(),
 	paymentPlan: z.enum([
 		"PAY_IN_FULL",
 		"DEPOSIT_50",

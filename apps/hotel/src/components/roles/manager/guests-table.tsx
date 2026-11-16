@@ -9,14 +9,14 @@ import { SectionCard } from "@hospio/ui/shared/section-card";
 import { StatusPill } from "@hospio/ui/shared/status-pill";
 import { btn } from "@hospio/ui/shared/ui";
 import type { bookingBuckets } from "@hospio/api/data";
-import type { BookingRow } from "@hospio/api/data/types";
+import { type BookingRow, stayBill } from "@hospio/api/data/types";
 import { cn } from "@hospio/ui/utils";
 
 type Tab = "arrivals" | "departures" | "inHouse";
 
 function statusOf(b: BookingRow, tab: Tab): { label: string; tone: "success" | "warning" | "danger" | "info" } {
 	if (b.status === "NO_SHOW") return { label: "No-show", tone: "danger" };
-	if (tab === "inHouse") return b.paymentPlan === "PAY_AT_CHECKOUT" ? { label: "Pays at check-out", tone: "info" } : b.totalAmount - b.paid > 0 ? { label: "Balance due", tone: "warning" } : { label: "Checked in", tone: "success" };
+	if (tab === "inHouse") return b.paymentPlan === "PAY_AT_CHECKOUT" ? { label: "Pays at check-out", tone: "info" } : stayBill(b).balance > 0 ? { label: "Balance due", tone: "warning" } : { label: "Checked in", tone: "success" };
 	if (tab === "departures") return { label: "Due out today", tone: "warning" };
 	if (b.status === "CHECKED_IN") return { label: "Arrived", tone: "success" };
 	return b.roomNumber ? { label: "Room assigned", tone: "success" } : { label: "No room yet", tone: "warning" };
@@ -74,7 +74,7 @@ export function GuestsTable({ buckets }: { buckets: ReturnType<typeof bookingBuc
 					<tbody>
 						{rows.map((b) => {
 							const status = statusOf(b, tab);
-							const dueNow = b.totalAmount - b.paid;
+							const dueNow = stayBill(b).balance;
 							const due = dueNow > 0 && tab === "arrivals" && b.paymentPlan !== "PAY_AT_CHECKOUT" && b.paymentPlan !== "ORGANIZATION";
 							return (
 								<tr key={b.id} className="h-14 border-b border-line">

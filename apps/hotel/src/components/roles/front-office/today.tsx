@@ -28,6 +28,7 @@ import {
 	occupancyLabel,
 	pastDeparture,
 	type RoomRow,
+	stayBill,
 	type TerminalRow,
 	type TillRow,
 } from "@hospio/api/data/types";
@@ -289,7 +290,7 @@ export function FrontDeskToday({
 										b.paymentPlan === "PAY_AT_CHECKOUT" ||
 										b.paymentPlan === "ORGANIZATION"
 											? 0
-											: b.totalAmount - b.paid;
+											: stayBill(b).balance;
 									const pill =
 										b.status === "CHECKED_IN" ? (
 											<StatusPill tone="success">Checked in</StatusPill>
