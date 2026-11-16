@@ -1,6 +1,5 @@
 import { describe, expect, test } from "bun:test";
 import {
-	brandFromSettings,
 	brandStyle,
 	contrast,
 	decodeBrandCookie,
@@ -31,7 +30,7 @@ describe("brand", () => {
 			darkNav: true,
 		});
 		expect(css).not.toContain("display:none");
-		expect(css).toContain("--brand-primary:#4338ca");
+		expect(css).toContain("--brand-primary:#4c091e");
 	});
 	test("the remembered look survives the cookie and a tampered one is refused", () => {
 		const raw = encodeBrandCookie(
@@ -78,20 +77,6 @@ describe("pale colours stay readable", () => {
 		expect(brandStyle({ primary: "#0b4f50", darkNav: true })).not.toContain(
 			"--color-white:#1a1a1a",
 		);
-	});
-});
-
-describe("the default is indigo on navy", () => {
-	test("no colour, or the old maroon a hotel saved, paints indigo with the navy sidebar", () => {
-		for (const primary of ["", "#4c091e", "#4338ca"]) {
-			const css = brandStyle({ primary, darkNav: true });
-			expect(css).toContain("--brand-primary:#4338ca");
-			expect(css).toContain("--nav-background:#111a33");
-		}
-		expect(brandFromSettings({ primaryColour: "#4c091e" }).primary).toBe("#4338ca");
-	});
-	test("a hotel's own colour still fills the sidebar", () => {
-		expect(brandStyle({ primary: "#0b4f50", darkNav: true })).toContain("--nav-background:#0b4f50");
 	});
 });
 

@@ -84,7 +84,7 @@ export const demoStaffAccess: StaffAccessRow[] = [
 
 export const demoSetupExtras: HotelSetupSection[] = [
 	{ key: "brand", title: "Brand & colours", description: "Your logo and colours on every screen your staff and guests see", icon: "palette", fields: [
-		{ key: "primary", label: "Brand colour", type: "text", value: "#4338ca", help: "Buttons, the sidebar and highlights" },
+		{ key: "primary", label: "Brand colour", type: "text", value: "#4c091e", help: "Buttons, the sidebar and highlights" },
 		{ key: "logoText", label: "Short name on the sidebar", type: "text", value: "Hospio360" },
 		{ key: "receiptFooter", label: "Receipt footer", type: "text", value: "Thank you for staying with Simpas Hotels" },
 		{ key: "darkNav", label: "Dark sidebar", type: "toggle", value: true },

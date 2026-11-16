@@ -85,7 +85,7 @@ export const SETUP_CATALOGUE: SectionDef[] = [
 				api: "primaryColour",
 				label: "Brand colour",
 				type: "text",
-				default: "#4338ca",
+				default: "#4c091e",
 				help: "Buttons, the sidebar and highlights · #RRGGBB or pick above",
 			},
 			{
