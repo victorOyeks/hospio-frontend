@@ -1,5 +1,6 @@
 "use client";
 
+import { APP } from "@hospio/api/app";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { EyeIcon, EyeOffIcon, Loader2Icon } from "lucide-react";
 import Link from "next/link";
@@ -159,8 +160,10 @@ export function AuthForm({ from, email = "" }: { from?: string; email?: string }
 				className="flex flex-col gap-4"
 			>
 				<div>
-					<h1 className="text-[28px] font-bold text-ink">Sign in</h1>
-					<p className="mt-2 text-sm text-ink-3">Welcome back to Hospio360</p>
+					<h1 className="text-[28px] font-bold text-ink">{APP === "admin" ? "Admin sign in" : "Sign in"}</h1>
+					<p className="mt-2 text-sm text-ink-3">
+						{APP === "admin" ? "The Hospio360 platform console, for staff accounts" : "Welcome back to Hospio360"}
+					</p>
 				</div>
 
 				<FormField
@@ -176,7 +179,7 @@ export function AuthForm({ from, email = "" }: { from?: string; email?: string }
 									{...field}
 									type="email"
 									autoComplete="username"
-									placeholder="you@hotel.com"
+									placeholder={APP === "admin" ? "you@hospio360.com" : "you@hotel.com"}
 									className="h-auto rounded-control border-line px-[14px] py-3 text-sm focus-visible:border-brand focus-visible:ring-0"
 								/>
 							</FormControl>

@@ -239,6 +239,7 @@ export async function AuthShell({ children }: PropsWithChildren) {
 	const hotel = remembered
 		? remembered.brand.shortName || remembered.hotelName
 		: null;
+	if (admin) return <AdminAuthShell>{children}</AdminAuthShell>;
 	const areas = admin
 		? ["Businesses", "Support", "Fees", "Marketers"]
 		: ["Front desk", "Restaurant & bar", "Housekeeping", "Finance"];
@@ -308,6 +309,79 @@ export async function AuthShell({ children }: PropsWithChildren) {
 						}
 					/>
 				)}
+			</section>
+		</main>
+	);
+}
+
+/** The admin portal's colour: indigo on deep slate, so it never looks like a hotel's sign-in. */
+const ADMIN_ACCENT = "#4338ca";
+
+/**
+ * The admin portal's sign-in (admin-*.hospio360.com): its own look so Hospio360 staff and hotel staff can't confuse the two.
+ * Deep slate and indigo instead of a hotel's colour, a "Platform console · Staff only" badge, and the console's own words.
+ * Never takes a remembered hotel's look.
+ */
+function AdminAuthShell({ children }: PropsWithChildren) {
+	return (
+		<main className="flex min-h-screen bg-[#f6f7fb]">
+			{/* The console's accent on buttons, links and focus rings, whatever the browser remembered. */}
+			<style
+				// biome-ignore lint/security/noDangerouslySetInnerHtml: our own CSS, built from a fixed colour
+				dangerouslySetInnerHTML={{ __html: brandStyle({ primary: ADMIN_ACCENT, darkNav: true }) }}
+			/>
+			<aside
+				className="relative hidden w-[46%] max-w-[640px] min-w-[480px] shrink-0 flex-col overflow-hidden px-12 py-11 text-white lg:flex xl:px-14"
+				style={{ background: "linear-gradient(160deg, #0b1220 0%, #111a33 55%, #1e1b4b 100%)" }}
+			>
+				<div
+					aria-hidden="true"
+					className="pointer-events-none absolute inset-0 opacity-[0.10]"
+					style={{
+						backgroundImage: "linear-gradient(rgba(255,255,255,0.6) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.6) 1px, transparent 1px)",
+						backgroundSize: "36px 36px",
+						maskImage: "linear-gradient(to bottom, black, transparent 80%)",
+					}}
+				/>
+				<div className="relative flex items-center gap-3">
+					<Wordmark light />
+					<span className="rounded-pill border border-indigo-300/40 bg-indigo-400/15 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.08em] text-indigo-100">
+						Platform console
+					</span>
+				</div>
+				<div className="relative flex min-h-0 flex-1 items-center py-10 [@media(max-height:820px)]:py-6 [@media(max-height:820px)]:[&>*]:scale-90">
+					<Glimpse admin />
+				</div>
+				<div className="relative flex flex-col gap-4">
+					<h2 className="max-w-[460px] text-[34px] font-bold leading-[1.12] tracking-[-0.02em]">Hospio360 platform console</h2>
+					<p className="max-w-[440px] text-[16px] leading-[1.55] text-white/70">
+						For Hospio360 staff: businesses from sign-up to live, support, fees and marketers. Hotel teams sign in at their hotel app instead.
+					</p>
+					<div className="mt-2 flex flex-wrap gap-2 [@media(max-height:820px)]:hidden">
+						{["Businesses", "Support", "Fees", "Marketers"].map((a) => (
+							<Chip key={a}>{a}</Chip>
+						))}
+					</div>
+				</div>
+			</aside>
+			<section className="flex min-h-full flex-1 flex-col items-center justify-center px-4 py-10">
+				<div className="mb-8 flex flex-col items-center gap-3 lg:hidden">
+					<span className="flex items-center gap-[10px]">
+						<span className="flex size-9 items-center justify-center rounded-[10px] bg-[#0b1220] text-white">
+							<Mark className="size-5" />
+						</span>
+						<span className="text-[20px] font-bold text-[#0b1220]">Hospio360</span>
+					</span>
+					<span className="rounded-pill bg-indigo-100 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.08em] text-indigo-800">
+						Platform console
+					</span>
+				</div>
+				<div className="w-full max-w-[420px] rounded-card border border-line bg-card p-8 shadow-sm">
+					<p className="mb-6 inline-flex items-center gap-2 rounded-pill bg-indigo-50 px-3 py-1 text-[12px] font-semibold text-indigo-800">
+						<span aria-hidden="true" className="size-2 rounded-full bg-indigo-600" /> Hospio360 staff only
+					</p>
+					{children}
+				</div>
 			</section>
 		</main>
 	);
