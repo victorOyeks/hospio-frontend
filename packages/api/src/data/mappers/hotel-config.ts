@@ -637,6 +637,11 @@ export function toSetupSections(
 					value: items.map((i) => i.label),
 					help: f.help,
 					format: f.format,
+					zeroIsNone:
+						(f.type === "number" ||
+							f.type === "money" ||
+							f.type === "percent") &&
+						f.default === 0,
 				};
 			}
 			if (def.key === "danger" && f.key === "status")

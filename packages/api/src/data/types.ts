@@ -416,7 +416,12 @@ export type LeaveRow = {
 	to: string;
 	days: number;
 	reason: string;
-	status: "PENDING" | "APPROVED" | "DECLINED" | "CHANGE_REQUESTED" | "WITHDRAWN";
+	status:
+		| "PENDING"
+		| "APPROVED"
+		| "DECLINED"
+		| "CHANGE_REQUESTED"
+		| "WITHDRAWN";
 	note?: string;
 };
 export type ShiftRequestRow = {
@@ -1367,6 +1372,8 @@ export type HotelSetupSection = {
 		help?: string;
 		/** List fields whose entries must read as a shift or a department (data/rota-setup). */
 		format?: "shift" | "department";
+		/** A number whose default is 0, meaning "none": shown empty with a "None" hint, saved as 0 when left empty. */
+		zeroIsNone?: boolean;
 	}[];
 };
 

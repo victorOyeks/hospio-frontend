@@ -138,6 +138,10 @@ export function TillsScreen({ tills: initial }: { tills: TillRow[] }) {
 												: `· ${(t.variance ?? 0) < 0 ? "short" : "over"} ${naira(Math.abs(t.variance ?? 0))}`}
 										</span>
 									)}
+									{/* What the person who closed it wrote about a short or over count (DEF-069). */}
+									{t.status === "CLOSED" && t.variance !== 0 && t.note && (
+										<p className="mt-0.5 text-[12px] text-ink-2">“{t.note}”</p>
+									)}
 								</td>
 								<td className="px-5 py-3 text-right">
 									{t.status === "OPEN" ? (

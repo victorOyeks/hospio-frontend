@@ -91,11 +91,14 @@ export function staffStatusPill(s: StaffRow) {
 	} as const;
 	const [label, tone] = map[s.status];
 	// Shared devices: who still has to set a PIN (docs/shared-devices.md); a manager can remind them from the profile.
-	const noPin = s.hasPin === false && s.status === "ACTIVE" && s.role !== "OWNER";
+	const noPin =
+		s.hasPin === false && s.status === "ACTIVE" && s.role !== "OWNER";
 	return noPin ? (
 		<span className="inline-flex flex-wrap items-center gap-1">
 			<StatusPill tone={tone}>{label}</StatusPill>
-			<StatusPill tone="grey" dot={false}>No PIN yet</StatusPill>
+			<StatusPill tone="grey" dot={false}>
+				No PIN yet
+			</StatusPill>
 		</span>
 	) : (
 		<StatusPill tone={tone}>{label}</StatusPill>
@@ -125,14 +128,28 @@ export function StaffPinActions({
 		<PanelSection title="PIN for shared devices">
 			<div className="flex flex-wrap items-center gap-3">
 				<p className="flex-1 text-[13px] text-ink-2">
-					{hasPin ? "PIN set. Reset it if it was forgotten or seen; they set a new one at their next sign-in." : "No PIN yet. They set it themselves after signing in."}
+					{hasPin
+						? "PIN set. Reset it if it was forgotten or seen; they set a new one at their next sign-in."
+						: "No PIN yet. They set it themselves after signing in."}
 				</p>
 				{hasPin ? (
-					<Button variant="outline" className={btn.secondary} disabled={pending} onClick={() => setConfirm(true)}>
+					<Button
+						variant="outline"
+						className={btn.secondary}
+						disabled={pending}
+						onClick={() => setConfirm(true)}
+					>
 						<KeyRoundIcon className="size-4" /> Reset PIN
 					</Button>
 				) : (
-					<Button variant="outline" className={btn.secondary} disabled={pending} onClick={() => run(() => remind(id), `Reminder sent to ${staff.fullName}`)}>
+					<Button
+						variant="outline"
+						className={btn.secondary}
+						disabled={pending}
+						onClick={() =>
+							run(() => remind(id), `Reminder sent to ${staff.fullName}`)
+						}
+					>
 						Remind
 					</Button>
 				)}
@@ -145,9 +162,20 @@ export function StaffPinActions({
 				confirmLabel="Reset PIN"
 				tone="danger"
 				pending={pending}
-				onConfirm={() => run(() => reset(id), "PIN reset", () => { setHasPin(false); setConfirm(false); })}
+				onConfirm={() =>
+					run(
+						() => reset(id),
+						"PIN reset",
+						() => {
+							setHasPin(false);
+							setConfirm(false);
+						},
+					)
+				}
 			>
-				<p className="text-[13px] text-ink-2">They sign in with email and set a new PIN. You never see or choose it.</p>
+				<p className="text-[13px] text-ink-2">
+					They sign in with email and set a new PIN. You never see or choose it.
+				</p>
 			</ConfirmModal>
 		</PanelSection>
 	);
@@ -628,72 +656,72 @@ export function StaffFormPanel({
 								placeholder="Room attendant"
 							/>
 							<Note tone="info">
-								Role and access are changed in Roles &amp; Permissions; the shift
-								with Change shift.
+								Role and access are changed in Roles &amp; Permissions; the
+								shift with Change shift.
 							</Note>
 						</>
 					) : (
 						<>
-					<FieldRow>
-						<SelectField
-							label="Role"
-							value={form.role}
-							onChange={(v) => set("role", v)}
-							options={ROLE_OPTIONS}
-							required
-						/>
-						<SelectField
-							label="Department"
-							value={form.department}
-							onChange={(v) => set("department", v)}
-							options={DEPARTMENTS}
-							setupLink="departments"
-						/>
-					</FieldRow>
-					<ChoiceCards
-						label="Access level"
-						value={form.level}
-						onChange={(v) => set("level", v)}
-						columns={3}
-						options={[
-							{
-								value: "FULL",
-								label: "Full",
-								hint: "Everything in the module",
-							},
-							{
-								value: "EDIT",
-								label: "Can edit",
-								hint: "Day-to-day work, no settings",
-							},
-							{
-								value: "VIEW",
-								label: "View only",
-								hint: "Looks, can't change",
-							},
-						]}
-					/>
-					<FieldRow>
-						<TextField
-							label="Job title"
-							value={form.jobTitle}
-							onChange={(v) => set("jobTitle", v)}
-							placeholder="Room attendant"
-						/>
-						<SelectField
-							label="Shift"
-							value={form.shift}
-							onChange={(v) => set("shift", v)}
-							options={SHIFT_OPTIONS}
-							setupLink="shifts"
-						/>
-					</FieldRow>
-					<TextField
-						label="Start date"
-						type="date"
-						value={form.startedOn}
-						onChange={(v) => set("startedOn", v)}
-					/>
+							<FieldRow>
+								<SelectField
+									label="Role"
+									value={form.role}
+									onChange={(v) => set("role", v)}
+									options={ROLE_OPTIONS}
+									required
+								/>
+								<SelectField
+									label="Department"
+									value={form.department}
+									onChange={(v) => set("department", v)}
+									options={DEPARTMENTS}
+									setupLink="departments"
+								/>
+							</FieldRow>
+							<ChoiceCards
+								label="Access level"
+								value={form.level}
+								onChange={(v) => set("level", v)}
+								columns={3}
+								options={[
+									{
+										value: "FULL",
+										label: "Full",
+										hint: "Everything in the module",
+									},
+									{
+										value: "EDIT",
+										label: "Can edit",
+										hint: "Day-to-day work, no settings",
+									},
+									{
+										value: "VIEW",
+										label: "View only",
+										hint: "Looks, can't change",
+									},
+								]}
+							/>
+							<FieldRow>
+								<TextField
+									label="Job title"
+									value={form.jobTitle}
+									onChange={(v) => set("jobTitle", v)}
+									placeholder="Room attendant"
+								/>
+								<SelectField
+									label="Shift"
+									value={form.shift}
+									onChange={(v) => set("shift", v)}
+									options={SHIFT_OPTIONS}
+									setupLink="shifts"
+								/>
+							</FieldRow>
+							<TextField
+								label="Start date"
+								type="date"
+								value={form.startedOn}
+								onChange={(v) => set("startedOn", v)}
+							/>
 						</>
 					)}
 					{!editing && (
@@ -723,7 +751,19 @@ export function ChangeShiftModal({
 	const { run, pending } = useAction();
 	const [shift, setShift] = useState("");
 	const [from, setFrom] = useState(new Date().toISOString().slice(0, 10));
-	const [days, setDays] = useState("1");
+	// Starts empty (DEF-068): the manager types how many days; 1 to 14, whole days.
+	const [days, setDays] = useState("");
+	const [daysTouched, setDaysTouched] = useState(false);
+	const dayCount = /^\d+$/.test(days.trim()) ? Number(days) : Number.NaN;
+	const daysError =
+		days.trim() === ""
+			? daysTouched
+				? "Enter the number of days"
+				: undefined
+			: !Number.isInteger(dayCount) || dayCount < 1 || dayCount > 14
+				? "Between 1 and 14 days"
+				: undefined;
+	const daysOk = Number.isInteger(dayCount) && dayCount >= 1 && dayCount <= 14;
 	const preset = shifts.find((s) => s.name === shift);
 	const times = preset ? ([preset.starts, preset.ends] as const) : undefined;
 	return (
@@ -740,13 +780,13 @@ export function ChangeShiftModal({
 					</Button>
 					<Button
 						className={btn.primary}
-						disabled={!shift || !staff || pending}
+						disabled={!shift || !staff || !daysOk || pending}
 						onClick={() =>
 							staff &&
 							times &&
 							run(
 								async () => {
-									const n = Math.max(1, Math.min(14, Number(days) || 1));
+									const n = dayCount;
 									for (let i = 0; i < n; i++) {
 										const date = format(
 											addDays(parseISO(from), i),
@@ -767,6 +807,8 @@ export function ChangeShiftModal({
 								`${staff.fullName} is on ${shift} from ${fmtDay(from)}`,
 								() => {
 									setShift("");
+									setDays("");
+									setDaysTouched(false);
 									onClose();
 								},
 							)
@@ -799,7 +841,12 @@ export function ChangeShiftModal({
 						label="Number of days"
 						type="number"
 						value={days}
-						onChange={setDays}
+						onChange={(v) => {
+							setDays(v);
+							setDaysTouched(true);
+						}}
+						placeholder="e.g. 5"
+						error={daysError}
 					/>
 				</FieldRow>
 				<Note tone="info">
