@@ -26,9 +26,10 @@ export default async function PlatformPaymentsPage({
 		from: param(sp, "from"),
 		to: param(sp, "to"),
 	};
-	const [role, settlements, batches, failed, payments, summary, businesses] =
+	const role = adminRole(await getActiveRole());
+	const money = role === "SUPER_ADMIN" || role === "FINANCE_ADMIN";
+	const [settlements, batches, failed, payments, summary, businesses, hotels] =
 		await Promise.all([
-			getActiveRole(),
 			adminData.payments.settlements({
 				...(tab === "settlements" ? filters : {}),
 				page: tab === "settlements" ? page : 0,
@@ -49,16 +50,21 @@ export default async function PlatformPaymentsPage({
 				? adminData.payments.summary({ businessId })
 				: Promise.resolve(null),
 			data.platform.businesses(),
+			// POS & fee collection: every hotel, read only on that tab; its keys and debit state load from the browser.
+			tab === "pos" && money
+				? adminData.hotels.directory()
+				: Promise.resolve(null),
 		]);
 	return (
 		<PaymentsScreen
-			role={adminRole(role)}
+			role={role}
 			settlements={settlements}
 			batches={batches}
 			failed={failed}
 			payments={payments}
 			summary={summary}
 			businesses={businesses}
+			hotels={hotels}
 		/>
 	);
 }

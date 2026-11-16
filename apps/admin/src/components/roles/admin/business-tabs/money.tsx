@@ -102,7 +102,7 @@ export function MoneyTab({
 					subtitle="Monthly, from the fee model"
 					action={{
 						label: "Fees & billing",
-						href: `/dashboard/fees?businessId=${businessId}`,
+						href: `/dashboard/fees?view=statements&businessId=${businessId}`,
 					}}
 					flush
 				>
@@ -113,7 +113,7 @@ export function MoneyTab({
 							{statements.map((s) => (
 								<li key={s.id}>
 									<Link
-										href={`/dashboard/fees?businessId=${businessId}&open=${s.id}`}
+										href={`/dashboard/fees?view=statements&businessId=${businessId}&open=${s.id}`}
 										className="flex items-center gap-3 px-5 py-3 hover:bg-subtle/60"
 									>
 										<div className="min-w-0 flex-1">

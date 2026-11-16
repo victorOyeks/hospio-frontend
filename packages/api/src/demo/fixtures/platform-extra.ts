@@ -148,3 +148,34 @@ export const demoAdminActivity = [
 	{ id: "aa-5", at: at(-3, 7, 0), by: "Bode Fashola", action: "Approved payout batch PB-2026-309", target: "3 businesses" },
 	{ id: "aa-6", at: at(-5, 10, 0), by: "Ngozi Umeh", action: "Reset owner password", target: "Savannah Lodge Abuja" },
 ];
+
+type DemoIntegrationField = { key: string; label: string; type: "TEXT" | "SECRET" | "URL" | "NUMBER" | "BOOLEAN"; hint: string | null; value: string | null; saved: boolean };
+const f = (key: string, label: string, type: DemoIntegrationField["type"], value: string | null = null, hint: string | null = null): DemoIntegrationField => ({
+	key,
+	label,
+	type,
+	hint,
+	value,
+	saved: value !== null,
+});
+
+/** Sample Integrations page cards (demo mode): a mix of keys saved in the portal and providers on the server's setting. */
+export const demoIntegrationCards: {
+	provider: string;
+	label: string;
+	group: "EMAIL" | "MESSAGING" | "PAYMENTS" | "POS" | "FEE_DEBIT";
+	testable: boolean;
+	updatedByName: string | null;
+	updatedAt: string | null;
+	fields: DemoIntegrationField[];
+}[] = [
+	{ provider: "BREVO", label: "Brevo", group: "EMAIL", testable: true, updatedByName: "Amoria Nwosu", updatedAt: at(-2, 10, 15), fields: [f("apiKey", "API key", "SECRET", "xkeysib-••••••••3f9a", "Brevo → SMTP & API → API keys"), f("senderEmail", "Sender email", "TEXT", "no-reply@hospio360.com"), f("senderName", "Sender name", "TEXT", "Hospio360")] },
+	{ provider: "SMTP", label: "SMTP (fallback)", group: "EMAIL", testable: true, updatedByName: null, updatedAt: null, fields: [f("host", "Host", "TEXT"), f("port", "Port", "NUMBER", null, "Usually 587"), f("username", "Username", "TEXT"), f("password", "Password", "SECRET"), f("startTls", "Use STARTTLS", "BOOLEAN")] },
+	{ provider: "INFOBIP", label: "Infobip WhatsApp", group: "MESSAGING", testable: true, updatedByName: null, updatedAt: null, fields: [f("baseUrl", "Base URL", "URL", null, "e.g. https://xxxx.api.infobip.com"), f("apiKey", "API key", "SECRET"), f("sender", "WhatsApp sender number", "TEXT")] },
+	{ provider: "TERMII", label: "Termii SMS", group: "MESSAGING", testable: true, updatedByName: "Amoria Nwosu", updatedAt: at(-6, 9, 0), fields: [f("apiKey", "API key", "SECRET", "TL••••••••a81c"), f("senderId", "Sender ID", "TEXT", "Hospio360")] },
+	{ provider: "PAYSTACK", label: "Paystack", group: "PAYMENTS", testable: true, updatedByName: null, updatedAt: null, fields: [f("secretKey", "Secret key", "SECRET"), f("publicKey", "Public key", "TEXT")] },
+	{ provider: "MONIEPOINT", label: "Moniepoint POS", group: "POS", testable: false, updatedByName: null, updatedAt: null, fields: [f("baseUrl", "Base URL", "URL"), f("apiKey", "API key", "SECRET"), f("webhookSecret", "Webhook secret", "SECRET")] },
+	{ provider: "OPAY", label: "OPay POS", group: "POS", testable: false, updatedByName: null, updatedAt: null, fields: [f("baseUrl", "Base URL", "URL"), f("clientAuthKey", "Client auth key", "SECRET")] },
+	{ provider: "FEE_DEBIT_OPAY", label: "OPay fee debit", group: "FEE_DEBIT", testable: false, updatedByName: null, updatedAt: null, fields: [f("enabled", "Debit through OPay", "BOOLEAN"), f("merchantId", "Hospio merchant ID", "TEXT"), f("privateKey", "Merchant private key", "SECRET")] },
+	{ provider: "FEE_DEBIT_MONIEPOINT", label: "Moniepoint fee debit", group: "FEE_DEBIT", testable: false, updatedByName: null, updatedAt: null, fields: [f("enabled", "Debit through Moniepoint", "BOOLEAN"), f("accountNumber", "Hospio collection account", "TEXT"), f("apiKey", "API key", "SECRET")] },
+];

@@ -19,13 +19,11 @@ export default async function BusinessDetailPage({
 	]);
 	// Null means tenant-service answered 404; any other failure threw and error.tsx offers a retry.
 	if (!business) notFound();
-	const [hotels, users, admins, fees, tickets, changes] = await Promise.all([
+	// Statements, tickets and changes have their own tabs (Money, Support, Contract & activity) and load there.
+	const [hotels, users, admins] = await Promise.all([
 		data.platform.businessHotels(business.id),
 		data.platform.businessUsers(business.id),
 		adminData.team.list(),
-		adminData.fees.statements({ businessId: business.id, size: 24 }),
-		adminData.support.tickets({ businessId: business.id, size: 50 }),
-		adminData.changes.list({ businessId: business.id, size: 50 }),
 	]);
 	return (
 		<BusinessPage
@@ -34,9 +32,6 @@ export default async function BusinessDetailPage({
 			hotels={hotels}
 			users={users}
 			admins={admins}
-			fees={fees.content}
-			tickets={tickets.content}
-			changes={changes.content}
 		/>
 	);
 }

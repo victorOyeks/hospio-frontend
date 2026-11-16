@@ -16,7 +16,9 @@ import {
 import { SidebarTrigger } from "@hospio/ui/primitives/sidebar";
 import type { Me } from "@hospio/api/api/schema";
 import { logout } from "@hospio/api/actions";
-import { roleLabels, type HotelRole } from "@hospio/api/roles";
+import { APP } from "@hospio/api/app";
+import { PLATFORM_ROLES, roleLabels, type HotelRole } from "@hospio/api/roles";
+import { AdminSearch } from "@hospio/ui/shared/admin-search";
 import { cn } from "@hospio/ui/utils";
 import { type DeviceSetupHotel, LockButton, SetupDeviceModal } from "@hospio/ui/shared/shared-device";
 
@@ -53,15 +55,20 @@ export function Header({
 		<header className="flex items-center justify-between gap-4 px-8 pt-6">
 			<div className="flex items-center gap-3">
 				<SidebarTrigger className="md:hidden" />
-				<label className="hidden h-[42px] w-[380px] items-center gap-[10px] rounded-xl border border-line bg-card pl-[14px] pr-[10px] md:flex">
-					<SearchIcon className="size-[18px] text-ink-3" />
-					<input
-						type="search"
-						placeholder="Search bookings, guests, branches…"
-						className="min-w-0 flex-1 bg-transparent text-sm text-ink outline-none placeholder:text-ink-3"
-					/>
-					<kbd className="rounded-md bg-subtle px-[6px] py-[2px] text-[11px] font-medium text-ink-2">⌘ K</kbd>
-				</label>
+				{/* The admin portal's staff get a working search (⌘K); the hotel app keeps its box as it is. */}
+				{APP === "admin" && PLATFORM_ROLES.includes(role) ? (
+					<AdminSearch role={role} />
+				) : (
+					<label className="hidden h-[42px] w-[380px] items-center gap-[10px] rounded-xl border border-line bg-card pl-[14px] pr-[10px] md:flex">
+						<SearchIcon className="size-[18px] text-ink-3" />
+						<input
+							type="search"
+							placeholder="Search bookings, guests, branches…"
+							className="min-w-0 flex-1 bg-transparent text-sm text-ink outline-none placeholder:text-ink-3"
+						/>
+						<kbd className="rounded-md bg-subtle px-[6px] py-[2px] text-[11px] font-medium text-ink-2">⌘ K</kbd>
+					</label>
+				)}
 			</div>
 
 			<div className="flex items-center gap-3">

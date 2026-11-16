@@ -17,6 +17,7 @@ import type {
 	FailedPayout,
 	FeeStatementResponse,
 	Integration,
+	IntegrationView,
 	MarketerAgreement,
 	MarketerProfile,
 	PayoutBatch,
@@ -37,7 +38,7 @@ import { demoDelay } from "@hospio/api/demo/mode";
 import * as platform from "@hospio/api/demo/fixtures/platform";
 import * as extra from "@hospio/api/demo/fixtures/platform-extra";
 import { at } from "@hospio/api/demo/fixtures/hotel";
-import type { AdminUserRow } from "./types";
+import type { AdminUserRow, BusinessRow } from "./types";
 import { live } from "./live";
 import {
 	type AdminActivityRow,
@@ -51,7 +52,11 @@ import {
 	type FeeStatementStatus,
 	type HealthRow,
 	type HotelOverviewData,
+	type HotelDirectoryRow,
+	type IntegrationCard,
+	type IntegrationFieldType,
 	type IntegrationItem,
+	type IntegrationsData,
 	type MarketerAgreementRow,
 	type MarketerBusinessItem,
 	type MarketerDetailData,
@@ -544,6 +549,71 @@ const demoFailed: FailedPayoutItem[] = extra.demoFailedPayouts.map((f) => ({
 	attempts: f.attempts,
 	lastTriedAt: f.lastTriedAt,
 }));
+
+const integrationGroups = ["EMAIL", "MESSAGING", "PAYMENTS", "POS", "FEE_DEBIT"] as const;
+const integrationTypes = ["TEXT", "SECRET", "URL", "NUMBER", "BOOLEAN"] as const;
+const toIntegrationCard = (v: IntegrationView): IntegrationCard => ({
+	provider: v.provider,
+	label: v.label,
+	group: (integrationGroups as readonly string[]).includes(v.group)
+		? (v.group as IntegrationCard["group"])
+		: "PAYMENTS",
+	testable: !!v.testable,
+	updatedByName: v.updatedByName ?? null,
+	updatedAt: v.updatedAt ?? null,
+	fields: v.fields.map((f) => ({
+		key: f.key,
+		label: f.label,
+		type: (integrationTypes as readonly string[]).includes(f.type)
+			? (f.type as IntegrationFieldType)
+			: "TEXT",
+		hint: f.hint ?? null,
+		value: f.value ?? null,
+		saved: !!f.saved,
+	})),
+});
+export { toIntegrationCard };
+
+/** Runs `fn` over `items`, at most `limit` at once, keeping the order. */
+async function mapLimit<T, R>(
+	items: T[],
+	limit: number,
+	fn: (item: T) => Promise<R>,
+): Promise<R[]> {
+	const out: R[] = new Array(items.length);
+	let next = 0;
+	const worker = async () => {
+		while (next < items.length) {
+			const i = next++;
+			out[i] = await fn(items[i]);
+		}
+	};
+	await Promise.all(
+		Array.from({ length: Math.min(limit, items.length) }, worker),
+	);
+	return out;
+}
+
+/** One business's hotels straight from tenant (no manager names: that would be an identity call per business). */
+async function tenantHotels(businessId: string) {
+	const { data: res, error } = await api("@get/tenant/businesses/:id/hotels", {
+		...(await withSession()),
+		params: { id: businessId },
+	});
+	if (error || !res) {
+		fail("tenant-service business hotels", error);
+		return [];
+	}
+	return res.data.map((h) => ({
+		id: h.id,
+		name: h.name,
+		city: h.city,
+		address: h.address,
+		rooms: h.roomCount,
+		timezone: h.timezone,
+		status: h.status,
+	}));
+}
 
 const demoIntegrations: IntegrationItem[] = extra.demoIntegrations.map((i) => ({
 	key: i.key,
@@ -1473,17 +1543,163 @@ export const adminData = {
 				security: res.data.security ?? {},
 			};
 		},
-		integrations: async (): Promise<IntegrationItem[]> => {
-			if (!live("platform")) return give(demoIntegrations);
+	},
+
+	/**
+	 * The Integrations page (Platform → Integrations): each provider's keys as editable cards (GET /integrations, Super admin),
+	 * and the connection checks (GET /integrations/status) that Settings used to show, so nothing it showed is lost.
+	 */
+	integrations: async (): Promise<IntegrationsData> => {
+		if (!live("platform"))
+			return give({
+				ok: true,
+				cards: extra.demoIntegrationCards.map((c) => ({ ...c })),
+				status: demoIntegrations,
+			});
+		const [cards, status] = await Promise.all([
+			(async () => {
+				try {
+					const { data: res, error } = await api(
+						"@get/platform/admin/integrations",
+						await withSession(),
+					);
+					if (error || !res) {
+						fail("platform-service integrations", error);
+						return errorMessage(error, "Integrations could not be loaded");
+					}
+					return res.data.map(toIntegrationCard);
+				} catch (e) {
+					// An answer in another shape (a service not yet updated) fails validation here instead of breaking the page.
+					fail("platform-service integrations", e);
+					return "Integrations could not be read. The platform service may not have the update yet.";
+				}
+			})(),
+			adminData.integrationStatus(),
+		]);
+		return typeof cards === "string"
+			? { ok: false, error: cards, status }
+			: { ok: true, cards, status };
+	},
+
+	/** The server's connection checks (database, Kafka, providers); any platform role. Empty when the call fails. */
+	integrationStatus: async (): Promise<IntegrationItem[]> => {
+		if (!live("platform")) return give(demoIntegrations);
+		try {
 			const { data: res, error } = await api(
-				"@get/platform/admin/integrations",
+				"@get/platform/admin/integrations/status",
 				await withSession(),
 			);
 			if (error || !res) {
-				fail("platform-service integrations", error);
+				fail("platform-service integration status", error);
 				return [];
 			}
 			return res.data.map(toIntegrationItem);
+		} catch (e) {
+			fail("platform-service integration status", e);
+			return [];
+		}
+	},
+
+	hotels: {
+		/**
+		 * Every hotel across businesses for the flat Hotels page and Payments → POS & fee collection. Tenant has no
+		 * all-hotels list for the platform, so each business's hotels are read (a few at a time); money roles also get each
+		 * hotel's fee collection and its latest daily fee. Support can't read those, so they stay null.
+		 */
+		directory: async (
+			opts: { money?: boolean; businesses?: BusinessRow[] } = {},
+		): Promise<HotelDirectoryRow[]> => {
+			const { data } = await import("./index");
+			const businesses = opts.businesses ?? (await data.platform.businesses());
+			const base = (
+				await mapLimit(businesses, 6, async (b) => {
+					const hotels = live("tenant")
+						? await tenantHotels(b.id)
+						: (await data.platform.businessHotels(b.id)).map((h) => ({
+								...h,
+								status: "ACTIVE",
+							}));
+					return hotels.map(
+						(h): HotelDirectoryRow => ({
+							id: h.id,
+							name: h.name,
+							businessId: b.id,
+							businessName: b.name,
+							stage: b.stage,
+							city: h.city ?? "",
+							address: h.address ?? "",
+							rooms: h.rooms,
+							timezone: h.timezone ?? "Africa/Lagos",
+							status: h.status,
+							collection: null,
+							lastFee: null,
+						}),
+					);
+				})
+			).flat();
+			return opts.money ? adminData.hotels.withFees(base) : base;
+		},
+		/**
+		 * Adds each hotel's fee collection and latest daily fee (money roles; Support is refused). One call per hotel, so the
+		 * lists load the hotels first and fill these in from the browser.
+		 */
+		withFees: async (base: HotelDirectoryRow[]): Promise<HotelDirectoryRow[]> => {
+			if (!live("platform"))
+				return base.map((h, i) => ({
+					...h,
+					collection: {
+						provider: i % 3 === 2 ? null : i % 2 ? "OPAY" : "MONIEPOINT",
+						debitEnabled: i % 3 === 0,
+						posPaused: i % 7 === 6,
+						keysIn: i % 3 !== 2,
+						debitConfigured: i % 3 !== 2,
+					},
+					lastFee:
+						i % 3 === 2
+							? null
+							: {
+									date: at(-1, 12).slice(0, 10),
+									fee: 4500 + i * 750,
+									status: i % 3 === 0 ? "PAID" : "SHADOW",
+								},
+				}));
+			const session = await withSession();
+			const [fees, collections] = await Promise.all([
+				api("@get/platform/admin/fees/daily", { ...session, query: {} }),
+				mapLimit(base, 10, async (h) => {
+					const { data: res } = await api(
+						"@get/platform/admin/businesses/:businessId/hotels/:hotelId/fee-collection",
+						{ ...session, params: { businessId: h.businessId, hotelId: h.id } },
+					);
+					return res?.data ?? null;
+				}),
+			]);
+			const latest = new Map<string, { date: string; fee: number; status: string }>();
+			for (const d of fees.data?.data ?? []) {
+				const seen = latest.get(d.hotelId);
+				if (!seen || seen.date < d.date)
+					latest.set(d.hotelId, { date: d.date, fee: d.fee, status: d.status });
+			}
+			return base.map((h, i) => {
+				const c = collections[i];
+				const chosen =
+					c?.providers.find((p) => p.provider === c.provider) ??
+					c?.providers.find((p) => p.hotelKeys) ??
+					null;
+				return {
+					...h,
+					collection: c
+						? {
+								provider: c.provider ?? null,
+								debitEnabled: c.debitEnabled,
+								posPaused: c.posPaused,
+								keysIn: !!chosen?.hotelKeys,
+								debitConfigured: !!chosen?.debitConfigured,
+							}
+						: null,
+					lastFee: latest.get(h.id) ?? null,
+				};
+			});
 		},
 	},
 

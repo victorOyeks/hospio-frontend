@@ -26,6 +26,7 @@ import { useAction } from "@hospio/api/actions/use-action";
 import type {
 	AdminPaymentRow,
 	FailedPayoutItem,
+	HotelDirectoryRow,
 	Paged,
 	PaymentSummaryData,
 	PayoutBatchItem,
@@ -67,6 +68,7 @@ import {
 	usePageParam,
 	useRefresh,
 } from "./live";
+import { PosCollectionTab } from "./hotels/pos-tab";
 import { can, ReadOnlyNote } from "./shared";
 
 const settlementTone = {
@@ -95,6 +97,7 @@ export function PaymentsScreen({
 	payments,
 	summary,
 	businesses,
+	hotels,
 }: {
 	role: AdminRole;
 	settlements: Paged<SettlementItem>;
@@ -103,6 +106,8 @@ export function PaymentsScreen({
 	payments: Paged<AdminPaymentRow>;
 	summary: PaymentSummaryData | null;
 	businesses: BusinessRow[];
+	/** Every hotel's POS keys and fee debit, loaded only on the POS & fee collection tab. */
+	hotels?: HotelDirectoryRow[] | null;
 }) {
 	const [tab, setTab] = useFilterParam("tab");
 	const [status, setStatus] = useFilterParam("status");
@@ -120,7 +125,14 @@ export function PaymentsScreen({
 	const { run, pending } = useAction();
 	const { refresh } = useRefresh();
 	const money = can.money(role);
-	const active = tab || "settlements";
+	const active = tab === "pos" && !money ? "settlements" : tab || "settlements";
+	// Three areas, the first with its own sub-tabs: settlements and payouts, guest payments, and each hotel's POS and fee state.
+	const section =
+		active === "payments" ? "payments" : active === "pos" ? "pos" : "settlements";
+	const go = (k: string) => {
+		setTab(k === "settlements" ? null : k);
+		setPage(0);
+	};
 	const rows = settlements.content;
 	const selected = rows.find((s) => s.id === open) ?? null;
 	const pendingRows = rows.filter((s) => s.status === "PENDING");
@@ -283,10 +295,10 @@ export function PaymentsScreen({
 	return (
 		<>
 			<PageHeader
-				title="Payments"
+				title="Payments & POS"
 				subtitle="Card and transfer money taken on POS terminals, settled per business and provider each day with the Hospio360 share taken out"
 			>
-				{money && (
+				{money && section === "settlements" && (
 					<button
 						type="button"
 						className={cn(btn.secondary, "flex items-center gap-2")}
@@ -307,7 +319,7 @@ export function PaymentsScreen({
 						<PlayIcon className="size-4" /> Run settlements for yesterday
 					</button>
 				)}
-				{money && (
+				{money && section === "settlements" && (
 					<button
 						type="button"
 						className={btn.primary}
@@ -323,220 +335,242 @@ export function PaymentsScreen({
 					Finance admin.
 				</ReadOnlyNote>
 			)}
-			<div className="grid grid-cols-2 gap-4 md:grid-cols-4">
-				{summary ? (
-					<>
+			<PillTabs
+				tabs={[
+					{ key: "settlements", label: "Settlements & payouts" },
+					{ key: "payments", label: "Guest payments" },
+					...(money ? [{ key: "pos", label: "POS & fee collection" }] : []),
+				]}
+				value={section}
+				onChange={go}
+			/>
+			{/* The hotels arrive with the server render that follows the tab change; until then say so, not "No hotels". */}
+			{section === "pos" &&
+				(hotels ? (
+					<PosCollectionTab role={role} hotels={hotels} />
+				) : (
+					<Loading label="Loading every hotel…" />
+				))}
+			{section !== "pos" && (
+				<>
+					<div className="grid grid-cols-2 gap-4 md:grid-cols-4">
+						{summary ? (
+							<>
+								<KpiCard
+									label="Gross taken"
+									value={nairaShort(summary.gross)}
+									icon={CreditCardIcon}
+									hint={`${plural(summary.count, "payment")} · ${biz ? (businesses.find((b) => b.id === biz)?.name ?? "this business") : "all"}`}
+								/>
+								<KpiCard
+									label="By provider"
+									value={summary.byProvider.length}
+									icon={WalletIcon}
+									hint={
+										summary.byProvider
+											.map((p) => `${p.provider} ${nairaShort(p.gross)}`)
+											.join(" · ") || "—"
+									}
+								/>
+							</>
+						) : (
+							<>
+								<KpiCard
+									label="Gross on this page"
+									value={nairaShort(gross)}
+									icon={CreditCardIcon}
+									hint={plural(rows.length, "settlement")}
+								/>
+								<KpiCard
+									label="Hospio360 share"
+									value={nairaShort(hms)}
+									icon={WalletIcon}
+									hint="Of the settlements shown"
+								/>
+							</>
+						)}
 						<KpiCard
-							label="Gross taken"
-							value={nairaShort(summary.gross)}
-							icon={CreditCardIcon}
-							hint={`${plural(summary.count, "payment")} · ${biz ? (businesses.find((b) => b.id === biz)?.name ?? "this business") : "all"}`}
+							label="Waiting for payout"
+							value={nairaShort(pendingNet)}
+							icon={BanknoteIcon}
+							hint={plural(pendingRows.length, "pending settlement")}
 						/>
 						<KpiCard
-							label="By provider"
-							value={summary.byProvider.length}
-							icon={WalletIcon}
-							hint={
-								summary.byProvider
-									.map((p) => `${p.provider} ${nairaShort(p.gross)}`)
-									.join(" · ") || "—"
+							label="Failed payouts"
+							value={failed.total}
+							icon={AlertTriangleIcon}
+							pill={
+								failed.total > 0 ? (
+									<StatusPill tone="danger">
+										{naira(failed.content.reduce((a, f) => a + f.amount, 0))}
+									</StatusPill>
+								) : undefined
 							}
 						/>
-					</>
-				) : (
-					<>
-						<KpiCard
-							label="Gross on this page"
-							value={nairaShort(gross)}
-							icon={CreditCardIcon}
-							hint={plural(rows.length, "settlement")}
-						/>
-						<KpiCard
-							label="Hospio360 share"
-							value={nairaShort(hms)}
-							icon={WalletIcon}
-							hint="Of the settlements shown"
-						/>
-					</>
-				)}
-				<KpiCard
-					label="Waiting for payout"
-					value={nairaShort(pendingNet)}
-					icon={BanknoteIcon}
-					hint={plural(pendingRows.length, "pending settlement")}
-				/>
-				<KpiCard
-					label="Failed payouts"
-					value={failed.total}
-					icon={AlertTriangleIcon}
-					pill={
-						failed.total > 0 ? (
-							<StatusPill tone="danger">
-								{naira(failed.content.reduce((a, f) => a + f.amount, 0))}
-							</StatusPill>
-						) : undefined
-					}
-				/>
-			</div>
-			<Toolbar
-				left={
-					<PillTabs
-						tabs={[
-							{
-								key: "settlements",
-								label: "Settlements",
-								count: settlements.total,
-							},
-							{ key: "batches", label: "Payout batches", count: batches.total },
-							{ key: "failed", label: "Failed payouts", count: failed.total },
-							{ key: "payments", label: "Payments", count: payments.total },
-						]}
-						value={active}
-						onChange={(k) => {
-							setTab(k === "settlements" ? null : k);
-							setPage(0);
-						}}
-					/>
-				}
-				right={
-					active === "settlements" || active === "payments" ? (
-						<>
-							<FilterSelect
-								value={status}
-								onChange={(v) => {
-									setStatus(v);
-									setPage(0);
-								}}
-								all="All statuses"
-								options={
-									active === "settlements"
-										? [
-												{ value: "PENDING", label: "Pending" },
-												{ value: "SETTLED", label: "Settled" },
-												{ value: "FAILED", label: "Failed" },
-											]
-										: [
-												"PENDING",
-												"PROCESSING",
-												"APPROVED",
-												"DECLINED",
-												"FAILED",
-												"REFUNDED",
-											].map((v) => ({ value: v, label: v.toLowerCase() }))
-								}
-							/>
-							<FilterSelect
-								value={biz}
-								onChange={(v) => {
-									setBiz(v);
-									setPage(0);
-								}}
-								all="All businesses"
-								options={bizOptions}
-							/>
-							<input
-								type="date"
-								value={from}
-								onChange={(e) => {
-									setFrom(e.target.value);
-									setPage(0);
-								}}
-								className="h-[38px] rounded-control border border-line bg-card px-3 text-[13px] text-ink"
-								aria-label="From"
-							/>
-							<input
-								type="date"
-								value={to}
-								onChange={(e) => {
-									setTo(e.target.value);
-									setPage(0);
-								}}
-								className="h-[38px] rounded-control border border-line bg-card px-3 text-[13px] text-ink"
-								aria-label="To"
-							/>
-						</>
-					) : undefined
-				}
-			/>
-			{active === "settlements" && (
-				<DataTable
-					columns={settlementCols}
-					data={rows}
-					server={{ page: settlements, onPage: setPage }}
-					onRowClick={(s) => setOpen(s.id)}
-					emptyTitle="No settlements"
-					emptyHint="Run settlements for yesterday to build them from approved card and transfer payments."
-				/>
-			)}
-			{active === "batches" && (
-				<DataTable
-					columns={batchCols}
-					data={batches.content}
-					server={{ page: batches, onPage: setPage }}
-					onRowClick={(b) => setBatchId(b.id)}
-					emptyTitle="No payout batches yet"
-				/>
-			)}
-			{active === "payments" && (
-				<DataTable
-					columns={paymentCols}
-					data={payments.content}
-					server={{ page: payments, onPage: setPage }}
-					emptyTitle="No payments"
-				/>
-			)}
-			{active === "failed" && (
-				<SectionCard
-					title="Failed payouts"
-					subtitle="Money we hold for the hotel until the bank details are fixed"
-					count={failed.total}
-				>
-					{failed.content.length === 0 ? (
-						<p className="py-4 text-sm text-ink-3">Nothing failed.</p>
-					) : (
-						failed.content.map((f, i) => (
-							<div
-								key={f.id}
-								className={cn(
-									"flex items-center gap-3 py-3",
-									i < failed.content.length - 1 && "border-b border-line",
-								)}
-							>
-								<AlertTriangleIcon className="size-4 shrink-0 text-danger" />
-								<div className="min-w-0 flex-1">
-									<p className="text-[13px] font-semibold text-ink">
-										{f.businessName} · {naira(f.amount)}
-									</p>
-									<p className="text-xs text-ink-3">
-										{f.bankLabel} · {f.reason} · {plural(f.attempts, "attempt")}
-										{f.lastTriedAt ? ` · last ${fmtAgo(f.lastTriedAt)}` : ""}
-									</p>
-								</div>
-								{money && (
-									<button
-										type="button"
-										className={cn(btn.secondary, "flex items-center gap-2")}
-										onClick={() => setRetry({ f, resolve: false })}
-									>
-										<RefreshCwIcon className="size-4" /> Retry
-									</button>
-								)}
-								{money && (
-									<button
-										type="button"
-										className={cn(btn.ghost, "flex items-center gap-2")}
-										onClick={() => setRetry({ f, resolve: true })}
-									>
-										<CheckIcon className="size-4" /> Resolve
-									</button>
-								)}
-							</div>
-						))
-					)}
-					<div className="pt-3">
-						<ServerPager bare page={failed} onPage={setPage} />
 					</div>
-				</SectionCard>
+					<Toolbar
+						left={
+							section === "settlements" ? (
+								<PillTabs
+									tabs={[
+										{
+											key: "settlements",
+											label: "Settlements",
+											count: settlements.total,
+										},
+										{ key: "batches", label: "Payout batches", count: batches.total },
+										{ key: "failed", label: "Failed payouts", count: failed.total },
+									]}
+									value={active}
+									onChange={go}
+								/>
+							) : (
+								<span className="text-[13px] text-ink-2">
+									{plural(payments.total, "guest payment")} across every business · read only
+								</span>
+							)
+						}
+						right={
+							active === "settlements" || active === "payments" ? (
+								<>
+									<FilterSelect
+										value={status}
+										onChange={(v) => {
+											setStatus(v);
+											setPage(0);
+										}}
+										all="All statuses"
+										options={
+											active === "settlements"
+												? [
+														{ value: "PENDING", label: "Pending" },
+														{ value: "SETTLED", label: "Settled" },
+														{ value: "FAILED", label: "Failed" },
+													]
+												: [
+														"PENDING",
+														"PROCESSING",
+														"APPROVED",
+														"DECLINED",
+														"FAILED",
+														"REFUNDED",
+													].map((v) => ({ value: v, label: v.toLowerCase() }))
+										}
+									/>
+									<FilterSelect
+										value={biz}
+										onChange={(v) => {
+											setBiz(v);
+											setPage(0);
+										}}
+										all="All businesses"
+										options={bizOptions}
+									/>
+									<input
+										type="date"
+										value={from}
+										onChange={(e) => {
+											setFrom(e.target.value);
+											setPage(0);
+										}}
+										className="h-[38px] rounded-control border border-line bg-card px-3 text-[13px] text-ink"
+										aria-label="From"
+									/>
+									<input
+										type="date"
+										value={to}
+										onChange={(e) => {
+											setTo(e.target.value);
+											setPage(0);
+										}}
+										className="h-[38px] rounded-control border border-line bg-card px-3 text-[13px] text-ink"
+										aria-label="To"
+									/>
+								</>
+							) : undefined
+						}
+					/>
+					{active === "settlements" && (
+						<DataTable
+							columns={settlementCols}
+							data={rows}
+							server={{ page: settlements, onPage: setPage }}
+							onRowClick={(s) => setOpen(s.id)}
+							emptyTitle="No settlements"
+							emptyHint="Run settlements for yesterday to build them from approved card and transfer payments."
+						/>
+					)}
+					{active === "batches" && (
+						<DataTable
+							columns={batchCols}
+							data={batches.content}
+							server={{ page: batches, onPage: setPage }}
+							onRowClick={(b) => setBatchId(b.id)}
+							emptyTitle="No payout batches yet"
+						/>
+					)}
+					{active === "payments" && (
+						<DataTable
+							columns={paymentCols}
+							data={payments.content}
+							server={{ page: payments, onPage: setPage }}
+							emptyTitle="No payments"
+						/>
+					)}
+					{active === "failed" && (
+						<SectionCard
+							title="Failed payouts"
+							subtitle="Money we hold for the hotel until the bank details are fixed"
+							count={failed.total}
+						>
+							{failed.content.length === 0 ? (
+								<p className="py-4 text-sm text-ink-3">Nothing failed.</p>
+							) : (
+								failed.content.map((f, i) => (
+									<div
+										key={f.id}
+										className={cn(
+											"flex items-center gap-3 py-3",
+											i < failed.content.length - 1 && "border-b border-line",
+										)}
+									>
+										<AlertTriangleIcon className="size-4 shrink-0 text-danger" />
+										<div className="min-w-0 flex-1">
+											<p className="text-[13px] font-semibold text-ink">
+												{f.businessName} · {naira(f.amount)}
+											</p>
+											<p className="text-xs text-ink-3">
+												{f.bankLabel} · {f.reason} · {plural(f.attempts, "attempt")}
+												{f.lastTriedAt ? ` · last ${fmtAgo(f.lastTriedAt)}` : ""}
+											</p>
+										</div>
+										{money && (
+											<button
+												type="button"
+												className={cn(btn.secondary, "flex items-center gap-2")}
+												onClick={() => setRetry({ f, resolve: false })}
+											>
+												<RefreshCwIcon className="size-4" /> Retry
+											</button>
+										)}
+										{money && (
+											<button
+												type="button"
+												className={cn(btn.ghost, "flex items-center gap-2")}
+												onClick={() => setRetry({ f, resolve: true })}
+											>
+												<CheckIcon className="size-4" /> Resolve
+											</button>
+										)}
+									</div>
+								))
+							)}
+							<div className="pt-3">
+								<ServerPager bare page={failed} onPage={setPage} />
+							</div>
+						</SectionCard>
+					)}
+				</>
 			)}
 
 			<SidePanel
