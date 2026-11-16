@@ -80,6 +80,11 @@ export async function adminPosConfig(hotelId: string): Promise<ActionResult<PosC
 	return error || !data ? fail(error, "POS keys could not be loaded") : { ok: true, data: data.data };
 }
 
+export async function removeAdminPosConfig(hotelId: string): Promise<ActionResult<PosConfigView>> {
+	const { data, error } = await api("@delete/payment/admin/hotels/:hotelId/pos-config", { ...(await withSession()), params: { hotelId } });
+	return error || !data ? fail(error, "POS keys could not be removed") : { ok: true, data: data.data };
+}
+
 export async function saveAdminPosConfig(
 	businessId: string,
 	hotelId: string,
