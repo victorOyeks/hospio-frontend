@@ -61,6 +61,7 @@ import {
 	ShiftListEditor,
 } from "./hotel-setup-staff-lists";
 import { GuestMessagesSection } from "./hotel-setup-guest-messages";
+import { PosKeysCard } from "./hotel-setup-pos-keys";
 import { MinibarPricesSection } from "./hotel-setup-minibar";
 import { RestaurantsSection } from "./hotel-setup-restaurants";
 import { cn } from "@hospio/ui/utils";
@@ -175,6 +176,17 @@ export function HotelSetupScreen({
 						stores={stores}
 						locked={locked}
 					/>
+				) : section.key === "pos" ? (
+					<div className="flex min-w-0 flex-col gap-4">
+						<SectionForm
+							key={section.key}
+							section={section}
+							locked={locked}
+							why={why[section.key]}
+							hotelId={hotelId}
+						/>
+						<PosKeysCard />
+					</div>
 				) : section.key === "housekeeping" ? (
 					<div className="flex min-w-0 flex-col gap-4">
 						<SectionForm

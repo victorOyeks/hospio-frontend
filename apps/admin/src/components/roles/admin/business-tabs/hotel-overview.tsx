@@ -17,7 +17,9 @@ import { naira, nairaShort, plural } from "@hospio/ui/shared/format";
 import { KpiCard } from "@hospio/ui/shared/kpi-card";
 import { SectionCard } from "@hospio/ui/shared/section-card";
 import { cn } from "@hospio/ui/utils";
+import type { AdminRole } from "@hospio/api/demo/fixtures/platform-extra";
 import { GuestMessagePlans } from "../guest-messages";
+import { HotelFeesPanel } from "../hotel-fees";
 import { BusinessTabHeader } from "./nav";
 
 /** Business · one hotel's day: GET /platform/admin/businesses/{id}/hotels/{hotelId}/overview. */
@@ -27,12 +29,14 @@ export function HotelOverviewTab({
 	hotel,
 	overview,
 	siblings,
+	role,
 }: {
 	businessId: string;
 	businessName: string;
 	hotel: HotelSummary | null;
 	overview: HotelOverviewData | null;
 	siblings: HotelSummary[];
+	role: AdminRole;
 }) {
 	const name = overview?.name ?? hotel?.name ?? "Hotel";
 	return (
@@ -124,6 +128,7 @@ export function HotelOverviewTab({
 					</SectionCard>
 				</>
 			)}
+			{hotel && <HotelFeesPanel businessId={businessId} hotelId={hotel.id} role={role} />}
 			{hotel && <GuestMessagePlans businessId={businessId} hotels={[{ id: hotel.id, name }]} />}
 		</>
 	);

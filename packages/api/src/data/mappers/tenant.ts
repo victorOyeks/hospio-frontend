@@ -21,6 +21,7 @@ import {
 /** tenant-service responses → the rows the owner Hotels screen and the platform Businesses/Onboarding screens render. */
 
 export const feeModelLabels: Record<string, string> = {
+	PERCENT_OF_SALES: "% of daily sales, debited daily",
 	PERCENT_OF_PAYMENTS: "% of payments",
 	PER_ROOM_NIGHT: "Per room night",
 	PERCENT_OF_BOOKINGS: "% of bookings",

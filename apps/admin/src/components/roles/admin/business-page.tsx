@@ -929,12 +929,13 @@ function EditBusinessForm({
 	const [ownerEmail, setOwnerEmail] = useState(business.ownerEmail ?? "");
 	const [ownerPhone, setOwnerPhone] = useState(business.ownerPhone ?? "");
 	const [feeModel, setFeeModel] = useState<
-		"PERCENT_OF_PAYMENTS" | "PER_ROOM_NIGHT" | "PERCENT_OF_BOOKINGS"
+		"PERCENT_OF_SALES" | "PERCENT_OF_PAYMENTS" | "PER_ROOM_NIGHT" | "PERCENT_OF_BOOKINGS"
 	>(
 		business.feeModelKey === "PER_ROOM_NIGHT" ||
-			business.feeModelKey === "PERCENT_OF_BOOKINGS"
+			business.feeModelKey === "PERCENT_OF_BOOKINGS" ||
+			business.feeModelKey === "PERCENT_OF_PAYMENTS"
 			? business.feeModelKey
-			: "PERCENT_OF_PAYMENTS",
+			: "PERCENT_OF_SALES",
 	);
 	const [perNight, setPerNight] = useState<number | "">(
 		business.feeValue || "",
@@ -1120,6 +1121,10 @@ function EditBusinessForm({
 					value={feeModel}
 					onChange={setFeeModel}
 					options={[
+						{
+							value: "PERCENT_OF_SALES",
+							label: feeModelLabels.PERCENT_OF_SALES,
+						},
 						{
 							value: "PERCENT_OF_PAYMENTS",
 							label: feeModelLabels.PERCENT_OF_PAYMENTS,
