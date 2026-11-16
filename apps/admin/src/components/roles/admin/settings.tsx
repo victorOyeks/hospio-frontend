@@ -182,6 +182,7 @@ export function SettingsScreen({
 							value={str(f.model, "PER_ROOM_NIGHT")}
 							onChange={(v) => set("fees", "model", v)}
 							options={[
+								{ value: "PERCENT_OF_SALES", label: "% of daily sales (debited daily)" },
 								{ value: "PER_ROOM_NIGHT", label: "Per room night" },
 								{ value: "PERCENT_OF_PAYMENTS", label: "% of guest payments" },
 								{ value: "PERCENT_OF_BOOKINGS", label: "% of bookings" },

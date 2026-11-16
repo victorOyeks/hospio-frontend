@@ -8,6 +8,7 @@ import { lmRoutes } from "./routes-lm";
 import { mlRoutes } from "./routes-ml";
 import { opsRoutes } from "./routes-ops";
 import { ownerRoutes } from "./routes-owner";
+import { feeRoutes } from "./routes-fees";
 import { paymentRoutes } from "./routes-payments";
 import { profileRoutes } from "./routes-profile";
 import { pagedOf, pageParams } from "./paged";
@@ -212,6 +213,7 @@ export const BusinessStage = z.enum([
 ]);
 export const BusinessSource = z.enum(["SELF_SERVE", "BACK_OFFICE"]);
 export const FeeModel = z.enum([
+	"PERCENT_OF_SALES",
 	"PERCENT_OF_PAYMENTS",
 	"PER_ROOM_NIGHT",
 	"PERCENT_OF_BOOKINGS",
@@ -1110,6 +1112,7 @@ const paging = z
 
 export const schema = createSchema({
 	...ownerRoutes,
+	...feeRoutes,
 	...mlRoutes,
 	...adminRoutes,
 	...opsRoutes,

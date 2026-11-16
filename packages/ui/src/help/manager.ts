@@ -523,7 +523,25 @@ export const managerHelp: HelpModule = {
 			goodToKnow: [
 				"Don't send a second charge while one is waiting.",
 				"If the POS doesn't answer, take cash or a bank transfer instead.",
+				"If it says POS payments are paused, Hospio360's daily fee is unpaid for 3 days: take cash or a transfer and tell the owner.",
 			],
+		},
+		{
+			id: "mgr-pos-keys",
+			title: "Check your POS provider connection",
+			when: "You want to know whether card payments go to your Moniepoint or OPay terminals.",
+			topic: "Money",
+			steps: [
+				"Open “Hotel setup” → “POS”.",
+				"Under “POS provider keys”, see the provider and “Connected”, with each key shown masked.",
+				"Your terminals (serial numbers) are added in the same section, each matched to a role.",
+			],
+			goodToKnow: [
+				"Hospio360 enters the keys from your Moniepoint or OPay business account; you can see them but not change them. Ask Hospio360 support to change one.",
+				"“Not connected yet” means card payments use the standard POS setting until the keys are added.",
+			],
+			route: "/dashboard/hotel-setup",
+			screen: "Hotel setup",
 		},
 	],
 };

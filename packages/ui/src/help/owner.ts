@@ -239,6 +239,26 @@ export const ownerHelp: HelpModule = {
 			screen: "Reports",
 		},
 		{
+			id: "own-hospio-fees",
+			title: "See Hospio360's daily fee",
+			when: "You want to see what each hotel sold, the fee on it and whether it was debited.",
+			topic: "Money",
+			steps: [
+				"Open “Hospio fees”. The cards show the last 30 days' sales, fees and what was debited.",
+				"Each row is one day (and one hotel). Tap a day to see its lines: room nights, other folio charges, restaurant and bar, laundry, discounts and voids.",
+				"Check the “Status”: “Statement only” means nothing is debited yet; “Debit at 6am”, “Debited”, “Part debited” or “Not debited” once automatic debit is on.",
+			],
+			goodToKnow: [
+				"The fee is 1.5 % of what was sold that day, VAT excluded. A sale charged to a room counts once, on the folio.",
+				"Room nights count one night per day of the stay, not all at check-in.",
+				"After midnight you get the day's statement by email. With automatic debit on, the fee is taken at 6am from your hotel's Moniepoint or OPay account.",
+				"A day that isn't debited is tried again that day and moves into the next day's fee. After 3 days unpaid, card payments to the POS pause until a debit goes through; cash and transfers keep working.",
+				"Something looks wrong? Reply to the statement email or contact Hospio360 support.",
+			],
+			route: "/dashboard/hospio-fees",
+			screen: "Hospio fees",
+		},
+		{
 			id: "own-schedule-report",
 			title: "Get a report every day, week or month",
 			when: "You want a report to arrive on its own without opening Reports.",

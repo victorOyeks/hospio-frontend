@@ -97,6 +97,7 @@ export const ownerLinks: NavLink[] = [
 	{ title: "Staff", url: "/dashboard/staff", icon: IdCardIcon },
 	{ title: "Financials", url: "/dashboard/financials", icon: BarChart3Icon },
 	{ title: "Payments", url: "/dashboard/payments", icon: WalletIcon },
+	{ title: "Hospio fees", url: "/dashboard/hospio-fees", icon: ReceiptIcon },
 	{ title: "Reports", url: "/dashboard/reports", icon: FolderIcon },
 	{ title: "Users", url: "/dashboard/users", icon: UsersIcon },
 	{

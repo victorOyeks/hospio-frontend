@@ -1,0 +1,63 @@
+"use client";
+
+import { KeyRoundIcon } from "lucide-react";
+import { useEffect, useState } from "react";
+import { hotelPosConfig, type PosConfigView } from "@hospio/api/actions/daily-fees";
+import { DetailList, Note } from "@hospio/ui/shared/detail-list";
+import { fmtWhen } from "@hospio/ui/shared/format";
+import { SectionCard } from "@hospio/ui/shared/section-card";
+import { StatusPill } from "@hospio/ui/shared/status-pill";
+
+/**
+ * Hotel setup → POS: the hotel's Moniepoint or OPay keys, as Hospio360 entered them (hospio-backend docs/pos-providers.md).
+ * Read only and masked: to change a key, the hotel asks Hospio360 support.
+ */
+
+const LABELS: Record<string, string> = {
+	apiKey: "API key",
+	webhookSecret: "Webhook secret",
+	clientAuthKey: "Client auth key",
+	opayPublicKey: "OPay public key",
+	merchantPrivateKey: "Merchant private key",
+	headMerchantId: "Head merchant ID",
+	merchantId: "Merchant ID",
+};
+
+export function PosKeysCard() {
+	const [pos, setPos] = useState<PosConfigView | null>(null);
+	const [error, setError] = useState<string | null>(null);
+	useEffect(() => {
+		hotelPosConfig().then((r) => (r.ok ? setPos(r.data) : setError(r.error)));
+	}, []);
+	return (
+		<SectionCard title="POS provider keys" subtitle="Set by Hospio360 · shown masked; ask Hospio360 support to change them">
+			{error ? (
+				<Note tone="danger">{error}</Note>
+			) : !pos ? (
+				<p className="text-[13px] text-ink-3">Loading…</p>
+			) : !pos.provider ? (
+				<div className="flex items-center gap-2 text-[13px] text-ink-2">
+					<KeyRoundIcon className="size-4 text-ink-3" /> Not connected yet. Hospio360 adds your Moniepoint or OPay keys when your POS is set up.
+				</div>
+			) : (
+				<div className="flex flex-col gap-3">
+					{pos.posPaused && (
+						<Note tone="danger">
+							Card payments to your POS are paused: Hospio360's daily fee has been unpaid for 3 days. Cash and transfers still work. It resumes as
+							soon as a debit goes through.
+						</Note>
+					)}
+					<DetailList
+						columns={2}
+						items={[
+							{ label: "Provider", value: pos.provider === "OPAY" ? "OPay" : "Moniepoint" },
+							{ label: "Status", value: pos.complete ? <StatusPill tone="success">Connected</StatusPill> : <StatusPill tone="warning">Keys incomplete</StatusPill> },
+							...Object.entries(pos.fields).map(([k, v]) => ({ label: LABELS[k] ?? k, value: v ?? "—" })),
+							{ label: "Last changed", value: pos.updatedAt ? `${fmtWhen(pos.updatedAt)} by ${pos.updatedByName ?? "Hospio360"}` : "—" },
+						]}
+					/>
+				</div>
+			)}
+		</SectionCard>
+	);
+}

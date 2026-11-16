@@ -282,8 +282,8 @@ export function NewBusinessPanel({
 	const [phone, setPhone] = useState("");
 	const [city, setCity] = useState("");
 	const [feeModel, setFeeModel] = useState<
-		"PERCENT_OF_PAYMENTS" | "PER_ROOM_NIGHT" | "PERCENT_OF_BOOKINGS"
-	>("PERCENT_OF_PAYMENTS");
+		"PERCENT_OF_SALES" | "PERCENT_OF_PAYMENTS" | "PER_ROOM_NIGHT" | "PERCENT_OF_BOOKINGS"
+	>("PERCENT_OF_SALES");
 	// Both start empty: the grey text is a hint, never a value (DEF-041).
 	const [perNight, setPerNight] = useState<number | "">("");
 	const [pct, setPct] = useState("");
@@ -460,6 +460,10 @@ export function NewBusinessPanel({
 						value={feeModel}
 						onChange={edit(setFeeModel, "fee")}
 						options={[
+							{
+								value: "PERCENT_OF_SALES",
+								label: feeModelLabels.PERCENT_OF_SALES,
+							},
 							{
 								value: "PERCENT_OF_PAYMENTS",
 								label: feeModelLabels.PERCENT_OF_PAYMENTS,

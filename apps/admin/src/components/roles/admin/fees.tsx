@@ -602,6 +602,11 @@ function StatementPanel({
 
 const MODELS = [
 	{
+		value: "PERCENT_OF_SALES",
+		label: "% of daily sales",
+		hint: "Worked out every day and debited at 6am from the hotel's POS account",
+	},
+	{
 		value: "PER_ROOM_NIGHT",
 		label: "Per room night",
 		hint: "A fixed amount for every night sold",
@@ -651,6 +656,7 @@ function FeeModelModal({
 			const b = businesses.find((x) => x.id === bizId);
 			const key = current?.model ?? b?.feeModelKey;
 			if (
+				key === "PERCENT_OF_SALES" ||
 				key === "PERCENT_OF_PAYMENTS" ||
 				key === "PERCENT_OF_BOOKINGS" ||
 				key === "PER_ROOM_NIGHT"
