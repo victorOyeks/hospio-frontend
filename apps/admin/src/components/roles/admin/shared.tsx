@@ -1,6 +1,8 @@
 "use client";
 
-import { LockIcon } from "lucide-react";
+import { ChevronRightIcon, LockIcon } from "lucide-react";
+import Link from "next/link";
+import { Fragment } from "react";
 import { StatusPill, type PillTone } from "@hospio/ui/shared/status-pill";
 import type { AdminRole } from "@hospio/api/demo/fixtures/platform-extra";
 import { cn } from "@hospio/ui/utils";
@@ -76,3 +78,23 @@ export const ticketStatus: Record<string, { label: string; tone: PillTone }> = {
 	IN_PROGRESS: { label: "In progress", tone: "info" },
 	RESOLVED: { label: "Resolved", tone: "success" },
 };
+
+/** "Businesses › Royal Suites Ltd" above a detail page: each step but the last links back. */
+export function Crumbs({ items }: { items: { label: string; href?: string }[] }) {
+	return (
+		<nav aria-label="Breadcrumb" className="flex flex-wrap items-center gap-1 text-[13px] font-medium text-ink-3">
+			{items.map((c, i) => (
+				<Fragment key={`${c.label}-${i}`}>
+					{i > 0 && <ChevronRightIcon className="size-[14px]" />}
+					{c.href ? (
+						<Link href={c.href} className="text-ink-2 hover:text-ink hover:underline">
+							{c.label}
+						</Link>
+					) : (
+						<span className="text-ink">{c.label}</span>
+					)}
+				</Fragment>
+			))}
+		</nav>
+	);
+}

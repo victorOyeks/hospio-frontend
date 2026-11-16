@@ -5,6 +5,11 @@ export const whatsNewWeek = "Week of 15 November 2026";
 
 export const whatsNew: WhatsNewItem[] = [
 	{
+		title: "A tidier admin portal",
+		body: "The menu is grouped: Customers, Operations, Money, Growth and Platform. “Hotels” lists every hotel across businesses; tap one for its figures, POS keys, Hospio fees and guest messages in a side panel. Press ⌘K to jump to any business, hotel, ticket or page. Fees & billing and Payments & POS have clear tabs, and provider keys are on the new “Integrations” page (Super admin).",
+		audience: ["PLATFORM"],
+	},
+	{
 		title: "Your hotel's colours everywhere",
 		body: "Hotel setup → “Brand & colours” sets the brand colour, a short name, the logo and a dark or white sidebar. You see the change straight away; after “Save changes” it is used within a minute for every role, on the guest's booking page, in booking emails and on WhatsApp messages.",
 		audience: ["MANAGER", "OWNER"],

@@ -1,33 +1,16 @@
-import { notFound } from "next/navigation";
-import { HotelOverviewTab } from "@/components/roles/admin/business-tabs/hotel-overview";
-import { data } from "@hospio/api/data";
-import { adminData } from "@hospio/api/data/admin";
-import { getActiveRole } from "@hospio/api/dal";
-import { adminRole } from "../../../../../role";
+import { redirect } from "next/navigation";
 
-export const dynamic = "force-dynamic";
-
+/**
+ * The old one-hotel page. A hotel now opens in a side panel on its business's Hotels tab, so saved links and bookmarks
+ * land there with the same hotel open.
+ */
 export default async function BusinessHotelPage({
 	params,
 }: {
 	params: Promise<{ id: string; hotelId: string }>;
 }) {
 	const { id, hotelId } = await params;
-	const business = await data.platform.business(id);
-	if (!business) notFound();
-	const [hotels, overview, role] = await Promise.all([
-		data.platform.businessHotels(id),
-		adminData.hotelOverview(id, hotelId),
-		getActiveRole(),
-	]);
-	return (
-		<HotelOverviewTab
-			businessId={id}
-			businessName={business.name}
-			hotel={hotels.find((h) => h.id === hotelId) ?? null}
-			overview={overview}
-			siblings={hotels}
-			role={adminRole(role)}
-		/>
+	redirect(
+		`/dashboard/businesses/${id}?tab=hotels&hotel=${encodeURIComponent(hotelId)}`,
 	);
 }

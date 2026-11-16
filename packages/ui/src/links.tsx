@@ -25,6 +25,7 @@ import {
 	MessageSquareIcon,
 	MoonIcon,
 	PackageIcon,
+	PlugIcon,
 	ReceiptIcon,
 	SearchIcon,
 	SettingsIcon,
@@ -50,6 +51,10 @@ export type NavLink = {
 	badge?: "unpaidSales" | "inbox" | "approvals";
 	/** Shown only to a housekeeping supervisor (Full access) or a manager, the rule the service applies. */
 	supervisorOnly?: boolean;
+	/** A heading the link sits under (admin portal); menus without groups show one flat list. */
+	group?: string;
+	/** Only these roles see the link; everyone with the menu when left out. */
+	roles?: HotelRole[];
 };
 
 /** Manager portal, in the order of the Figma sidebar. */
@@ -241,21 +246,35 @@ export const financeLinks: NavLink[] = [
 	{ title: "Notifications", url: "/dashboard/notifications", icon: BellIcon },
 ];
 
+/**
+ * Admin portal menu, grouped so each kind of work has one home: customers (businesses, every hotel, onboarding), day-to-day
+ * operations, money, growth and the platform itself. Integrations is for a Super admin only; the rest is shown to every
+ * platform role and each page says what that role may change.
+ */
 export const adminLinks: NavLink[] = [
-	{ title: "Dashboard", url: "/dashboard", icon: HomeIcon },
-	{ title: "Businesses", url: "/dashboard/businesses", icon: BuildingIcon },
+	{ title: "Dashboard", url: "/dashboard", icon: HomeIcon, group: "Overview" },
+	{ title: "Businesses", url: "/dashboard/businesses", icon: BuildingIcon, group: "Customers" },
+	{ title: "Hotels", url: "/dashboard/hotels", icon: BedDoubleIcon, group: "Customers" },
 	{
 		title: "Onboarding",
 		url: "/dashboard/onboarding",
 		icon: ClipboardCheckIcon,
+		group: "Customers",
 	},
-	{ title: "Support", url: "/dashboard/support", icon: HeadsetIcon },
-	{ title: "Fees & billing", url: "/dashboard/fees", icon: CoinsIcon },
-	{ title: "Payments", url: "/dashboard/payments", icon: CreditCardIcon },
-	{ title: "Marketers", url: "/dashboard/marketers", icon: MegaphoneIcon },
-	{ title: "Changes by Hospio360", url: "/dashboard/changes", icon: BookOpenIcon },
-	{ title: "Admin team", url: "/dashboard/team", icon: UsersIcon },
-	{ title: "Settings", url: "/dashboard/settings", icon: SettingsIcon },
+	{ title: "Support", url: "/dashboard/support", icon: HeadsetIcon, group: "Operations" },
+	{ title: "Changes by Hospio360", url: "/dashboard/changes", icon: BookOpenIcon, group: "Operations" },
+	{ title: "Fees & billing", url: "/dashboard/fees", icon: CoinsIcon, group: "Money" },
+	{ title: "Payments & POS", url: "/dashboard/payments", icon: CreditCardIcon, group: "Money" },
+	{ title: "Marketers", url: "/dashboard/marketers", icon: MegaphoneIcon, group: "Growth" },
+	{
+		title: "Integrations",
+		url: "/dashboard/integrations",
+		icon: PlugIcon,
+		group: "Platform",
+		roles: ["SUPER_ADMIN"],
+	},
+	{ title: "Settings", url: "/dashboard/settings", icon: SettingsIcon, group: "Platform" },
+	{ title: "Admin team", url: "/dashboard/team", icon: UsersIcon, group: "Platform" },
 ];
 
 export const marketerLinks: NavLink[] = [
