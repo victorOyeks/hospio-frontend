@@ -27,7 +27,7 @@ import { useEffect, useState } from "react";
 import {
 	type Brand,
 	brandStyle,
-	HOSPIO_MAROON,
+	HOSPIO_DEFAULT,
 	navMode,
 	normalizeHex,
 	readabilityWarning,
@@ -104,7 +104,7 @@ const why: Record<string, string> = {
 	night:
 		"The day cannot close until these are done, so the numbers are trustworthy.",
 	brand:
-		"Your colours replace the Hospio360 maroon on every screen your staff and guests see.",
+		"Your colours replace Hospio360's indigo and navy on every screen your staff and guests see.",
 	pos: "Terminals are matched to roles so a bar sale never lands in the front desk till.",
 	reasons:
 		"Staff pick from these lists so reports group cleanly; items in use are hidden, never deleted.",
@@ -664,7 +664,7 @@ function ChipList({
 }
 
 const BRAND_SWATCHES = [
-	HOSPIO_MAROON,
+	HOSPIO_DEFAULT,
 	"#0b4f50",
 	"#1d3a6e",
 	"#14532d",
@@ -691,7 +691,7 @@ function BrandPreview({
 	const typed = String(values.primary ?? "");
 	const hex = normalizeHex(typed);
 	const brand: Brand = {
-		primary: hex ?? HOSPIO_MAROON,
+		primary: hex ?? HOSPIO_DEFAULT,
 		darkNav: values.darkNav !== false,
 		shortName: String(values.logoText ?? "").trim() || null,
 		logoUrl: /^https:\/\/\S+$/.test(String(values.logoUrl ?? "").trim())
@@ -744,7 +744,7 @@ function BrandPreview({
 							type="color"
 							aria-label="Pick any colour"
 							disabled={disabled}
-							value={hex ?? HOSPIO_MAROON}
+							value={hex ?? HOSPIO_DEFAULT}
 							onChange={(e) => onPick(e.target.value)}
 							className="absolute inset-0 cursor-pointer opacity-0"
 						/>

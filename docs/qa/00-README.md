@@ -46,6 +46,7 @@ allow-listed number 09035911994, so sign-up and phone codes for any other number
 | 30 | `30-retest-def-068-075.md` | Retest of Sam's operating-day defects DEF-068 to DEF-075: rota days field, short-till note to manager and finance, pay-out reason, setup number fields, finance told on day close, organization staff validation and duplicates, reload message | Ready |
 | 31 | `31-stay-bill-everywhere.md` | A stay's bill reads the same everywhere: bookings list, booking panel, folio and Bookings cards use the folio's total, paid and balance once the guest is in; folio payments count on the booking; Open folio opens closed folios too | Ready |
 | 32 | `32-daily-fee-and-pos.md` | Hospio's daily fee: 1.5 % of each day's sales (folio nights spread per night, counter sales, laundry, no-show deposits, voids), statements, the 6am debit and its switch, POS pause; each hotel's Moniepoint/OPay keys (masked) and the POS device test | Ready |
+| 33 | `33-default-colours.md` | Hospio360's default colours are indigo on navy across the hotel app, admin portal, sign-in, booking page, emails, WhatsApp banner and hospio360.com; a hotel's own colour still wins | Ready |
 
 ## Before you start
 
