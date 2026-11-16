@@ -215,6 +215,7 @@ export const SETUP_CATALOGUE: SectionDef[] = [
 				key: "depositPct",
 				label: "Deposit to hold a booking",
 				type: "percent",
+				help: "A share of the stay, 0 to 100 %",
 				default: 0,
 			},
 			{

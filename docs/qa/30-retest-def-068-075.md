@@ -53,6 +53,9 @@ Password for every account: `Hospio123!`.
    the hint "None". Nothing has to be deleted before typing.
 2. Type a value, save and reload: it stays. Clear it, save and reload: empty again (saved as none).
 3. Every other number field in Hotel setup with a "none" default behaves the same.
+4. **Deposit to hold a booking is a share of the stay (0–100 %), not an amount.** Type 15000: "Between 0 and 100 %"
+   shows and **Save changes** stays disabled. (Simpas Ikeja had 15000 saved from an earlier test; set it to a real
+   percentage, e.g. 50, or clear it.)
 
 ## DEF-072 · Finance is told when the day is closed
 
