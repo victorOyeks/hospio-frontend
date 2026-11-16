@@ -18,11 +18,11 @@ type Theme = {
 
 const themes: Theme[] = [
 	{
-		nav: "bg-nav",
+		nav: "bg-brand",
 		railText: "text-nav-foreground",
 		page: "bg-page",
 		button: "bg-brand",
-		caption: "Hospio360 default · Indigo on navy",
+		caption: "Hospio360 default · Maroon",
 	},
 	{
 		nav: "bg-teal-nav",

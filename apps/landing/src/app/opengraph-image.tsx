@@ -4,7 +4,7 @@ export const alt = "Hospio360 · Hotel management for Nigerian hotels";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
-/** The share card: Hospio360 navy with the wordmark and the one-line pitch. */
+/** The share card: the brand maroon with the wordmark and the one-line pitch. */
 export default function OpengraphImage() {
 	return new ImageResponse(
 		<div
@@ -15,7 +15,7 @@ export default function OpengraphImage() {
 				flexDirection: "column",
 				justifyContent: "center",
 				padding: "80px",
-				background: "linear-gradient(160deg, #0b1220 0%, #111a33 55%, #1e1b4b 100%)",
+				background: "#4c091e",
 				color: "white",
 			}}
 		>
@@ -33,7 +33,7 @@ export default function OpengraphImage() {
 			>
 				Every room, every till, every hotel, on one screen.
 			</div>
-			<div style={{ marginTop: 28, fontSize: 30, color: "#c7d2fe" }}>
+			<div style={{ marginTop: 28, fontSize: 30, color: "#e8c9d3" }}>
 				Hotel management for Nigerian hotels
 			</div>
 		</div>,

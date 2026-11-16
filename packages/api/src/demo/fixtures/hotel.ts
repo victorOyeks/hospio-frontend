@@ -46,7 +46,7 @@ export const demoBusiness: Business = {
 	email: "godwin@royalsuites.ng",
 	phone: "+234 801 000 0001",
 	logoUrl: null,
-	brandColour: "#4338ca",
+	brandColour: "#4c091e",
 	contractStartsOn: "2024-01-10",
 	contractNotes: null,
 	hotelCount: 4,

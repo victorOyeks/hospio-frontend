@@ -30,7 +30,7 @@ Password for every account: `Hospio123!`.
 
 ## Before you start
 
-Write down the hotel's current brand values. Put them back at the end (Simpas Ikeja: Hospio360's default indigo `#4338ca`, Dark sidebar on, no short
+Write down the hotel's current brand values. Put them back at the end (Simpas Ikeja: `#4c091e`, Dark sidebar on, no short
 name or logo).
 
 ## 1. Live preview
@@ -67,29 +67,29 @@ name or logo).
 1. Signed in as Tunde with the teal brand saved, open any page, then **Log out**.
 2. The sign-in page shows the teal panel with the hotel's name (or short name and logo) instead of Hospio360. **Forgot
    password**, **Sign up** and the shared-device **Lock** screen look the same.
-3. Under the form: "Not Simpas Ikeja? **Use the Hospio360 look**". Click it: the page turns Hospio360's navy and indigo.
+3. Under the form: "Not Simpas Ikeja? **Use the Hospio360 look**". Click it: the page turns maroon with Hospio360.
 4. Sign in again as Tunde, open a page and log out: the teal is back.
 5. Sign in on the same browser as a user of another hotel with a different colour, open a page and log out: the sign-in page
    now shows that hotel's colour. The last hotel to use the browser wins.
 6. A pale colour (e.g. sky blue) shows as a deep shade of itself on the sign-in panel, so the white text stays readable.
 
-## 4. No screen left in Hospio360's colours
+## 4. No screen left in maroon
 
-With the hotel's own colour saved (e.g. sky blue), sign in as someone with two roles (Segun) and look for any Hospio360 indigo or navy:
+With the hotel's own colour saved (e.g. sky blue), sign in as someone with two roles (Segun) and look for any maroon or pink:
 
 1. The **role picker**: card icons in the hotel's tint, page background a faint tint, no pink.
 2. Any **dropdown** (e.g. Shared device → Lock after): the hovered option is the hotel's tint, with readable text.
-3. A **modal**: the backdrop behind it is a deep shade of the hotel's colour, not Hospio360's navy.
+3. A **modal**: the backdrop behind it is a deep shade of the hotel's colour, not maroon.
 4. **Lock**, **Sign in**, **Forgot password**, an **invite link** and a **receipt** page all carry the colour.
 5. With a pale colour (sky blue): buttons have dark text, and links are a deeper shade of the colour, readable on white.
-6. Switch to a hotel that kept Hospio360's default on the same browser: everything turns indigo with a navy sidebar, with no sky-blue leftovers
+6. Switch to a hotel that kept Hospio360 maroon on the same browser: everything turns maroon, with no sky-blue leftovers
    (the sidebar text stays white).
 
 Only the browser tab's small icon stays Hospio360.
 
 ## Clean up
 
-- Put the brand values back as you found them and save. Within a minute the app, the booking page and emails are back to Hospio360's indigo
+- Put the brand values back as you found them and save. Within a minute the app, the booking page and emails are maroon
   again.
 
 ## What to report
