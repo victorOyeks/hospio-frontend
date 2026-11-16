@@ -349,7 +349,7 @@ function SectionForm({
 					</Button>
 					<Button
 						className={btn.primary}
-						disabled={!dirty || pending}
+						disabled={!dirty || pending || invalid(section, values)}
 						onClick={() =>
 							run(
 								() =>
@@ -510,7 +510,12 @@ export function SetupField({
 			);
 		case "percent":
 			return (
-				<Field label={field.label} hint={field.help} className={cls}>
+				<Field
+					label={field.label}
+					hint={field.help}
+					className={cls}
+					error={percentError(value)}
+				>
 					<div className="relative">
 						<input
 							type="number"
@@ -838,4 +843,13 @@ function saved(
 			out[f.key] = 0;
 	}
 	return out;
+}
+
+/** A percentage outside 0–100 (a deposit of "15000" meant as naira): said under the field, and Save stays disabled. */
+function percentError(value: unknown): string | undefined {
+	return typeof value === "number" && (value < 0 || value > 100) ? "Between 0 and 100 %" : undefined;
+}
+
+function invalid(section: HotelSetupSection, values: Record<string, unknown>): boolean {
+	return section.fields.some((f) => f.type === "percent" && percentError(values[f.key]) !== undefined);
 }
