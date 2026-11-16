@@ -94,6 +94,7 @@ const ROUTES: Record<Exclude<HelpAudience, "EVERYONE">, string[]> = {
 	],
 	PLATFORM: [
 		"businesses",
+		"hotels",
 		"onboarding",
 		"support",
 		"fees",
@@ -102,6 +103,7 @@ const ROUTES: Record<Exclude<HelpAudience, "EVERYONE">, string[]> = {
 		"changes",
 		"team",
 		"settings",
+		"integrations",
 	],
 	MARKETER: ["businesses", "commissions", "refer"],
 };

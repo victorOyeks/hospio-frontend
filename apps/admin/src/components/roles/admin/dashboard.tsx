@@ -124,7 +124,7 @@ export function AdminDashboard({
 					}
 					hint={
 						<Link
-							href="/dashboard/fees"
+							href="/dashboard/fees?view=statements"
 							className="font-semibold text-brand hover:underline"
 						>
 							Fees & billing

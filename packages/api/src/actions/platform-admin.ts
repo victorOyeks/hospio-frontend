@@ -23,7 +23,6 @@ import type {
 	FeeStatementItem,
 	GenerateStatementsResult,
 	HealthRow,
-	IntegrationItem,
 	MarketerDetailData,
 	MarketerInvitedData,
 	MarketerProfileRow,
@@ -888,12 +887,6 @@ export async function loadSettings(): Promise<
 	return { ok: true, data: await adminData.settings.get() };
 }
 
-/** Re-reads GET /platform/admin/integrations (the server checks each connection when asked). */
-export async function loadIntegrations(): Promise<
-	ActionResult<IntegrationItem[]>
-> {
-	return { ok: true, data: await adminData.settings.integrations() };
-}
 
 export async function dismissAlert(
 	id: string,

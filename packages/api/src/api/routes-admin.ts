@@ -426,6 +426,30 @@ export const Integration = z.object({
 });
 export const PlatformSettings = z.record(z.string(), JsonMap);
 
+/**
+ * A provider's keys as the Integrations page edits them (docs/admin-portal.md): SECRET values come back masked, `saved` says
+ * the portal holds a value (otherwise the service uses its server setting). Nullable throughout so a service ahead or behind
+ * never breaks the page.
+ */
+export const IntegrationField = z.object({
+	key: z.string(),
+	label: z.string(),
+	type: z.string(),
+	hint: str,
+	value: str,
+	saved: z.boolean().nullable().optional(),
+});
+export const IntegrationView = z.object({
+	provider: z.string(),
+	label: z.string(),
+	group: z.string(),
+	testable: z.boolean().nullable().optional(),
+	updatedByName: str,
+	updatedAt: str,
+	fields: z.array(IntegrationField),
+});
+export const IntegrationTest = z.object({ ok: z.boolean(), message: str });
+
 // ---- payment: settlements and payouts -------------------------------------------------------------
 
 export const Settlement = z.object({
@@ -787,8 +811,24 @@ export const adminRoutes = {
 		input: JsonMap,
 		output: envelope(JsonMap),
 	},
+	// Provider keys (Super admin); the connection checks that used to live at this path are at /status.
 	"@get/platform/admin/integrations": {
+		output: envelope(z.array(IntegrationView)),
+	},
+	"@get/platform/admin/integrations/status": {
 		output: envelope(z.array(Integration)),
+	},
+	"@put/platform/admin/integrations/:provider": {
+		params: z.object({ provider: z.string() }),
+		input: z.object({
+			fields: z.record(z.string(), z.string()),
+			clear: z.array(z.string()),
+		}),
+		output: envelope(IntegrationView),
+	},
+	"@post/platform/admin/integrations/:provider/test": {
+		params: z.object({ provider: z.string() }),
+		output: envelope(IntegrationTest),
 	},
 
 	// platform · marketer portal
@@ -957,6 +997,7 @@ export type MarketerMe = z.infer<typeof MarketerMe>;
 export type MarketerBusiness = z.infer<typeof MarketerBusiness>;
 export type CommissionStatement = z.infer<typeof CommissionStatement>;
 export type Integration = z.infer<typeof Integration>;
+export type IntegrationView = z.infer<typeof IntegrationView>;
 export type PlatformSettings = z.infer<typeof PlatformSettings>;
 export type Settlement = z.infer<typeof Settlement>;
 export type PayoutBatch = z.infer<typeof PayoutBatch>;

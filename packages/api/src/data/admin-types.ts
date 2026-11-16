@@ -409,6 +409,61 @@ export type IntegrationItem = {
 	lastCheck?: string;
 };
 
+/** Integrations page: one provider's keys (GET/PUT /platform/admin/integrations). */
+export type IntegrationGroup = "EMAIL" | "MESSAGING" | "PAYMENTS" | "POS" | "FEE_DEBIT";
+export type IntegrationFieldType = "TEXT" | "SECRET" | "URL" | "NUMBER" | "BOOLEAN";
+export type IntegrationFieldView = {
+	key: string;
+	label: string;
+	type: IntegrationFieldType;
+	hint: string | null;
+	/** Masked for a SECRET; null when nothing is saved in the portal. */
+	value: string | null;
+	saved: boolean;
+};
+export type IntegrationCard = {
+	provider: string;
+	label: string;
+	group: IntegrationGroup;
+	testable: boolean;
+	updatedByName: string | null;
+	updatedAt: string | null;
+	fields: IntegrationFieldView[];
+};
+/** The Integrations page: editable cards (or why they didn't load) and the server's connection checks. */
+export type IntegrationsData =
+	| { ok: true; cards: IntegrationCard[]; status: IntegrationItem[] }
+	| { ok: false; error: string; status: IntegrationItem[] };
+
+// ---- hotels across businesses --------------------------------------------------------------------
+
+/** How a hotel's Hospio fee is collected, as the Hotels list shows it (fee-collection, money roles only). */
+export type HotelCollectionSummary = {
+	provider: string | null;
+	debitEnabled: boolean;
+	posPaused: boolean;
+	/** The hotel's POS keys are in for the chosen (or first) provider. */
+	keysIn: boolean;
+	debitConfigured: boolean;
+};
+
+/** One hotel on the flat Hotels page, with its business and (for money roles) its fee state. */
+export type HotelDirectoryRow = {
+	id: string;
+	name: string;
+	businessId: string;
+	businessName: string;
+	stage: string;
+	city: string;
+	address: string;
+	rooms: number;
+	timezone: string;
+	status: string;
+	/** Null when not loaded (Support can't read fee collection) or the call failed. */
+	collection: HotelCollectionSummary | null;
+	lastFee: { date: string; fee: number; status: string } | null;
+};
+
 // ---- support access --------------------------------------------------------------------------------
 
 export type SupportAccessGrantItem = {

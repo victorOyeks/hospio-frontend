@@ -1283,6 +1283,8 @@ export const schema = createSchema({
 		query: z.object({ adminId: z.string() }),
 		output: envelope(Business),
 	},
+	/** Platform staff: every hotel across businesses, by name (the admin portal's Hotels page). */
+	"@get/tenant/admin/hotels": { output: envelope(z.array(Hotel)) },
 	"@get/tenant/businesses/:id/hotels": {
 		params: z.object({ id: z.string() }),
 		output: envelope(z.array(Hotel)),

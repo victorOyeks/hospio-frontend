@@ -11,7 +11,8 @@ import {
 	SendIcon,
 	SparklesIcon,
 } from "lucide-react";
-import { useQueryState } from "nuqs";
+import { parseAsString, useQueryState } from "nuqs";
+import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import {
 	generateStatements,
@@ -51,7 +52,6 @@ import { KpiCard } from "@hospio/ui/shared/kpi-card";
 import { Modal } from "@hospio/ui/shared/modal";
 import { PageHeader } from "@hospio/ui/shared/page-header";
 import { PillTabs } from "@hospio/ui/shared/pill-tabs";
-import { GuestMessageBilling } from "./guest-messages";
 import { PanelSection, SidePanel } from "@hospio/ui/shared/side-panel";
 import { StatusPill } from "@hospio/ui/shared/status-pill";
 import { FilterSelect, SearchBox, Toolbar } from "@hospio/ui/shared/toolbar";
@@ -67,7 +67,9 @@ import {
 	usePageParam,
 	useRefresh,
 } from "./live";
-import { can, ReadOnlyNote } from "./shared";
+import { DailyFeesTab } from "./fees-daily";
+import { GuestMessageBilling } from "./guest-messages";
+import { can, ReadOnlyNote, StagePill } from "./shared";
 
 const statusTone = {
 	DUE: "warning",
@@ -117,6 +119,17 @@ export function FeesScreen({
 	const [search, setSearch] = useState("");
 	const { refresh } = useRefresh();
 	const money = can.money(role);
+	// One page, four jobs: each has its own tab in the URL (`?view=`) so Back and shared links land on it. Daily fees and
+	// guest-message billing are read by the money roles only (the services refuse Support).
+	const views = [
+		...(money ? [{ key: "daily", label: "Daily fees" }] : []),
+		{ key: "rules", label: "Fee rules" },
+		{ key: "statements", label: "Statements", count: openStatements.length || undefined },
+		...(money ? [{ key: "messages", label: "Guest messages" }] : []),
+	];
+	const [viewParam, setView] = useQueryState("view", parseAsString.withOptions({ history: "push", scroll: false }));
+	const defaultView = money ? "daily" : "statements";
+	const view = views.some((v) => v.key === viewParam) ? (viewParam as string) : defaultView;
 	const active = tab || "ALL";
 	const due = openStatements.reduce((a, s) => a + s.outstanding, 0);
 	const overdue = openStatements
@@ -201,124 +214,133 @@ export function FeesScreen({
 		<>
 			<PageHeader
 				title="Fees & billing"
-				subtitle="Monthly statements per business · due on the 5th, overdue after the grace days in Settings"
+				subtitle="What hotels pay Hospio360: the daily fee, each business's fee rule, monthly statements and guest-message invoices"
 			>
-				{money && (
+				{money && view === "statements" && (
 					<button
 						type="button"
 						onClick={() => setGenerate(true)}
-						className={cn(btn.secondary, "flex items-center gap-2")}
+						className={cn(btn.primary, "flex items-center gap-2")}
 					>
 						<SparklesIcon className="size-4" /> Generate this month
-					</button>
-				)}
-				{money && (
-					<button
-						type="button"
-						onClick={() => setModel(biz || businesses[0]?.id || "")}
-						className={cn(btn.secondary, "flex items-center gap-2")}
-					>
-						<PencilIcon className="size-4" /> Fee models
 					</button>
 				)}
 			</PageHeader>
 			{!money && (
 				<ReadOnlyNote>
-					Support can see statements. Recording payments, sending statements and
-					fee models are for Finance admin.
+					Support can see statements and fee rules. Daily fees, recording payments,
+					sending statements and fee rules are for Finance admin.
 				</ReadOnlyNote>
 			)}
-			<div className="grid grid-cols-2 gap-4 md:grid-cols-4">
-				<KpiCard
-					label="Due now"
-					value={nairaShort(due)}
-					icon={ClockIcon}
-					hint={plural(openStatements.length, "open statement")}
+			<PillTabs
+				tabs={views}
+				value={view}
+				onChange={(k) => void setView(k === defaultView ? null : k)}
+			/>
+			{view === "daily" && <DailyFeesTab role={role} businesses={businesses} />}
+			{view === "rules" && (
+				<FeeRulesTab
+					businesses={businesses}
+					money={money}
+					onChange={(id) => void setModel(id)}
 				/>
-				<KpiCard
-					label="Overdue"
-					value={nairaShort(overdue)}
-					icon={AlertTriangleIcon}
-					pill={
-						overdue > 0 ? (
-							<StatusPill tone="danger">
-								{openStatements.filter((s) => s.status === "OVERDUE").length}
-							</StatusPill>
-						) : undefined
-					}
-				/>
-				<KpiCard
-					label={`Collected · ${monthLabel(thisMonth()).split(" ")[0]}`}
-					value={nairaShort(collected)}
-					icon={CheckCircle2Icon}
-					hint={plural(monthly.length, "statement")}
-				/>
-				<KpiCard
-					label="Monthly fees (MRR)"
-					value={nairaShort(mrr)}
-					icon={CoinsIcon}
-					hint="This month's statements"
-				/>
-			</div>
-			<Toolbar
-				left={
-					<PillTabs
-						tabs={[
-							{ key: "ALL", label: "All" },
-							{ key: "DUE", label: "Due" },
-							{ key: "PART_PAID", label: "Part paid" },
-							{ key: "OVERDUE", label: "Overdue" },
-							{ key: "PAID", label: "Paid" },
-						]}
-						value={active}
-						onChange={(k) => {
-							setTab(k === "ALL" ? null : k);
-							setPage(0);
-						}}
+			)}
+			{view === "messages" && <GuestMessageBilling />}
+			{view === "statements" && (
+				<>
+					<div className="grid grid-cols-2 gap-4 md:grid-cols-4">
+						<KpiCard
+							label="Due now"
+							value={nairaShort(due)}
+							icon={ClockIcon}
+							hint={plural(openStatements.length, "open statement")}
+						/>
+						<KpiCard
+							label="Overdue"
+							value={nairaShort(overdue)}
+							icon={AlertTriangleIcon}
+							pill={
+								overdue > 0 ? (
+									<StatusPill tone="danger">
+										{openStatements.filter((s) => s.status === "OVERDUE").length}
+									</StatusPill>
+								) : undefined
+							}
+						/>
+						<KpiCard
+							label={`Collected · ${monthLabel(thisMonth()).split(" ")[0]}`}
+							value={nairaShort(collected)}
+							icon={CheckCircle2Icon}
+							hint={plural(monthly.length, "statement")}
+						/>
+						<KpiCard
+							label="Monthly fees (MRR)"
+							value={nairaShort(mrr)}
+							icon={CoinsIcon}
+							hint="This month's statements"
+						/>
+					</div>
+					<Toolbar
+						left={
+							<PillTabs
+								tabs={[
+									{ key: "ALL", label: "All" },
+									{ key: "DUE", label: "Due" },
+									{ key: "PART_PAID", label: "Part paid" },
+									{ key: "OVERDUE", label: "Overdue" },
+									{ key: "PAID", label: "Paid" },
+								]}
+								value={active}
+								onChange={(k) => {
+									setTab(k === "ALL" ? null : k);
+									setPage(0);
+								}}
+							/>
+						}
+						right={
+							<>
+								<FilterSelect
+									value={month}
+									onChange={(v) => {
+										setMonth(v);
+										setPage(0);
+									}}
+									all="All months"
+									options={monthOptions(14)}
+								/>
+								<FilterSelect
+									value={biz}
+									onChange={(v) => {
+										setBiz(v);
+										setPage(0);
+									}}
+									all="All businesses"
+									options={businesses.map((b) => ({ value: b.id, label: b.name }))}
+								/>
+								<SearchBox
+									value={search}
+									onChange={setSearch}
+									placeholder="Search this page…"
+								/>
+							</>
+						}
 					/>
-				}
-				right={
-					<>
-						<FilterSelect
-							value={month}
-							onChange={(v) => {
-								setMonth(v);
-								setPage(0);
-							}}
-							all="All months"
-							options={monthOptions(14)}
-						/>
-						<FilterSelect
-							value={biz}
-							onChange={(v) => {
-								setBiz(v);
-								setPage(0);
-							}}
-							all="All businesses"
-							options={businesses.map((b) => ({ value: b.id, label: b.name }))}
-						/>
-						<SearchBox
-							value={search}
-							onChange={setSearch}
-							placeholder="Search this page…"
-						/>
-					</>
-				}
-			/>
-			<DataTable
-				columns={columns}
-				data={statements.content}
-				search={search}
-				pageSize={statements.size}
-				footer={<ServerPager bare page={statements} onPage={setPage} />}
-				onRowClick={(s) => setOpen(s.id)}
-				emptyTitle="No statements"
-				emptyHint={
-					money
-						? "Generate this month's statements from the button above."
-						: undefined
-				}
-			/>
+					<DataTable
+						columns={columns}
+						data={statements.content}
+						search={search}
+						pageSize={statements.size}
+						footer={<ServerPager bare page={statements} onPage={setPage} />}
+						onRowClick={(s) => setOpen(s.id)}
+						emptyTitle="No statements"
+						emptyHint={
+							money
+								? "Generate this month's statements from the button above."
+								: undefined
+						}
+					/>
+				</>
+			)}
 
 			<StatementPanel
 				id={open}
@@ -341,7 +363,85 @@ export function FeesScreen({
 				defaultMonth={month || thisMonth()}
 				onDone={refresh}
 			/>
-			{money && <GuestMessageBilling />}
+		</>
+	);
+}
+
+/**
+ * Fees & billing → Fee rules: how each business is charged, with Change opening the fee rule form for that business. The
+ * defaults for new businesses are in Settings.
+ */
+function FeeRulesTab({
+	businesses,
+	money,
+	onChange,
+}: {
+	businesses: BusinessRow[];
+	money: boolean;
+	onChange: (businessId: string) => void;
+}) {
+	const [search, setSearch] = useState("");
+	return (
+		<>
+			<Toolbar
+				left={
+					<SearchBox
+						value={search}
+						onChange={setSearch}
+						placeholder="Search a business…"
+					/>
+				}
+				right={
+					<Link href="/dashboard/settings?tab=fees" className={btn.secondary}>
+						Defaults for new businesses
+					</Link>
+				}
+			/>
+			<DataTable
+				data={businesses}
+				search={search}
+				onRowClick={money ? (b) => onChange(b.id) : undefined}
+				columns={[
+					{
+						accessorKey: "name",
+						header: "Business",
+						cell: ({ row }) => (
+							<TwoLine
+								primary={row.original.name}
+								secondary={row.original.city || "—"}
+							/>
+						),
+					},
+					{
+						accessorKey: "stage",
+						header: "Stage",
+						cell: ({ row }) => <StagePill stage={row.original.stage} />,
+					},
+					{ accessorKey: "feeModel", header: "Fee model" },
+					{
+						accessorKey: "feeValue",
+						header: "Fee",
+						cell: ({ row }) =>
+							row.original.feeValue
+								? row.original.feeModel.includes("%")
+									? `${row.original.feeValue}%`
+									: naira(row.original.feeValue)
+								: "—",
+					},
+					{
+						id: "change",
+						header: "",
+						cell: () =>
+							money ? (
+								<span className="flex items-center gap-1 text-[13px] font-semibold text-brand">
+									<PencilIcon className="size-[14px]" /> Change
+								</span>
+							) : null,
+					},
+				]}
+				emptyTitle="No businesses yet"
+				emptyHint="A business gets its fee rule when it is set up under Businesses."
+			/>
 		</>
 	);
 }

@@ -37,14 +37,26 @@ export function NavMain({
 	/** Counts for links that carry one (`NavLink.badge`); nothing is shown for 0 or a missing count. */
 	badges?: Partial<Record<NonNullable<NavLink["badge"]>, number>>;
 }) {
-	const items = linksByRole[role].filter((i) => supervisor || !i.supervisorOnly);
+	const items = linksByRole[role].filter((i) => (supervisor || !i.supervisorOnly) && (!i.roles || i.roles.includes(role)));
 	const pathname = usePathname();
 	const active = activeUrl(pathname, items);
+	// Menus with groups (the admin portal) get a small heading per group; the others stay one flat list as before.
+	const groups: { title?: string; items: NavLink[] }[] = [];
+	for (const item of items) {
+		const last = groups[groups.length - 1];
+		if (last && last.title === item.group) last.items.push(item);
+		else groups.push({ title: item.group, items: [item] });
+	}
 
-	return (
-		<sidebar.SidebarGroup className="px-0 py-3">
-			<sidebar.SidebarMenu className="gap-y-[10px]">
-				{items.map((item) => {
+	return groups.map((g) => (
+		<sidebar.SidebarGroup key={g.title ?? "all"} className={cn("px-0", g.title ? "py-1 first:pt-3" : "py-3")}>
+			{g.title && (
+				<sidebar.SidebarGroupLabel className="h-7 px-2 text-[11px] font-semibold uppercase tracking-[0.06em] text-white/45">
+					{g.title}
+				</sidebar.SidebarGroupLabel>
+			)}
+			<sidebar.SidebarMenu className={g.title ? "gap-y-[2px]" : "gap-y-[10px]"}>
+				{g.items.map((item) => {
 					const isActive = active === item.url;
 					const count = item.badge ? (badges[item.badge] ?? 0) : 0;
 					return (
@@ -58,6 +70,7 @@ export function NavMain({
 									"hover:bg-white/10 hover:text-white",
 									"data-[active=true]:bg-white/10 data-[active=true]:font-medium data-[active=true]:text-white",
 									!isActive && "opacity-70 hover:opacity-100",
+									g.title && "h-9",
 								)}
 							>
 								<Link href={item.url} prefetch={false} className="flex w-full items-center gap-2">
@@ -82,5 +95,5 @@ export function NavMain({
 				})}
 			</sidebar.SidebarMenu>
 		</sidebar.SidebarGroup>
-	);
+	));
 }
