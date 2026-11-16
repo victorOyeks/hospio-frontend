@@ -614,26 +614,6 @@ async function allTenantHotels() {
 	}));
 }
 
-async function tenantHotels(businessId: string) {
-	const { data: res, error } = await api("@get/tenant/businesses/:id/hotels", {
-		...(await withSession()),
-		params: { id: businessId },
-	});
-	if (error || !res) {
-		fail("tenant-service business hotels", error);
-		return [];
-	}
-	return res.data.map((h) => ({
-		id: h.id,
-		name: h.name,
-		city: h.city,
-		address: h.address,
-		rooms: h.roomCount,
-		timezone: h.timezone,
-		status: h.status,
-	}));
-}
-
 const demoIntegrations: IntegrationItem[] = extra.demoIntegrations.map((i) => ({
 	key: i.key,
 	name: i.name,
