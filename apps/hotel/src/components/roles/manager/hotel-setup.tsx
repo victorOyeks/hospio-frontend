@@ -240,7 +240,7 @@ function SectionForm({
 }) {
 	const router = useRouter();
 	const [values, setValues] = useState<Record<string, unknown>>(() =>
-		Object.fromEntries(section.fields.map((f) => [f.key, f.value])),
+		Object.fromEntries(section.fields.map((f) => [f.key, shown(f)])),
 	);
 	const [dirty, setDirty] = useState(false);
 	const [danger, setDanger] = useState<HotelStatus | null>(null);
@@ -250,7 +250,7 @@ function SectionForm({
 		setDirty(true);
 	};
 	const reset = () => {
-		setValues(Object.fromEntries(section.fields.map((f) => [f.key, f.value])));
+		setValues(Object.fromEntries(section.fields.map((f) => [f.key, shown(f)])));
 		setDirty(false);
 	};
 	const isDanger = section.key === "danger";
@@ -352,7 +352,12 @@ function SectionForm({
 						disabled={!dirty || pending}
 						onClick={() =>
 							run(
-								() => saveSetupSection(section.key, values, hotelId),
+								() =>
+									saveSetupSection(
+										section.key,
+										saved(section, values),
+										hotelId,
+									),
 								`${section.title} saved`,
 								() => {
 									setDirty(false);
@@ -473,7 +478,8 @@ export function SetupField({
 					label={field.label}
 					type="number"
 					value={String(value ?? "")}
-					onChange={(v) => onChange(Number(v))}
+					onChange={(v) => onChange(v === "" ? "" : Number(v))}
+					placeholder={field.zeroIsNone ? "None" : undefined}
 					hint={field.help}
 					disabled={disabled}
 				/>
@@ -497,6 +503,7 @@ export function SetupField({
 					label={field.label}
 					value={typeof value === "number" ? value : ""}
 					onChange={onChange}
+					placeholder={field.zeroIsNone ? "None" : undefined}
 					hint={field.help}
 					disabled={disabled}
 				/>
@@ -509,7 +516,10 @@ export function SetupField({
 							type="number"
 							step="0.5"
 							value={String(value ?? "")}
-							onChange={(e) => onChange(Number(e.target.value))}
+							onChange={(e) =>
+								onChange(e.target.value === "" ? "" : Number(e.target.value))
+							}
+							placeholder={field.zeroIsNone ? "None" : undefined}
 							disabled={disabled}
 							className={cn(inputCls, "pr-8")}
 						/>
@@ -805,4 +815,27 @@ function BrandPreview({
 			</p>
 		</div>
 	);
+}
+
+const NUMERIC = new Set(["number", "money", "percent"]);
+
+/**
+ * What a field shows when the section opens (DEF-071): a number whose default is 0 ("none") shows empty with a "None"
+ * hint, so nobody has to delete a 0 before typing.
+ */
+function shown(f: HotelSetupSection["fields"][number]): unknown {
+	return f.zeroIsNone && f.value === 0 ? "" : f.value;
+}
+
+/** What is saved: an empty number field is 0 ("none"); hints are never saved. */
+function saved(
+	section: HotelSetupSection,
+	values: Record<string, unknown>,
+): Record<string, unknown> {
+	const out = { ...values };
+	for (const f of section.fields) {
+		if (NUMERIC.has(f.type) && (out[f.key] === "" || out[f.key] === undefined))
+			out[f.key] = 0;
+	}
+	return out;
 }

@@ -38,6 +38,7 @@ refreshing or going back in the middle of a flow.
 | 27 | `27-brand-everywhere.md` | Brand & colours: live preview before saving (whole page, pale-colour warning, white sidebar), then the colour, short name and logo in the app for every role, the booking page, booking emails and the WhatsApp banner | Ready |
 | 28 | `28-retention.md` | Notifications and chats (staff Inbox and guest conversations) deleted 30 days after creation / last message; activity log kept six months (admin Settings → Security, at least 30 days); the screens say so | Ready |
 | 29 | `29-card-payment-status.md` | Card payment at the POS: the screen asks our backend every 4 s and shows approved / declined at once; "Still waiting for the POS" after 3 min with Check again; Moniepoint / OPay placeholders refuse clearly | Ready |
+| 30 | `30-retest-def-068-075.md` | Retest of Sam's operating-day defects DEF-068 to DEF-075: rota days field, short-till note to manager and finance, pay-out reason, setup number fields, finance told on day close, organization staff validation and duplicates, reload message | Ready |
 
 ## Before you start
 
@@ -47,6 +48,7 @@ refreshing or going back in the middle of a flow.
 
 - **Emails are real.** Invites, receipts and guest messages go to the address typed. Use your own inbox, or `@hospio-qa.test` for throwaway accounts.
 - **Accept invites in a private window**, not the owner's browser; accepting signs the invited person in on that browser.
+- **Staging is redeployed often.** After a deploy, a "Reload Hospio360" banner appears once on open pages; that is expected, not a defect.
 - **SMS is only for sign-in codes; WhatsApp is live. Staging texts only allow-listed numbers**; other numbers show "Held back: not on this environment's allow-list" (expected). Phone codes on staging are `123456`.
 - **Card payments can't complete on staging** (the test terminal never confirms). Test cash, transfer and charge to room.
 - **Don't change the shared accounts** (tunde, godwin, victor, grace, segun, mariam, femi, jide): no role, password or 2-step changes. Invite your own staff for anything that changes an account.

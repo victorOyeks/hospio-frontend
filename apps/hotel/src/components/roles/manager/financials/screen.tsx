@@ -56,7 +56,11 @@ import type {
 	TransactionRow,
 } from "@hospio/api/data/types";
 import type { demoIncomeSources } from "@hospio/api/demo/fixtures/manager-ops";
-import type { BillRow, BudgetView, ExpenseCategoryRow } from "@hospio/api/data/ml-types";
+import type {
+	BillRow,
+	BudgetView,
+	ExpenseCategoryRow,
+} from "@hospio/api/data/ml-types";
 import {
 	BillPanel,
 	BillsCard,
@@ -76,7 +80,13 @@ import {
 } from "./panels";
 import { OutletSalesCard } from "../outlet-sales";
 
-type Tab = "overview" | "expenses" | "bills" | "transactions" | "requests" | "tills";
+type Tab =
+	| "overview"
+	| "expenses"
+	| "bills"
+	| "transactions"
+	| "requests"
+	| "tills";
 
 export type FinancialsProps = {
 	hotelName: string;
@@ -133,7 +143,9 @@ export function FinancialsScreen(p: FinancialsProps) {
 	});
 	const [billOpen, setBillOpen] = useState<BillRow | null>(null);
 	const [addingBill, setAddingBill] = useState(false);
-	const activeCategories = p.categories.filter((c) => c.active).map((c) => c.label);
+	const activeCategories = p.categories
+		.filter((c) => c.active)
+		.map((c) => c.label);
 	const [exporting, setExporting] = useState(false);
 	const page = p.expenses.data;
 	const counts = page.counts ?? {};
@@ -389,14 +401,22 @@ export function FinancialsScreen(p: FinancialsProps) {
 						Matched
 					</StatusPill>
 				) : (
-					<StatusPill
-						tone={row.original.variance < 0 ? "danger" : "warning"}
-						dot={false}
-					>
-						{row.original.variance < 0
-							? `${naira(-row.original.variance)} short`
-							: `${naira(row.original.variance)} over`}
-					</StatusPill>
+					<div className="flex flex-col items-start gap-1">
+						<StatusPill
+							tone={row.original.variance < 0 ? "danger" : "warning"}
+							dot={false}
+						>
+							{row.original.variance < 0
+								? `${naira(-row.original.variance)} short`
+								: `${naira(row.original.variance)} over`}
+						</StatusPill>
+						{/* What the person who closed it wrote (DEF-069). */}
+						{row.original.note && (
+							<span className="max-w-[260px] text-[12px] text-ink-2">
+								“{row.original.note}”
+							</span>
+						)}
+					</div>
 				),
 		},
 		{
@@ -751,7 +771,9 @@ export function FinancialsScreen(p: FinancialsProps) {
 								headerRight={
 									<button
 										type="button"
-										onClick={() => list.set({ tab: "bills", q: null, category: null })}
+										onClick={() =>
+											list.set({ tab: "bills", q: null, category: null })
+										}
 										className="text-[13px] font-semibold text-brand hover:underline"
 									>
 										All bills

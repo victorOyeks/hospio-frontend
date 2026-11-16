@@ -591,6 +591,20 @@ export function AddStaffPanel({
 			setEmail("");
 		}
 	}, [open]);
+	// DEF-074: the same rules as folio-service: a real name, a real phone, an email that looks like one.
+	const nameError =
+		name.trim() !== "" && !realName(name)
+			? "Enter the person's full name"
+			: undefined;
+	const phoneError =
+		phone.trim() !== "" && !realPhone(phone)
+			? "Enter a real phone number, e.g. 0803 555 0192"
+			: undefined;
+	const emailError =
+		email.trim() !== "" && !/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email.trim())
+			? "Enter a real email address"
+			: undefined;
+	const ok = realName(name) && realPhone(phone) && !emailError;
 	const save = () => {
 		const fallback: OrgMemberRow = {
 			id: `om-${Date.now()}`,
@@ -628,7 +642,7 @@ export function AddStaffPanel({
 					</Button>
 					<Button
 						className={btn.primary}
-						disabled={pending || !name.trim() || !phone.trim()}
+						disabled={pending || !ok}
 						onClick={save}
 					>
 						Add
@@ -637,7 +651,13 @@ export function AddStaffPanel({
 			}
 		>
 			<div className="flex flex-col gap-5">
-				<TextField label="Full name" value={name} onChange={setName} required />
+				<TextField
+					label="Full name"
+					value={name}
+					onChange={setName}
+					required
+					error={nameError}
+				/>
 				<FieldRow>
 					<TextField
 						label="Staff ID / ref"
@@ -645,13 +665,20 @@ export function AddStaffPanel({
 						onChange={setRef}
 						placeholder="JB-10021"
 					/>
-					<TextField label="Phone" value={phone} onChange={setPhone} required />
+					<TextField
+						label="Phone"
+						value={phone}
+						onChange={setPhone}
+						required
+						error={phoneError}
+					/>
 				</FieldRow>
 				<TextField
 					label="Email"
 					value={email}
 					onChange={setEmail}
 					placeholder="Optional"
+					error={emailError}
 				/>
 				<Note tone="info">
 					The front desk checks the name against this list at booking time.
@@ -932,4 +959,17 @@ export function AgreementPanel({
 			</div>
 		</SidePanel>
 	);
+}
+
+/** Two letters or more: "0000" is not a name (same rule as folio-service). */
+function realName(v: string) {
+	return v.trim().length >= 2 && (v.match(/\p{L}/gu) ?? []).length >= 2;
+}
+
+/** 10 to 15 digits, not one digit repeated ("0000 000 0000"), as folio-service checks it. */
+function realPhone(v: string) {
+	if (!/^\+?[0-9 ()-]{7,24}$/.test(v.trim())) return false;
+	const d = v.replace(/\D/g, "");
+	const key = d.length <= 10 ? d : d.slice(-10);
+	return d.length >= 10 && d.length <= 15 && !/^(\d)\1*$/.test(key);
 }

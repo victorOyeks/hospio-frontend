@@ -369,7 +369,7 @@ export function TillScreen({
 								!open ||
 								typeof amount !== "number" ||
 								amount <= 0 ||
-								reason.trim().length < 3 ||
+								!saysSomething(reason) ||
 								pending
 							}
 							onClick={() =>
@@ -432,6 +432,11 @@ export function TillScreen({
 						onChange={setReason}
 						placeholder="e.g. Taxi for guest in A204"
 						required
+						error={
+							reason.trim() !== "" && !saysSomething(reason)
+								? "Say what the cash was for, in words"
+								: undefined
+						}
 					/>
 					{open && (
 						<Note tone="info">
@@ -473,7 +478,7 @@ export function TillScreen({
 							disabled={
 								!open ||
 								typeof counted !== "number" ||
-								(variance !== 0 && note.trim().length < 3) ||
+								(variance !== 0 && !saysSomething(note)) ||
 								pending
 							}
 							onClick={() =>
@@ -541,6 +546,11 @@ export function TillScreen({
 							label="What happened"
 							value={note}
 							onChange={setNote}
+							error={
+								note.trim() !== "" && !saysSomething(note)
+									? "Say what happened, in words"
+									: undefined
+							}
 							rows={2}
 						/>
 					)}
@@ -570,7 +580,7 @@ export function TillScreen({
 								!open ||
 								!toStaff ||
 								typeof counted !== "number" ||
-								(variance !== 0 && note.trim().length < 3) ||
+								(variance !== 0 && !saysSomething(note)) ||
 								pending
 							}
 							onClick={() => {
@@ -651,6 +661,11 @@ export function TillScreen({
 							label="What happened"
 							value={note}
 							onChange={setNote}
+							error={
+								note.trim() !== "" && !saysSomething(note)
+									? "Say what happened, in words"
+									: undefined
+							}
 							rows={2}
 						/>
 					)}
@@ -658,4 +673,12 @@ export function TillScreen({
 			</Modal>
 		</>
 	);
+}
+
+/**
+ * A pay-out reason or a till note must say something (DEF-070): at least 3 letters, so "1234567-0-=-" or "x" is refused
+ * while "Diesel 20L" passes. The same rule as finance-service's Words.meaningful.
+ */
+function saysSomething(text: string) {
+	return (text.match(/\p{L}/gu) ?? []).length >= 3;
 }
