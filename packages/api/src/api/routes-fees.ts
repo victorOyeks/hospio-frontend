@@ -127,4 +127,23 @@ export const feeRoutes = {
 		output: envelope(PosConfig),
 	},
 	"@get/payment/pos-config": { output: envelope(PosConfig) },
+	// The admin portal's Hotels page, in one call each: every hotel's fee state and every hotel's POS status (no keys).
+	"@get/platform/admin/fees/hotels": {
+		output: envelope(
+			z.array(
+				z.object({
+					hotelId: z.string(),
+					provider: str,
+					debitEnabled: z.boolean(),
+					posPaused: z.boolean(),
+					lastFee: DailyFee.nullable().optional(),
+				}),
+			),
+		),
+	},
+	"@get/payment/admin/pos-configs": {
+		output: envelope(
+			z.array(z.object({ hotelId: z.string(), provider: str, complete: z.boolean(), posPaused: z.boolean() })),
+		),
+	},
 };

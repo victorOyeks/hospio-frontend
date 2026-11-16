@@ -595,6 +595,25 @@ async function mapLimit<T, R>(
 }
 
 /** One business's hotels straight from tenant (no manager names: that would be an identity call per business). */
+/** Every hotel across businesses in one call (platform staff). */
+async function allTenantHotels() {
+	const { data: res, error } = await api("@get/tenant/admin/hotels", await withSession());
+	if (error || !res) {
+		fail("tenant-service all hotels", error);
+		return [];
+	}
+	return res.data.map((h) => ({
+		id: h.id,
+		businessId: h.businessId,
+		name: h.name,
+		city: h.city,
+		address: h.address,
+		rooms: h.roomCount,
+		timezone: h.timezone,
+		status: h.status,
+	}));
+}
+
 async function tenantHotels(businessId: string) {
 	const { data: res, error } = await api("@get/tenant/businesses/:id/hotels", {
 		...(await withSession()),
@@ -1611,32 +1630,38 @@ export const adminData = {
 		): Promise<HotelDirectoryRow[]> => {
 			const { data } = await import("./index");
 			const businesses = opts.businesses ?? (await data.platform.businesses());
-			const base = (
-				await mapLimit(businesses, 6, async (b) => {
-					const hotels = live("tenant")
-						? await tenantHotels(b.id)
-						: (await data.platform.businessHotels(b.id)).map((h) => ({
+			const byBusiness = new Map(businesses.map((b) => [b.id, b]));
+			// Live: every hotel in one call (tenant's platform list); demo: each business's hotels.
+			const all = live("tenant")
+				? await allTenantHotels()
+				: (
+						await mapLimit(businesses, 6, async (b) =>
+							(await data.platform.businessHotels(b.id)).map((h) => ({
 								...h,
+								businessId: b.id,
 								status: "ACTIVE",
-							}));
-					return hotels.map(
-						(h): HotelDirectoryRow => ({
-							id: h.id,
-							name: h.name,
-							businessId: b.id,
-							businessName: b.name,
-							stage: b.stage,
-							city: h.city ?? "",
-							address: h.address ?? "",
-							rooms: h.rooms,
-							timezone: h.timezone ?? "Africa/Lagos",
-							status: h.status,
-							collection: null,
-							lastFee: null,
-						}),
-					);
-				})
-			).flat();
+							})),
+						)
+					).flat();
+			const base = all
+				.filter((h) => byBusiness.has(h.businessId))
+				.map((h): HotelDirectoryRow => {
+					const b = byBusiness.get(h.businessId) as BusinessRow;
+					return {
+						id: h.id,
+						name: h.name,
+						businessId: b.id,
+						businessName: b.name,
+						stage: b.stage,
+						city: h.city ?? "",
+						address: h.address ?? "",
+						rooms: h.rooms,
+						timezone: h.timezone ?? "Africa/Lagos",
+						status: h.status,
+						collection: null,
+						lastFee: null,
+					};
+				});
 			return opts.money ? adminData.hotels.withFees(base) : base;
 		},
 		/**
@@ -1663,40 +1688,48 @@ export const adminData = {
 									status: i % 3 === 0 ? "PAID" : "SHADOW",
 								},
 				}));
+			// Three calls whatever the number of hotels: every hotel's fee state, every hotel's POS status, and the server's
+			// debit configuration (the same for every hotel, read through any one hotel).
 			const session = await withSession();
-			const [fees, collections] = await Promise.all([
-				api("@get/platform/admin/fees/daily", { ...session, query: {} }),
-				mapLimit(base, 10, async (h) => {
-					const { data: res } = await api(
-						"@get/platform/admin/businesses/:businessId/hotels/:hotelId/fee-collection",
-						{ ...session, params: { businessId: h.businessId, hotelId: h.id } },
-					);
-					return res?.data ?? null;
-				}),
+			const [states, pos, sample] = await Promise.all([
+				api("@get/platform/admin/fees/hotels", session),
+				api("@get/payment/admin/pos-configs", session),
+				base[0]
+					? api("@get/platform/admin/businesses/:businessId/hotels/:hotelId/fee-collection", {
+							...session,
+							params: { businessId: base[0].businessId, hotelId: base[0].id },
+						})
+					: Promise.resolve({ data: null }),
 			]);
+			const stateOf = new Map((states.data?.data ?? []).map((x) => [x.hotelId, x]));
+			const posOf = new Map((pos.data?.data ?? []).map((x) => [x.hotelId, x]));
+			const configured = new Map((sample.data?.data?.providers ?? []).map((p) => [p.provider, p.debitConfigured]));
 			const latest = new Map<string, { date: string; fee: number; status: string }>();
-			for (const d of fees.data?.data ?? []) {
-				const seen = latest.get(d.hotelId);
-				if (!seen || seen.date < d.date)
-					latest.set(d.hotelId, { date: d.date, fee: d.fee, status: d.status });
+			for (const x of states.data?.data ?? []) {
+				if (x.lastFee) latest.set(x.hotelId, { date: x.lastFee.date, fee: x.lastFee.fee, status: x.lastFee.status });
 			}
-			return base.map((h, i) => {
-				const c = collections[i];
-				const chosen =
-					c?.providers.find((p) => p.provider === c.provider) ??
-					c?.providers.find((p) => p.hotelKeys) ??
-					null;
+			return base.map((h) => {
+				const st = stateOf.get(h.id);
+				const ps = posOf.get(h.id);
+				const provider = st?.provider ?? ps?.provider ?? null;
+				const c = st || ps ? true : null;
 				return {
 					...h,
 					collection: c
 						? {
-								provider: c.provider ?? null,
-								debitEnabled: c.debitEnabled,
-								posPaused: c.posPaused,
-								keysIn: !!chosen?.hotelKeys,
-								debitConfigured: !!chosen?.debitConfigured,
+								provider,
+								debitEnabled: !!st?.debitEnabled,
+								posPaused: !!(st?.posPaused || ps?.posPaused),
+								keysIn: !!ps?.complete,
+								debitConfigured: provider ? !!configured.get(provider) : false,
 							}
-						: null,
+						: {
+								provider: null,
+								debitEnabled: false,
+								posPaused: false,
+								keysIn: false,
+								debitConfigured: false,
+							},
 					lastFee: latest.get(h.id) ?? null,
 				};
 			});
