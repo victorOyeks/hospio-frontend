@@ -638,11 +638,6 @@ export function toSetupSections(
 					value: items.map((i) => i.label),
 					help: f.help,
 					format: f.format,
-					zeroIsNone:
-						(f.type === "number" ||
-							f.type === "money" ||
-							f.type === "percent") &&
-						f.default === 0,
 				};
 			}
 			if (def.key === "danger" && f.key === "status")
@@ -669,6 +664,10 @@ export function toSetupSections(
 				value,
 				options,
 				help: f.help,
+				// DEF-071: a number whose default is 0 ("none") shows empty with a "None" hint.
+				zeroIsNone:
+					(f.type === "number" || f.type === "money" || f.type === "percent") &&
+					f.default === 0,
 			};
 		});
 		const known = new Set(def.fields.map((f) => f.api ?? f.key));
