@@ -17,7 +17,7 @@ import { StatusPill } from "@hospio/ui/shared/status-pill";
 import { SearchBox, Toolbar } from "@hospio/ui/shared/toolbar";
 import { btn } from "@hospio/ui/shared/ui";
 import type { FolioLine, FolioRow, TerminalRow } from "@hospio/api/data/types";
-import { giveDiscount, postCharge, sendFolio, staySummary, voidLine } from "@hospio/api/actions/folio";
+import { folioById, giveDiscount, postCharge, sendFolio, staySummary, voidLine } from "@hospio/api/actions/folio";
 import { withDeliveries } from "@hospio/ui/shared/deliveries-store";
 import { useAction } from "@hospio/api/actions/use-action";
 import { cn } from "@hospio/ui/utils";
@@ -50,8 +50,21 @@ export function FoliosScreen({ folios: initial, terminals, isManager = false, ti
 		closed: folios.filter((f) => f.status !== "OPEN"),
 		all: folios,
 	};
-	const folio = folios.find((f) => f.id === openId) ?? null;
-	const patch = (id: string, fn: (f: FolioRow) => FolioRow) => setFolios((xs) => xs.map((f) => (f.id === id ? fn(f) : f)));
+	// A link to a folio this list doesn't hold (a closed one, from a booking or a payment) reads it, so it still opens.
+	const [extra, setExtra] = useState<FolioRow | null>(null);
+	useEffect(() => {
+		if (!openId || folios.some((f) => f.id === openId) || extra?.id === openId) return;
+		let live = true;
+		void folioById(openId).then((f) => live && f && setExtra(f));
+		return () => {
+			live = false;
+		};
+	}, [openId, folios, extra]);
+	const folio = folios.find((f) => f.id === openId) ?? (extra?.id === openId ? extra : null);
+	const patch = (id: string, fn: (f: FolioRow) => FolioRow) => {
+		setFolios((xs) => xs.map((f) => (f.id === id ? fn(f) : f)));
+		setExtra((x) => (x && x.id === id ? fn(x) : x));
+	};
 
 	const columns = useMemo<ColumnDef<FolioRow, unknown>[]>(
 		() => [

@@ -65,6 +65,17 @@ export function toBookingRow(
 				: folio
 					? Number(folio.payments)
 					: 0,
+		// The folio's bill once the guest is in: reservation-service keeps it on the booking (FolioTotals). Before check-in the
+		// booking's total and paid are the bill, so nothing is set.
+		bill:
+			b.billTotal != null &&
+			(b.status === "CHECKED_IN" || b.status === "CHECKED_OUT")
+				? {
+						total: Number(b.billTotal),
+						paid: Number(b.billPaid ?? 0),
+						balance: Number(b.balance ?? 0),
+					}
+				: undefined,
 		paymentPlan: b.paymentPlan,
 		organizationId: b.organizationId ?? undefined,
 		source: b.source ?? "Front desk",

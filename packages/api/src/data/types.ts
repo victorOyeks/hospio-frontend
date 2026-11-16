@@ -194,6 +194,11 @@ export type BookingRow = {
 	nightlyRate: number;
 	totalAmount: number;
 	paid: number;
+	/**
+	 * The stay's bill as its folio has it (extras, tax and discounts in the total; every payment less refunds), once the
+	 * guest is in. Absent before check-in, when the booking's total and paid are the bill. Read it through `stayBill`.
+	 */
+	bill?: { total: number; paid: number; balance: number };
 	paymentPlan: PaymentPlan;
 	organizationId?: Id;
 	organizationName?: string;
@@ -1499,6 +1504,41 @@ export type AdminUserRow = {
 	lastSignIn?: string;
 	twoStep: boolean;
 };
+
+/**
+ * The stay's bill, the same on every screen: the folio's total, paid and balance once the guest is in (room, extras, tax,
+ * discounts, every payment and refund); the booking's own total and paid before. A cancelled stay owes nothing: what was paid
+ * shows as a negative balance (credit to refund).
+ */
+export function stayBill(
+	b: Pick<BookingRow, "totalAmount" | "paid" | "status" | "priceKind"> & {
+		bill?: BookingRow["bill"];
+	},
+): { total: number; paid: number; balance: number; fromFolio: boolean } {
+	if (b.bill) return { ...b.bill, fromFolio: true };
+	const total = b.priceKind === "COMPLIMENTARY" ? 0 : b.totalAmount;
+	return {
+		total,
+		paid: b.paid,
+		balance: b.status === "CANCELLED" ? -b.paid : total - b.paid,
+		fromFolio: false,
+	};
+}
+
+/** The booking after a payment of `amount` was approved for it: its paid, and the folio bill when there is one. */
+export function withPayment<T extends BookingRow>(b: T, amount: number): T {
+	return {
+		...b,
+		paid: b.paid + amount,
+		bill: b.bill
+			? {
+					...b.bill,
+					paid: b.bill.paid + amount,
+					balance: b.bill.balance - amount,
+				}
+			: undefined,
+	};
+}
 
 /** What the booking's payment plan asks for now: a 50% deposit or the full stay, less what is already paid. */
 export function dueOnBooking(

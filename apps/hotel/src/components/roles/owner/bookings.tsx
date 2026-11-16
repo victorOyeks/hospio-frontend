@@ -15,7 +15,12 @@ import { exportBookings } from "@hospio/api/actions/reservation-lists";
 import type { PageResult } from "@hospio/api/data/paging";
 import { useListParams } from "@hospio/ui/shared/list-params";
 import { HotelScope } from "@hospio/api/actions/hotel-scope";
-import type { AtHotel, BookingRow } from "@hospio/api/data/types";
+import {
+	type AtHotel,
+	type BookingRow,
+	stayBill,
+	withPayment,
+} from "@hospio/api/data/types";
 import { Button } from "@hospio/ui/primitives/button";
 import { DataTable, TwoLine } from "@hospio/ui/shared/data-table";
 import { AvatarName } from "@hospio/ui/shared/detail-list";
@@ -135,7 +140,7 @@ export function OwnerBookings({
 		if (p.status === "APPROVED") {
 			setBookings((bs) =>
 				bs.map((b) =>
-					b.id === bookingId ? { ...b, paid: b.paid + p.amount } : b,
+					b.id === bookingId ? withPayment(b, p.amount) : b,
 				),
 			);
 			return;
@@ -208,10 +213,12 @@ export function OwnerBookings({
 				return (
 					<TwoLine
 						primary={
-							b.priceKind === "COMPLIMENTARY" ? "₦0" : naira(b.totalAmount)
+							b.priceKind === "COMPLIMENTARY" && !b.bill
+								? "₦0"
+								: naira(stayBill(b).total)
 						}
 						secondary={
-							b.priceKind === "COMPLIMENTARY" ? (
+							b.priceKind === "COMPLIMENTARY" && due <= 0 ? (
 								"Complimentary"
 							) : b.paymentPlan === "ORGANIZATION" ? (
 								`Billed to ${b.organizationName ?? "the company"}`
@@ -547,8 +554,8 @@ export function OwnerBookings({
 								b.nights,
 								bookingStatus(b).label,
 								paymentStatus(b).label,
-								b.totalAmount,
-								b.paid,
+								stayBill(b).total,
+								stayBill(b).paid,
 								balance(b),
 								b.createdAt ?? "",
 							]),

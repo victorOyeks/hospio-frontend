@@ -1,9 +1,10 @@
 import { format } from "date-fns";
 import type { PillTone } from "@hospio/ui/shared/status-pill";
-import type {
-	BookingRow,
-	PaymentPlan,
-	PriceKind,
+import {
+	type BookingRow,
+	type PaymentPlan,
+	type PriceKind,
+	stayBill,
 } from "@hospio/api/data/types";
 
 // The local (Lagos) calendar date, not UTC.
@@ -45,13 +46,13 @@ export function paymentStatus(b: BookingRow): {
 			label: b.paid > 0 ? "Paid · refund or credit" : "Nothing due",
 			tone: "grey",
 		};
-	if (b.priceKind === "COMPLIMENTARY")
+	if (b.priceKind === "COMPLIMENTARY" && !(b.bill && b.bill.balance > 0))
 		return { label: "Complimentary", tone: "brand" };
 	if (b.paymentPlan === "ORGANIZATION")
 		return { label: "On account", tone: "info" };
-	const due = b.totalAmount - b.paid;
-	if (due <= 0) return { label: "Paid", tone: "success" };
-	if (b.paid > 0) return { label: "Part-paid", tone: "warning" };
+	const bill = stayBill(b);
+	if (bill.balance <= 0) return { label: "Paid", tone: "success" };
+	if (bill.paid > 0) return { label: "Part-paid", tone: "warning" };
 	return { label: "Unpaid", tone: "danger" };
 }
 
@@ -69,7 +70,7 @@ export const priceKindLabels: Record<PriceKind, string> = {
 
 /** What the guest still owes on the stay; nothing once the booking is cancelled. */
 export const balance = (b: BookingRow) =>
-	b.status === "CANCELLED" ? 0 : Math.max(0, b.totalAmount - b.paid);
+	b.status === "CANCELLED" ? 0 : Math.max(0, stayBill(b).balance);
 
 /** Whether an action from the URL (?action=) still applies to the booking: a stale link must not open check-in on a stay that is in house or cancelled. */
 export function actionAllowed(b: BookingRow, action: string | null): boolean {

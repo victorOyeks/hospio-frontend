@@ -6,6 +6,8 @@ import { withDeliveries } from "@hospio/ui/shared/deliveries-store";
 import { GuestMessageModal } from "../shared-staff/guest-message";
 import {
 	dueOnBooking,
+	stayBill,
+	withPayment,
 	occupancyLabel,
 	occupantHint,
 	pastDeparture,
@@ -246,9 +248,7 @@ export function BookingsScreen({
 		reload();
 		if (p.status === "APPROVED") {
 			setBookings((xs) =>
-				xs.map((x) =>
-					x.id === bookingId ? { ...x, paid: x.paid + p.amount } : x,
-				),
+				xs.map((x) => (x.id === bookingId ? withPayment(x, p.amount) : x)),
 			);
 			return;
 		}
@@ -259,7 +259,7 @@ export function BookingsScreen({
 		const folio = folios.find((f) => f.bookingId === b.id);
 		return (
 			dueOnBooking(b) ||
-			Math.max(0, folio ? folio.balance : b.totalAmount - b.paid)
+			Math.max(0, folio ? folio.balance : stayBill(b).balance)
 		);
 	};
 	/** A flow ended: land on the booking summary. */
@@ -311,16 +311,16 @@ export function BookingsScreen({
 				cell: ({ row }) => (
 					<TwoLine
 						primary={
-							row.original.priceKind === "COMPLIMENTARY"
+							row.original.priceKind === "COMPLIMENTARY" && !row.original.bill
 								? "Comp"
-								: naira(row.original.totalAmount)
+								: naira(stayBill(row.original).total)
 						}
 						secondary={
 							row.original.paymentPlan === "ORGANIZATION"
 								? "Company pays"
 								: row.original.status !== "CANCELLED" &&
-										row.original.totalAmount - row.original.paid > 0
-									? `${naira(row.original.totalAmount - row.original.paid)} due`
+										stayBill(row.original).balance > 0
+									? `${naira(stayBill(row.original).balance)} due`
 									: "Paid"
 						}
 					/>
@@ -718,8 +718,10 @@ export function BookingPanel({
 }) {
 	if (!booking) return null;
 	const b = booking;
-	// A cancelled booking owes nothing; what was paid shows as credit to refund.
-	const due = b.status === "CANCELLED" ? -b.paid : b.totalAmount - b.paid;
+	// The stay's bill, as the folio has it once the guest is in (extras, tax, every payment); a cancelled booking owes
+	// nothing, and what was paid shows as credit to refund.
+	const bill = stayBill(b);
+	const due = bill.balance;
 	return (
 		<SidePanel
 			open={open}
@@ -765,10 +767,12 @@ export function BookingPanel({
 					{[
 						[
 							"Total",
-							b.priceKind === "COMPLIMENTARY" ? "Comp" : naira(b.totalAmount),
+							b.priceKind === "COMPLIMENTARY" && !b.bill
+								? "Comp"
+								: naira(bill.total),
 							undefined,
 						],
-						["Paid", naira(b.paid), "text-success"],
+						["Paid", naira(bill.paid), "text-success"],
 						[
 							b.paymentPlan === "ORGANIZATION"
 								? "Company pays"

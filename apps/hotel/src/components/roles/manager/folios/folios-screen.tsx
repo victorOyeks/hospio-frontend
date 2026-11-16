@@ -5,6 +5,7 @@ import { ReceiptIcon, WalletIcon } from "lucide-react";
 import Link from "next/link";
 import { parseAsString, useQueryState } from "nuqs";
 import { useEffect, useState } from "react";
+import { folioById } from "@hospio/api/actions/folio";
 import { DataTable, TwoLine } from "@hospio/ui/shared/data-table";
 import { AvatarName } from "@hospio/ui/shared/detail-list";
 import { fmtWhen, naira, nairaShort, plural } from "@hospio/ui/shared/format";
@@ -59,9 +60,24 @@ export function FoliosScreen({
 	useEffect(() => setFolios(initial), [initial]);
 	const [search, setSearch] = useState("");
 	const active = (TABS.includes(tab as Tab) ? tab : "open") as Tab;
-	const selected = folios.find((f) => f.id === openId) ?? null;
-	const patch = (id: string, fn: (f: FolioRow) => FolioRow) =>
+	// A link to a folio this list doesn't hold (a closed one, from a booking or a payment) reads it, so it still opens.
+	const [extra, setExtra] = useState<FolioRow | null>(null);
+	useEffect(() => {
+		if (!openId || folios.some((f) => f.id === openId) || extra?.id === openId)
+			return;
+		let live = true;
+		void folioById(openId).then((f) => live && f && setExtra(f));
+		return () => {
+			live = false;
+		};
+	}, [openId, folios, extra]);
+	const selected =
+		folios.find((f) => f.id === openId) ??
+		(extra?.id === openId ? extra : null);
+	const patch = (id: string, fn: (f: FolioRow) => FolioRow) => {
 		setFolios((fs) => fs.map((f) => (f.id === id ? fn(f) : f)));
+		setExtra((x) => (x && x.id === id ? fn(x) : x));
+	};
 
 	const open = folios.filter((f) => f.status === "OPEN");
 	const dueTotal = open

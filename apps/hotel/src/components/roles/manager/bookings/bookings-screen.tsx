@@ -31,9 +31,11 @@ import { RowActions } from "@hospio/ui/shared/row-actions";
 import { StatusPill } from "@hospio/ui/shared/status-pill";
 import { ExportButton, SearchBox, Toolbar } from "@hospio/ui/shared/toolbar";
 import { btn } from "@hospio/ui/shared/ui";
-import type {
-	BookingRow,
-	OrganizationRow,
+import {
+	type BookingRow,
+	type OrganizationRow,
+	stayBill,
+	withPayment,
 } from "@hospio/api/data/types";
 import type { TakenPayment } from "../../front-office/take-payment";
 import { BookingDetailsPanel } from "./booking-details";
@@ -182,7 +184,7 @@ export function BookingsScreen({
 		if (p.status === "APPROVED") {
 			setBookings((bs) =>
 				bs.map((b) =>
-					b.id === bookingId ? { ...b, paid: b.paid + p.amount } : b,
+					b.id === bookingId ? withPayment(b, p.amount) : b,
 				),
 			);
 			return;
@@ -232,8 +234,8 @@ export function BookingsScreen({
 					b.nights,
 					bookingStatus(b).label,
 					paymentStatus(b).label,
-					b.totalAmount,
-					b.paid,
+					stayBill(b).total,
+					stayBill(b).paid,
 					balance(b),
 					b.createdAt ?? "",
 				]),
@@ -300,10 +302,12 @@ export function BookingsScreen({
 				return (
 					<TwoLine
 						primary={
-							b.priceKind === "COMPLIMENTARY" ? "₦0" : naira(b.totalAmount)
+							b.priceKind === "COMPLIMENTARY" && !b.bill
+								? "₦0"
+								: naira(stayBill(b).total)
 						}
 						secondary={
-							b.priceKind === "COMPLIMENTARY" ? (
+							b.priceKind === "COMPLIMENTARY" && due <= 0 ? (
 								"Complimentary"
 							) : b.paymentPlan === "ORGANIZATION" ? (
 								`Billed to ${b.organizationName}`
