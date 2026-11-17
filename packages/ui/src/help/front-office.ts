@@ -106,7 +106,7 @@ export const frontOfficeHelp: HelpModule = {
 				"Open “Payments” and tap “Take payment” (it is also on “Today”, or use “Record payment” on a booking).",
 				"Pick the “Guest folio”, check “Who is paying”, the “Amount” and “What for”, then tap “Continue · ₦…”.",
 				"On “How is the guest paying?”, pick the “Method”: “Card on the POS”, “Bank transfer” or “Cash”.",
-				"Card: pick the “Terminal” and tap “Send to POS”, then hand the guest the POS. Transfer: tap “Show transfer details”, wait for the alert, type the “Sender's name or bank reference” and tap “I've confirmed the transfer”. Cash: tap “Count cash”, enter the “Cash received” and tap “Cash received”.",
+				"Card: pick the “Terminal” and tap “Send to POS”, then hand the guest the POS. Bank transfer: also goes to the POS. Pick the “Terminal”, tap “Send to POS”, and the guest chooses transfer on the POS and pays to the account it shows. Cash: tap “Count cash”, enter the “Cash received” and tap “Cash received”.",
 				"Under “Receipt”, “Email” is picked when the guest has an email: check the “Guest's email” and tap “Email receipt & record”. Or pick “Print” and tap “Record payment”, or tap “Skip receipt”.",
 				"Tap “Done”. The folio and your payments list update.",
 			],

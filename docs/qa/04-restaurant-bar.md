@@ -132,9 +132,9 @@ once.
    recorded"; Sale done shows the total and "Paid by cash".
 3. **Do:** reload the board. **Expect:** the order is gone (the payment closed it). The kitchen till's "Should
    be in the drawer" went up by the order total.
-4. **Do:** New order → Takeaway → one item → Payment: Pay now → Send & take payment → Bank transfer → Show
-   transfer details → I've confirmed the transfer → Skip receipt. **Expect:** "Paid by bank transfer"; the
-   order closes at once (it does not wait for Finance).
+4. **Do:** New order → Takeaway → one item → Payment: Pay now → Send & take payment → Bank transfer on the POS →
+   pick the terminal → Send to POS. **Expect:** it waits for the POS like a card (on the terminal the guest chooses
+   transfer); once the POS confirms, "Paid by bank transfer" and the order closes.
 5. **Do:** New order → one item → Send → Take payment → Card on the POS → Send to POS. **Expect:** it stays
    "Processing" (test terminal); the order stays on the board as "to pay". Charge it to a room or take cash
    instead: both work.

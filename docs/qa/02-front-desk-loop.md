@@ -53,8 +53,8 @@ ends on the booking summary.
    With "Save, take payment later" on a deposit booking → the summary opens with nothing paid.
 4. Card on the POS: the step shows "sent to the POS" and you can continue to the receipt and finish; the
    summary shows a note that the amount is with the POS (staging terminals stay Processing), also after a
-   reload. Cash and transfer are approved at once: a transfer is recorded when the desk confirms it landed
-   ("I've confirmed the transfer"); finance matches it to the bank line later. A role with no POS assigned
+   reload. Cash is approved at once. A bank transfer goes to the POS like a card (the guest chooses
+   transfer on the terminal) and is approved when the POS confirms it. A role with no POS assigned
    (e.g. the manager on staging) gets "The card wasn't sent" with the reason and "Try another way".
 5. Closing the panel on any payment step (X or Escape) keeps the booking: the panel lands on the summary with
    nothing paid. Reloading mid-payment records nothing.
