@@ -166,7 +166,7 @@ export function toPaymentRow(p: z.infer<typeof PaymentResponse>): PaymentRow {
 		method: p.method === "ORGANIZATION" ? "TRANSFER" : p.method,
 		amount: Number(p.amount),
 		status: p.status,
-		terminal: p.terminalId ?? undefined,
+		terminal: p.terminalName ?? p.terminalId ?? undefined,
 		providerRef: p.providerRef ?? undefined,
 		createdAt: p.createdAt,
 		resolvedAt: p.resolvedAt ?? undefined,
