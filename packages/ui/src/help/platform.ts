@@ -36,6 +36,7 @@ export const platformHelp: HelpModule = {
 			],
 			goodToKnow: [
 				"The same panel opens from a business's “Hotels” tab and from Payments & POS → “POS & fee collection”.",
+				"A hotel can hold keys for both Moniepoint and OPay: each card payment goes through its terminal's provider, and the debit uses the provider you choose under “Debit from”.",
 				"Only a Super admin adds, changes or removes POS keys and turns the debit on or off. Finance admin sees them.",
 				"Support doesn't see the POS & Hospio fees tab.",
 			],

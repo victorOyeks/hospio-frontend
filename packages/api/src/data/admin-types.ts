@@ -442,8 +442,10 @@ export type HotelCollectionSummary = {
 	provider: string | null;
 	debitEnabled: boolean;
 	posPaused: boolean;
-	/** The hotel's POS keys are in for the chosen (or first) provider. */
+	/** The hotel has complete POS keys for at least one provider. */
 	keysIn: boolean;
+	/** Every provider with complete keys (a hotel can hold Moniepoint and OPay side by side). */
+	providers?: string[];
 	debitConfigured: boolean;
 };
 

@@ -3,7 +3,7 @@
 import type { z } from "zod";
 import type { ActionResult } from "@hospio/api/actions/auth";
 import { api, errorMessage } from "@hospio/api/api/client";
-import type { DailyFee, DayRun, DebitRun, FeeCollection, PosConfig } from "@hospio/api/api/routes-fees";
+import type { DailyFee, DayRun, DebitRun, FeeCollection, PosConfig, PosProviderKeys } from "@hospio/api/api/routes-fees";
 import { withSession } from "@hospio/api/api/server";
 
 /**
@@ -14,6 +14,7 @@ import { withSession } from "@hospio/api/api/server";
 export type DailyFeeRow = z.infer<typeof DailyFee>;
 export type FeeCollectionView = z.infer<typeof FeeCollection>;
 export type PosConfigView = z.infer<typeof PosConfig>;
+export type PosProviderKeysView = z.infer<typeof PosProviderKeys>;
 export type DayRunResult = z.infer<typeof DayRun>;
 export type DebitRunResult = z.infer<typeof DebitRun>;
 
@@ -80,8 +81,12 @@ export async function adminPosConfig(hotelId: string): Promise<ActionResult<PosC
 	return error || !data ? fail(error, "POS keys could not be loaded") : { ok: true, data: data.data };
 }
 
-export async function removeAdminPosConfig(hotelId: string): Promise<ActionResult<PosConfigView>> {
-	const { data, error } = await api("@delete/payment/admin/hotels/:hotelId/pos-config", { ...(await withSession()), params: { hotelId } });
+/** Removes one provider's keys; the hotel's other provider is untouched. */
+export async function removeAdminPosConfig(hotelId: string, provider: string): Promise<ActionResult<PosConfigView>> {
+	const { data, error } = await api("@delete/payment/admin/hotels/:hotelId/pos-config/:provider", {
+		...(await withSession()),
+		params: { hotelId, provider },
+	});
 	return error || !data ? fail(error, "POS keys could not be removed") : { ok: true, data: data.data };
 }
 

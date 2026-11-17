@@ -72,11 +72,16 @@ Password for every account: `Hospio123!`.
 
 ## 4. POS keys (super admin)
 
-1. Admin portal → the hotel → **POS provider** → **Add keys**.
-2. Choose **Moniepoint**, paste the API key and webhook secret, then **Save keys**.
-3. The card shows each key masked (e.g. `••••••3456`) and **Complete**.
-4. Choose **OPay** instead: paste a PKCS#1 private key (`BEGIN RSA PRIVATE KEY`). It's refused with how to convert it (`openssl pkcs8 …`).
-5. As the manager, Hotel setup → **POS** shows **POS provider keys** with the provider, **Connected** and the masked keys. Nothing can be edited.
+1. Admin portal → Hotels → the hotel → **POS & Hospio fees** → **POS providers**. There's a block for **Moniepoint** and one for
+   **OPay**, each "Not added".
+2. Moniepoint → **Add keys**: paste the API key and webhook secret and **Save keys**. The Moniepoint block shows each key masked
+   (e.g. `••••••3456`) and **Complete**.
+3. OPay → **Add keys**: paste a PKCS#1 private key (`BEGIN RSA PRIVATE KEY`). It's refused, with how to convert it
+   (`openssl pkcs8 …`). With proper keys, OPay shows **Complete** too. **Moniepoint's keys are still there**: a hotel holds both.
+4. Moniepoint → **Remove**: only Moniepoint's keys go. OPay's stay.
+5. As the manager, Hotel setup → **POS** shows a block per provider with **Connected** and the masked keys. Nothing can be edited.
+6. Each card payment goes through its terminal's provider. A Moniepoint terminal uses the Moniepoint keys, an OPay terminal the
+   OPay keys. A terminal of a provider without keys keeps the server's POS setting.
 
 ## 5. The debit switch (super admin)
 

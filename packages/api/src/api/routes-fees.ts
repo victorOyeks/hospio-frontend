@@ -65,14 +65,19 @@ export const FeeCollection = z.object({
 	providers: z.array(ProviderState),
 });
 
-export const PosConfig = z.object({
-	hotelId: z.string(),
-	provider: str,
+/** One provider's keys for a hotel, masked. A hotel can hold Moniepoint and OPay side by side. */
+export const PosProviderKeys = z.object({
+	provider: z.string(),
 	fields: z.record(z.string(), z.string().nullable()),
 	complete: z.boolean(),
-	posPaused: z.boolean(),
 	updatedByName: str,
 	updatedAt: str,
+});
+
+export const PosConfig = z.object({
+	hotelId: z.string(),
+	providers: z.array(PosProviderKeys),
+	posPaused: z.boolean(),
 	keyStoreReady: z.boolean(),
 });
 
@@ -122,8 +127,8 @@ export const feeRoutes = {
 		input: z.object({ businessId: z.string(), provider: z.string(), fields: z.record(z.string(), z.string()) }),
 		output: envelope(PosConfig),
 	},
-	"@delete/payment/admin/hotels/:hotelId/pos-config": {
-		params: z.object({ hotelId: z.string() }),
+	"@delete/payment/admin/hotels/:hotelId/pos-config/:provider": {
+		params: z.object({ hotelId: z.string(), provider: z.string() }),
 		output: envelope(PosConfig),
 	},
 	"@get/payment/pos-config": { output: envelope(PosConfig) },
@@ -143,7 +148,7 @@ export const feeRoutes = {
 	},
 	"@get/payment/admin/pos-configs": {
 		output: envelope(
-			z.array(z.object({ hotelId: z.string(), provider: str, complete: z.boolean(), posPaused: z.boolean() })),
+			z.array(z.object({ hotelId: z.string(), providers: z.array(z.string()), posPaused: z.boolean() })),
 		),
 	},
 };

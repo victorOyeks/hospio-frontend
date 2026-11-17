@@ -10,6 +10,7 @@ import {
 	type FeeCollectionView,
 	feeCollection,
 	type PosConfigView,
+	type PosProviderKeysView,
 	redoFeeDay,
 	removeAdminPosConfig,
 	runFeeDay,
@@ -78,7 +79,8 @@ export function HotelFeesPanel({ businessId, hotelId, role }: { businessId: stri
 	const [collection, setCollection] = useState<FeeCollectionView | null>(null);
 	const [days, setDays] = useState<DailyFeeRow[] | null>(null);
 	const [error, setError] = useState<string | null>(null);
-	const [editing, setEditing] = useState(false);
+	/** The provider whose keys are being added or changed (null: closed). */
+	const [editing, setEditing] = useState<string | null>(null);
 	const [open, setOpen] = useState<DailyFeeRow | null>(null);
 
 	const load = useCallback(async () => {
@@ -93,7 +95,7 @@ export function HotelFeesPanel({ businessId, hotelId, role }: { businessId: stri
 	}, [load]);
 
 	const toggleDebit = async (on: boolean) => {
-		const r = await setFeeCollection(businessId, hotelId, collection?.provider ?? pos?.provider ?? null, on);
+		const r = await setFeeCollection(businessId, hotelId, collection?.provider ?? pos?.providers[0]?.provider ?? null, on);
 		if (r.ok) {
 			setCollection(r.data);
 			toast.success(on ? "Debit switched on: the fee is debited at 6am daily" : "Debit off: statements only");
@@ -105,7 +107,7 @@ export function HotelFeesPanel({ businessId, hotelId, role }: { businessId: stri
 		else toast.error(r.error);
 	};
 
-	const state = collection?.providers.find((x) => x.provider === (collection?.provider ?? pos?.provider));
+	const state = collection?.providers.find((x) => x.provider === (collection?.provider ?? pos?.providers[0]?.provider));
 	const canSwitchOn = !!state && state.debitConfigured && state.hotelKeys;
 
 	return (
@@ -113,49 +115,68 @@ export function HotelFeesPanel({ businessId, hotelId, role }: { businessId: stri
 			{error && <Note tone="danger">{error}</Note>}
 			{superAdmin && (
 				<SectionCard
-					title="POS provider"
-					subtitle="The hotel's own Moniepoint or OPay keys: card payments go to its terminals, and the daily fee is debited from its account"
-					headerRight={
-						<div className="flex gap-2">
-							{pos?.provider && (
-								<button
-									type="button"
-									className={`${btn.secondary} ${btn.small}`}
-									onClick={async () => {
-										if (!window.confirm("Remove this hotel's POS keys? Its card payments go back to the server's POS setting.")) return;
-										const r = await removeAdminPosConfig(hotelId);
-										if (r.ok) {
-											setPos(r.data);
-											toast.success("POS keys removed");
-											void load();
-										} else toast.error(r.error);
-									}}
-								>
-									Remove keys
-								</button>
-							)}
-							<button type="button" className={`${btn.secondary} ${btn.small}`} onClick={() => setEditing(true)}>
-								<KeyRoundIcon className="mr-1 inline size-4" /> {pos?.provider ? "Change keys" : "Add keys"}
-							</button>
-						</div>
-					}
+					title="POS providers"
+					subtitle="The hotel's own Moniepoint and OPay keys. Each card payment goes through its terminal's provider; the daily fee is debited from the provider chosen below"
 				>
 					{!pos ? (
 						<p className="text-[13px] text-ink-3">Loading…</p>
 					) : !pos.keyStoreReady ? (
 						<Note tone="warning">The server has no POS_SECRETS_KEY yet, so keys can't be stored. Set it on the server first.</Note>
-					) : !pos.provider ? (
-						<p className="text-[13px] text-ink-2">No keys yet. This hotel's card payments use the server's POS setting.</p>
 					) : (
-						<DetailList
-							columns={2}
-							items={[
-								{ label: "Provider", value: providerLabel(pos.provider) },
-								{ label: "Keys", value: pos.complete ? <StatusPill tone="success">Complete</StatusPill> : <StatusPill tone="warning">Incomplete</StatusPill> },
-								...FIELDS[pos.provider].map((f) => ({ label: f.label, value: pos.fields[f.key] ?? "—" })),
-								{ label: "Updated", value: pos.updatedAt ? `${fmtWhen(pos.updatedAt)} by ${pos.updatedByName ?? "Hospio360"}` : "—" },
-							]}
-						/>
+						<div className="flex flex-col gap-3">
+							{(["MONIEPOINT", "OPAY"] as const).map((provider) => {
+								const keys = pos.providers.find((x) => x.provider === provider);
+								return (
+									<div key={provider} className="rounded-card border border-line p-4">
+										<div className="flex flex-wrap items-center justify-between gap-2">
+											<div className="flex items-center gap-2">
+												<span className="text-[14px] font-semibold text-ink">{providerLabel(provider)}</span>
+												{!keys ? (
+													<StatusPill tone="grey">Not added</StatusPill>
+												) : keys.complete ? (
+													<StatusPill tone="success">Complete</StatusPill>
+												) : (
+													<StatusPill tone="warning">Incomplete</StatusPill>
+												)}
+											</div>
+											<div className="flex gap-2">
+												{keys && (
+													<button
+														type="button"
+														className={`${btn.secondary} ${btn.small}`}
+														onClick={async () => {
+															if (!window.confirm(`Remove this hotel's ${providerLabel(provider)} keys? Payments on its ${providerLabel(provider)} terminals go back to the server's POS setting.`)) return;
+															const r = await removeAdminPosConfig(hotelId, provider);
+															if (r.ok) {
+																setPos(r.data);
+																toast.success(`${providerLabel(provider)} keys removed`);
+																void load();
+															} else toast.error(r.error);
+														}}
+													>
+														Remove
+													</button>
+												)}
+												<button type="button" className={`${btn.secondary} ${btn.small}`} onClick={() => setEditing(provider)}>
+													<KeyRoundIcon className="mr-1 inline size-4" /> {keys ? "Change keys" : "Add keys"}
+												</button>
+											</div>
+										</div>
+										{keys && (
+											<div className="mt-3">
+												<DetailList
+													columns={2}
+													items={[
+														...FIELDS[provider].map((f) => ({ label: f.label, value: keys.fields[f.key] ?? "—" })),
+														{ label: "Updated", value: keys.updatedAt ? `${fmtWhen(keys.updatedAt)} by ${keys.updatedByName ?? "Hospio360"}` : "—" },
+													]}
+												/>
+											</div>
+										)}
+									</div>
+								);
+							})}
+						</div>
 					)}
 				</SectionCard>
 			)}
@@ -268,13 +289,14 @@ export function HotelFeesPanel({ businessId, hotelId, role }: { businessId: stri
 
 			{editing && pos && (
 				<PosKeysModal
-					current={pos}
-					onClose={() => setEditing(false)}
+					provider={editing}
+					current={pos.providers.find((x) => x.provider === editing) ?? null}
+					onClose={() => setEditing(null)}
 					onSave={async (provider, fields) => {
 						const r = await saveAdminPosConfig(businessId, hotelId, provider, fields);
 						if (r.ok) {
 							setPos(r.data);
-							setEditing(false);
+							setEditing(null);
 							toast.success("POS keys saved");
 							void load();
 						} else toast.error(r.error);
@@ -386,46 +408,36 @@ export function FeeDayModal({ day, onClose, onRedo }: { day: DailyFeeRow; onClos
 }
 
 function PosKeysModal({
+	provider,
 	current,
 	onClose,
 	onSave,
 }: {
-	current: PosConfigView;
+	provider: string;
+	/** The provider's saved keys, masked; null when none are saved yet. */
+	current: PosProviderKeysView | null;
 	onClose: () => void;
 	onSave: (provider: string, fields: Record<string, string>) => Promise<void>;
 }) {
-	const [provider, setProvider] = useState(current.provider ?? "MONIEPOINT");
 	const [values, setValues] = useState<Record<string, string>>({});
 	const [saving, setSaving] = useState(false);
-	const same = provider === current.provider;
-	const missing = FIELDS[provider].filter((f) => !values[f.key]?.trim() && !(same && current.fields[f.key]));
+	const saved = (key: string) => current?.fields[key] ?? null;
+	const missing = FIELDS[provider].filter((f) => !values[f.key]?.trim() && !saved(f.key));
 	return (
 		<Modal
 			open
 			onOpenChange={(o) => !o && onClose()}
-			title="POS provider keys"
+			title={`${providerLabel(provider)} keys`}
 			subtitle="Stored encrypted. Leave a field empty to keep the saved value; the hotel sees them masked."
 		>
 			<div className="flex flex-col gap-4">
-				<SelectField
-					label="Provider"
-					value={provider}
-					onChange={(v) => {
-						setProvider(v);
-						setValues({});
-					}}
-					options={[
-						{ value: "MONIEPOINT", label: "Moniepoint" },
-						{ value: "OPAY", label: "OPay" },
-					]}
-				/>
 				{FIELDS[provider].map((f) =>
 					f.multiline ? (
 						<label key={f.key} className="flex flex-col gap-1 text-[13px]">
 							<span className="font-medium text-ink">{f.label}</span>
 							<textarea
 								className="min-h-24 rounded-lg border border-line bg-card px-3 py-2 font-mono text-[12px]"
-								placeholder={same && current.fields[f.key] ? `Saved ${current.fields[f.key]}` : "Paste here"}
+								placeholder={saved(f.key) ? `Saved ${saved(f.key)}` : "Paste here"}
 								value={values[f.key] ?? ""}
 								onChange={(e) => setValues({ ...values, [f.key]: e.target.value })}
 							/>
@@ -437,7 +449,7 @@ function PosKeysModal({
 							label={f.label}
 							value={values[f.key] ?? ""}
 							onChange={(v) => setValues({ ...values, [f.key]: v })}
-							placeholder={same && current.fields[f.key] ? `Saved ${current.fields[f.key]}` : undefined}
+							placeholder={saved(f.key) ? `Saved ${saved(f.key)}` : undefined}
 							hint={f.hint}
 						/>
 					),

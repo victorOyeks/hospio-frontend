@@ -35,7 +35,7 @@ export function PosKeysCard() {
 				<Note tone="danger">{error}</Note>
 			) : !pos ? (
 				<p className="text-[13px] text-ink-3">Loading…</p>
-			) : !pos.provider ? (
+			) : pos.providers.length === 0 ? (
 				<div className="flex items-center gap-2 text-[13px] text-ink-2">
 					<KeyRoundIcon className="size-4 text-ink-3" /> Not connected yet. Hospio360 adds your Moniepoint or OPay keys when your POS is set up.
 				</div>
@@ -47,15 +47,20 @@ export function PosKeysCard() {
 							soon as a debit goes through.
 						</Note>
 					)}
-					<DetailList
-						columns={2}
-						items={[
-							{ label: "Provider", value: pos.provider === "OPAY" ? "OPay" : "Moniepoint" },
-							{ label: "Status", value: pos.complete ? <StatusPill tone="success">Connected</StatusPill> : <StatusPill tone="warning">Keys incomplete</StatusPill> },
-							...Object.entries(pos.fields).map(([k, v]) => ({ label: LABELS[k] ?? k, value: v ?? "—" })),
-							{ label: "Last changed", value: pos.updatedAt ? `${fmtWhen(pos.updatedAt)} by ${pos.updatedByName ?? "Hospio360"}` : "—" },
-						]}
-					/>
+					{pos.providers.map((p) => (
+						<div key={p.provider} className="rounded-card border border-line p-4">
+							<DetailList
+								columns={2}
+								items={[
+									{ label: "Provider", value: p.provider === "OPAY" ? "OPay" : "Moniepoint" },
+									{ label: "Status", value: p.complete ? <StatusPill tone="success">Connected</StatusPill> : <StatusPill tone="warning">Keys incomplete</StatusPill> },
+									...Object.entries(p.fields).map(([k, v]) => ({ label: LABELS[k] ?? k, value: v ?? "—" })),
+									{ label: "Last changed", value: p.updatedAt ? `${fmtWhen(p.updatedAt)} by ${p.updatedByName ?? "Hospio360"}` : "—" },
+								]}
+							/>
+						</div>
+					))}
+					<p className="text-[12px] text-ink-3">Each card payment goes through the provider of the terminal it's sent to.</p>
 				</div>
 			)}
 		</SectionCard>
