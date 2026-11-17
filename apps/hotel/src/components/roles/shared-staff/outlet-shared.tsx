@@ -25,12 +25,14 @@ export function useOrderRows(initial: OrderRow[]) {
 	useEffect(() => setRows(initial), [initial]);
 	// The server's rows win; an order this screen already holds that the refreshed board no longer has (it was
 	// just paid, charged to a room or cancelled, so it left the open board) is kept, so the Sale done panel
-	// and Recent sales still have it.
+	// and Recent sales still have it. A ticket from another outlet that left the board was served there: it goes.
 	useEffect(
 		() =>
 			setRows((prev) => [
 				...initial,
-				...prev.filter((p) => !initial.some((i) => i.id === p.id)),
+				...prev.filter(
+					(p) => !p.ticketFrom && !initial.some((i) => i.id === p.id),
+				),
 			]),
 		[initial],
 	);
@@ -214,3 +216,34 @@ export function daysLabel(days: string) {
 /** A tab or order sits at a table when it names it; used for the seats grid and for moving a tab. */
 export const sitsAt = (o: OrderRow, t: { id: string; number: string }) =>
 	o.tableId === t.id || (!o.tableId && o.tableNo === t.number);
+
+/** A line another outlet makes (the kitchen's pepper soup sold at the patio). */
+export const madeElsewhere = (
+	l: { preparedAt?: string },
+	outletId: string | undefined,
+) => !!l.preparedAt && l.preparedAt !== outletId;
+
+/** Where a line made elsewhere stands, for the waiter who sold it: when to collect. */
+export function stationStatus(
+	status: string,
+	station: string,
+): { label: string; tone: "success" | "info" | "grey" | "danger" } {
+	switch (status) {
+		case "NEW":
+			return { label: `For ${station} · not sent`, tone: "grey" };
+		case "SENT":
+			return { label: `Sent to ${station}`, tone: "info" };
+		case "READY":
+			return { label: `Ready in ${station} · collect`, tone: "success" };
+		case "SERVED":
+			return { label: "Served", tone: "success" };
+		default:
+			return { label: lineLabel(status), tone: lineTone(status) };
+	}
+}
+
+/** The name of the outlet that makes a line, from the hotel's outlets ("the kitchen" when unknown). */
+export const stationName = (
+	outlets: { id: string; name: string }[],
+	id?: string,
+) => outlets.find((o) => o.id === id)?.name ?? "the kitchen";

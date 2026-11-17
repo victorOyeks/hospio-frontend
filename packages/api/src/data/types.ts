@@ -1097,6 +1097,8 @@ export type MenuItemRow = {
 	recipe?: { stockItemId: Id; quantity: number }[];
 	/** A price change waiting for the manager (set by the screen after the 202 answer). */
 	pendingPrice?: number;
+	/** The outlet that makes it (e.g. the kitchen for a bar's pepper soup); unset = made where it is sold. */
+	preparedAt?: Id;
 };
 export type OrderLineRow = {
 	id?: Id;
@@ -1110,6 +1112,8 @@ export type OrderLineRow = {
 	notes?: string;
 	/** NEW, SENT (cooking), READY, SERVED or CANCELLED. */
 	status: string;
+	/** The outlet that makes the line; unset = the selling outlet. */
+	preparedAt?: Id;
 };
 export type OrderRow = {
 	id: Id;
@@ -1144,6 +1148,11 @@ export type OrderRow = {
 	notes?: string;
 	/** Approved payments so far: part paid while under the total. */
 	paidAmount?: number;
+	/**
+	 * A ticket on another outlet's board: the selling outlet's name. Only the lines made at the board's
+	 * outlet are listed and the money fields are the whole order's, so the board never shows them.
+	 */
+	ticketFrom?: string;
 };
 
 /** Where a sale stands in the sales history (fnb-service SaleBucket). */
@@ -1591,6 +1600,8 @@ export type OutletRow = {
 	status: "OPEN" | "CLOSED";
 	/** The inventory store the outlet draws from. */
 	storeId?: Id;
+	/** The POS terminal its payments go to first; unset = the role's terminal. */
+	terminalId?: Id;
 	tables: TableRow[];
 };
 export type CategoryRow = {

@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation";
+import { OutletSwitch } from "@/components/roles/shared-staff/outlet-switch";
 import { BarTodayScreen } from "@/components/roles/bar/today";
 import { data } from "@hospio/api/data";
 
@@ -42,19 +43,26 @@ export default async function BarHome({
 		data.finance.myTill("BAR"),
 	]);
 	return (
-		<BarTodayScreen
-			outlet={outlet}
-			orders={orders}
-			closed={closed}
-			menu={menu}
-			categories={categories}
-			happyHours={happyHours}
-			inHouse={buckets.inHouse}
-			stock={items.filter((i) => i.storeId === outlet?.storeId)}
-			settings={settings}
-			terminals={terminals}
-			sales={sales}
-			till={till}
-		/>
+		<>
+			<OutletSwitch
+				desk="BAR"
+				outlets={await data.outlets.forRoleAll("BAR")}
+				current={outlet?.id}
+			/>
+			<BarTodayScreen
+				outlet={outlet}
+				orders={orders}
+				closed={closed}
+				menu={menu}
+				categories={categories}
+				happyHours={happyHours}
+				inHouse={buckets.inHouse}
+				stock={items.filter((i) => i.storeId === outlet?.storeId)}
+				settings={settings}
+				terminals={terminals}
+				sales={sales}
+				till={till}
+			/>
+		</>
 	);
 }

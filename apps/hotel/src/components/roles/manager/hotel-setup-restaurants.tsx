@@ -9,6 +9,7 @@ import type {
 	OutletRow,
 	StoreRow,
 	TableRow,
+	TerminalRow,
 } from "@hospio/api/data/types";
 import { Button } from "@hospio/ui/primitives/button";
 import { Note } from "@hospio/ui/shared/detail-list";
@@ -28,8 +29,12 @@ type OutletDraft = {
 	name: string;
 	kind: OutletKind;
 	storeId: string;
+	/** The POS it takes payment on; ROLE_TERMINAL = the desk's own terminal. */
+	terminalId: string;
 	open: boolean;
 };
+/** "Use the role's terminal" (a select can't hold an empty value). */
+const ROLE_TERMINAL = "role";
 type TableDraft = {
 	outletId: string;
 	id?: string;
@@ -46,10 +51,13 @@ type TableDraft = {
 export function RestaurantsSection({
 	outlets: initial,
 	stores,
+	terminals = [],
 	locked,
 }: {
 	outlets: OutletRow[];
 	stores: StoreRow[];
+	/** The hotel's POS terminals: an outlet may take payment on its own one. */
+	terminals?: TerminalRow[];
 	locked: boolean;
 }) {
 	const [outlets, setOutlets] = useState(initial);
@@ -58,6 +66,8 @@ export function RestaurantsSection({
 	const [table, setTable] = useState<TableDraft | null>(null);
 	const { run, pending } = useAction();
 	const storeName = (id?: string) => stores.find((s) => s.id === id)?.name;
+	const terminalName = (id?: string) =>
+		terminals.find((t) => t.id === id)?.name;
 
 	const putOutlet = (o: OutletRow) =>
 		setOutlets((all) =>
@@ -91,6 +101,8 @@ export function RestaurantsSection({
 						kind: outlet.kind,
 						storeId: outlet.storeId || undefined,
 						status: outlet.open ? "OPEN" : "CLOSED",
+						terminalId:
+							outlet.terminalId === ROLE_TERMINAL ? "" : outlet.terminalId,
 					},
 					existing?.tables,
 				),
@@ -131,7 +143,13 @@ export function RestaurantsSection({
 					<Button
 						className={btn.primary}
 						onClick={() =>
-							setOutlet({ name: "", kind: "KITCHEN", storeId: "", open: true })
+							setOutlet({
+							name: "",
+							kind: "KITCHEN",
+							storeId: "",
+							terminalId: ROLE_TERMINAL,
+							open: true,
+						})
 						}
 					>
 						<PlusIcon className="size-4" /> Add outlet
@@ -163,6 +181,9 @@ export function RestaurantsSection({
 										{o.storeId
 											? `draws from ${storeName(o.storeId) ?? "a store"}`
 											: "no store linked, so no stock is drawn"}
+										{o.terminalId
+											? ` · pays on ${terminalName(o.terminalId) ?? "its own POS"}`
+											: ""}
 									</p>
 								</div>
 								<StatusPill tone={o.status === "OPEN" ? "success" : "grey"}>
@@ -178,6 +199,7 @@ export function RestaurantsSection({
 												name: o.name,
 												kind: o.kind,
 												storeId: o.storeId ?? "",
+												terminalId: o.terminalId ?? ROLE_TERMINAL,
 												open: o.status === "OPEN",
 											})
 										}
@@ -296,6 +318,20 @@ export function RestaurantsSection({
 							onChange={(v) => setOutlet({ ...outlet, storeId: v })}
 							options={stores.map((s) => ({ value: s.id, label: s.name }))}
 							placeholder="No store"
+						/>
+						<SelectField
+							label="POS terminal"
+							value={outlet.terminalId}
+							onChange={(v) => setOutlet({ ...outlet, terminalId: v })}
+							options={[
+								{ value: ROLE_TERMINAL, label: "Use the role's terminal" },
+								...terminals.map((t) => ({
+									value: t.id,
+									label: t.name,
+									hint: t.status === "ONLINE" ? undefined : "Offline",
+								})),
+							]}
+							hint="Card payments for this outlet's orders go here first. If it is offline, staff get the bar's or kitchen's own terminal."
 						/>
 						<ToggleField
 							label="Open"

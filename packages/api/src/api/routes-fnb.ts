@@ -34,6 +34,8 @@ export const OutletItem = z.object({
 	status: str,
 	/** The inventory store the outlet draws from (new). */
 	storeId: str,
+	/** The POS terminal its payments go to first (payment-service terminal id); null = the role's terminal. */
+	terminalId: str,
 });
 
 export const TableItem = z.object({
@@ -80,6 +82,8 @@ export const MenuItemItem = z.object({
 	available: bool,
 	active: bool,
 	sortOrder: num,
+	/** The outlet that makes it (e.g. the kitchen for a bar's pepper soup); null = made where it is sold. */
+	preparedAt: str,
 });
 
 export const PriceChangeAnswer = z.object({
@@ -100,6 +104,8 @@ const MenuItemBody = z.object({
 		.optional(),
 	sortOrder: z.number().nullable().optional(),
 	active: z.boolean().nullable().optional(),
+	/** Another outlet of the hotel that makes it; "" clears it (made where it is sold). */
+	preparedAt: z.string().nullable().optional(),
 });
 
 // ---- orders ---------------------------------------------------------------------------------------
@@ -120,6 +126,8 @@ export const OrderLineItem = z.object({
 	/** Why and by whom a cancelled line was cancelled. */
 	cancelReason: str,
 	cancelledByName: str,
+	/** The outlet that makes the line; null = the selling outlet. */
+	preparedAt: str,
 });
 
 export const OrderItem = z.object({
@@ -158,6 +166,11 @@ export const OrderItem = z.object({
 	/** Approved payments so far; part paid while under the total. */
 	paidAmount: num,
 	lines: z.array(OrderLineItem).nullable().optional(),
+	/**
+	 * Set on a kitchen ticket: another outlet's order shown on this outlet's board with only the lines
+	 * made here. The name of the selling outlet. Money fields are the whole order's, so never shown.
+	 */
+	ticketFrom: str,
 });
 
 // ---- sales history --------------------------------------------------------------------------------
@@ -447,6 +460,8 @@ const outletBody = z.object({
 	kind: z.string(),
 	storeId: z.string().nullable().optional(),
 	status: z.string().nullable().optional(),
+	/** The POS terminal its payments go to first; "" clears it. */
+	terminalId: z.string().nullable().optional(),
 });
 const reasonBody = z.object({ reason: z.string() });
 
@@ -477,6 +492,20 @@ export const fnbRoutes = {
 	"@put/fnb/outlets/:outletId/menu/:id": {
 		input: MenuItemBody,
 		output: envelope(MenuItemItem),
+	},
+	"@post/fnb/outlets/:outletId/menu/copy": {
+		input: z.object({
+			fromOutletId: z.string(),
+			categories: z.array(z.string()).nullable().optional(),
+			madeAtSource: z.boolean().nullable().optional(),
+		}),
+		output: envelope(
+			z.object({
+				copied: z.number(),
+				skipped: z.number(),
+				categories: num,
+			}),
+		),
 	},
 	"@put/fnb/menu/:id/available": {
 		query: z.object({ available: z.boolean() }),
@@ -534,6 +563,9 @@ export const fnbRoutes = {
 	"@post/fnb/orders/:id/send": { output: envelope(OrderItem) },
 	"@put/fnb/orders/:id/status": {
 		query: z.object({ status: z.string() }),
+		output: envelope(OrderItem),
+	},
+	"@post/fnb/orders/:id/stations/:stationId/ready": {
 		output: envelope(OrderItem),
 	},
 	"@put/fnb/orders/:id/lines/:lineId/status": {

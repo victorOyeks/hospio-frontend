@@ -59,6 +59,7 @@ import {
 	activeHappyHour,
 	estimate,
 	liveLines,
+	madeElsewhere,
 	roomLabel,
 	sitsAt,
 	toLineInputs,
@@ -193,6 +194,8 @@ export function BarTodayScreen({
 					guestName:
 						settle === "ROOM" ? guest?.guestName : name.trim() || undefined,
 					lines: toLineInputs(lines, discount),
+					// Something another outlet makes (the kitchen's pepper soup) goes there as a ticket at once.
+					send: lines.some((l) => madeElsewhere(l.item, outlet?.id)),
 					vatPct: settings.vatPct,
 					pricesIncludeTax: settings.pricesIncludeTax,
 				});
@@ -570,6 +573,7 @@ export function BarTodayScreen({
 									liveLines(current).reduce((s, l) => s + l.qty, 0),
 									"drink",
 								)}`,
+								terminalId: outlet?.terminalId,
 							}
 						: null
 				}

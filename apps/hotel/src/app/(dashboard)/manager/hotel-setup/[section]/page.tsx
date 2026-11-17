@@ -11,7 +11,7 @@ export default async function HotelSetupSectionPage({
 	params: Promise<{ section: string }>;
 }) {
 	const { section } = await params;
-	const [hotel, role, sections, { outlets, stores }] = await Promise.all([
+	const [hotel, role, sections, { outlets, stores, terminals }] = await Promise.all([
 		getActiveHotel(),
 		getActiveRole(),
 		loadSetup(),
@@ -26,6 +26,7 @@ export default async function HotelSetupSectionPage({
 			hotelId={hotel?.id}
 			outlets={outlets}
 			stores={stores}
+			terminals={terminals}
 			isOwner={role === "OWNER"}
 		/>
 	);

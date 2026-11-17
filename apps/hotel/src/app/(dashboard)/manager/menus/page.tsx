@@ -62,6 +62,7 @@ export default async function ManagerMenusPage({
 				title="Menus"
 				menu={menu}
 				outlet={outlet}
+				outlets={outlets}
 				categories={categories}
 				happyHours={happyHours}
 				stock={items.filter((i) => i.storeId === outlet.storeId)}
