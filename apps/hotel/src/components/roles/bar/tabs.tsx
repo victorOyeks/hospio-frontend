@@ -258,7 +258,8 @@ export function BarTabsScreen({
 								{mark(o.outletId, o.outlet)}
 								{o.tableNo ?? "Walk-up"}
 							</span>
-							<span className="text-xs text-ink-3">
+							{/* The clock moves between the server render and hydration. */}
+							<span className="text-xs text-ink-3" suppressHydrationWarning>
 								{minutesSince(o.openedAt)} min
 							</span>
 						</div>

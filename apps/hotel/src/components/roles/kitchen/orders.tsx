@@ -536,6 +536,7 @@ export function KitchenOrdersScreen({
 												From {o.ticketFrom} · {where(o)}
 											</span>
 											<span
+												suppressHydrationWarning
 												className={cn(
 													"text-xs",
 													colOf(o) === "SENT" && minutesSince(o.openedAt) > 15
@@ -614,6 +615,7 @@ export function KitchenOrdersScreen({
 											{where(o)}
 										</span>
 										<span
+											suppressHydrationWarning
 											className={cn(
 												"text-xs",
 												o.status === "SENT" && minutesSince(o.openedAt) > 15
