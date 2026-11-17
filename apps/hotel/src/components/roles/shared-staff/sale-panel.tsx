@@ -22,19 +22,28 @@ import { StatusPill } from "@hospio/ui/shared/status-pill";
 import {
 	cancelOrder,
 	chargeOrderToRoom,
+	readOrder,
 	readSale,
+	setLinesStatus,
 } from "@hospio/api/actions/fnb";
 import { useAction } from "@hospio/api/actions/use-action";
 import { lagosDate } from "@hospio/api/data/mappers/finance";
 import type {
 	BookingRow,
+	OrderRow,
 	SaleDetailView,
 	SaleRow,
 	SaleStatus,
 	TerminalRow,
 } from "@hospio/api/data/types";
 import { cn } from "@hospio/ui/utils";
-import { ReasonModal, roomLabel } from "./outlet-shared";
+import {
+	ReasonModal,
+	madeElsewhere,
+	roomLabel,
+	stationName,
+	stationStatus,
+} from "./outlet-shared";
 import { OrderPaymentPanel } from "./pos-payment";
 import { BigButton } from "./tablet";
 
@@ -78,6 +87,8 @@ export const fromEarlierDay = (s: Pick<SaleRow, "createdAt" | "status">) =>
 	(s.status === "TO_PAY" || s.status === "PART_PAID") &&
 	lagosDate(new Date(s.createdAt)) < lagosDate();
 
+const capitalise = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
+
 export type PayDesk = "BAR" | "KITCHEN" | "MANAGER" | "OWNER";
 
 /**
@@ -94,8 +105,11 @@ export function SalePanel({
 	terminals,
 	inHouse,
 	onChanged,
+	outlets = [],
 }: {
 	saleId: string | null;
+	/** The hotel's outlets: names the outlet that makes a line sold here (the kitchen's pepper soup at the patio). */
+	outlets?: { id: string; name: string }[];
 	onClose: () => void;
 	/** The sale was paid, charged or cancelled here: a screen holding its own copy of the order reads it again. */
 	onChanged?: (id: string) => void;
@@ -107,6 +121,8 @@ export function SalePanel({
 	const router = useRouter();
 	const { run, pending } = useAction();
 	const [sale, setSale] = useState<SaleDetailView | null>(null);
+	/** The live order behind the sale, for lines another outlet makes: where each stands and serving it once ready. */
+	const [order, setOrder] = useState<OrderRow | null>(null);
 	const [error, setError] = useState<string | null>(null);
 	const [loading, setLoading] = useState(false);
 	const [sub, setSub] = useState<null | "pay" | "room" | "cancel">(null);
@@ -130,6 +146,15 @@ export function SalePanel({
 			return null;
 		}
 		setSale(r.data);
+		// Only a desk serves; a sale still open may hold lines another outlet makes (ticket there, served here once ready).
+		const d = r.data;
+		const open = !!d && d.sale.status !== "CANCELLED" && !d.timeline.closedAt;
+		const o =
+			desk && d && open
+				? await readOrder(id, d.sale.outletName).catch(() => null)
+				: null;
+		if (req !== reqRef.current) return r.data;
+		setOrder(o?.ok && o.data ? o.data : null);
 		return r.data;
 	}, []);
 
@@ -137,6 +162,7 @@ export function SalePanel({
 		setSub(null);
 		setRoomError(null);
 		setSale(null);
+		setOrder(null);
 		setWaiting(false);
 		if (saleId) void load(saleId);
 		else reqRef.current++;
@@ -197,6 +223,34 @@ export function SalePanel({
 			`${s.number} cancelled`,
 			async () => {
 				setSub(null);
+				if (saleId) {
+					await load(saleId);
+					onChanged?.(saleId);
+				}
+			},
+		);
+	};
+
+	/** The order line behind a sale line when another outlet makes it and the order is still open. */
+	const elsewhereLine = (lineId: string) => {
+		if (!order || order.status === "CLOSED" || order.status === "CANCELLED")
+			return null;
+		const ol = order.lines.find((x) => x.id === lineId);
+		return ol && madeElsewhere(ol, order.outletId) ? ol : null;
+	};
+	const pendingElsewhere =
+		order?.lines.filter(
+			(l) =>
+				madeElsewhere(l, order.outletId) &&
+				l.status !== "SERVED" &&
+				l.status !== "CANCELLED",
+		) ?? [];
+	const serveLine = (lineId: string, name: string) => {
+		if (!s || !order) return;
+		run(
+			() => setLinesStatus(order.id, [lineId], "SERVED", s.outletName),
+			`${name} served`,
+			async () => {
 				if (saleId) {
 					await load(saleId);
 					onChanged?.(saleId);
@@ -329,6 +383,14 @@ export function SalePanel({
 						{sale.can.note && s.status !== "CANCELLED" && (
 							<Note tone="info">{sale.can.note}</Note>
 						)}
+						{pendingElsewhere.length > 0 && (
+							<Note tone="info">
+								{capitalise(stationName(outlets, pendingElsewhere[0].preparedAt))}{" "}
+								is making{" "}
+								{pendingElsewhere.map((l) => l.name).join(", ")}. The sale
+								closes once you serve {pendingElsewhere.length > 1 ? "them" : "it"}.
+							</Note>
+						)}
 						{sale.notes && (
 							<p className="rounded-control bg-subtle px-4 py-3 text-[13px] text-ink">
 								{sale.notes}
@@ -371,6 +433,37 @@ export function SalePanel({
 												{l.notes && (
 													<p className="text-xs text-ink-3">Note: {l.notes}</p>
 												)}
+												{(() => {
+													const ol = gone ? null : elsewhereLine(l.id);
+													if (!ol || ol.status === "SERVED") return null;
+													const st = stationStatus(
+														ol.status,
+														stationName(outlets, ol.preparedAt),
+													);
+													return ol.status === "READY" && desk ? (
+														<span className="mt-1 flex items-center gap-2">
+															<StatusPill tone={st.tone} dot={false}>
+																{st.label}
+															</StatusPill>
+															<button
+																type="button"
+																disabled={pending}
+																onClick={() => serveLine(l.id, l.name)}
+																className="rounded-control border border-line px-3 py-1.5 text-xs font-semibold text-ink hover:bg-subtle"
+															>
+																Served
+															</button>
+														</span>
+													) : (
+														<StatusPill
+															tone={st.tone}
+															dot={false}
+															className="mt-1"
+														>
+															{st.label}
+														</StatusPill>
+													);
+												})()}
 												{gone && (
 													<p className="text-xs font-medium text-danger">
 														Cancelled

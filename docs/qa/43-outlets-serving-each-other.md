@@ -59,6 +59,17 @@ See hospio-backend fnb-service (feature/outlet-kitchen-tickets).
    (while it is online; offline → the bar's own terminal as before). Pay.
 3. Sales (bar or manager) → filter **Patio Lounge**: the sale is there with every line; the Kitchen's sales don't include it.
 
+## 5b. Paid before the kitchen is done (bar user)
+
+1. Patio tab with a drink and a Pepper soup, **Close & pay** in cash while the kitchen is still cooking. The tab stays on
+   Open tabs with a green **Paid** pill (not counted in *Unpaid*); its panel says *Paid. Kitchen is still making part of
+   it…*, with no **Close & pay** or **Add drinks** (only **Close**).
+2. Bar today → **New sale** → Pepper soup → **Pay now** → cash. The sale shows in *Recent sales* as *Paid* with
+   *Being made elsewhere* under it; the kitchen gets the ticket.
+3. The kitchen marks it **Ready**: *Recent sales* reads *Ready elsewhere · collect and serve* (refresh). Open the sale: the
+   line shows **Ready in Kitchen · collect** with a **Served** button and a note that the sale closes once served. Tap
+   **Served**: the sale closes and the kitchen's card leaves its board.
+
 ## 6. Edge cases
 
 1. **Made at another hotel's outlet**: the Made at list only offers this hotel's outlets; an API call with another hotel's

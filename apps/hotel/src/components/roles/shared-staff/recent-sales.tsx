@@ -7,7 +7,7 @@ import { StatusPill } from "@hospio/ui/shared/status-pill";
 import { lagosDate } from "@hospio/api/data/mappers/finance";
 import type { OrderRow, SaleStatus } from "@hospio/api/data/types";
 import { cn } from "@hospio/ui/utils";
-import { liveLines } from "./outlet-shared";
+import { liveLines, madeElsewhere } from "./outlet-shared";
 import { SALE_STATUS, saleWhere } from "./sale-panel";
 
 /** Where an order from the board stands, by the same rule as the sales history (fnb-service SaleBucket). */
@@ -58,6 +58,14 @@ export function RecentSales({
 						const earlier =
 							(status === "TO_PAY" || status === "PART_PAID") &&
 							lagosDate(new Date(o.openedAt)) < today;
+						// Something another outlet makes (the kitchen's pepper soup): ready to collect, or still being made.
+						const open = o.status !== "CLOSED" && o.status !== "CANCELLED";
+						const away = open
+							? liveLines(o).filter(
+									(l) => madeElsewhere(l, o.outletId) && l.status !== "SERVED",
+								)
+							: [];
+						const collect = away.some((l) => l.status === "READY");
 						return (
 							<li key={o.id}>
 								<button
@@ -87,6 +95,18 @@ export function RecentSales({
 												? ` · ${o.openedBy}`
 												: ""}
 										</span>
+										{away.length > 0 && (
+											<span
+												className={cn(
+													"block text-xs font-semibold",
+													collect ? "text-success" : "text-info",
+												)}
+											>
+												{collect
+													? "Ready elsewhere · collect and serve"
+													: "Being made elsewhere"}
+											</span>
+										)}
 									</span>
 									<span
 										className={cn(
