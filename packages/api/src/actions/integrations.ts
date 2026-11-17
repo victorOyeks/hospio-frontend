@@ -4,7 +4,7 @@ import type { ActionResult } from "@hospio/api/actions/auth";
 import { api, errorMessage } from "@hospio/api/api/client";
 import { withSession } from "@hospio/api/api/server";
 import { adminData, toIntegrationCard } from "@hospio/api/data/admin";
-import type { IntegrationCard, IntegrationsData } from "@hospio/api/data/admin-types";
+import type { IntegrationCard, IntegrationItem, IntegrationsData } from "@hospio/api/data/admin-types";
 import { live } from "@hospio/api/data/live";
 import { demoDelay } from "@hospio/api/demo/mode";
 
@@ -59,6 +59,14 @@ export async function saveIntegration(
 	} catch {
 		return { ok: false, error: "The server's answer could not be read. Reload the page to see what was saved." };
 	}
+}
+
+/** Settings · Integrations → Connection checks, run again: each service checks its own connection now; any platform role. */
+export async function runConnectionChecks(): Promise<ActionResult<IntegrationItem[]>> {
+	const items = await adminData.integrationStatus();
+	return items.length > 0
+		? { ok: true, data: items }
+		: { ok: false, error: "The checks couldn't be run. Try again in a moment." };
 }
 
 export async function testIntegration(provider: string): Promise<ActionResult<{ ok: boolean; message: string }>> {

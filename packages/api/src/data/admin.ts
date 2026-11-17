@@ -362,7 +362,7 @@ const fromCommissionRow = (r: CommissionRow) =>
 	toCommissionLine(r.commission, r.marketerName, r.businessName);
 
 const integrationStatus = (v: string): IntegrationItem["status"] =>
-	v === "CONNECTED" || v === "DISCONNECTED" || v === "ERROR"
+	v === "CONNECTED" || v === "DISCONNECTED" || v === "ERROR" || v === "TEST_MODE"
 		? v
 		: "NOT_CONFIGURED";
 const toIntegrationItem = (i: Integration): IntegrationItem => ({
@@ -372,6 +372,7 @@ const toIntegrationItem = (i: Integration): IntegrationItem => ({
 	status: integrationStatus(i.status),
 	detail: i.detail ?? "",
 	lastCheck: s(i.lastCheck),
+	checkedBy: s(i.checkedBy),
 });
 
 const PLATFORM_ROLES = ["SUPER_ADMIN", "SUPPORT", "FINANCE_ADMIN"] as const;
