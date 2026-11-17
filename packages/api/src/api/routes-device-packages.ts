@@ -73,6 +73,29 @@ export const DevicePackage = z.object({
 	daysLeft: num,
 	expectedFinish: str,
 	updatedAt: str,
+	/** The data plan after installation: running, billed from, stopped from, next invoice; the real subscription renewed through. */
+	dataPlanRunning: z.boolean().optional(),
+	dataPlanFrom: str,
+	dataPlanStoppedOn: str,
+	nextDataPlanDue: str,
+	dataPlanChangedByName: str,
+	dataPlanChangedAt: str,
+	dataPlanRenewedThrough: str,
+	dataPlanRenewedByName: str,
+	dataPlanRenewedAt: str,
+});
+
+export const DataPlanRenewal = z.object({
+	packageId: z.string(),
+	businessId: z.string(),
+	hotelId: z.string(),
+	hotelName: str,
+	monthly: z.number(),
+	nextInvoiceDue: str,
+	renewedThrough: str,
+	daysLeft: num,
+	renewedByName: str,
+	renewedAt: str,
 });
 
 export const DeviceInvoice = z.object({
@@ -186,6 +209,20 @@ export const devicePackageRoutes = {
 	"@post/platform/owner/devices/invoices/confirm": {
 		query: z.object({ reference: z.string() }),
 		output: envelope(DeviceInvoice),
+	},
+	"@put/platform/admin/device-packages/:id/data-plan": {
+		params: idParams,
+		input: z.object({ action: z.string(), monthly: z.number().nullable() }),
+		output: envelope(DevicePackage),
+	},
+	"@post/platform/admin/device-packages/:id/data-plan/renewed": {
+		params: idParams,
+		input: z.object({ through: z.string() }),
+		output: envelope(DevicePackage),
+	},
+	"@get/platform/admin/devices/data-plans/renewals": {
+		query: z.object({ days: z.number().optional() }).optional(),
+		output: envelope(z.array(DataPlanRenewal)),
 	},
 	"@get/platform/owner/devices": { output: envelope(z.array(DevicePackage)) },
 	"@get/platform/devices": { output: envelope(DevicePackage.nullable()) },

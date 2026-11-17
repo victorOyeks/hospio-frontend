@@ -186,7 +186,13 @@ export function HospioFees({
 											</p>
 										</>
 									)}
-									{p.dataPlanMonthly > 0 && <p className="text-[12px] text-ink-3">Data plan: {naira(p.dataPlanMonthly)} a month</p>}
+									{p.dataPlanMonthly > 0 && (
+										<p className="text-[12px] text-ink-3">
+											{p.dataPlanStoppedOn
+												? `Data plan stopped from ${day(p.dataPlanStoppedOn, true)}`
+												: `Data plan: ${naira(p.dataPlanMonthly)} a month${p.nextDataPlanDue ? ` · next invoice ${day(p.nextDataPlanDue)}` : ""}`}
+										</p>
+									)}
 									{p.payments.length > 0 && (
 										<p className="text-[12px] text-ink-3">
 											Last payment {naira(p.payments[0].amount)} on {day(p.payments[0].paidOn)}

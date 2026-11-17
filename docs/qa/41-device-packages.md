@@ -51,3 +51,16 @@ at all (own devices). See hospio-backend docs/plan-device-packages.md.
 
 - Any amount that doesn't add up (instalments, caps, daily device line, ledger vs package paid).
 - A validation that lets a wrong value through.
+
+## 6. The data plan after installation
+
+1. Hotel panel → Devices on an installed package with a data plan: a **Data plan** box shows Running, the price, the next invoice
+   and "No renewal recorded yet".
+2. **Mark renewed with provider** (any admin): pick a day → "Renewed through … · <you>". A past day is refused.
+3. Finance or Super admin: **Change price** (0 or empty refused) → later invoices use the new price; issued ones keep theirs.
+4. **Stop data plan** → Stopped from the next due day; no more data plan invoices; invoices already issued stay owed. **Start data plan
+   again** → billed from the next due day; the stopped months are never billed. A package with no data plan offers **Add a data plan**.
+5. Support sees the box and Mark renewed, but not Change price / Stop / Start.
+6. Fees & billing → Devices → **Data plan renewals**: running plans whose subscription runs out within 7/14/30 days (never recorded
+   first); Mark renewed removes them from the 7-day list.
+7. Owner's Hospio fees: "Data plan: ₦… a month · next invoice …" or "Data plan stopped from …".

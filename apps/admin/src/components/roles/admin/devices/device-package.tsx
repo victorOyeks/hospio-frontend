@@ -9,8 +9,10 @@ import {
 	deviceCatalogue,
 	hotelDevicePackage,
 	installDevicePackage,
+	markDataPlanRenewed,
 	recordDevicePayment,
 	saveDevicePackage,
+	setDataPlan,
 } from "@hospio/api/actions/device-packages";
 import type { AdminRole } from "@hospio/api/demo/fixtures/platform-extra";
 import { Checkbox } from "@hospio/ui/primitives/checkbox";
@@ -404,6 +406,9 @@ function PackageSummary({
 					Collection starts the day the devices are installed. It is taken with the Hospio fee, so the hotel's automatic debit must be on.
 				</Note>
 			)}
+			{(p.status === "INSTALLED" || p.status === "PAID_OFF") && (
+				<DataPlanControls p={p} role={role} onChange={onChange} />
+			)}
 			{p.status !== "DRAFT" && (p.paymentOption === "MONTHLY" || p.dataPlanMonthly > 0) && (
 				<div className="flex flex-col gap-2">
 					<p className="text-xs font-semibold uppercase tracking-[0.04em] text-ink-3">Monthly invoices</p>
@@ -547,6 +552,177 @@ function PackageSummary({
 				pending={busy}
 				onConfirm={() => void run(() => cancelDevicePackage(p.id), "Device package removed").then(() => setCancelling(false))}
 			/>
+		</div>
+	);
+}
+
+const dayText = (d?: string | null) => (d ? fmtLongDate(d) : "—");
+
+/**
+ * The data plan after installation: running or stopped, the next invoice, the real provider subscription renewed through; Finance
+ * and Super admins stop, start again or reprice it; any admin records a renewal with the provider.
+ */
+function DataPlanControls({
+	p,
+	role,
+	onChange,
+}: {
+	p: DevicePackageView;
+	role: AdminRole;
+	onChange: (p: DevicePackageView) => void;
+}) {
+	const money = can.money(role);
+	const running = p.dataPlanRunning ?? (p.dataPlanMonthly > 0 && !p.dataPlanStoppedOn);
+	const hasPlan = p.dataPlanMonthly > 0;
+	const [modal, setModal] = useState<"price" | "stop" | "start" | "renewed" | null>(null);
+	const [price, setPrice] = useState<number | "">(p.dataPlanMonthly || "");
+	const [through, setThrough] = useState(() => {
+		const d = new Date();
+		d.setMonth(d.getMonth() + 1);
+		return d.toLocaleDateString("en-CA", { timeZone: "Africa/Lagos" });
+	});
+	const [busy, setBusy] = useState(false);
+	const act = async (fn: () => ReturnType<typeof setDataPlan>, done: string) => {
+		setBusy(true);
+		const r = await fn();
+		setBusy(false);
+		if (!r.ok) return toast.error(r.error);
+		toast.success(done);
+		onChange(r.data);
+		setModal(null);
+	};
+	if (!hasPlan && !money) return null;
+	const renewedLate = p.dataPlanRenewedThrough && p.dataPlanRenewedThrough < new Date().toLocaleDateString("en-CA", { timeZone: "Africa/Lagos" });
+	return (
+		<div className="flex flex-col gap-3 rounded-xl border border-line p-4">
+			<div className="flex flex-wrap items-center justify-between gap-2">
+				<p className="text-[13px] font-semibold text-ink">Data plan</p>
+				{!hasPlan ? (
+					<StatusPill tone="grey">None</StatusPill>
+				) : running ? (
+					<StatusPill tone="success">Running</StatusPill>
+				) : (
+					<StatusPill tone="grey">Stopped</StatusPill>
+				)}
+			</div>
+			{hasPlan && (
+				<DetailList
+					columns={2}
+					items={[
+						{ label: "Price", value: `${naira(p.dataPlanMonthly)} a month` },
+						running
+							? { label: "Next invoice", value: dayText(p.nextDataPlanDue) }
+							: { label: "Stopped from", value: dayText(p.dataPlanStoppedOn) },
+						{
+							label: "Provider subscription",
+							value: p.dataPlanRenewedThrough ? (
+								<span className={renewedLate ? "font-semibold text-danger" : undefined}>
+									Renewed through {dayText(p.dataPlanRenewedThrough)}
+									{p.dataPlanRenewedByName ? ` · ${p.dataPlanRenewedByName}` : ""}
+								</span>
+							) : (
+								<span className="text-warning">No renewal recorded yet</span>
+							),
+						},
+						...(p.dataPlanChangedByName ? [{ label: "Last changed", value: `${p.dataPlanChangedByName} · ${dayText(p.dataPlanChangedAt)}` }] : []),
+					]}
+				/>
+			)}
+			<div className="flex flex-wrap justify-end gap-2">
+				{hasPlan && running && (
+					<button type="button" className={btn.secondary} onClick={() => setModal("renewed")} disabled={busy}>
+						Mark renewed with provider
+					</button>
+				)}
+				{money && running && (
+					<>
+						<button type="button" className={btn.secondary} onClick={() => setModal("price")} disabled={busy}>
+							Change price
+						</button>
+						<button type="button" className={btn.secondary} onClick={() => setModal("stop")} disabled={busy}>
+							Stop data plan
+						</button>
+					</>
+				)}
+				{money && !running && (
+					<button
+						type="button"
+						className={btn.primary}
+						onClick={() => {
+							setPrice(p.dataPlanMonthly || "");
+							setModal("start");
+						}}
+						disabled={busy}
+					>
+						{hasPlan ? "Start data plan again" : "Add a data plan"}
+					</button>
+				)}
+			</div>
+			<Modal
+				open={modal === "price" || modal === "start"}
+				onOpenChange={(o) => !o && setModal(null)}
+				title={modal === "start" ? (hasPlan ? "Start the data plan again" : "Add a data plan") : "Change the data plan price"}
+				subtitle={
+					modal === "start"
+						? "Billed every month from the next due day; the months it was stopped are never billed"
+						: "Applies to invoices issued from now on; invoices already issued keep their amount"
+				}
+				footer={
+					<>
+						<button type="button" className={btn.secondary} onClick={() => setModal(null)}>
+							Cancel
+						</button>
+						<button
+							type="button"
+							className={btn.primary}
+							disabled={busy || price === "" || price <= 0}
+							onClick={() =>
+								void act(
+									() => setDataPlan(p.id, modal === "start" ? "START" : "PRICE", price === "" ? null : price),
+									modal === "start" ? "Data plan running" : "Data plan price changed",
+								)
+							}
+						>
+							{modal === "start" ? "Start data plan" : "Save price"}
+						</button>
+					</>
+				}
+			>
+				<MoneyField label="Price a month" value={price} onChange={setPrice} />
+			</Modal>
+			<ConfirmModal
+				open={modal === "stop"}
+				onOpenChange={(o) => !o && setModal(null)}
+				tone="danger"
+				title="Stop the data plan?"
+				subtitle={`No more data plan invoices from ${dayText(p.nextDataPlanDue)}. Invoices already issued stay owed. Remember to stop the subscription with the provider too.`}
+				confirmLabel="Stop data plan"
+				pending={busy}
+				onConfirm={() => void act(() => setDataPlan(p.id, "STOP", null), "Data plan stopped")}
+			/>
+			<Modal
+				open={modal === "renewed"}
+				onOpenChange={(o) => !o && setModal(null)}
+				title="Renewed with the provider"
+				subtitle="Record that the hotel's data subscription (MTN, Airtel, Spectranet…) now runs to this day"
+				footer={
+					<>
+						<button type="button" className={btn.secondary} onClick={() => setModal(null)}>
+							Cancel
+						</button>
+						<button
+							type="button"
+							className={btn.primary}
+							disabled={busy || !through}
+							onClick={() => void act(() => markDataPlanRenewed(p.id, through), "Renewal recorded")}
+						>
+							Save
+						</button>
+					</>
+				}
+			>
+				<TextField label="Runs to" type="date" value={through} onChange={setThrough} />
+			</Modal>
 		</div>
 	);
 }
