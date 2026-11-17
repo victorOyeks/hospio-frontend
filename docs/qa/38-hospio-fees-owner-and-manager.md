@@ -29,6 +29,16 @@ Password for every account: `Hospio123!`. Owner of Royal Suites; manager of Simp
 1. Signed in as the manager: **Hospio fees** is in the menu (after Payments).
 2. It shows only the manager's own hotel, with the same detail. The notes say the statement is emailed to the owner.
 
+## 3. Admin portal · business Money tab
+
+1. Admin portal → Businesses → Royal Suites Ltd → **Money**. Royal Suites is on the daily 1.5 % fee, so the first card reads
+   **Hospio fees this month** (with "statement only, not debited yet" while debit is off, or the amount debited) and the
+   left panel is **Daily fees · this month**: one row per day and hotel with sales, debited, fee and status.
+2. **Daily fees →** opens Fees & billing → Daily fees filtered to the business.
+3. No "Fee statements" or "Fees outstanding ₦151k" any more (the two seeded test statements were removed on 17 Nov, and the
+   staging seed no longer creates them).
+4. A business on a monthly fee model (% of payments, per room night, % of booking value, flat) still shows its fee statements.
+
 ## What to report
 
 - A manager seeing another hotel's fees.

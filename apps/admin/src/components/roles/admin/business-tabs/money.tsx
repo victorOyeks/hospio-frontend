@@ -7,6 +7,7 @@ import {
 	ReceiptIcon,
 } from "lucide-react";
 import Link from "next/link";
+import type { DailyFeeRow } from "@hospio/api/actions/daily-fees";
 import type {
 	FeeStatementItem,
 	PaymentSummaryData,
@@ -38,21 +39,57 @@ const settlementTone = {
 	FAILED: "danger",
 } as const;
 
-/** Business · Money tab: its fee statements, settlements and the payment summary for the business. */
+const dailyTone: Record<string, "success" | "info" | "grey" | "brand" | "warning" | "danger"> = {
+	PAID: "success",
+	SHADOW: "info",
+	NO_FEE: "grey",
+	SCHEDULED: "brand",
+	PENDING: "warning",
+	PART_PAID: "warning",
+	UNPAID: "danger",
+	CARRIED: "grey",
+};
+const dailyLabel: Record<string, string> = {
+	PAID: "debited",
+	SHADOW: "statement only",
+	NO_FEE: "no fee",
+	SCHEDULED: "debit at 6am",
+	PENDING: "being debited",
+	PART_PAID: "part debited",
+	UNPAID: "not debited",
+	CARRIED: "moved on",
+};
+
+/**
+ * Business · Money tab: what it pays Hospio360, settlements and the payment summary. A business on monthly fees shows its fee
+ * statements; a daily-fee business (a % of each day's sales, debited from its POS provider account) shows this month's days.
+ */
 export function MoneyTab({
 	businessId,
 	businessName,
 	statements,
 	settlements,
 	summary,
+	dailyFees = null,
+	dailyFeesError = null,
+	feeRate,
 }: {
 	businessId: string;
 	businessName: string;
 	statements: FeeStatementItem[];
 	settlements: SettlementItem[];
 	summary: PaymentSummaryData;
+	/** This month's daily fees, for a daily-fee business; null for one on monthly statements. */
+	dailyFees?: DailyFeeRow[] | null;
+	dailyFeesError?: string | null;
+	feeRate?: number;
 }) {
 	const outstanding = statements.reduce((a, s) => a + s.outstanding, 0);
+	const daily = dailyFees !== null;
+	const dayFees = (dailyFees ?? []).reduce((a, d) => a + d.fee, 0);
+	const dayCollected = (dailyFees ?? []).reduce((a, d) => a + (d.collected ?? 0), 0);
+	const unpaidDays = (dailyFees ?? []).filter((d) => d.status === "UNPAID" || d.status === "PART_PAID").length;
+	const shadow = (dailyFees ?? []).some((d) => d.status === "SHADOW");
 	return (
 		<>
 			<BusinessTabHeader
@@ -62,6 +99,15 @@ export function MoneyTab({
 				subtitle="What the business pays Hospio360, what its guests paid on POS, and what was settled back to it"
 			/>
 			<div className="grid grid-cols-2 gap-4 md:grid-cols-4">
+				{daily ? (
+					<KpiCard
+						label="Hospio fees this month"
+						value={nairaShort(dayFees)}
+						icon={CoinsIcon}
+						pill={unpaidDays > 0 ? <StatusPill tone="danger">{plural(unpaidDays, "unpaid day")}</StatusPill> : undefined}
+						hint={shadow ? `${feeRate ?? ""}% of sales · statement only, not debited yet` : `${nairaShort(dayCollected)} debited`}
+					/>
+				) : (
 				<KpiCard
 					label="Fees outstanding"
 					value={nairaShort(outstanding)}
@@ -73,6 +119,7 @@ export function MoneyTab({
 					}
 					hint={plural(statements.length, "statement")}
 				/>
+				)}
 				<KpiCard
 					label="Guest payments"
 					value={nairaShort(summary.gross)}
@@ -97,6 +144,42 @@ export function MoneyTab({
 				/>
 			</div>
 			<div className="grid gap-4 xl:grid-cols-2">
+				{daily ? (
+					<SectionCard
+						title="Daily fees · this month"
+						subtitle={`${feeRate ?? ""}% of each day's sales, debited at 6am from the hotel's POS provider account`}
+						action={{ label: "Daily fees", href: `/dashboard/fees?view=daily&dbiz=${businessId}` }}
+						flush
+					>
+						{dailyFeesError ? (
+							<p className="mx-5 mb-5 text-[13px] text-danger">{dailyFeesError}</p>
+						) : (dailyFees ?? []).length === 0 ? (
+							<EmptyState title="No days yet this month" hint="Each day is worked out at 00:05." className="mx-5 mb-5" />
+						) : (
+							<ul className="divide-y divide-line">
+								{(dailyFees ?? []).slice(0, 10).map((d) => (
+									<li key={d.id}>
+										<Link
+											href={`/dashboard/fees?view=daily&dbiz=${businessId}`}
+											className="flex items-center gap-3 px-5 py-3 hover:bg-subtle/60"
+										>
+											<div className="min-w-0 flex-1">
+												<p className="text-[13px] font-semibold text-ink">
+													{fmtDay(d.date)} · {d.hotelName ?? "Hotel"}
+												</p>
+												<p className="text-xs text-ink-3">
+													sales {naira(d.sales)} · debited {naira(d.collected ?? 0)}
+												</p>
+											</div>
+											<span className="text-[13px] font-semibold text-ink">{naira(d.fee)}</span>
+											<StatusPill tone={dailyTone[d.status] ?? "grey"}>{dailyLabel[d.status] ?? d.status.toLowerCase()}</StatusPill>
+										</Link>
+									</li>
+								))}
+							</ul>
+						)}
+					</SectionCard>
+				) : (
 				<SectionCard
 					title="Fee statements"
 					subtitle="Monthly, from the fee model"
@@ -142,6 +225,7 @@ export function MoneyTab({
 						</ul>
 					)}
 				</SectionCard>
+				)}
 				<SectionCard
 					title="Settlements"
 					subtitle="Per provider and day"
