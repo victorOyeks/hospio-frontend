@@ -50,6 +50,7 @@ allow-listed number 09035911994, so sign-up and phone codes for any other number
 | 34 | `34-transfer-on-the-pos.md` | Bank transfer goes to the POS like card (the guest picks card or transfer on the terminal); only cash is recorded at the desk | Ready |
 | 35 | `35-pos-decline-reason.md` | A declined card or transfer shows the provider's reason (e.g. Insufficient funds) on screen and in My payments; the screen names the POS it was sent to (the picked terminal is used); 15 s provider check; Moniepoint/OPay call logs | Ready |
 | 36 | `36-pos-time-out.md` | A POS payment with no final answer in 5 minutes is marked Timed out; a late approval still settles it; retry and check are offered | Ready |
+| 37 | `37-guest-messages-subscribed-vs-hold.md` | Admin Guest messages separates Subscribed (hotel's choice) from On hold (Hospio360, non-payment); hold needs a reason; hotel side explains how to lift it | Ready |
 
 ## Before you start
 
