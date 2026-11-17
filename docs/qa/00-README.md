@@ -56,6 +56,7 @@ allow-listed number 09035911994, so sign-up and phone codes for any other number
 | 40 | `40-reload-notice.md` | The "Reload Hospio360" button works while a side panel or modal is open, and shows Reloading… | Ready |
 | 41 | `41-device-packages.md` | Devices & internet packages: catalogue, package per hotel, four payment options, install, daily device line, payments, monthly invoices, overdue steps, owner/manager view | Ready |
 | 42 | `42-guest-service-charge.md` | Owner chooses whether guests pay the Hospio fee as a service charge: folio, bar/kitchen, laundry, never in sales | Ready |
+| 43 | `43-outlets-serving-each-other.md` | A patio bar selling the kitchen's starters: outlet POS terminal, copy menu (made at the source), Made at, kitchen tickets and Ready, patio serves, one bill on the patio terminal, edge cases | Ready |
 
 ## Before you start
 
