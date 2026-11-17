@@ -6,9 +6,7 @@ import { updateBusiness } from "@hospio/api/actions/tenant";
 import type { BusinessRequest } from "@hospio/api/api/schema";
 import { feeModelLabels } from "@hospio/api/data/mappers/tenant";
 import {
-	ChoiceCards,
 	FieldRow,
-	MoneyField,
 	SelectField,
 	TextareaField,
 	TextField,
@@ -20,7 +18,6 @@ import {
 	checkEmail,
 	checkName,
 	checkPercent,
-	checkPerNight,
 	checkPhone,
 	checkRegistration,
 	only,
@@ -436,52 +433,20 @@ export function OwnerStep({ ctx }: { ctx: WizardCtx }) {
 	);
 }
 
-const FEE_MODELS = [
-	{
-		value: "PERCENT_OF_PAYMENTS",
-		label: feeModelLabels.PERCENT_OF_PAYMENTS,
-		hint: "A share of every guest payment taken through Hospio360",
-	},
-	{
-		value: "PER_ROOM_NIGHT",
-		label: feeModelLabels.PER_ROOM_NIGHT,
-		hint: "A fixed naira amount for each room night sold",
-	},
-	{
-		value: "PERCENT_OF_BOOKINGS",
-		label: feeModelLabels.PERCENT_OF_BOOKINGS,
-		hint: "A share of the booking value, whatever is paid",
-	},
-] as const;
-type FeeModelKey = (typeof FEE_MODELS)[number]["value"];
-const isFeeModel = (v: unknown): v is FeeModelKey =>
-	FEE_MODELS.some((m) => m.value === v);
+/** One fee model: a % of each day's sales, debited each morning from the hotel's POS provider account. Only the rate varies. */
+const FEE_MODEL = "PERCENT_OF_SALES" as const;
 
 export function FeeStep({ ctx }: { ctx: WizardCtx }) {
 	const { business, data } = ctx;
 	const saved = data.fee;
-	const [feeModel, setFeeModel] = useState<FeeModelKey>(
-		isFeeModel(saved?.feeModel)
-			? saved.feeModel
-			: isFeeModel(business.feeModelKey)
-				? business.feeModelKey
-				: "PERCENT_OF_PAYMENTS",
-	);
-	// Only the value saved for this business is shown, and only under its own model; switching model starts empty.
-	const savedModel = isFeeModel(saved?.feeModel)
-		? saved.feeModel
-		: business.feeModelKey;
-	const savedValue = saved?.feeValue ?? business.feeValue;
-	// A business with no fee model has no fee yet (the row maps a missing value to 0, which is not a choice).
-	const hasSaved =
-		(saved?.feeValue !== null && saved?.feeValue !== undefined) ||
-		!!business.feeModelKey;
-	const [pct, setPct] = useState(
-		hasSaved && savedModel !== "PER_ROOM_NIGHT" ? String(savedValue) : "",
-	);
-	const [amount, setAmount] = useState<number | "">(
-		hasSaved && savedModel === "PER_ROOM_NIGHT" ? Number(savedValue) : "",
-	);
+	// The rate saved for this business (on the daily-sales model), else the usual 1.5 %.
+	const savedValue =
+		saved?.feeModel === FEE_MODEL && saved.feeValue != null
+			? saved.feeValue
+			: business.feeModelKey === FEE_MODEL && business.feeValue
+				? business.feeValue
+				: 1.5;
+	const [pct, setPct] = useState(String(savedValue));
 	const [contractStartsOn, setStartsOn] = useState(
 		saved?.contractStartsOn ?? business.contractStartsOn ?? "",
 	);
@@ -490,18 +455,15 @@ export function FeeStep({ ctx }: { ctx: WizardCtx }) {
 	);
 	const [error, setError] = useState<string | undefined>();
 	const { pending, busy } = useWizardSave();
-	const perNight = feeModel === "PER_ROOM_NIGHT";
 
 	const save = () =>
 		busy(async () => {
-			const problem = perNight ? checkPerNight(amount) : checkPercent(pct);
+			const problem = checkPercent(pct);
 			setError(problem);
 			if (problem) return;
-			const feeValue = perNight
-				? (amount as number)
-				: Number(pct.trim().replace(",", "."));
+			const feeValue = Number(pct.trim().replace(",", "."));
 			const patch = {
-				feeModel,
+				feeModel: FEE_MODEL,
 				feeValue,
 				contractStartsOn: contractStartsOn || null,
 				contractNotes: contractNotes.trim(),
@@ -514,7 +476,7 @@ export function FeeStep({ ctx }: { ctx: WizardCtx }) {
 			);
 			if (!b) return;
 			const row = await ctx.saveStep("fee", {
-				feeModel,
+				feeModel: FEE_MODEL,
 				feeValue,
 				currency: business.currency ?? "NGN",
 				contractStartsOn: patch.contractStartsOn ?? undefined,
@@ -532,44 +494,21 @@ export function FeeStep({ ctx }: { ctx: WizardCtx }) {
 			pending={pending}
 		>
 			<StepCard
-				title="Fee model"
-				subtitle="How Hospio360 is paid. Statements are produced monthly from this."
+				title="Hospio360 fee"
+				subtitle={`${feeModelLabels.PERCENT_OF_SALES}: a share of each day's sales, debited each morning from the hotel's Moniepoint or OPay account. A statement for each day is emailed to the owner.`}
 			>
-				<ChoiceCards
-					value={feeModel}
-					onChange={(m) => {
-						setFeeModel(m);
+				<TextField
+					label="Share of daily sales (%)"
+					value={pct}
+					onChange={(v) => {
+						setPct(v);
 						setError(undefined);
 					}}
-					options={[...FEE_MODELS]}
+					placeholder="1.5"
+					required
+					hint="1.5 % unless agreed otherwise · 0 to 100, up to two decimals"
+					error={error}
 				/>
-				{perNight ? (
-					<MoneyField
-						label="Fee per room night"
-						value={amount}
-						onChange={(v) => {
-							setAmount(v);
-							setError(undefined);
-						}}
-						placeholder="e.g. 1,500"
-						required
-						error={error}
-						hint="₦0 to ₦1,000,000, charged on every room night sold"
-					/>
-				) : (
-					<TextField
-						label="Share (%)"
-						value={pct}
-						onChange={(v) => {
-							setPct(v);
-							setError(undefined);
-						}}
-						placeholder="e.g. 1.5"
-						required
-						hint="0 to 100, up to two decimals"
-						error={error}
-					/>
-				)}
 			</StepCard>
 			<StepCard title="Contract">
 				<FieldRow>

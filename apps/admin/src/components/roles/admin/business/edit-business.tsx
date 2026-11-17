@@ -10,13 +10,7 @@ import type { AdminChangeRow } from "@hospio/api/data/admin-types";
 import { feeModelLabels } from "@hospio/api/data/mappers/tenant";
 import type { BusinessRow } from "@hospio/api/data/types";
 import { Note } from "@hospio/ui/shared/detail-list";
-import {
-	ChoiceCards,
-	FieldRow,
-	MoneyField,
-	TextareaField,
-	TextField,
-} from "@hospio/ui/shared/field";
+import { FieldRow, TextareaField, TextField } from "@hospio/ui/shared/field";
 import { PanelSection, SidePanel } from "@hospio/ui/shared/side-panel";
 import { btn } from "@hospio/ui/shared/ui";
 import { businessRequestFrom, refreshBusiness } from "../onboarding/shared";
@@ -127,31 +121,17 @@ function EditBusinessForm({
 	);
 	const [ownerEmail, setOwnerEmail] = useState(business.ownerEmail ?? "");
 	const [ownerPhone, setOwnerPhone] = useState(business.ownerPhone ?? "");
-	const [feeModel, setFeeModel] = useState<
-		"PERCENT_OF_SALES" | "PERCENT_OF_PAYMENTS" | "PER_ROOM_NIGHT" | "PERCENT_OF_BOOKINGS"
-	>(
-		business.feeModelKey === "PER_ROOM_NIGHT" ||
-			business.feeModelKey === "PERCENT_OF_BOOKINGS" ||
-			business.feeModelKey === "PERCENT_OF_PAYMENTS"
-			? business.feeModelKey
-			: "PERCENT_OF_SALES",
-	);
-	const [perNight, setPerNight] = useState<number | "">(
-		business.feeValue || "",
-	);
+	// One fee model (a % of daily sales, debited daily): only the rate is edited.
 	const [pct, setPct] = useState(
-		business.feeValue ? String(business.feeValue) : "",
+		business.feeModelKey === "PERCENT_OF_SALES" && business.feeValue
+			? String(business.feeValue)
+			: "1.5",
 	);
 	const [contractStartsOn, setStartsOn] = useState(
 		business.contractStartsOn ?? "",
 	);
 	const [contractNotes, setNotes] = useState(business.contractNotes ?? "");
-	const feeValue =
-		feeModel === "PER_ROOM_NIGHT"
-			? perNight === ""
-				? 0
-				: perNight
-			: Number(pct.replace(",", "."));
+	const feeValue = Number(pct.replace(",", "."));
 	const emailOk = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(ownerEmail.trim());
 	const reasonOk = !asHms || reason.trim().length >= 8;
 	const valid =
@@ -170,7 +150,7 @@ function EditBusinessForm({
 			ownerName: ownerName.trim(),
 			ownerEmail: ownerEmail.trim().toLowerCase(),
 			ownerPhone: ownerPhone.trim() || null,
-			feeModel,
+			feeModel: "PERCENT_OF_SALES",
 			feeValue: Number.isFinite(feeValue) && feeValue > 0 ? feeValue : null,
 			contractStartsOn: contractStartsOn || null,
 			contractNotes: contractNotes.trim() || null,
@@ -316,39 +296,13 @@ function EditBusinessForm({
 				</FieldRow>
 			</PanelSection>
 			<PanelSection title="Fee & contract">
-				<ChoiceCards
-					value={feeModel}
-					onChange={setFeeModel}
-					options={[
-						{
-							value: "PERCENT_OF_SALES",
-							label: feeModelLabels.PERCENT_OF_SALES,
-						},
-						{
-							value: "PERCENT_OF_PAYMENTS",
-							label: feeModelLabels.PERCENT_OF_PAYMENTS,
-						},
-						{ value: "PER_ROOM_NIGHT", label: feeModelLabels.PER_ROOM_NIGHT },
-						{
-							value: "PERCENT_OF_BOOKINGS",
-							label: feeModelLabels.PERCENT_OF_BOOKINGS,
-						},
-					]}
+				<TextField
+					label="Share of daily sales (%)"
+					value={pct}
+					onChange={setPct}
+					placeholder="1.5"
+					hint={`${feeModelLabels.PERCENT_OF_SALES} from the hotel's Moniepoint or OPay account`}
 				/>
-				{feeModel === "PER_ROOM_NIGHT" ? (
-					<MoneyField
-						label="Fee per room night"
-						value={perNight}
-						onChange={setPerNight}
-					/>
-				) : (
-					<TextField
-						label="Share (%)"
-						value={pct}
-						onChange={setPct}
-						placeholder="1.5"
-					/>
-				)}
 				<FieldRow>
 					<TextField
 						label="Agreement starts on"

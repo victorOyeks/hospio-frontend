@@ -36,7 +36,6 @@ import { DataTable, TwoLine } from "@hospio/ui/shared/data-table";
 import { withDeliveries } from "@hospio/ui/shared/deliveries-store";
 import { DetailList, Note, TotalsList } from "@hospio/ui/shared/detail-list";
 import {
-	ChoiceCards,
 	MoneyField,
 	SelectField,
 	TextField,
@@ -700,29 +699,6 @@ function StatementPanel({
 	);
 }
 
-const MODELS = [
-	{
-		value: "PERCENT_OF_SALES",
-		label: "% of daily sales",
-		hint: "Worked out every day and debited at 6am from the hotel's POS account",
-	},
-	{
-		value: "PER_ROOM_NIGHT",
-		label: "Per room night",
-		hint: "A fixed amount for every night sold",
-	},
-	{
-		value: "PERCENT_OF_PAYMENTS",
-		label: "% of guest payments",
-		hint: "Grows with what the hotel takes",
-	},
-	{
-		value: "PERCENT_OF_BOOKINGS",
-		label: "% of bookings",
-		hint: "On the booking value",
-	},
-] as const;
-
 function FeeModelModal({
 	open,
 	onOpenChange,
@@ -739,9 +715,9 @@ function FeeModelModal({
 	const { run, pending } = useAction();
 	const [bizId, setBizId] = useState(initial || businesses[0]?.id || "");
 	const [rules, setRules] = useState<FeeRuleRow[] | null>(null);
-	const [model, setModel] =
-		useState<(typeof MODELS)[number]["value"]>("PER_ROOM_NIGHT");
-	const [value, setValue] = useState("");
+	// One fee model (a share of daily sales, debited daily): a rule only sets the rate.
+	const model = "PERCENT_OF_SALES";
+	const [value, setValue] = useState("1.5");
 	const [from, setFrom] = useState(`${thisMonth()}-01`);
 	useEffect(() => {
 		if (initial) setBizId(initial);
@@ -754,24 +730,16 @@ function FeeModelModal({
 			setRules(r.data);
 			const current = r.data[r.data.length - 1];
 			const b = businesses.find((x) => x.id === bizId);
-			const key = current?.model ?? b?.feeModelKey;
-			if (
-				key === "PERCENT_OF_SALES" ||
-				key === "PERCENT_OF_PAYMENTS" ||
-				key === "PERCENT_OF_BOOKINGS" ||
-				key === "PER_ROOM_NIGHT"
-			)
-				setModel(key);
-			setValue(String(current?.value ?? b?.feeValue ?? ""));
+			const onSales = (current?.model ?? b?.feeModelKey) === model;
+			setValue(onSales ? String(current?.value ?? b?.feeValue ?? "1.5") : "1.5");
 		});
 	}, [open, bizId, businesses]);
-	const isPct = model !== "PER_ROOM_NIGHT";
 	return (
 		<Modal
 			open={open}
 			onOpenChange={onOpenChange}
-			title="Fee model"
-			subtitle="How a business is charged each month · a new rule starts from the date given and never touches a statement already issued"
+			title="Fee rate"
+			subtitle="A share of each day's sales, debited each morning from the hotel's POS provider account · a new rate applies from the date given"
 			icon={PencilIcon}
 			size="form"
 			footer={
@@ -796,7 +764,7 @@ function FeeModelModal({
 										value: Number(value),
 										startsOn: from,
 									}),
-								"Fee model saved",
+								"Fee rate saved",
 								() => {
 									onOpenChange(false);
 									onSaved();
@@ -804,7 +772,7 @@ function FeeModelModal({
 							)
 						}
 					>
-						Save model
+						Save rate
 					</button>
 				</>
 			}
@@ -847,26 +815,13 @@ function FeeModelModal({
 						No fee rule yet. The business is not charged until one starts.
 					</Note>
 				)}
-				<ChoiceCards
-					value={model}
-					onChange={setModel}
-					columns={1}
-					options={MODELS.map((m) => ({ ...m }))}
+				<TextField
+					label="Share of daily sales (%)"
+					value={value}
+					onChange={setValue}
+					placeholder="1.5"
+					hint="1.5 % unless agreed otherwise"
 				/>
-				{isPct ? (
-					<TextField
-						label="Share (%)"
-						value={value}
-						onChange={setValue}
-						placeholder="2"
-					/>
-				) : (
-					<MoneyField
-						label="Fee per room night"
-						value={value === "" ? "" : Number(value)}
-						onChange={(v) => setValue(v === "" ? "" : String(v))}
-					/>
-				)}
 				<TextField
 					label="Applies from"
 					type="date"

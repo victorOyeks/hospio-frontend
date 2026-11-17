@@ -52,6 +52,7 @@ allow-listed number 09035911994, so sign-up and phone codes for any other number
 | 36 | `36-pos-time-out.md` | A POS payment with no final answer in 5 minutes is marked Timed out; a late approval still settles it; retry and check are offered | Ready |
 | 37 | `37-guest-messages-subscribed-vs-hold.md` | Admin Guest messages separates Subscribed (hotel's choice) from On hold (Hospio360, non-payment); hold needs a reason; hotel side explains how to lift it | Ready |
 | 38 | `38-hospio-fees-owner-and-manager.md` | Hospio fees: owner and (new) manager see each day's sales, fee and how/when it was debited (provider, reference, failure reason); month picker; nothing to pay | Ready |
+| 39 | `39-one-fee-model.md` | One fee model everywhere (share of daily sales, 1.5 % default): new/edit business, onboarding, fee rules, settings, handover; old models refused and existing businesses moved | Ready |
 
 ## Before you start
 
