@@ -4,6 +4,7 @@ import { cookies } from "next/headers";
 import { type NextRequest, NextResponse } from "next/server";
 import { api } from "./api/client";
 import { isAppRole } from "./app";
+import { safeAppPath } from "./safe-path";
 import type { Me } from "./api/schema";
 import { clearActiveRole, COOKIES, createSession, deleteSession, setActiveRole } from "./session";
 import type { Session } from "./types";
@@ -44,7 +45,7 @@ function go(path: string) {
 }
 
 /** Where the shell sends a stale session: here, then back to the page. */
-const safeBack = (from: string | null | undefined) => (from?.startsWith("/dashboard") || from === "/select-role" ? (from as string) : "/dashboard");
+const safeBack = (from: string | null | undefined) => safeAppPath(from) ?? "/dashboard";
 
 export function refreshUrl(from: string | null | undefined): string {
 	const back = safeBack(from);
@@ -65,7 +66,8 @@ export async function refreshSessionRoute(request: NextRequest) {
 		await deleteSession();
 		// A shared device goes back to its lock screen, where the next person unlocks (docs/shared-devices.md).
 		if (jar.get("hms.device")?.value) return go(`/lock?reason=${encodeURIComponent(reason)}`);
-		return go(`/auth?reason=${encodeURIComponent(reason)}`);
+		// Signing in again comes back to this page (the sign-in page only goes there for the same person).
+		return go(`/auth?reason=${encodeURIComponent(reason)}&from=${encodeURIComponent(back)}`);
 	};
 	const refreshToken = jar.get(COOKIES.refresh)?.value;
 	if (!refreshToken || jar.get(REFRESHED_COOKIE)?.value) return toSignIn("access-changed");

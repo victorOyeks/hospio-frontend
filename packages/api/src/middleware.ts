@@ -2,6 +2,7 @@ import { type NextRequest, NextResponse } from "next/server";
 import { APP, APP_ROLES, isAppRole, OTHER_APP_URL } from "./app";
 import { DEMO_AUTH } from "./demo/mode";
 import { rolePaths } from "./roles";
+import { safeAppPath } from "./safe-path";
 import { COOKIES, cookieOptions, decodeSession } from "./session";
 
 const PREFIX = "/dashboard";
@@ -128,8 +129,10 @@ async function gate(request: NextRequest) {
 	const session = token ? decodeSession(token) : null;
 
 	if (startsWithAny(pathname, PUBLIC)) {
+		// Already signed in: straight to the page the sign-in link asked for (a page of this app only), else the dashboard.
+		const from = safeAppPath(request.nextUrl.searchParams.get("from"));
 		return session && !startsWithAny(pathname, PUBLIC_WHEN_SIGNED_IN)
-			? NextResponse.redirect(new URL("/dashboard", request.url))
+			? NextResponse.redirect(new URL(from ?? "/dashboard", request.url))
 			: next(request);
 	}
 	if (!session) {

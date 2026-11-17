@@ -32,6 +32,7 @@ import {
 import { cn } from "@hospio/ui/utils";
 import { brandStyle, encodeBrandCookie } from "@hospio/api/brand";
 import { RememberBrand } from "@hospio/ui/shared/remember-brand";
+import { DraftUser } from "@hospio/ui/shared/draft";
 import { getSharedDevice, pinPromptAsked } from "@hospio/api/device";
 import type { Hotel, Me } from "@hospio/api/api/schema";
 import {
@@ -161,6 +162,9 @@ export async function DashboardShell({ children }: PropsWithChildren) {
 
 	return (
 		<NuqsAdapter>
+			{/* Half-typed forms and the page to come back to after the lock screen belong to this person (shared/draft.tsx);
+			    not kept while support views as the owner. */}
+			<DraftUser userId={support ? null : user.id}>
 			<JotaiProvider>
 				{/* Always the hotel's own brand, Hospio360 maroon included, so it replaces a look this browser remembered. */}
 				{brand && (
@@ -232,6 +236,7 @@ export async function DashboardShell({ children }: PropsWithChildren) {
 					</SidebarInset>
 				</SidebarProvider>
 			</JotaiProvider>
+			</DraftUser>
 		</NuqsAdapter>
 	);
 }

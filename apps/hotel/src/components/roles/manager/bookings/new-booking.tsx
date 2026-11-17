@@ -8,7 +8,8 @@ import {
 	UserPlusIcon,
 } from "lucide-react";
 import { differenceInCalendarDays, format } from "date-fns";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
+import { DraftNote, useDraft } from "@hospio/ui/shared/draft";
 import { Button } from "@hospio/ui/primitives/button";
 import { Note, TotalsList } from "@hospio/ui/shared/detail-list";
 import {
@@ -125,32 +126,84 @@ export function NewBookingPanel({
 	const [eta, setEta] = useState("");
 	const [notes, setNotes] = useState("");
 
+	const firstType = types[0]?.id ?? "";
+	const blankForm = useCallback(() => {
+		setWalkIn(false);
+		setRoomId("");
+		setIdSeen(false);
+		setGuest(null);
+		setNewGuest(false);
+		setGuestQuery("");
+		setName("");
+		setPhone("");
+		setEmail("");
+		// Everything else too: the next booking starts from an empty form, not the last guest's.
+		setCheckIn(iso(new Date()));
+		setCheckOut(iso(new Date(Date.now() + 86400000)));
+		setTypeId(firstType);
+		setAdults("");
+		setChildren("");
+		setEta("");
+		setSpecialRate("");
+		setOrgId("");
+		setPriceKind("NORMAL");
+		setPlan("PAY_IN_FULL");
+		setNotes("");
+	}, [firstType]);
 	useEffect(() => {
 		if (!open) {
 			resetFlow();
-			setWalkIn(false);
-			setRoomId("");
-			setIdSeen(false);
-			setGuest(null);
-			setNewGuest(false);
-			setGuestQuery("");
-			setName("");
-			setPhone("");
-			setEmail("");
-			// Everything else too: the next booking starts from an empty form, not the last guest's.
-			setCheckIn(iso(new Date()));
-			setCheckOut(iso(new Date(Date.now() + 86400000)));
-			setTypeId(types[0]?.id ?? "");
-			setAdults("");
-			setChildren("");
-			setEta("");
-			setSpecialRate("");
-			setOrgId("");
-			setPriceKind("NORMAL");
-			setPlan("PAY_IN_FULL");
-			setNotes("");
+			blankForm();
 		}
-	}, [open, resetFlow, types]);
+	}, [open, resetFlow, blankForm]);
+	// What was typed comes back after the lock screen for the same person, until the booking is saved (the payment steps
+	// are never drafted) or the panel is closed. The special rate is a price: typed again, never kept.
+	const draft = useDraft(
+		"new-booking",
+		open && flow.phase === "form",
+		{
+			walkIn,
+			roomId,
+			idSeen,
+			guest,
+			newGuest,
+			name,
+			phone,
+			email,
+			checkIn,
+			checkOut,
+			typeId,
+			adults,
+			children,
+			priceKind,
+			plan,
+			orgId,
+			eta,
+			notes,
+		},
+		(d) => {
+			setWalkIn(d.walkIn);
+			setRoomId(d.roomId);
+			setIdSeen(d.idSeen);
+			setGuest(d.guest);
+			setNewGuest(d.newGuest);
+			setName(d.name);
+			setPhone(d.phone);
+			setEmail(d.email);
+			if (d.checkIn >= iso(new Date())) {
+				setCheckIn(d.checkIn);
+				setCheckOut(d.checkOut);
+			}
+			if (types.some((t) => t.id === d.typeId)) setTypeId(d.typeId);
+			setAdults(d.adults);
+			setChildren(d.children);
+			setPriceKind(d.priceKind);
+			setPlan(d.plan);
+			setOrgId(d.orgId);
+			setEta(d.eta);
+			setNotes(d.notes);
+		},
+	);
 
 	// Returning guests come from reservation-service as you type, not from a list of every guest.
 	const { rows: matches } = useGuestSearch(guestQuery);
@@ -364,6 +417,7 @@ export function NewBookingPanel({
 				flow.view.body
 			) : (
 				<div className="flex flex-col gap-6">
+					<DraftNote draft={draft} onClear={blankForm} />
 					<PanelSection title="Guest">
 						{guest ? (
 							<div className="flex items-center gap-3 rounded-xl border border-brand bg-brand-soft/40 px-4 py-3">

@@ -52,7 +52,7 @@ tablet, the other is the manager's desk.
 - Unlocking gives that person a normal session **for this hotel only**, on the role the device is for. Everything they
   do is recorded under their name.
 - **Lock** (top right) or the idle time ends that person's session on this device only; their phone stays signed in.
-- Unsaved form state is lost when the device locks.
+- The same person unlocking goes back to the page they were on, with half-typed forms filled in (see 46-lock-screen-resume.md).
 
 ## 1 · Set up a bar tablet (Tunde)
 
@@ -197,5 +197,4 @@ unlocked.
   session's next refresh; that is how access changes already work everywhere.
 - The lock screen lists everyone who fits the device; a big team uses the search box.
 - The owner's Staff screen has no PIN reset or remind yet (the manager's has).
-- Unsaved form state is lost when the device locks.
 

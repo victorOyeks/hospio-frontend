@@ -29,6 +29,7 @@ import { Field, SelectField, TextField } from "@hospio/ui/shared/field";
 import { Modal } from "@hospio/ui/shared/modal";
 import { btn } from "@hospio/ui/shared/ui";
 import { cn } from "@hospio/ui/utils";
+import { rememberPage, useDraftUser } from "./draft";
 
 /**
  * Shared devices in the dashboard (docs/shared-devices.md in hospio-backend): "Use this device as a shared device" from the
@@ -340,12 +341,15 @@ export function SetupDeviceModal({
 /** The header's "Lock" on a shared device: this person's session here ends and the lock screen opens. */
 export function LockButton({ deviceName }: { deviceName: string }) {
 	const [pending, start] = useTransition();
+	const userId = useDraftUser();
 	return (
 		<button
 			type="button"
 			disabled={pending}
 			onClick={() =>
 				start(async () => {
+					// The same person unlocking comes back to this page (shared/draft.tsx).
+					if (userId) rememberPage(userId);
 					await lockDevice("button");
 					window.location.assign("/lock");
 				})
@@ -368,6 +372,7 @@ export function IdleLock({ minutes }: { minutes: number }) {
 	const last = useRef(Date.now());
 	const warned = useRef(false);
 	const locking = useRef(false);
+	const userId = useDraftUser();
 	useEffect(() => {
 		const limit = Math.max(1, minutes) * 60_000;
 		const activity = () => {
@@ -392,6 +397,8 @@ export function IdleLock({ minutes }: { minutes: number }) {
 			if (left <= 0) {
 				locking.current = true;
 				toast.dismiss("idle-lock");
+				// The same person unlocking comes back to this page with what they were typing (shared/draft.tsx).
+				if (userId) rememberPage(userId);
 				void lockDevice("idle").finally(() =>
 					window.location.assign("/lock?reason=idle"),
 				);
@@ -400,7 +407,7 @@ export function IdleLock({ minutes }: { minutes: number }) {
 				toast.warning("Locking in 30 seconds", {
 					id: "idle-lock",
 					description:
-						"Tap anywhere to stay signed in. Unsaved changes are lost when it locks.",
+						"Tap anywhere to stay signed in. What you are typing comes back when you unlock.",
 					duration: 35_000,
 				});
 			}
@@ -418,7 +425,7 @@ export function IdleLock({ minutes }: { minutes: number }) {
 			window.clearInterval(tick);
 			window.clearInterval(poll);
 		};
-	}, [minutes]);
+	}, [minutes, userId]);
 	return null;
 }
 

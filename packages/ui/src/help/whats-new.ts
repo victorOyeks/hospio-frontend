@@ -5,6 +5,11 @@ export const whatsNewWeek = "Week of 15 November 2026";
 
 export const whatsNew: WhatsNewItem[] = [
 	{
+		title: "Pick up where you were after the lock screen",
+		body: "When a shared tablet locks, or you sign in again after being signed out, you go back to the page you were on. Check-in, New booking, a bar sale, a kitchen order, a till handover and a housekeeping problem report keep what you had typed, with “Restored what you were typing · Clear” at the top. Only you get it back: someone else unlocking starts on their own home page. Payments are never kept; take them again.",
+		audience: ["FRONT_OFFICE", "BAR", "KITCHEN", "HOUSEKEEPING", "MANAGER"],
+	},
+	{
 		title: "A tidier admin portal",
 		body: "The menu is grouped: Customers, Operations, Money, Growth and Platform. “Hotels” lists every hotel across businesses; tap one for its figures, POS keys, Hospio fees and guest messages in a side panel. Press ⌘K to jump to any business, hotel, ticket or page. Fees & billing and Payments & POS have clear tabs, and provider keys are on the new “Integrations” page (Super admin).",
 		audience: ["PLATFORM"],

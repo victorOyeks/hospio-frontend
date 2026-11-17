@@ -16,7 +16,8 @@ import { createSession, decodeSession, deleteSession, setActiveHotel, setActiveR
 
 export type ActionResult<T = null> = { ok: true; data: T } | { ok: false; error: string };
 
-export type SignInResult = { mustChangePassword: boolean; roles: string[]; twoStepToken?: undefined } | { twoStepToken: string; mustChangePassword?: undefined; roles?: undefined };
+/** `userId` decides where the sign-in page goes next: back to the page only for the person who was on it (packages/ui/src/shared/draft.tsx). */
+export type SignInResult = { mustChangePassword: boolean; roles: string[]; userId: string; twoStepToken?: undefined } | { twoStepToken: string; mustChangePassword?: undefined; roles?: undefined; userId?: undefined };
 
 export async function login(input: { email: string; password: string }): Promise<ActionResult<SignInResult>> {
 	if (DEMO_AUTH) {
@@ -25,7 +26,7 @@ export async function login(input: { email: string; password: string }): Promise
 		const token = mintDemoToken(input.email, nameFromEmail(input.email), BUSINESS_ID, demoHotels.map((h) => h.id), APP_ROLES);
 		await createSession(token, "demo-refresh");
 		await setActiveHotel(demoHotels[0].id);
-		return { ok: true, data: { mustChangePassword: false, roles: [...APP_ROLES] } };
+		return { ok: true, data: { mustChangePassword: false, roles: [...APP_ROLES], userId: decodeSession(token)?.sub ?? "" } };
 	}
 	const { data, error } = await api("@post/identity/auth/sign-in", { body: input, headers: await clientAgentHeaders() });
 	if (error || !data) return { ok: false, error: errorMessage(error, "Email or password is wrong") };
@@ -39,7 +40,7 @@ export async function login(input: { email: string; password: string }): Promise
 }
 
 /** The code step of 2-step sign-in: an authenticator code or a recovery code, then the same landing as a normal sign-in. */
-export async function loginWithCode(input: { twoStepToken: string; code: string }): Promise<ActionResult<{ mustChangePassword: boolean; roles: string[] }>> {
+export async function loginWithCode(input: { twoStepToken: string; code: string }): Promise<ActionResult<{ mustChangePassword: boolean; roles: string[]; userId: string }>> {
 	if (DEMO_AUTH) return { ok: false, error: "2-step sign-in needs the live services" };
 	const code = input.code.trim();
 	if (!code) return { ok: false, error: "Enter the code from your authenticator app" };
@@ -61,7 +62,7 @@ async function settleSignIn(accessToken: string, refreshToken: string | null, mu
 	const { device } = await getSharedDevice();
 	if (device && session.hotels.includes(device.hotelId)) await setActiveHotel(device.hotelId);
 	if (device || mustChangePassword) await askForPin();
-	return { mustChangePassword, roles };
+	return { mustChangePassword, roles, userId: session.sub };
 }
 
 /** Signs out. `notice: "saved"` (onboarding's "Save and finish later") tells the sign-in page to say the setup was kept. */

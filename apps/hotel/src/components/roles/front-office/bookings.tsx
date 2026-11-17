@@ -30,7 +30,7 @@ import { useRouter } from "next/navigation";
 import { useQueryState } from "nuqs";
 import type { PageResult } from "@hospio/api/data/paging";
 import { useListParams } from "@hospio/ui/shared/list-params";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { DataTable, TwoLine } from "@hospio/ui/shared/data-table";
 import { DetailList, Note, TotalsList } from "@hospio/ui/shared/detail-list";
 import {
@@ -92,6 +92,7 @@ import {
 	checkName,
 	checkPhone,
 } from "@hospio/ui/shared/validate";
+import { DraftNote, useDraft } from "@hospio/ui/shared/draft";
 import { dueAtCheckIn, useSaveFlow } from "./save-flow";
 import {
 	type PaymentTarget,
@@ -956,6 +957,17 @@ function CheckInPanel({
 	useEffect(() => {
 		if (!open) setPaying(false);
 	}, [open]);
+	// The room and ID tick come back after the lock screen for the same person; the payment never does.
+	const draft = useDraft(
+		booking ? `check-in:${booking.id}` : null,
+		open && !!booking,
+		{ roomId, idSeen },
+		(d) => {
+			setRoomId(d.roomId);
+			setIdSeen(d.idSeen);
+		},
+		{ roomId: booking?.roomId ?? "", idSeen: false },
+	);
 	if (!booking) return null;
 	const b = booking;
 	const due = dueAtCheckIn(b);
@@ -1054,6 +1066,13 @@ function CheckInPanel({
 			}
 		>
 			<div className="flex flex-col gap-4">
+				<DraftNote
+					draft={draft}
+					onClear={() => {
+						setRoomId(b.roomId ?? "");
+						setIdSeen(false);
+					}}
+				/>
 				<SelectField
 					label="Room"
 					value={roomId}
@@ -1584,31 +1603,84 @@ export function NewBookingPanel({
 		onClose: () => onOpenChange(false),
 	});
 	const resetFlow = flow.reset;
+	const firstType = roomTypes[0]?.id ?? "";
+	const blankForm = useCallback(() => {
+		setWalkIn(false);
+		setRoomId("");
+		setIdSeen(false);
+		// The next booking starts from an empty form, not the last guest's details.
+		setGuestId("");
+		setPicked(null);
+		setGuestQuery("");
+		setName("");
+		setPhone("");
+		setEmail("");
+		setTypeId(firstType);
+		setCi(format(new Date(), "yyyy-MM-dd"));
+		setCo(format(addDays(new Date(), 1), "yyyy-MM-dd"));
+		setAdults("");
+		setChildren("");
+		setEta("");
+		setPriceKind("NORMAL");
+		setPlan("PAY_IN_FULL");
+		setOrgId("");
+		setNotes("");
+	}, [firstType]);
 	useEffect(() => {
 		if (!open) {
 			resetFlow();
-			setWalkIn(false);
-			setRoomId("");
-			setIdSeen(false);
-			// The next booking starts from an empty form, not the last guest's details.
-			setGuestId("");
-			setPicked(null);
-			setGuestQuery("");
-			setName("");
-			setPhone("");
-			setEmail("");
-			setTypeId(roomTypes[0]?.id ?? "");
-			setCi(format(new Date(), "yyyy-MM-dd"));
-			setCo(format(addDays(new Date(), 1), "yyyy-MM-dd"));
-			setAdults("");
-			setChildren("");
-			setEta("");
-			setPriceKind("NORMAL");
-			setPlan("PAY_IN_FULL");
-			setOrgId("");
-			setNotes("");
+			blankForm();
 		}
-	}, [open, resetFlow, roomTypes]);
+	}, [open, resetFlow, blankForm]);
+	// What was typed comes back after the lock screen for the same person, until the booking is saved (then the payment
+	// steps run, never drafted) or the panel is closed. Prices and amounts are worked out again, never kept.
+	const draft = useDraft(
+		"new-booking",
+		open && flow.phase === "form",
+		{
+			guestId,
+			picked,
+			name,
+			phone,
+			email,
+			typeId,
+			ci,
+			co,
+			adults,
+			children,
+			eta,
+			priceKind,
+			plan,
+			orgId,
+			notes,
+			walkIn,
+			roomId,
+			idSeen,
+		},
+		(d) => {
+			setGuestId(d.guestId);
+			setPicked(d.picked);
+			setName(d.name);
+			setPhone(d.phone);
+			setEmail(d.email);
+			if (roomTypes.some((t) => t.id === d.typeId)) setTypeId(d.typeId);
+			// A draft from yesterday doesn't bring back a check-in date that is now in the past.
+			if (d.ci >= format(new Date(), "yyyy-MM-dd")) {
+				setCi(d.ci);
+				setCo(d.co);
+			}
+			setAdults(d.adults);
+			setChildren(d.children);
+			setEta(d.eta);
+			setPriceKind(d.priceKind);
+			setPlan(d.plan);
+			setOrgId(d.orgId);
+			setNotes(d.notes);
+			setWalkIn(d.walkIn);
+			setRoomId(d.roomId);
+			setIdSeen(d.idSeen);
+		},
+	);
 
 	const type = roomTypes.find((t) => t.id === typeId);
 	const nights = Math.max(
@@ -1832,6 +1904,7 @@ export function NewBookingPanel({
 				flow.view.body
 			) : (
 				<div className="flex flex-col gap-6">
+					<DraftNote draft={draft} onClear={blankForm} />
 					<PanelSection title="Guest">
 						<TextField
 							label="Returning guest"

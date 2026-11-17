@@ -20,6 +20,7 @@ import type {
 	LockScreenPerson,
 } from "@hospio/api/api/routes-devices";
 import { isHotelRole, roleLabels } from "@hospio/api/roles";
+import { resumeTarget } from "@hospio/ui/shared/draft";
 import { initials } from "@hospio/ui/shared/format";
 import { cn } from "@hospio/ui/utils";
 import { BigButton } from "@/components/roles/shared-staff/tablet";
@@ -104,6 +105,7 @@ export function LockScreen({
 					<p className="rounded-[10px] bg-info-soft px-4 py-3 text-[13px] text-info">
 						Locked after {device.autoLockMinutes}{" "}
 						{device.autoLockMinutes === 1 ? "minute" : "minutes"} without use.
+						Unlock with your PIN to carry on where you were.
 					</p>
 				)}
 				<div>
@@ -211,7 +213,9 @@ function PinPad({
 					setPin("");
 					return;
 				}
-				window.location.assign("/dashboard");
+				// The same person goes back to the page they were on when it locked (with their half-typed form); anyone else
+				// to their own dashboard, and the last person's drafts are cleared (shared/draft.tsx).
+				window.location.assign(resumeTarget(person.userId));
 			});
 		},
 		[person.userId],

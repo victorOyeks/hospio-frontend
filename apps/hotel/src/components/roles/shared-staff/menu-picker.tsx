@@ -45,6 +45,55 @@ export const unitPrice = (l: CartLine, discountPct = 0) =>
 export const cartTotal = (lines: CartLine[], discountPct = 0) =>
 	lines.reduce((s, l) => s + unitPrice(l, discountPct) * l.qty, 0);
 
+/** A cart line as a draft keeps it (shared/draft.tsx): the menu item's id, never its price or the line's money. */
+export type DraftLine = {
+	key: string;
+	itemId: string;
+	qty: number;
+	option?: string;
+	note?: string;
+};
+
+export const draftLines = (lines: CartLine[]): DraftLine[] =>
+	lines.map((l) => ({
+		key: l.key,
+		itemId: l.item.id,
+		qty: l.qty,
+		option: l.option,
+		note: l.note,
+	}));
+
+/**
+ * A draft's lines back on today's menu: items no longer on sale are left out, and prices (with what the choices add)
+ * come from the menu as it is now.
+ */
+export function cartFromDraft(menu: MenuItemRow[], saved: DraftLine[]): CartLine[] {
+	const out: CartLine[] = [];
+	for (const d of Array.isArray(saved) ? saved : []) {
+		const item = menu.find((m) => m.id === d.itemId);
+		if (!item || item.active === false || !item.available || !(d.qty > 0))
+			continue;
+		const chosen = d.option ? d.option.split(", ") : [];
+		const extra = groupsOf(item).reduce(
+			(sum, g) =>
+				sum +
+				g.choices
+					.filter((c) => chosen.includes(c.name))
+					.reduce((a, c) => a + c.priceDelta, 0),
+			0,
+		);
+		out.push({
+			key: d.key,
+			item,
+			qty: Math.floor(d.qty),
+			option: d.option,
+			note: d.note,
+			extra: extra || undefined,
+		});
+	}
+	return out;
+}
+
 /**
  * The menu picker inside Kitchen "New order" and Bar "New sale": category pills, a grid of items,
  * an "item with choices" modal (Figma 3253:11586 / 3262:12174) and the running cart. Choices come in
