@@ -73,6 +73,7 @@ export const managerLinks: NavLink[] = [
 	{ title: "Staff", url: "/dashboard/staff", icon: IdCardIcon },
 	{ title: "Financials", url: "/dashboard/financials", icon: BarChart3Icon },
 	{ title: "Payments", url: "/dashboard/payments", icon: CreditCardIcon },
+	{ title: "Hospio fees", url: "/dashboard/hospio-fees", icon: ReceiptIcon },
 	{
 		title: "Organizations",
 		url: "/dashboard/organizations",

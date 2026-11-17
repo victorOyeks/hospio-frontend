@@ -1,6 +1,7 @@
 "use client";
 
 import { BanknoteIcon, ReceiptIcon, WalletIcon } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import type { DailyFeeRow } from "@hospio/api/actions/daily-fees";
 import { DetailList, Note } from "@hospio/ui/shared/detail-list";
@@ -14,10 +15,27 @@ import { StatusPill } from "@hospio/ui/shared/status-pill";
 import { cell, tableHead, tableRow } from "@hospio/ui/shared/ui";
 
 /**
- * The owner's Hospio fees: what each hotel sold each day (VAT excluded), Hospio360's fee on it and how it was collected. The
- * statement for each day is emailed after midnight; the fee is debited at 6am from the hotel's POS provider account once
- * automatic debit is on. Until then the days show as "Statement only".
+ * Hospio fees for the owner (every hotel) and the manager (their hotel, read-only): what each hotel sold each day (VAT
+ * excluded), Hospio360's fee on it and how it was collected. The statement for each day is emailed after midnight; the fee is
+ * debited at 6am from the hotel's POS provider account (Moniepoint or OPay) once automatic debit is on, so there is nothing to
+ * pay here. Until then the days show as "Statement only". `?month=YYYY-MM` shows one month; without it, the last 30 days.
  */
+
+const providerName = (p?: string | null) => (p === "OPAY" ? "OPay" : p === "MONIEPOINT" ? "Moniepoint" : p ? p : null);
+
+/** The last 12 months, newest first, for the picker. */
+function recentMonths() {
+	const out: { value: string; label: string }[] = [];
+	const d = new Date();
+	for (let i = 0; i < 12; i++) {
+		const m = new Date(d.getFullYear(), d.getMonth() - i, 1);
+		out.push({
+			value: `${m.getFullYear()}-${String(m.getMonth() + 1).padStart(2, "0")}`,
+			label: m.toLocaleDateString("en-GB", { month: "long", year: "numeric" }),
+		});
+	}
+	return out;
+}
 
 const day = (d: string, long = false) =>
 	new Date(`${d}T12:00:00`).toLocaleDateString("en-GB", long ? { weekday: "long", day: "numeric", month: "long", year: "numeric" } : { weekday: "short", day: "numeric", month: "short" });
@@ -45,8 +63,22 @@ function status(s: string) {
 	}
 }
 
-export function HospioFees({ days, error }: { days: DailyFeeRow[]; error: string | null }) {
+export function HospioFees({
+	days,
+	error,
+	month,
+	audience = "owner",
+}: {
+	days: DailyFeeRow[];
+	error: string | null;
+	/** YYYY-MM, or null for the last 30 days. */
+	month?: string | null;
+	audience?: "owner" | "manager";
+}) {
+	const router = useRouter();
 	const [open, setOpen] = useState<DailyFeeRow | null>(null);
+	const months = recentMonths();
+	const period = month ? (months.find((m) => m.value === month)?.label ?? month) : "Last 30 days";
 	const sales = days.reduce((s, d) => s + d.sales, 0);
 	const fees = days.reduce((s, d) => s + d.fee, 0);
 	const collected = days.reduce((s, d) => s + (d.collected ?? 0), 0);
@@ -54,12 +86,36 @@ export function HospioFees({ days, error }: { days: DailyFeeRow[]; error: string
 	const hotels = new Set(days.map((d) => d.hotelId)).size;
 	return (
 		<>
-			<PageHeader title="Hospio fees" subtitle="Last 30 days · what each hotel sold (VAT excluded) and Hospio360's fee on it" />
+			<PageHeader
+				title="Hospio fees"
+				subtitle={`${period} · what ${audience === "manager" ? "the hotel" : "each hotel"} sold (VAT excluded), Hospio360's fee on it and how it was taken`}
+			>
+					<select
+						value={month ?? ""}
+						onChange={(e) => router.push(e.target.value ? `?month=${e.target.value}` : "?")}
+						className="h-10 rounded-control border border-line bg-card px-3 text-[13px]"
+						aria-label="Period"
+					>
+						<option value="">Last 30 days</option>
+						{months.map((m) => (
+							<option key={m.value} value={m.value}>
+								{m.label}
+							</option>
+						))}
+					</select>
+			</PageHeader>
 			{error && <Note tone="danger">{error}</Note>}
+			{!shadow && (
+				<p className="text-[13px] text-ink-3">
+					Nothing to pay here: each day's fee is taken automatically at 6am from {audience === "manager" ? "the hotel's" : "your"} POS provider account
+					(Moniepoint or OPay), and each day's statement is emailed{audience === "manager" ? " to the owner" : ""}.
+				</p>
+			)}
 			{shadow && (
 				<Note tone="info">
-					Automatic debit isn't on yet: you get each day's statement, and nothing is taken from your account. Once Hospio360 switches it
-					on, the day's fee is debited at 6am from your POS provider account.
+					Automatic debit isn't on yet: each day's statement is emailed{audience === "manager" ? " to the owner" : ""}, and nothing is taken from{" "}
+					{audience === "manager" ? "the hotel's" : "your"} account. Once Hospio360 switches it on, the day's fee is debited at 6am from the POS provider
+					account. There is nothing to pay here.
 				</Note>
 			)}
 			<div className="grid grid-cols-1 gap-4 md:grid-cols-3">
@@ -67,7 +123,7 @@ export function HospioFees({ days, error }: { days: DailyFeeRow[]; error: string
 				<KpiCard label="Hospio fees" value={naira(fees)} icon={ReceiptIcon} hint={days[0] ? `${days[0].rate} % of sales` : undefined} />
 				<KpiCard label="Debited" value={naira(collected)} icon={WalletIcon} />
 			</div>
-			<SectionCard title="Days" subtitle="Open a day for its lines" flush>
+			<SectionCard title="Days" subtitle="Open a day for what was sold and how the fee was taken" flush>
 				{days.length === 0 ? (
 					<EmptyState title="No days yet" hint="The first day appears after midnight, with its statement in your email." className="m-5" />
 				) : (
@@ -80,6 +136,7 @@ export function HospioFees({ days, error }: { days: DailyFeeRow[]; error: string
 									<th className={cell}>Sales</th>
 									<th className={cell}>Fee</th>
 									<th className={cell}>Debited</th>
+									<th className={cell}>From</th>
 									<th className={cell}>Status</th>
 								</tr>
 							</thead>
@@ -91,6 +148,16 @@ export function HospioFees({ days, error }: { days: DailyFeeRow[]; error: string
 										<td className={cell}>{naira(d.sales)}</td>
 										<td className={cell}>{naira(d.fee)}</td>
 										<td className={cell}>{naira(d.collected ?? 0)}</td>
+										<td className={cell}>
+											{providerName(d.provider) ? (
+												<span className="flex flex-col">
+													<span>{providerName(d.provider)}</span>
+													{d.debitedAt && <span className="text-[11px] text-ink-3">{fmtWhen(d.debitedAt)}</span>}
+												</span>
+											) : (
+												<span className="text-ink-3">—</span>
+											)}
+										</td>
 										<td className={cell}>{status(d.status)}</td>
 									</tr>
 								))}
@@ -125,11 +192,22 @@ export function HospioFees({ days, error }: { days: DailyFeeRow[]; error: string
 								{ label: "From earlier days", value: naira(open.carriedIn ?? 0) },
 								{ label: "Debited", value: naira(open.collected ?? 0) },
 								{ label: "Status", value: status(open.status) },
+								{ label: "Due that day", value: naira(open.due) },
 								{ label: "Statement emailed", value: open.statementSentAt ? fmtWhen(open.statementSentAt) : "—" },
 								{ label: "Debited at", value: open.debitedAt ? fmtWhen(open.debitedAt) : "—" },
+								{ label: "Debited from", value: providerName(open.provider) ? `${providerName(open.provider)} account` : "—" },
+								{ label: "Debit reference", value: open.debitRef ?? "—" },
+								{ label: "Attempts", value: open.attempts ? String(open.attempts) : "—" },
 							]}
 						/>
-						{open.status === "UNPAID" && <Note tone="warning">The debit didn't go through. It is tried again today and moves to tomorrow's fee if it still fails.</Note>}
+						{(open.status === "UNPAID" || open.status === "PART_PAID") && (
+							<Note tone="warning">
+								{open.status === "PART_PAID" ? "Only part of the fee could be debited." : "The debit didn't go through."}
+								{open.lastError ? ` ${providerName(open.provider) ?? "The provider"} said: ${open.lastError}.` : ""} It is tried again at 9am,
+								1pm and 6pm, and what is still owed moves to the next day's fee. POS payments pause after 3 unpaid days.
+							</Note>
+						)}
+						{open.status === "CARRIED" && <Note tone="info">This fee wasn't debited on the day and was added to the next day's fee.</Note>}
 					</div>
 				</Modal>
 			)}

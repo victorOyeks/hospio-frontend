@@ -27,6 +27,12 @@ export async function ownerDailyFees(from?: string, to?: string): Promise<Action
 	return error || !data ? fail(error, "Hospio fees could not be loaded") : { ok: true, data: data.data };
 }
 
+/** A manager's own hotel's daily fees (read-only; the fee is debited automatically, nothing to pay here). */
+export async function hotelDailyFees(from?: string, to?: string): Promise<ActionResult<DailyFeeRow[]>> {
+	const { data, error } = await api("@get/platform/fees/daily", { ...(await withSession()), query: { from, to } });
+	return error || !data ? fail(error, "Hospio fees could not be loaded") : { ok: true, data: data.data };
+}
+
 export async function hotelPosConfig(): Promise<ActionResult<PosConfigView>> {
 	const { data, error } = await api("@get/payment/pos-config", await withSession());
 	return error || !data ? fail(error, "The POS provider could not be loaded") : { ok: true, data: data.data };

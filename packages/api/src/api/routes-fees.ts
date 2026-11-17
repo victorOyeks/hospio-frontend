@@ -102,6 +102,8 @@ const range = z.object({ from: z.string().optional(), to: z.string().optional() 
 
 export const feeRoutes = {
 	"@get/platform/owner/fees/daily": { query: range, output: envelope(z.array(DailyFee)) },
+	/** A manager's own hotel, read-only. */
+	"@get/platform/fees/daily": { query: range, output: envelope(z.array(DailyFee)) },
 	"@get/platform/admin/fees/daily": {
 		query: range.extend({ businessId: z.string().optional(), hotelId: z.string().optional() }),
 		output: envelope(z.array(DailyFee)),
