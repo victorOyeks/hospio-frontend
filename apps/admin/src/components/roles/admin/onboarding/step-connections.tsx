@@ -45,7 +45,8 @@ const REF: Record<string, { placeholder: string; hint: string }> = {
 };
 
 const DESKS = [
-	{ value: "", label: "No desk yet" },
+	// Radix Select refuses an empty value, so "no desk" is NONE.
+	{ value: "NONE", label: "No desk yet" },
 	{ value: "FRONT_OFFICE", label: "Front office" },
 	{ value: "BAR", label: "Bar" },
 	{ value: "KITCHEN", label: "Kitchen & restaurant" },
@@ -118,7 +119,7 @@ export function ConnectionsStep({ ctx }: { ctx: WizardCtx }) {
 			);
 			if (!made) return;
 			// The desk that uses it: card payments from that desk go to this terminal.
-			if (form.desk) {
+			if (form.desk && form.desk !== "NONE") {
 				const assigned = await assignTerminalDesk(made.id, form.desk as "FRONT_OFFICE" | "BAR" | "KITCHEN" | "LAUNDRY", hotelId);
 				if (assigned.ok) made.roles = [form.desk];
 				else toast.error(`${made.name} was added, but not given to ${deskLabel(form.desk)}: ${assigned.error}`, { duration: 8000 });
