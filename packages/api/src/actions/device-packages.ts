@@ -3,7 +3,7 @@
 import type { z } from "zod";
 import type { ActionResult } from "@hospio/api/actions/auth";
 import { api, errorMessage } from "@hospio/api/api/client";
-import type { DeviceCatalogueItem, DeviceInvoice, DevicePackage } from "@hospio/api/api/routes-device-packages";
+import type { DataPlanRenewal, DeviceCatalogueItem, DeviceInvoice, DevicePackage } from "@hospio/api/api/routes-device-packages";
 import { withSession } from "@hospio/api/api/server";
 
 /**
@@ -14,6 +14,7 @@ import { withSession } from "@hospio/api/api/server";
 export type DeviceCatalogueRow = z.infer<typeof DeviceCatalogueItem>;
 export type DevicePackageView = z.infer<typeof DevicePackage>;
 export type DeviceInvoiceView = z.infer<typeof DeviceInvoice>;
+export type DataPlanRenewalRow = z.infer<typeof DataPlanRenewal>;
 export type DeviceItemInput = { catalogueId: string | null; name: string; kind: string; quantity: number; unitPrice: number };
 export type DevicePackageInput = {
 	paymentOption: string;
@@ -154,4 +155,36 @@ export async function payDeviceInvoice(id: string, callbackUrl: string | null): 
 export async function confirmDeviceInvoice(reference: string): Promise<ActionResult<DeviceInvoiceView>> {
 	const { data, error } = await api("@post/platform/owner/devices/invoices/confirm", { ...(await withSession()), query: { reference } });
 	return error || !data ? fail(error, "The payment could not be confirmed") : { ok: true, data: data.data };
+}
+
+// ---- the data plan after installation ---------------------------------------------------------------------------------
+
+/** Stop, start again (optionally at a new price) or reprice an installed package's data plan (Finance or Super admin). */
+export async function setDataPlan(
+	id: string,
+	action: "STOP" | "START" | "PRICE",
+	monthly: number | null,
+): Promise<ActionResult<DevicePackageView>> {
+	const { data, error } = await api("@put/platform/admin/device-packages/:id/data-plan", {
+		...(await withSession()),
+		params: { id },
+		body: { action, monthly },
+	});
+	return error || !data ? fail(error, "The data plan could not be changed") : { ok: true, data: data.data };
+}
+
+/** Hospio360 renewed the hotel's real data subscription with the provider through this day (YYYY-MM-DD). */
+export async function markDataPlanRenewed(id: string, through: string): Promise<ActionResult<DevicePackageView>> {
+	const { data, error } = await api("@post/platform/admin/device-packages/:id/data-plan/renewed", {
+		...(await withSession()),
+		params: { id },
+		body: { through },
+	});
+	return error || !data ? fail(error, "The renewal could not be recorded") : { ok: true, data: data.data };
+}
+
+/** Running data plans whose real subscription runs out within {@code days} (or was never recorded). */
+export async function dataPlanRenewals(days = 7): Promise<ActionResult<DataPlanRenewalRow[]>> {
+	const { data, error } = await api("@get/platform/admin/devices/data-plans/renewals", { ...(await withSession()), query: { days } });
+	return error || !data ? fail(error, "Renewals could not be loaded") : { ok: true, data: data.data };
 }

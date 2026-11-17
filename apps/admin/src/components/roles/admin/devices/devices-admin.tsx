@@ -5,6 +5,9 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import {
 	allDevicePackages,
+	dataPlanRenewals,
+	type DataPlanRenewalRow,
+	markDataPlanRenewed,
 	type DeviceCatalogueRow,
 	type DevicePackageView,
 	deviceCatalogue,
@@ -233,7 +236,124 @@ export function DevicesTab({ money = false, superAdmin = false }: { money?: bool
 					</div>
 				)}
 			</SectionCard>
+			<DataPlanRenewals />
 			<AllDeviceInvoices money={money} superAdmin={superAdmin} />
 		</div>
+	);
+}
+
+/** Fees & billing → Devices: data plans whose real subscription with the provider runs out soon (or was never recorded). */
+function DataPlanRenewals() {
+	const [days, setDays] = useState(7);
+	const [rows, setRows] = useState<DataPlanRenewalRow[] | null>(null);
+	const [open, setOpen] = useState<DataPlanRenewalRow | null>(null);
+	const [through, setThrough] = useState("");
+	const [busy, setBusy] = useState(false);
+	const load = useCallback(async () => {
+		const r = await dataPlanRenewals(days);
+		if (r.ok) setRows(r.data);
+		else toast.error(r.error);
+	}, [days]);
+	useEffect(() => {
+		void load();
+	}, [load]);
+	const save = async () => {
+		if (!open) return;
+		setBusy(true);
+		const r = await markDataPlanRenewed(open.packageId, through);
+		setBusy(false);
+		if (!r.ok) return toast.error(r.error);
+		toast.success(`${open.hotelName ?? "Hotel"}: renewal recorded`);
+		setOpen(null);
+		void load();
+	};
+	return (
+		<SectionCard
+			title="Data plan renewals"
+			subtitle="Renew these hotels' data subscriptions with the provider (MTN, Airtel, Spectranet…), then record it here"
+			headerRight={
+				<select value={days} onChange={(e) => setDays(Number(e.target.value))} className="h-9 rounded-control border border-line bg-card px-3 text-[13px]" aria-label="Within">
+					<option value={7}>Due within 7 days</option>
+					<option value={14}>Within 14 days</option>
+					<option value={30}>Within 30 days</option>
+				</select>
+			}
+			flush
+		>
+			{!rows ? (
+				<div className="mx-5 mb-5 h-16 animate-pulse rounded-xl bg-subtle" />
+			) : rows.length === 0 ? (
+				<p className="px-5 pb-5 text-[13px] text-ink-3">Nothing to renew in that time.</p>
+			) : (
+				<div className="overflow-x-auto">
+					<table className="w-full min-w-[640px] text-[13px]">
+						<thead className={tableHead}>
+							<tr>
+								<th className={cell}>Hotel</th>
+								<th className={`${cell} text-right`}>Price a month</th>
+								<th className={cell}>Subscription runs to</th>
+								<th className={cell}>Next invoice</th>
+								<th className={cell} />
+							</tr>
+						</thead>
+						<tbody>
+							{rows.map((r) => (
+								<tr key={r.packageId} className={tableRow}>
+									<td className={cell}>
+										<Link href={`/dashboard/hotels?hotel=${r.hotelId}&htab=devices`} className="font-semibold text-brand hover:underline">
+											{r.hotelName ?? "Hotel"}
+										</Link>
+									</td>
+									<td className={`${cell} text-right`}>{naira(r.monthly)}</td>
+									<td className={cell}>
+										{r.renewedThrough ? (
+											<span className={(r.daysLeft ?? 0) < 0 ? "font-semibold text-danger" : (r.daysLeft ?? 0) <= 3 ? "text-warning" : undefined}>
+												{fmtLongDate(r.renewedThrough)} ·{" "}
+												{(r.daysLeft ?? 0) < 0 ? `ran out ${-(r.daysLeft ?? 0)} days ago` : `${r.daysLeft} days left`}
+											</span>
+										) : (
+											<StatusPill tone="warning">Not recorded</StatusPill>
+										)}
+									</td>
+									<td className={cell}>{r.nextInvoiceDue ? fmtLongDate(r.nextInvoiceDue) : "—"}</td>
+									<td className={`${cell} text-right`}>
+										<button
+											type="button"
+											className="text-[13px] font-semibold text-brand hover:underline"
+											onClick={() => {
+												const d = new Date();
+												d.setMonth(d.getMonth() + 1);
+												setThrough(d.toLocaleDateString("en-CA", { timeZone: "Africa/Lagos" }));
+												setOpen(r);
+											}}
+										>
+											Mark renewed
+										</button>
+									</td>
+								</tr>
+							))}
+						</tbody>
+					</table>
+				</div>
+			)}
+			<Modal
+				open={!!open}
+				onOpenChange={(o) => !o && setOpen(null)}
+				title={`Renewed · ${open?.hotelName ?? ""}`}
+				subtitle="The day the provider subscription now runs to"
+				footer={
+					<>
+						<button type="button" className={btn.secondary} onClick={() => setOpen(null)}>
+							Cancel
+						</button>
+						<button type="button" className={btn.primary} disabled={busy || !through} onClick={() => void save()}>
+							Save
+						</button>
+					</>
+				}
+			>
+				<TextField label="Runs to" type="date" value={through} onChange={setThrough} />
+			</Modal>
+		</SectionCard>
 	);
 }
