@@ -305,6 +305,8 @@ export type PaymentRow = {
 	description: string;
 	/** The hotel it was taken at (owner lists across hotels). */
 	hotelId?: string;
+	/** Why it was declined or failed, in the provider's words ("Insufficient funds"). */
+	failureReason?: string;
 };
 export type TerminalRow = {
 	id: Id;

@@ -191,9 +191,18 @@ export function MyPaymentsScreen({
 						accessorKey: "status",
 						header: "Status",
 						cell: ({ row }) => (
-							<StatusPill tone={tone[row.original.status]}>
-								{label[row.original.status]}
-							</StatusPill>
+							<span className="flex flex-col items-start gap-[2px]">
+								<StatusPill tone={tone[row.original.status]}>
+									{label[row.original.status]}
+								</StatusPill>
+								{row.original.failureReason &&
+									(row.original.status === "DECLINED" ||
+										row.original.status === "FAILED") && (
+										<span className="text-[11px] text-danger">
+											{row.original.failureReason}
+										</span>
+									)}
+							</span>
 						),
 					},
 				]}
@@ -226,6 +235,10 @@ export function MyPaymentsScreen({
 										</StatusPill>
 									),
 								},
+								...(current.failureReason &&
+								(current.status === "DECLINED" || current.status === "FAILED")
+									? [{ label: "Reason", value: current.failureReason }]
+									: []),
 								{ label: "Provider ref", value: current.providerRef ?? "—" },
 								{
 									label: "Receipt",
@@ -246,12 +259,6 @@ export function MyPaymentsScreen({
 										{current.terminal ?? "the POS"}: if it shows Approved, ask
 										the provider below. Do not charge the guest again until you
 										know.
-									</Note>
-								) : current.method === "TRANSFER" ? (
-									<Note tone="info">
-										A transfer shows here until Finance matches it against the
-										bank statement. You can ask the provider if one is
-										connected.
 									</Note>
 								) : (
 									<Note tone="info">
@@ -281,7 +288,7 @@ export function MyPaymentsScreen({
 						)}
 						{(current.status === "DECLINED" ||
 							current.status === "NO_RESPONSE") &&
-							current.method === "CARD" && (
+							(current.method === "CARD" || current.method === "TRANSFER") && (
 								<BigButton
 									tone="secondary"
 									pending={pending}

@@ -173,6 +173,7 @@ export function toPaymentRow(p: z.infer<typeof PaymentResponse>): PaymentRow {
 		receiptSent: "NONE" as const,
 		description: p.description ?? "Payment",
 		hotelId: p.hotelId ?? undefined,
+		failureReason: p.failureReason ?? undefined,
 	};
 }
 
