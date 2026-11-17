@@ -572,6 +572,7 @@ export function SetupField({
 					hint={field.help}
 					checked={!!value}
 					onChange={disabled ? () => undefined : onChange}
+					disabled={disabled}
 				/>
 			);
 		case "list": {
