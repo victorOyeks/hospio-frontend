@@ -22,6 +22,7 @@ import { SectionCard } from "@hospio/ui/shared/section-card";
 import { StatusPill } from "@hospio/ui/shared/status-pill";
 import { btn, cell, tableHead, tableRow } from "@hospio/ui/shared/ui";
 import { can } from "../shared";
+import { PackageInvoices } from "./device-invoices";
 
 /**
  * A hotel's devices and internet package (hospio-backend docs/plan-device-packages.md): tick what Hospio360 supplies from the
@@ -399,6 +400,12 @@ function PackageSummary({
 				<Note tone="info">
 					Collection starts the day the devices are installed. It is taken with the Hospio fee, so the hotel's automatic debit must be on.
 				</Note>
+			)}
+			{p.status !== "DRAFT" && (p.paymentOption === "MONTHLY" || p.dataPlanMonthly > 0) && (
+				<div className="flex flex-col gap-2">
+					<p className="text-xs font-semibold uppercase tracking-[0.04em] text-ink-3">Monthly invoices</p>
+					<PackageInvoices packageId={p.id} money={money} />
+				</div>
 			)}
 			{p.payments.length > 0 && (
 				<div className="overflow-x-auto rounded-xl border border-line">

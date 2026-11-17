@@ -19,6 +19,7 @@ import { SectionCard } from "@hospio/ui/shared/section-card";
 import { StatusPill } from "@hospio/ui/shared/status-pill";
 import { btn, cell, tableHead, tableRow } from "@hospio/ui/shared/ui";
 import { BanknoteIcon, MonitorSmartphoneIcon, WalletIcon } from "lucide-react";
+import { AllDeviceInvoices } from "./device-invoices";
 import { optionLabel, PackageProgress, packageStatus } from "./device-package";
 
 /** Settings · Device catalogue: the standard items and prices a package starts from (a Super admin edits them). */
@@ -148,8 +149,8 @@ export function DeviceCatalogueSettings({ editable }: { editable: boolean }) {
 	);
 }
 
-/** Fees & billing → Devices: every hotel's package, what has been collected and what is left. */
-export function DevicesTab() {
+/** Fees & billing → Devices: every hotel's package, what has been collected and what is left, and the monthly invoices. */
+export function DevicesTab({ money = false, superAdmin = false }: { money?: boolean; superAdmin?: boolean }) {
 	const [rows, setRows] = useState<DevicePackageView[] | null>(null);
 	const [error, setError] = useState<string | null>(null);
 	const [status, setStatus] = useState("");
@@ -232,6 +233,7 @@ export function DevicesTab() {
 					</div>
 				)}
 			</SectionCard>
+			<AllDeviceInvoices money={money} superAdmin={superAdmin} />
 		</div>
 	);
 }

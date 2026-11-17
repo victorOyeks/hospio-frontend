@@ -3,7 +3,7 @@
 import type { z } from "zod";
 import type { ActionResult } from "@hospio/api/actions/auth";
 import { api, errorMessage } from "@hospio/api/api/client";
-import type { DeviceCatalogueItem, DevicePackage } from "@hospio/api/api/routes-device-packages";
+import type { DeviceCatalogueItem, DeviceInvoice, DevicePackage } from "@hospio/api/api/routes-device-packages";
 import { withSession } from "@hospio/api/api/server";
 
 /**
@@ -13,6 +13,7 @@ import { withSession } from "@hospio/api/api/server";
 
 export type DeviceCatalogueRow = z.infer<typeof DeviceCatalogueItem>;
 export type DevicePackageView = z.infer<typeof DevicePackage>;
+export type DeviceInvoiceView = z.infer<typeof DeviceInvoice>;
 export type DeviceItemInput = { catalogueId: string | null; name: string; kind: string; quantity: number; unitPrice: number };
 export type DevicePackageInput = {
 	paymentOption: string;
@@ -105,4 +106,52 @@ export async function ownerDevicePackages(): Promise<ActionResult<DevicePackageV
 export async function hotelDevices(): Promise<ActionResult<DevicePackageView | null>> {
 	const { data, error } = await api("@get/platform/devices", await withSession());
 	return error || !data ? fail(error, "Devices could not be loaded") : { ok: true, data: data.data };
+}
+
+// ---- monthly invoices (instalments and data plan) --------------------------------------------------------------------
+
+export async function packageInvoices(id: string): Promise<ActionResult<DeviceInvoiceView[]>> {
+	const { data, error } = await api("@get/platform/admin/device-packages/:id/invoices", { ...(await withSession()), params: { id } });
+	return error || !data ? fail(error, "Invoices could not be loaded") : { ok: true, data: data.data };
+}
+
+export async function allDeviceInvoices(status?: string[]): Promise<ActionResult<DeviceInvoiceView[]>> {
+	const { data, error } = await api("@get/platform/admin/devices/invoices", { ...(await withSession()), query: status ? { status } : {} });
+	return error || !data ? fail(error, "Invoices could not be loaded") : { ok: true, data: data.data };
+}
+
+export async function markDeviceInvoicePaid(id: string, reference: string, note: string | null): Promise<ActionResult<DeviceInvoiceView>> {
+	const { data, error } = await api("@post/platform/admin/device-invoices/:id/mark-paid", {
+		...(await withSession()),
+		params: { id },
+		body: { reference, note },
+	});
+	return error || !data ? fail(error, "The invoice could not be marked paid") : { ok: true, data: data.data };
+}
+
+export async function runDeviceInvoices(): Promise<
+	ActionResult<{ issued: number; paid: number; failed: number; overdue: number; reminded: number; flagged: number; paused: number; voided: number }>
+> {
+	const { data, error } = await api("@post/platform/admin/devices/invoices/run", await withSession());
+	return error || !data ? fail(error, "The invoices could not be run") : { ok: true, data: data.data };
+}
+
+export async function ownerDeviceInvoices(): Promise<ActionResult<DeviceInvoiceView[]>> {
+	const { data, error } = await api("@get/platform/owner/devices/invoices", await withSession());
+	return error || !data ? fail(error, "Invoices could not be loaded") : { ok: true, data: data.data };
+}
+
+/** Starts a Paystack checkout for what is still owed; the owner comes back to {@code callbackUrl}. */
+export async function payDeviceInvoice(id: string, callbackUrl: string | null): Promise<ActionResult<{ authorizationUrl: string; reference: string }>> {
+	const { data, error } = await api("@post/platform/owner/devices/invoices/:id/pay", {
+		...(await withSession()),
+		params: { id },
+		body: { callbackUrl },
+	});
+	return error || !data ? fail(error, "The payment could not be started") : { ok: true, data: data.data };
+}
+
+export async function confirmDeviceInvoice(reference: string): Promise<ActionResult<DeviceInvoiceView>> {
+	const { data, error } = await api("@post/platform/owner/devices/invoices/confirm", { ...(await withSession()), query: { reference } });
+	return error || !data ? fail(error, "The payment could not be confirmed") : { ok: true, data: data.data };
 }

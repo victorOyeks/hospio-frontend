@@ -2,9 +2,10 @@
 
 import { BanknoteIcon, ReceiptIcon, WalletIcon } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { Suspense, useState } from "react";
 import type { DailyFeeRow } from "@hospio/api/actions/daily-fees";
 import type { DevicePackageView } from "@hospio/api/actions/device-packages";
+import { OwnerDeviceInvoices } from "./device-invoices";
 import { DetailList, Note } from "@hospio/ui/shared/detail-list";
 import { EmptyState } from "@hospio/ui/shared/empty-state";
 import { fmtWhen, naira } from "@hospio/ui/shared/format";
@@ -150,6 +151,11 @@ export function HospioFees({
 				<KpiCard label="Hospio fees" value={naira(fees)} icon={ReceiptIcon} hint={days[0] ? `${days[0].rate} % of sales` : undefined} />
 				<KpiCard label="Debited" value={naira(collected)} icon={WalletIcon} />
 			</div>
+			{supplied.length > 0 && (
+				<Suspense fallback={null}>
+					<OwnerDeviceInvoices canPay />
+				</Suspense>
+			)}
 			{supplied.length > 0 && (
 				<SectionCard
 					title="Devices & internet"

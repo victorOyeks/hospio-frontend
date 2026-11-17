@@ -247,7 +247,7 @@ export function FeesScreen({
 				/>
 			)}
 			{view === "messages" && <GuestMessageBilling />}
-			{view === "devices" && <DevicesTab />}
+			{view === "devices" && <DevicesTab money={money} superAdmin={role === "SUPER_ADMIN"} />}
 			{view === "statements" && (
 				<>
 					<div className="grid grid-cols-2 gap-4 md:grid-cols-4">
