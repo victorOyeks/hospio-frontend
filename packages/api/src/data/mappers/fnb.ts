@@ -182,6 +182,7 @@ export function toMenuItemRow(
 		taxRate: m.taxRate ?? undefined,
 		sortOrder: m.sortOrder ?? undefined,
 		recipe: recipe.length ? recipe : undefined,
+		preparedAt: m.preparedAt || undefined,
 	};
 }
 
@@ -240,6 +241,7 @@ export function toOrderRow(o: Order, outletName?: string): OrderRow {
 			options: lineOptionsText(l.options),
 			notes: l.notes ?? undefined,
 			status: l.status,
+			preparedAt: l.preparedAt || undefined,
 		})),
 		subtotal: num(o.subtotal),
 		tax: num(o.tax),
@@ -257,6 +259,7 @@ export function toOrderRow(o: Order, outletName?: string): OrderRow {
 		settledBy: o.settledBy ?? undefined,
 		notes: o.notes ?? undefined,
 		paidAmount: o.paidAmount ?? undefined,
+		ticketFrom: o.ticketFrom || undefined,
 	};
 }
 
@@ -279,6 +282,7 @@ export function toOutletRow(o: Outlet, tables: Table[] = []): OutletRow {
 			: "KITCHEN") as OutletKind,
 		status: o.status === "CLOSED" ? "CLOSED" : "OPEN",
 		storeId: o.storeId ?? undefined,
+		terminalId: o.terminalId || undefined,
 		tables: tables.map((t) => toTableRow(t, o.id)),
 	};
 }

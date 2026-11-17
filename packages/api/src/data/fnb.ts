@@ -8,6 +8,7 @@ import "server-only";
  * like the readers in ./ops.
  */
 
+import { cookies } from "next/headers";
 import { cache } from "react";
 import { api, errorMessage } from "@hospio/api/api/client";
 import { withSession } from "@hospio/api/api/server";
@@ -245,18 +246,38 @@ function demoSalesHistory(
 	};
 }
 
+/** The cookie that remembers which outlet a desk works on this device (see OutletSwitch in the hotel app). */
+export const outletCookie = (role: "KITCHEN" | "BAR") => `hms.outlet.${role}`;
+
 export const fnbData = {
 	outlets: {
 		/** Every outlet with its tables (Hotel setup, the manager's menus, outlet pickers). */
 		list: (): Promise<OutletRow[]> => loadOutlets(),
-		/** The outlet a desk works: a kitchen role gets the first KITCHEN or RESTAURANT outlet, the bar the first BAR one. */
+		/**
+		 * The outlet a desk works: the one picked on this device (OUTLET_COOKIE, when the hotel has several, e.g. a
+		 * Bar and a Patio Lounge), else a kitchen role gets the first KITCHEN or RESTAURANT outlet, the bar the first BAR one.
+		 */
 		forRole: async (role: "KITCHEN" | "BAR"): Promise<OutletRow | null> => {
-			const all = await loadOutlets();
+			const [all, jar] = await Promise.all([
+				loadOutlets(),
+				cookies().catch(() => null),
+			]);
 			const mine = all.filter((o) =>
 				role === "BAR" ? o.kind === "BAR" : o.kind !== "BAR",
 			);
-			return mine.find((o) => o.status === "OPEN") ?? mine[0] ?? null;
+			const picked = jar?.get(outletCookie(role))?.value;
+			return (
+				mine.find((o) => o.id === picked) ??
+				mine.find((o) => o.status === "OPEN") ??
+				mine[0] ??
+				null
+			);
 		},
+		/** The outlets a desk can work (the switch shows when there is more than one). */
+		forRoleAll: async (role: "KITCHEN" | "BAR"): Promise<OutletRow[]> =>
+			(await loadOutlets()).filter((o) =>
+				role === "BAR" ? o.kind === "BAR" : o.kind !== "BAR",
+			),
 		/** The menu of one outlet; `all` includes items taken off the menu (manage menu). */
 		menu: async (outletId: string, all = false): Promise<MenuItemRow[]> => {
 			if (!live("fnb"))

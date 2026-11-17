@@ -49,6 +49,8 @@ export type PaymentTarget = {
 	orderId?: string;
 	/** The desk taking the payment (KITCHEN, BAR): sent to payment-service so the right POS and till are used. */
 	role?: string;
+	/** The selling outlet's own POS (Hotel setup → Restaurants & tables): picked first while it is online. */
+	terminalId?: string;
 };
 export type TakenPayment = {
 	id: string;
@@ -121,13 +123,22 @@ export type PaymentStepsOptions = {
  * `begin(target)` restarts the steps for a new target; `autoStart: false` leaves them idle until then.
  */
 /**
- * The POS a payment goes to unless the desk picks another: the online terminal assigned to the paying desk (the front office
- * when the target names none), else the first online one.
+ * The POS a payment goes to unless the desk picks another: the outlet's own terminal when the target names one and it is
+ * online, else the online terminal assigned to the paying desk (the front office when the target names none), else the
+ * first online one.
  */
-function defaultTerminal(terminals: TerminalRow[], role?: string) {
+function defaultTerminal(
+	terminals: TerminalRow[],
+	role?: string,
+	preferred?: string,
+) {
 	const online = terminals.filter((t) => t.status === "ONLINE");
 	const desk = role ?? "FRONT_OFFICE";
-	return (online.find((t) => t.roles.includes(desk)) ?? online[0])?.id ?? "";
+	return (
+		(preferred ? online.find((t) => t.id === preferred) : undefined) ??
+		online.find((t) => t.roles.includes(desk)) ??
+		online[0]
+	)?.id ?? "";
 }
 
 export function usePaymentSteps(
@@ -160,7 +171,7 @@ export function usePaymentSteps(
 	// Card and bank transfer both go to the POS: the guest picks card or transfer on the terminal itself. Only cash doesn't.
 	const toPos = method === "CARD" || method === "TRANSFER";
 	const [terminal, setTerminal] = useState(() =>
-		defaultTerminal(terminals, target?.role),
+		defaultTerminal(terminals, target?.role, target?.terminalId),
 	);
 	const [card, setCard] = useState<CardState>("waiting");
 	const [attempt, setAttempt] = useState(0);
@@ -187,7 +198,7 @@ export function usePaymentSteps(
 		setAmount(t?.amountDue ?? "");
 		setDescription(t?.description ?? "Room charges");
 		setMethod("CARD");
-		setTerminal(defaultTerminal(terminals, t?.role));
+		setTerminal(defaultTerminal(terminals, t?.role, t?.terminalId));
 		setCard("waiting");
 		setAttempt(0);
 		setTendered("");
