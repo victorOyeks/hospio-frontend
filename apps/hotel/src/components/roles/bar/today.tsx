@@ -22,6 +22,7 @@ import {
 	TextareaField,
 } from "@hospio/ui/shared/field";
 import { naira, plural } from "@hospio/ui/shared/format";
+import { OutletMark } from "@hospio/ui/shared/outlet-mark";
 import { PageHeader } from "@hospio/ui/shared/page-header";
 import { SectionCard } from "@hospio/ui/shared/section-card";
 import {
@@ -82,7 +83,7 @@ type Panel =
 	| { kind: "close" }
 	| null;
 
-/** Bar · Bar today (3262:11673): seats, tonight's totals, new sale → choices → charge to room / tab / pay → sale done; close shift. */
+/** Bar · Today (3262:11673), titled with the outlet ("Patio Lounge · today"): seats, tonight's totals, new sale → choices → charge to room / tab / pay → sale done; close shift. */
 export function BarTodayScreen({
 	outlet,
 	orders,
@@ -97,9 +98,12 @@ export function BarTodayScreen({
 	sales,
 	till,
 	outlets = [],
+	peers = [],
 }: {
 	/** The hotel's outlets: names the outlet that makes a line sold here (the kitchen's pepper soup). */
 	outlets?: { id: string; name: string }[];
+	/** The ids of the desk's outlets: with several, the outlet's colour and icon mark the title and seats. */
+	peers?: string[];
 	outlet: OutletRow | null;
 	orders: OrderRow[];
 	closed: OrderRow[];
@@ -130,6 +134,17 @@ export function BarTodayScreen({
 	const { run, pending } = useAction();
 	const outletName = outlet?.name ?? "Bar";
 	const tables = (outlet?.tables ?? []).filter((t) => t.active);
+	const several = peers.length > 1;
+	const mark = (size: "sm" | "lg") => (
+		<OutletMark
+			id={outlet?.id}
+			peers={peers}
+			kind="BAR"
+			size={size}
+			title={size === "lg" ? outletName : undefined}
+			className={size === "sm" ? "absolute top-2 right-2" : undefined}
+		/>
+	);
 
 	useEffect(() => {
 		if (isNew && !panel) setPanel({ kind: "sale" });
@@ -237,7 +252,7 @@ export function BarTodayScreen({
 						id: order.id,
 						how:
 							settle === "TAB"
-								? "Tab opened · add more from Open tabs"
+								? "Tab opened · add more from Tabs"
 								: `Charged to room ${order.roomNumber ?? guest?.roomNumber ?? ""}`,
 					});
 			},
@@ -273,7 +288,8 @@ export function BarTodayScreen({
 	return (
 		<>
 			<PageHeader
-				title="Bar today"
+				title={`${outletName} · today`}
+				mark={mark("lg")}
 				subtitle={`${outletName}${happy ? ` · happy hour now, ${happy.discountPct}% off` : happyHours.find((h) => h.active) ? ` · happy hour ${happyHours.find((h) => h.active)?.from} – ${happyHours.find((h) => h.active)?.to}` : ""}`}
 			>
 				<Link
@@ -293,7 +309,7 @@ export function BarTodayScreen({
 			<div className="flex gap-3">
 				<ActionTile
 					icon={PlusIcon}
-					label="New sale"
+					label={several ? `New sale at ${outletName}` : "New sale"}
 					onClick={() => startSale()}
 					tone="brand"
 				/>
@@ -339,8 +355,9 @@ export function BarTodayScreen({
 									<Link
 										key={t.id}
 										href={`/dashboard/tabs?open=${tab.id}`}
-										className="flex h-[68px] flex-col items-center justify-center rounded-control border border-brand bg-brand-soft/40 text-center"
+										className="relative flex h-[68px] flex-col items-center justify-center rounded-control border border-brand bg-brand-soft/40 text-center"
 									>
+										{mark("sm")}
 										<span className="text-[15px] font-bold text-ink">
 											{t.number}
 										</span>
@@ -354,9 +371,10 @@ export function BarTodayScreen({
 										type="button"
 										onClick={() => startSale(t.id)}
 										className={cn(
-											"flex h-[68px] flex-col items-center justify-center rounded-control border border-line bg-card text-center hover:bg-subtle",
+											"relative flex h-[68px] flex-col items-center justify-center rounded-control border border-line bg-card text-center hover:bg-subtle",
 										)}
 									>
+										{mark("sm")}
 										<span className="text-[15px] font-bold text-ink">
 											{t.number}
 										</span>
@@ -434,7 +452,7 @@ export function BarTodayScreen({
 			<SidePanel
 				open={panel?.kind === "sale"}
 				onOpenChange={(o) => !o && close()}
-				title="New sale"
+				title={several ? `New sale at ${outletName}` : "New sale"}
 				subtitle={
 					table
 						? `${table.number} · pick the drinks`
@@ -551,7 +569,7 @@ export function BarTodayScreen({
 						)}
 						{settle === "TAB" && (
 							<Note tone="info">
-								The tab shows on Open tabs. When it reaches{" "}
+								The tab shows on Tabs. When it reaches{" "}
 								{naira(settings.tabLimit)} the guest must pay before adding
 								more.
 							</Note>

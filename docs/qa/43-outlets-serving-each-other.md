@@ -35,9 +35,9 @@ See hospio-backend fnb-service (feature/outlet-kitchen-tickets).
 
 ## 3. Order at the patio (bar user)
 
-1. Bar screens show outlet pills at the top when the hotel has more than one bar: pick **Patio Lounge** (remembered on this
-   device; Open tabs, Menu and Stock follow it).
-2. Open a tab on *Patio 1* with 2 Chapman (drink) and 1 Pepper soup. Open tabs → the tab card shows *Pepper soup* with
+1. With more than one bar the sidebar shows **Serving at** under the branch card: pick **Patio Lounge** (remembered on
+   this device; Tabs, Menu and Stock follow it; see QA 44).
+2. Open a tab on *Patio 1* with 2 Chapman (drink) and 1 Pepper soup. Tabs → the tab card shows *Pepper soup* with
    **Sent to Kitchen**.
 3. Add another Pepper soup from **Add drinks**: toast *Added to the tab · sent to Kitchen*.
 
@@ -53,7 +53,7 @@ See hospio-backend fnb-service (feature/outlet-kitchen-tickets).
 
 ## 5. The patio serves and gets paid (bar user)
 
-1. Refresh Open tabs: the pepper soup reads **Ready in Kitchen · collect**; the tab panel shows a **Served** button on it.
+1. Refresh Tabs: the pepper soup reads **Ready in Kitchen · collect**; the tab panel shows a **Served** button on it.
    Tap **Served**: it reads *Served*. The kitchen's card leaves its board on the next refresh.
 2. **Close & pay**: one bill with the drinks and the pepper soups. Card: the **Patio Lounge terminal** is preselected
    (while it is online; offline → the bar's own terminal as before). Pay.
@@ -81,7 +81,7 @@ See hospio-backend fnb-service (feature/outlet-kitchen-tickets).
 4. **Copy skips duplicates**: step 2.4.
 5. **Copy needs a manager or Full access**: a bar or kitchen user with Edit has no **Copy menu from…** button; calling
    `POST /fnb/outlets/{id}/menu/copy` as them gets 403. A head chef (Full) on the kitchen sees the button.
-6. A single bar and a single kitchen (most hotels): no outlet pills, no **Made at** field when there is no other outlet,
+6. A single bar and a single kitchen (most hotels): no **Serving at** switcher, no **Made at** field when there is no other outlet,
    no **Copy menu from…**; everything else as before.
 
 ## What to report

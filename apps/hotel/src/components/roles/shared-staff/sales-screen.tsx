@@ -27,6 +27,7 @@ import {
 	plural,
 } from "@hospio/ui/shared/format";
 import { KpiCard } from "@hospio/ui/shared/kpi-card";
+import { OutletMark } from "@hospio/ui/shared/outlet-mark";
 import { PageHeader } from "@hospio/ui/shared/page-header";
 import { PillTabs } from "@hospio/ui/shared/pill-tabs";
 import { SectionCard } from "@hospio/ui/shared/section-card";
@@ -108,7 +109,18 @@ export function SalesScreen({
 	payDesk,
 	terminals,
 	inHouse,
+	outletView,
 }: {
+	/**
+	 * Bar and kitchen with several outlets of their kind: the outlet picked in "Serving at" (its sales only, its mark by
+	 * the title) or, for a manager or lead, every outlet (`all`: outlet filter and each sale marked with its outlet).
+	 */
+	outletView?: {
+		peers: string[];
+		kind: "BAR" | "KITCHEN";
+		all: boolean;
+		current?: { id: string; name: string };
+	};
 	result: SalesResult;
 	filters: SaleFilters;
 	/** The all-outlets view: outlet filter, per-outlet and per-attendant tables. */
@@ -241,10 +253,27 @@ export function SalesScreen({
 	const viewer = data?.viewer;
 	const outletName = (id: string) =>
 		data?.outletChoices.find((o) => o.id === id)?.name ?? "Outlet";
+	// Every outlet in one list: the manager's view, or a lead's "All outlets".
+	const everyOutlet = management || !!outletView?.all;
+	const peers = outletView?.peers ?? [];
 
 	return (
 		<>
-			<PageHeader title={title} subtitle={subtitle}>
+			<PageHeader
+				title={title}
+				subtitle={subtitle}
+				mark={
+					outletView && !outletView.all ? (
+						<OutletMark
+							id={outletView.current?.id}
+							peers={peers}
+							kind={outletView.kind}
+							size="lg"
+							title={outletView.current?.name}
+						/>
+					) : undefined
+				}
+			>
 				{viewer?.canExport && (
 					<ExportButton
 						onClick={() => {
@@ -364,7 +393,10 @@ export function SalesScreen({
 								all="Anyone"
 							/>
 						)}
-						{data && (management || data.outletChoices.length > 1) && (
+						{data &&
+							(outletView
+								? everyOutlet
+								: management || data.outletChoices.length > 1) && (
 							<FilterSelect
 								value={params.outlet ?? ""}
 								onChange={(v) => set({ outlet: v || null })}
@@ -583,8 +615,14 @@ export function SalesScreen({
 															>
 																{r.number}
 															</button>
-															{management && (
-																<span className="block text-xs text-ink-3">
+															{everyOutlet && (
+																<span className="flex items-center gap-1 text-xs text-ink-3">
+																	<OutletMark
+																		id={r.outletId}
+																		peers={peers}
+																		kind={outletView?.kind}
+																		size="sm"
+																	/>
 																	{r.outletName}
 																</span>
 															)}

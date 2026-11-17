@@ -14,7 +14,9 @@ import { SelectField } from "@hospio/ui/shared/field";
 import { fmtTime, naira, plural } from "@hospio/ui/shared/format";
 import { KpiCard } from "@hospio/ui/shared/kpi-card";
 import { Modal } from "@hospio/ui/shared/modal";
+import { OutletMark } from "@hospio/ui/shared/outlet-mark";
 import { PageHeader } from "@hospio/ui/shared/page-header";
+import { PillTabs } from "@hospio/ui/shared/pill-tabs";
 import {
 	PanelSection,
 	SidePanel,
@@ -68,21 +70,42 @@ import {
 
 type Sub = "add" | "move" | "pay" | "room" | null;
 
-/** Bar · Open tabs (3262:12915), tab details (3262:13019), move tab (3262:13168), settle by payment or by room. */
+/** Menu, categories and happy hours of one outlet: what "Add drinks" offers on a tab of that outlet. */
+export type OutletKit = {
+	menu: MenuItemRow[];
+	categories: CategoryRow[];
+	happyHours: HappyHourRow[];
+};
+
+/**
+ * Bar · Tabs (3262:12915), titled with the outlet ("Patio Lounge · tabs"), tab details (3262:13019), move tab
+ * (3262:13168), settle by payment or by room. With `all` (a manager or lead picked "All outlets") the tabs of every bar
+ * outlet show together, each marked with its outlet, with a filter by outlet; a tab opened there works with its own
+ * outlet's menu, seats and POS terminal.
+ */
 export function BarTabsScreen({
-	outlet,
+	outlet: home,
 	orders,
 	closedTabs,
-	menu,
-	categories,
-	happyHours,
+	menu: homeMenu,
+	categories: homeCategories,
+	happyHours: homeHappyHours,
 	inHouse,
 	settings,
 	terminals,
 	outlets = [],
+	deskOutlets = [],
+	all = false,
+	kits = {},
 }: {
 	/** The hotel's outlets: names the outlet that makes a line (the kitchen's pepper soup). */
 	outlets?: { id: string; name: string }[];
+	/** The bar's outlets (BAR kind); with more than one, each gets its colour and icon. */
+	deskOutlets?: OutletRow[];
+	/** Every bar outlet's tabs at once ("All outlets"). */
+	all?: boolean;
+	/** Per outlet id, for a tab of another outlet in the all-outlets view. */
+	kits?: Record<string, OutletKit>;
 	outlet: OutletRow | null;
 	orders: OrderRow[];
 	closedTabs: number;
@@ -105,15 +128,33 @@ export function BarTabsScreen({
 		null,
 	);
 	const { run, pending } = useAction();
-	const outletName = outlet?.name ?? "Bar";
+	const [only, setOnly] = useQueryState("outlet", parseAsString);
+	const peers = deskOutlets.map((o) => o.id);
 	const LIMIT = settings.tabLimit;
 
-	const tabs = rows.filter(
+	const allTabs = rows.filter(
 		(o) =>
 			o.kind === "TAB" && o.status !== "CLOSED" && o.status !== "CANCELLED",
 	);
+	const tabs =
+		all && only ? allTabs.filter((o) => o.outletId === only) : allTabs;
 	const openId = open ?? orderParam;
 	const current = rows.find((o) => o.id === openId) ?? null;
+	// A tab works with its own outlet (all-outlets view); otherwise the outlet picked in "Serving at".
+	const outlet =
+		(current?.outletId &&
+			deskOutlets.find((o) => o.id === current.outletId)) ||
+		home;
+	const kit = (outlet && outlet.id !== home?.id && kits[outlet.id]) || {
+		menu: homeMenu,
+		categories: homeCategories,
+		happyHours: homeHappyHours,
+	};
+	const { menu, categories, happyHours } = kit;
+	const outletName = outlet?.name ?? "Bar";
+	const mark = (id: string | undefined, name?: string) => (
+		<OutletMark id={id} peers={peers} kind="BAR" title={name} />
+	);
 	const close = () => {
 		void setOpen(null);
 		void setOrderParam(null);
@@ -148,7 +189,18 @@ export function BarTabsScreen({
 	return (
 		<>
 			<PageHeader
-				title="Open tabs"
+				title={all ? "All outlets · tabs" : `${home?.name ?? "Bar"} · tabs`}
+				mark={
+					all ? undefined : (
+						<OutletMark
+							id={home?.id}
+							peers={peers}
+							kind="BAR"
+							size="lg"
+							title={home?.name}
+						/>
+					)
+				}
 				subtitle={`${plural(tabs.length, "tab")} open · ${naira(unpaid.reduce((s, o) => s + o.total, 0))} unpaid · limit ${naira(LIMIT)} per tab`}
 			>
 				<ShiftPill until="1am" />
@@ -158,6 +210,20 @@ export function BarTabsScreen({
 					Tabs are switched off in Hotel setup → Restaurant & bar. Existing tabs
 					can still be settled.
 				</Note>
+			)}
+			{all && (
+				<PillTabs
+					value={only ?? "all"}
+					onChange={(k) => void setOnly(k === "all" ? null : k)}
+					tabs={[
+						{ key: "all", label: "All outlets", count: allTabs.length },
+						...deskOutlets.map((o) => ({
+							key: o.id,
+							label: o.name,
+							count: allTabs.filter((t) => t.outletId === o.id).length,
+						})),
+					]}
+				/>
 			)}
 			<div className="grid grid-cols-2 gap-4 md:grid-cols-4">
 				<KpiCard label="Open tabs" value={tabs.length} icon={ReceiptIcon} />
@@ -188,13 +254,17 @@ export function BarTabsScreen({
 						accent={atLimit(o) ? "warning" : "brand"}
 					>
 						<div className="flex items-center justify-between">
-							<span className="text-[15px] font-bold text-ink">
+							<span className="flex items-center gap-2 text-[15px] font-bold text-ink">
+								{mark(o.outletId, o.outlet)}
 								{o.tableNo ?? "Walk-up"}
 							</span>
 							<span className="text-xs text-ink-3">
 								{minutesSince(o.openedAt)} min
 							</span>
 						</div>
+						{all && (
+							<p className="text-xs font-semibold text-ink-3">{o.outlet}</p>
+						)}
 						<p className="text-[13px] text-ink-2">
 							{o.guestName ?? "No name"}
 							{o.roomNumber ? ` · room ${o.roomNumber}` : ""}
@@ -243,7 +313,7 @@ export function BarTabsScreen({
 				}
 				subtitle={
 					current
-						? `${current.number} · opened ${fmtTime(current.openedAt)} by ${current.openedBy}`
+						? `${all ? `${current.outlet} · ` : ""}${current.number} · opened ${fmtTime(current.openedAt)} by ${current.openedBy}`
 						: undefined
 				}
 				icon={ReceiptIcon}

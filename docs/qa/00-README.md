@@ -57,6 +57,7 @@ allow-listed number 09035911994, so sign-up and phone codes for any other number
 | 41 | `41-device-packages.md` | Devices & internet packages: catalogue, package per hotel, four payment options, install, daily device line, payments, monthly invoices, overdue steps, owner/manager view | Ready |
 | 42 | `42-guest-service-charge.md` | Owner chooses whether guests pay the Hospio fee as a service charge: folio, bar/kitchen, laundry, never in sales | Ready |
 | 43 | `43-outlets-serving-each-other.md` | A patio bar selling the kitchen's starters: outlet POS terminal, copy menu (made at the source), Made at, kitchen tickets and Ready, patio serves, one bill on the patio terminal, edge cases | Ready |
+| 44 | `44-outlet-switcher.md` | "Serving at" in the sidebar for bars and kitchens with several outlets: neutral menu labels, outlet-named titles, outlet colours, switching keeps the page, All outlets on Tabs and Sales for managers and leads, one-outlet hotels unchanged | Ready |
 
 ## Before you start
 

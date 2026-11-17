@@ -50,6 +50,7 @@ export function StoreScreen({
 	title,
 	subtitle,
 	extraActions,
+	mark,
 	children,
 	catalogue = [],
 }: {
@@ -63,6 +64,8 @@ export function StoreScreen({
 	title: string;
 	subtitle: string;
 	extraActions?: React.ReactNode;
+	/** A marker before the title (the outlet's colour and icon when the desk has several outlets). */
+	mark?: React.ReactNode;
 	children?: React.ReactNode;
 }) {
 	const [rows, setRows] = useState(items);
@@ -99,7 +102,7 @@ export function StoreScreen({
 
 	return (
 		<>
-			<PageHeader title={title} subtitle={subtitle}>
+			<PageHeader title={title} subtitle={subtitle} mark={mark}>
 				<ShiftPill />
 				{extraActions}
 				<BigButton onClick={() => openAsk()}>

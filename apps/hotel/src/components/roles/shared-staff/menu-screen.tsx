@@ -26,6 +26,7 @@ import {
 } from "@hospio/ui/shared/field";
 import { naira } from "@hospio/ui/shared/format";
 import { ConfirmModal, Modal } from "@hospio/ui/shared/modal";
+import { OutletMark } from "@hospio/ui/shared/outlet-mark";
 import { PageHeader } from "@hospio/ui/shared/page-header";
 import { PillTabs } from "@hospio/ui/shared/pill-tabs";
 import { RowActions } from "@hospio/ui/shared/row-actions";
@@ -136,7 +137,10 @@ export function MenuScreen({
 	title = "Menu & prices",
 	canManage = true,
 	outlets = [],
+	peers = [],
 }: {
+	/** The ids of the desk's outlets: the outlet's colour and icon by the title when there are several. */
+	peers?: string[];
 	menu: MenuItemRow[];
 	outlet: { id: string; name: string; kind: OutletKind };
 	categories: CategoryRow[];
@@ -300,6 +304,15 @@ export function MenuScreen({
 		<>
 			<PageHeader
 				title={title}
+				mark={
+					<OutletMark
+						id={outlet.id}
+						peers={peers}
+						kind={outlet.kind}
+						size="lg"
+						title={outlet.name}
+					/>
+				}
 				subtitle={`${outlet.name} · ${onMenu.length} items · ${onMenu.filter((m) => !m.available).length} sold out${items.length > onMenu.length ? ` · ${items.length - onMenu.length} off the menu` : ""}`}
 			>
 				<ShiftPill />
