@@ -337,6 +337,9 @@ export function BarTabsScreen({
 										label: `VAT ${settings.vatPct}%${settings.pricesIncludeTax ? " (included)" : ""}`,
 										value: naira(current.tax),
 									},
+									...((current.serviceCharge ?? 0) > 0
+										? [{ label: "Service charge", value: naira(current.serviceCharge ?? 0) }]
+										: []),
 									{ label: "Total", value: naira(current.total), strong: true },
 								]}
 							/>

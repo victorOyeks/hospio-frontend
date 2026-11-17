@@ -54,6 +54,8 @@ allow-listed number 09035911994, so sign-up and phone codes for any other number
 | 38 | `38-hospio-fees-owner-and-manager.md` | Hospio fees: owner and (new) manager see each day's sales, fee and how/when it was debited (provider, reference, failure reason); month picker; nothing to pay | Ready |
 | 39 | `39-one-fee-model.md` | One fee model everywhere (share of daily sales, 1.5 % default): new/edit business, onboarding, fee rules, settings, handover; old models refused and existing businesses moved | Ready |
 | 40 | `40-reload-notice.md` | The "Reload Hospio360" button works while a side panel or modal is open, and shows Reloading… | Ready |
+| 41 | `41-device-packages.md` | Devices & internet packages: catalogue, package per hotel, four payment options, install, daily device line, payments, monthly invoices, overdue steps, owner/manager view | Ready |
+| 42 | `42-guest-service-charge.md` | Owner chooses whether guests pay the Hospio fee as a service charge: folio, bar/kitchen, laundry, never in sales | Ready |
 
 ## Before you start
 

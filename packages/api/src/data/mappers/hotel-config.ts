@@ -20,6 +20,8 @@ type FieldDef = {
 	format?: "shift" | "department";
 	/** Saved values no longer offered (receipts by SMS): shown as `default`. */
 	retired?: string[];
+	/** Only the owner changes it. */
+	ownerOnly?: boolean;
 };
 type SectionDef = {
 	key: string;
@@ -223,6 +225,14 @@ export const SETUP_CATALOGUE: SectionDef[] = [
 				label: "Default till float",
 				type: "money",
 				default: 0,
+			},
+			{
+				key: "guestPaysPlatformFee",
+				label: "Guests pay the Hospio fee",
+				type: "toggle",
+				help: "On: a service charge at the Hospio fee rate is added to every guest bill, so the hotel keeps its full price. Off: the hotel pays the fee. Only the owner changes this.",
+				default: false,
+				ownerOnly: true,
 			},
 			{ key: "bankName", label: "Bank", type: "text", default: "" },
 			{
@@ -657,20 +667,27 @@ export function toSetupSections(
 				f.type === "select" && f.options
 					? Array.from(new Set([...f.options, String(value)]))
 					: f.options;
+			// The guest service charge names the live fee rate hotel-config sends with the section (never saved from here).
+			const help =
+				f.key === "guestPaysPlatformFee" && typeof values.platformFeePct === "number" && values.platformFeePct > 0
+					? `On: "Service charge (${values.platformFeePct}%)" is added to every guest bill (rooms, restaurant, bar, laundry), so the hotel keeps its full price. Off: the hotel pays the ${values.platformFeePct}% fee. Only the owner changes this.`
+					: f.help;
 			return {
 				key: f.key,
 				label: f.label,
 				type: f.type,
 				value,
 				options,
-				help: f.help,
+				help,
+				ownerOnly: f.ownerOnly,
 				// DEF-071: a number whose default is 0 ("none") shows empty with a "None" hint.
 				zeroIsNone:
 					(f.type === "number" || f.type === "money" || f.type === "percent") &&
 					f.default === 0,
 			};
 		});
-		const known = new Set(def.fields.map((f) => f.api ?? f.key));
+		// platformFeePct is filled in by hotel-config (the business's fee rate): shown in the switch's hint, never a field of its own.
+		const known = new Set([...def.fields.map((f) => f.api ?? f.key), "platformFeePct"]);
 		for (const [key, value] of Object.entries(values)) {
 			if (!known.has(key))
 				fields.push({ key, label: labelOf(key), type: typeOf(value), value });
@@ -714,7 +731,7 @@ export function toApiSetup(
 							.filter(Boolean)
 					: [],
 			});
-		} else if (section && sectionKey !== "danger") {
+		} else if (section && sectionKey !== "danger" && key !== "platformFeePct") {
 			settings[aliases[key] ?? key] = value;
 		}
 	}
