@@ -58,6 +58,8 @@ export type TakenPayment = {
 	status: PaymentStatus;
 	folioId?: string;
 	bookingId?: string;
+	/** The provider's reason for a decline or failure ("Insufficient funds"), shown on the declined screen. */
+	failureReason?: string | null;
 };
 
 type Step =
@@ -268,6 +270,8 @@ export function usePaymentSteps(
 					setRecorded((x) => (x ? { ...x, status: "APPROVED" } : x));
 					setCard("approved");
 				} else if (status === "DECLINED" || status === "FAILED" || status === "CANCELLED") {
+					const reason = r?.ok ? r.data.failureReason : null;
+					setRecorded((x) => (x ? { ...x, status: status as PaymentStatus, failureReason: reason } : x));
 					setCard("declined");
 				} else if (Date.now() - started > 180_000) {
 					setCard("stalled");
@@ -746,7 +750,9 @@ export function usePaymentSteps(
 											: card === "stalled"
 												? "The POS hasn't answered yet"
 											: card === "declined"
-												? "The bank declined this card"
+												? recorded?.status === "FAILED"
+													? "The payment didn't go through"
+													: "The payment was declined"
 												: cardError
 													? "The card wasn't sent"
 													: "The terminal didn't answer"}
@@ -767,6 +773,11 @@ export function usePaymentSteps(
 												"Check the terminal is on and connected, then try again. Nothing was charged.")
 											: `Hand ${terminals.find((t) => t.id === terminal)?.name ?? "the POS"} to the guest. This updates when the POS answers.`}
 						</p>
+						{card === "declined" && recorded?.failureReason && (
+							<p className="mx-auto mt-3 max-w-sm rounded-lg bg-danger-soft px-3 py-2 text-[13px] font-semibold text-danger">
+								Reason: {recorded.failureReason}
+							</p>
+						)}
 					</div>
 					<div className="flex gap-2">
 						<StatusPill tone={card === "waiting" ? "grey" : "success"}>

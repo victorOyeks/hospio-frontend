@@ -30,6 +30,8 @@ export type RecordedPayment = {
 	status: PaymentStatus;
 	amount: number;
 	method: PaymentMethod;
+	/** Why a declined or failed payment didn't go through, in the provider's words ("Insufficient funds"). */
+	failureReason?: string | null;
 };
 
 /**
@@ -106,6 +108,7 @@ export async function recordPayment(
 			status: data.data.status,
 			amount: Number(data.data.amount),
 			method: data.data.method as PaymentMethod,
+			failureReason: data.data.failureReason,
 		},
 	};
 }
@@ -251,7 +254,9 @@ export async function resolveDispute(
 /** Ask the provider where a payment stands (payment-service verify). */
 export async function verifyPayment(
 	paymentId: string,
-): Promise<ActionResult<{ id: string; status: PaymentStatus }>> {
+): Promise<
+	ActionResult<{ id: string; status: PaymentStatus; failureReason?: string | null }>
+> {
 	if (!live("payment")) {
 		await demoDelay(400);
 		return { ok: true, data: { id: paymentId, status: "APPROVED" } };
@@ -266,7 +271,14 @@ export async function verifyPayment(
 			error: errorMessage(error, "The provider could not be reached"),
 		};
 	refreshPayments();
-	return { ok: true, data: { id: data.data.id, status: data.data.status } };
+	return {
+		ok: true,
+		data: {
+			id: data.data.id,
+			status: data.data.status,
+			failureReason: data.data.failureReason,
+		},
+	};
 }
 
 /**
@@ -275,7 +287,9 @@ export async function verifyPayment(
  */
 export async function paymentStatus(
 	paymentId: string,
-): Promise<ActionResult<{ id: string; status: PaymentStatus }>> {
+): Promise<
+	ActionResult<{ id: string; status: PaymentStatus; failureReason?: string | null }>
+> {
 	if (!live("payment")) {
 		await demoDelay(400);
 		return { ok: true, data: { id: paymentId, status: "APPROVED" } };
@@ -289,7 +303,14 @@ export async function paymentStatus(
 			ok: false,
 			error: errorMessage(error, "The payment could not be read"),
 		};
-	return { ok: true, data: { id: data.data.id, status: data.data.status } };
+	return {
+		ok: true,
+		data: {
+			id: data.data.id,
+			status: data.data.status,
+			failureReason: data.data.failureReason,
+		},
+	};
 }
 
 export type TerminalRole = "FRONT_OFFICE" | "BAR" | "KITCHEN" | "LAUNDRY";
@@ -522,7 +543,9 @@ export async function resendReceipt(paymentId: string): Promise<
  */
 export async function retryPayment(
 	paymentId: string,
-): Promise<ActionResult<{ id: string; status: PaymentStatus }>> {
+): Promise<
+	ActionResult<{ id: string; status: PaymentStatus; failureReason?: string | null }>
+> {
 	if (!live("payment"))
 		return { ok: false, error: "The POS is not connected in demo mode" };
 	const { data, error } = await api("@post/payment/payments/:id/retry", {
