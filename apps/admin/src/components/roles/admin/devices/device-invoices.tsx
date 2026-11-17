@@ -133,7 +133,7 @@ export function DeviceInvoicesTable({
 }
 
 /** One package's invoices (inside the package panel). */
-export function PackageInvoices({ packageId, money }: { packageId: string; money: boolean }) {
+export function PackageInvoices({ packageId, money, onPaid }: { packageId: string; money: boolean; onPaid?: () => void }) {
 	const [rows, setRows] = useState<DeviceInvoiceView[] | null>(null);
 	const load = useCallback(async () => {
 		const r = await packageInvoices(packageId);
@@ -146,7 +146,17 @@ export function PackageInvoices({ packageId, money }: { packageId: string; money
 	if (!rows) return <div className="h-16 animate-pulse rounded-xl bg-subtle" />;
 	if (rows.length === 0)
 		return <p className="text-[13px] text-ink-3">No invoices yet. The first is issued on the installation day, at 07:00 or 15:00.</p>;
-	return <DeviceInvoicesTable rows={rows} money={money} onChanged={() => void load()} />;
+	// A paid instalment changes the package (paid, left, the ledger), so the package reloads too.
+	return (
+		<DeviceInvoicesTable
+			rows={rows}
+			money={money}
+			onChanged={() => {
+				void load();
+				onPaid?.();
+			}}
+		/>
+	);
 }
 
 /** Fees & billing → Devices: every open invoice, plus "Run now" for a Super admin. */
