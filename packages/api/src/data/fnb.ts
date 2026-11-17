@@ -458,12 +458,17 @@ export const fnbData = {
 			}
 			return { ok: true, data: toSalesHistory(res.data) };
 		},
-		/** Sales still owing money (any day) for the sidebar; null when it can't be read. */
-		unpaidSales: async (desk: "BAR" | "KITCHEN"): Promise<number | null> => {
+		/**
+		 * Sales still owing money (any day) for the sidebar; null when it can't be read. With several outlets of the desk it counts
+		 * the outlet being served at (as the Sales list shows), unless "All outlets" is on.
+		 */
+		unpaidSales: async (desk: "BAR" | "KITCHEN", canSeeAll = false): Promise<number | null> => {
 			if (!live("fnb")) return null;
+			const d = await fnbData.outlets.desk(desk, canSeeAll).catch(() => null);
+			const outletId = d && d.outlets.length > 1 && !d.all ? d.outlet?.id : undefined;
 			const { data: res, error } = await api("@get/fnb/sales/history/unpaid", {
 				...(await withSession()),
-				query: { desk },
+				query: outletId ? { desk, outletId } : { desk },
 			});
 			if (error || !res) return failed("fnb-service unpaid sales", error, null);
 			return res.data.count;

@@ -104,7 +104,7 @@ export async function DashboardShell({ children }: PropsWithChildren) {
 		data.notifications.unreadCount().catch(() => 0),
 		// The bar and kitchen see how many sales still owe money next to Sales.
 		role === "BAR" || role === "KITCHEN"
-			? data.outlets.unpaidSales(role).catch(() => null)
+			? data.outlets.unpaidSales(role, seesAllOutlets(session, role)).catch(() => null)
 			: Promise.resolve(null),
 		// Every hotel role: unread staff messages next to Inbox (the owner's Messaging).
 		APP === "hotel" && !support
