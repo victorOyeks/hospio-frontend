@@ -7,13 +7,7 @@ import { useQueryState } from "nuqs";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { DataTable, TwoLine } from "@hospio/ui/shared/data-table";
-import {
-	ChoiceCards,
-	FieldRow,
-	MoneyField,
-	SelectField,
-	TextField,
-} from "@hospio/ui/shared/field";
+import { FieldRow, SelectField, TextField } from "@hospio/ui/shared/field";
 import { fmtAgo, naira } from "@hospio/ui/shared/format";
 import { PageHeader } from "@hospio/ui/shared/page-header";
 import { PillTabs } from "@hospio/ui/shared/pill-tabs";
@@ -25,7 +19,6 @@ import {
 	checkEmail,
 	checkName,
 	checkPercent,
-	checkPerNight,
 	checkPhone,
 	only,
 } from "@hospio/ui/shared/validate";
@@ -281,16 +274,11 @@ export function NewBusinessPanel({
 	const [email, setEmail] = useState("");
 	const [phone, setPhone] = useState("");
 	const [city, setCity] = useState("");
-	const [feeModel, setFeeModel] = useState<
-		"PERCENT_OF_SALES" | "PERCENT_OF_PAYMENTS" | "PER_ROOM_NIGHT" | "PERCENT_OF_BOOKINGS"
-	>("PERCENT_OF_SALES");
-	// Both start empty: the grey text is a hint, never a value (DEF-041).
-	const [perNight, setPerNight] = useState<number | "">("");
-	const [pct, setPct] = useState("");
+	// One fee model: a % of each day's sales, debited daily from the hotel's POS provider account. Only the rate varies.
+	const [pct, setPct] = useState("1.5");
 	const [marketer, setMarketer] = useState("");
 	const [manager, setManager] = useState("");
 	const [errors, setErrors] = useState<NewBusinessErrors>({});
-	const perRoomNight = feeModel === "PER_ROOM_NIGHT";
 	const adminOptions = admins
 		.filter((a) => a.status === "ACTIVE" && a.role !== "FINANCE_ADMIN")
 		.map((a) => ({
@@ -307,7 +295,7 @@ export function NewBusinessPanel({
 			phone: checkPhone(phone, false),
 			name: checkName(name, "the business name"),
 			city: checkCity(city),
-			fee: perRoomNight ? checkPerNight(perNight) : checkPercent(pct),
+			fee: checkPercent(pct),
 		});
 	// A field fixed after a failed try loses its message as soon as it is right.
 	const edit =
@@ -329,10 +317,8 @@ export function NewBusinessPanel({
 				ownerName: owner.trim(),
 				ownerEmail: email.trim().toLowerCase(),
 				ownerPhone: phone.trim() || null,
-				feeModel,
-				feeValue: perRoomNight
-					? (perNight as number)
-					: Number(pct.trim().replace(",", ".")),
+				feeModel: "PERCENT_OF_SALES",
+				feeValue: Number(pct.trim().replace(",", ".")),
 				marketerId: marketer || null,
 				source: "BACK_OFFICE",
 			});
@@ -455,53 +441,20 @@ export function NewBusinessPanel({
 						/>
 					</FieldRow>
 				</PanelSection>
-				<PanelSection title="Fee model">
-					<ChoiceCards
-						value={feeModel}
-						onChange={edit(setFeeModel, "fee")}
-						options={[
-							{
-								value: "PERCENT_OF_SALES",
-								label: feeModelLabels.PERCENT_OF_SALES,
-							},
-							{
-								value: "PERCENT_OF_PAYMENTS",
-								label: feeModelLabels.PERCENT_OF_PAYMENTS,
-								hint: "A share of every guest payment",
-							},
-							{
-								value: "PER_ROOM_NIGHT",
-								label: feeModelLabels.PER_ROOM_NIGHT,
-								hint: "A fixed amount per room night sold",
-							},
-							{
-								value: "PERCENT_OF_BOOKINGS",
-								label: feeModelLabels.PERCENT_OF_BOOKINGS,
-								hint: "A share of the booking value",
-							},
-						]}
+				<PanelSection title="Hospio360 fee">
+					<p className="text-[13px] text-ink-2">
+						{feeModelLabels.PERCENT_OF_SALES}: a share of each day's sales, debited each morning from the hotel's Moniepoint or OPay
+						account.
+					</p>
+					<TextField
+						label="Share of daily sales (%)"
+						value={pct}
+						onChange={edit(setPct, "fee")}
+						placeholder="1.5"
+						required
+						error={errors.fee}
+						hint="1.5 % unless agreed otherwise · 0 to 100, up to two decimals"
 					/>
-					{perRoomNight ? (
-						<MoneyField
-							label="Fee per room night"
-							value={perNight}
-							onChange={edit(setPerNight, "fee")}
-							placeholder="e.g. 1,500"
-							required
-							error={errors.fee}
-							hint="₦0 to ₦1,000,000 for each room night sold"
-						/>
-					) : (
-						<TextField
-							label="Share (%)"
-							value={pct}
-							onChange={edit(setPct, "fee")}
-							placeholder="e.g. 1.5"
-							required
-							error={errors.fee}
-							hint="0 to 100, up to two decimals"
-						/>
-					)}
 				</PanelSection>
 				<PanelSection title="Referred by">
 					<SelectField

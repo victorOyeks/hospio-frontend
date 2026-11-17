@@ -13,7 +13,6 @@ import type {
 import type { AdminRole } from "@hospio/api/demo/fixtures/platform-extra";
 import {
 	FieldRow,
-	MoneyField,
 	SelectField,
 	TextField,
 	ToggleField,
@@ -154,36 +153,20 @@ export function SettingsScreen({
 			{active === "fees" && (
 				<div className="grid gap-4 xl:grid-cols-2">
 					<SectionCard
-						title="Default fee model"
-						subtitle="Applied to new businesses; each one can be changed in Fees & billing"
+						title="Default fee"
+						subtitle="A share of daily sales, debited daily · applied to new businesses"
 						bodyClassName="gap-4 pt-2"
 					>
-						<SelectField
-							label="Model"
-							value={str(f.model, "PER_ROOM_NIGHT")}
-							onChange={(v) => set("fees", "model", v)}
-							options={[
-								{ value: "PERCENT_OF_SALES", label: "% of daily sales (debited daily)" },
-								{ value: "PER_ROOM_NIGHT", label: "Per room night" },
-								{ value: "PERCENT_OF_PAYMENTS", label: "% of guest payments" },
-								{ value: "PERCENT_OF_BOOKINGS", label: "% of bookings" },
-							]}
+						<p className="text-[13px] text-ink-2">
+							One fee model: a share of each day's sales, debited each morning from the hotel's Moniepoint or OPay account. New
+							businesses start at this rate; each one's rate can be changed in Fees &amp; billing.
+						</p>
+						<TextField
+							label="Default share of daily sales (%)"
+							value={str(f.revenuePct)}
+							onChange={(v) => set("fees", "revenuePct", num(v))}
 							disabled={!editable}
 						/>
-						<FieldRow>
-							<MoneyField
-								label="Per room per month"
-								value={num(f.perRoom)}
-								onChange={(v) => set("fees", "perRoom", v || 0)}
-								disabled={!editable}
-							/>
-							<TextField
-								label="Revenue share (%)"
-								value={str(f.revenuePct)}
-								onChange={(v) => set("fees", "revenuePct", num(v))}
-								disabled={!editable}
-							/>
-						</FieldRow>
 						<FieldRow>
 							<TextField
 								label="Free trial (days)"

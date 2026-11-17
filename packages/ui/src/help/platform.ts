@@ -258,15 +258,15 @@ export const platformHelp: HelpModule = {
 		},
 		{
 			id: "adm-fee-model",
-			title: "Change how a business is charged",
-			when: "A business's fee agreement changes.",
+			title: "Change a business's fee rate",
+			when: "A business's agreed share of daily sales changes.",
 			topic: "Money",
 			steps: [
 				"Open “Fees & billing” and go to the “Fee rules” tab.",
 				"Tap the business. Its “Rules so far” are listed.",
-				"Pick the new model: “Per room night”, “% of guest payments” or “% of bookings”, and enter the fee.",
+				"Enter the new share of daily sales (1.5 % unless agreed otherwise).",
 				"Set “Applies from”.",
-				"Tap “Save model”.",
+				"Tap “Save rate”. There is one fee model: a share of each day's sales, debited each morning.",
 			],
 			goodToKnow: [
 				"Only a Finance admin or a Super admin can change a fee model.",
