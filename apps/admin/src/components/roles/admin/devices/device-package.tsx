@@ -559,6 +559,25 @@ function PackageSummary({
 const dayText = (d?: string | null) => (d ? fmtLongDate(d) : "—");
 
 /**
+ * The day a stop takes effect: the first data plan due day (install day + whole months, the day clamped to short months as the
+ * server does) after today. Not nextDataPlanDue, which can be today while today's invoice is still to be issued.
+ */
+function firstDueAfterToday(installedAt?: string | null): string | null {
+	if (!installedAt) return null;
+	const today = new Date().toLocaleDateString("en-CA", { timeZone: "Africa/Lagos" });
+	const [y, m, d] = installedAt.slice(0, 10).split("-").map(Number);
+	for (let k = 0; k < 1200; k++) {
+		const mm = m - 1 + k;
+		const yy = y + Math.floor(mm / 12);
+		const mo = mm % 12;
+		const last = new Date(Date.UTC(yy, mo + 1, 0)).getUTCDate();
+		const due = `${yy}-${String(mo + 1).padStart(2, "0")}-${String(Math.min(d, last)).padStart(2, "0")}`;
+		if (due > today) return due;
+	}
+	return null;
+}
+
+/**
  * The data plan after installation: running or stopped, the next invoice, the real provider subscription renewed through; Finance
  * and Super admins stop, start again or reprice it; any admin records a renewal with the provider.
  */
@@ -695,7 +714,7 @@ function DataPlanControls({
 				onOpenChange={(o) => !o && setModal(null)}
 				tone="danger"
 				title="Stop the data plan?"
-				subtitle={`No more data plan invoices from ${dayText(p.nextDataPlanDue)}. Invoices already issued stay owed. Remember to stop the subscription with the provider too.`}
+				subtitle={`No more data plan invoices from ${dayText(firstDueAfterToday(p.installedAt))}. Invoices already issued stay owed. Remember to stop the subscription with the provider too.`}
 				confirmLabel="Stop data plan"
 				pending={busy}
 				onConfirm={() => void act(() => setDataPlan(p.id, "STOP", null), "Data plan stopped")}
