@@ -69,7 +69,7 @@ import {
 	useRefresh,
 } from "./live";
 import { PosCollectionTab } from "./hotels/pos-tab";
-import { can, ReadOnlyNote } from "./shared";
+import { can, howPaidLabel, ReadOnlyNote } from "./shared";
 
 const settlementTone = {
 	SETTLED: "success",
@@ -363,12 +363,12 @@ export function PaymentsScreen({
 									hint={`${plural(summary.count, "payment")} · ${biz ? (businesses.find((b) => b.id === biz)?.name ?? "this business") : "all"}`}
 								/>
 								<KpiCard
-									label="By provider"
+									label="By how it was paid"
 									value={summary.byProvider.length}
 									icon={WalletIcon}
 									hint={
 										summary.byProvider
-											.map((p) => `${p.provider} ${nairaShort(p.gross)}`)
+											.map((p) => `${howPaidLabel(p.provider)} ${nairaShort(p.gross)}`)
 											.join(" · ") || "—"
 									}
 								/>
