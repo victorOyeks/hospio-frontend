@@ -60,6 +60,8 @@ export type TakenPayment = {
 	bookingId?: string;
 	/** The provider's reason for a decline or failure ("Insufficient funds"), shown on the declined screen. */
 	failureReason?: string | null;
+	/** The POS it was sent to, as payment-service named it. */
+	terminalName?: string | null;
 };
 
 type Step =
@@ -118,6 +120,16 @@ export type PaymentStepsOptions = {
  * payment sits in My payments until then). Transfer and cash are recorded when the desk confirms them.
  * `begin(target)` restarts the steps for a new target; `autoStart: false` leaves them idle until then.
  */
+/**
+ * The POS a payment goes to unless the desk picks another: the online terminal assigned to the paying desk (the front office
+ * when the target names none), else the first online one.
+ */
+function defaultTerminal(terminals: TerminalRow[], role?: string) {
+	const online = terminals.filter((t) => t.status === "ONLINE");
+	const desk = role ?? "FRONT_OFFICE";
+	return (online.find((t) => t.roles.includes(desk)) ?? online[0])?.id ?? "";
+}
+
 export function usePaymentSteps(
 	{
 		target,
@@ -147,8 +159,8 @@ export function usePaymentSteps(
 	const [method, setMethod] = useState<PaymentMethod>("CARD");
 	// Card and bank transfer both go to the POS: the guest picks card or transfer on the terminal itself. Only cash doesn't.
 	const toPos = method === "CARD" || method === "TRANSFER";
-	const [terminal, setTerminal] = useState(
-		terminals.find((t) => t.status === "ONLINE")?.id ?? "",
+	const [terminal, setTerminal] = useState(() =>
+		defaultTerminal(terminals, target?.role),
 	);
 	const [card, setCard] = useState<CardState>("waiting");
 	const [attempt, setAttempt] = useState(0);
@@ -175,7 +187,7 @@ export function usePaymentSteps(
 		setAmount(t?.amountDue ?? "");
 		setDescription(t?.description ?? "Room charges");
 		setMethod("CARD");
-		setTerminal(terminals.find((x) => x.status === "ONLINE")?.id ?? "");
+		setTerminal(defaultTerminal(terminals, t?.role));
 		setCard("waiting");
 		setAttempt(0);
 		setTendered("");
@@ -213,6 +225,7 @@ export function usePaymentSteps(
 			receipt: "NONE",
 			orderId: tgt?.orderId,
 			role: tgt?.role,
+			terminalId: terminal || undefined,
 		})
 			.then((r) => {
 				clearTimeout(t);
@@ -315,6 +328,17 @@ export function usePaymentSteps(
 
 	const amt = typeof amount === "number" ? amount : 0;
 	const folio = folios.find((f) => f.id === folioId);
+	// Which POS the payment went to: payment-service's answer, else the one picked here.
+	const posName =
+		recorded?.terminalName ??
+		terminals.find((t) => t.id === terminal)?.name ??
+		"the POS";
+	const picked = terminals.find((t) => t.id === terminal);
+	// The serial only when it is the same terminal payment-service named.
+	const posRef =
+		picked && (!recorded?.terminalName || picked.name === recorded.terminalName)
+			? picked.ref
+			: undefined;
 	const title = {
 		idle: "",
 		who: "Take a payment",
@@ -329,9 +353,9 @@ export function usePaymentSteps(
 							? "The card wasn't sent"
 							: "No response from the terminal"
 						: card === "sent"
-							? "Sent to the POS"
+							? `Sent to ${posName}`
 							: card === "stalled"
-								? "Still waiting for the POS"
+								? `Still waiting for ${posName}`
 								: "Waiting for the guest on the POS",
 		cash: "Cash",
 		receipt: "Send a receipt",
@@ -740,15 +764,15 @@ export function usePaymentSteps(
 					<div>
 						<p className="text-lg font-bold text-ink">
 							{card === "waiting"
-								? "Sending to the terminal…"
+								? `Sending to ${posName}…`
 								: card === "paying"
 									? "Processing on the terminal…"
 									: card === "approved"
 										? `${naira(amt)} approved`
 										: card === "sent"
-											? `${naira(amt)} sent to the POS`
+											? `${naira(amt)} sent to ${posName}`
 											: card === "stalled"
-												? "The POS hasn't answered yet"
+												? `${posName} hasn't answered yet`
 											: card === "declined"
 												? recorded?.status === "FAILED"
 													? "The payment didn't go through"
@@ -771,8 +795,13 @@ export function usePaymentSteps(
 										: card === "no_response"
 											? (cardError ??
 												"Check the terminal is on and connected, then try again. Nothing was charged.")
-											: `Hand ${terminals.find((t) => t.id === terminal)?.name ?? "the POS"} to the guest. This updates when the POS answers.`}
+											: `Hand ${posName} to the guest. This updates when the POS answers.`}
 						</p>
+						{posRef && card !== "approved" && (
+							<p className="mt-2 text-[12px] text-ink-3">
+								POS: <span className="font-semibold text-ink-2">{posName}</span> · serial {posRef}
+							</p>
+						)}
 						{card === "declined" && recorded?.failureReason && (
 							<p className="mx-auto mt-3 max-w-sm rounded-lg bg-danger-soft px-3 py-2 text-[13px] font-semibold text-danger">
 								Reason: {recorded.failureReason}

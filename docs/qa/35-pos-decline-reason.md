@@ -35,7 +35,16 @@ front office `victor@royalsuites.ng`.
 2. The screen says the payment didn't go through, and the reason reads "Moniepoint refused the payment: …" in Moniepoint's
    words. The terminal is not marked offline.
 
-## 4. Logs (developer)
+## 4. Which POS it went to
+
+1. Take a card or transfer payment. The terminal picker starts on the POS assigned to your desk (front office, bar, …).
+2. Pick a different terminal and send. The screen reads **₦… sent to <that terminal's name>**, the panel title **Sent to
+   <name>**, and a line under it **POS: <name> · serial <serial>**.
+3. That terminal (and only that one) rings. Before this fix the picker was ignored and the desk's assigned POS was used.
+4. My payments → the payment's **Terminal** row shows the terminal's name, not an id.
+5. **Try again on POS** goes to the same terminal as the first attempt.
+
+## 5. Logs (developer)
 
 1. On the VPS, `journalctl -u hospio-payment-service -f | grep -E "Moniepoint|OPay"` while a payment is taken.
 2. Each push shows a `->` line (terminal, amount in kobo, reference) and a `<-` line (HTTP status, time, answer). Each status
@@ -47,3 +56,4 @@ front office `victor@royalsuites.ng`.
 - A reason that disagrees with what the terminal printed.
 - A waiting payment that takes much longer than 15–30 seconds to settle after the terminal answers.
 - Any key or secret in the logs.
+- A payment that rang a different POS from the one named on screen.

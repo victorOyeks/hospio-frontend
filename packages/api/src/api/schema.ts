@@ -1012,6 +1012,8 @@ export const PaymentResponse = z.object({
 	resolvedAt: z.string().nullable(),
 	verifiedAt: z.string().nullable(),
 	hotelId: z.string().nullable().optional(),
+	/** The POS's name ("Front desk POS"): which terminal the payment went to. */
+	terminalName: z.string().nullable().optional(),
 });
 
 export const Notification = z.object({
@@ -1698,6 +1700,8 @@ export const schema = createSchema({
 			orderId: z.string().nullable().optional(),
 			/** The desk taking the payment (one of the caller's roles). */
 			role: z.string().nullable().optional(),
+			/** The POS the desk picked for card or transfer; without it, the POS assigned to the role. */
+			terminalId: z.string().nullable().optional(),
 		}),
 		output: envelope(PaymentResponse),
 	},

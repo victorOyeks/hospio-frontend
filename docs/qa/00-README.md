@@ -48,7 +48,7 @@ allow-listed number 09035911994, so sign-up and phone codes for any other number
 | 32 | `32-daily-fee-and-pos.md` | Hospio's daily fee: 1.5 % of each day's sales (folio nights spread per night, counter sales, laundry, no-show deposits, voids), statements, the 6am debit and its switch, POS pause; each hotel's Moniepoint/OPay keys (masked) and the POS device test | Ready |
 | 33 | `33-admin-portal-layout-and-integrations.md` | Admin portal reorganised: grouped menu, Hotels list with a hotel panel, ⌘K search, tabbed Fees & billing and Payments & POS; Integrations (keys and addresses set in the portal, encrypted, server value as fallback, Test connection) | Ready |
 | 34 | `34-transfer-on-the-pos.md` | Bank transfer goes to the POS like card (the guest picks card or transfer on the terminal); only cash is recorded at the desk | Ready |
-| 35 | `35-pos-decline-reason.md` | A declined card or transfer shows the provider's reason (e.g. Insufficient funds) on screen and in My payments; 15 s provider check; Moniepoint/OPay call logs | Ready |
+| 35 | `35-pos-decline-reason.md` | A declined card or transfer shows the provider's reason (e.g. Insufficient funds) on screen and in My payments; the screen names the POS it was sent to (the picked terminal is used); 15 s provider check; Moniepoint/OPay call logs | Ready |
 
 ## Before you start
 

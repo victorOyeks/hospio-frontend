@@ -23,6 +23,8 @@ export type RecordPaymentInput = {
 	orderId?: string;
 	/** The desk taking the payment (KITCHEN, BAR, …): must be one of the caller's roles. */
 	role?: string;
+	/** The POS picked for card or transfer; without it, the POS assigned to the desk. */
+	terminalId?: string;
 };
 
 export type RecordedPayment = {
@@ -32,6 +34,8 @@ export type RecordedPayment = {
 	method: PaymentMethod;
 	/** Why a declined or failed payment didn't go through, in the provider's words ("Insufficient funds"). */
 	failureReason?: string | null;
+	/** The POS it was sent to ("Front desk POS"). */
+	terminalName?: string | null;
 };
 
 /**
@@ -78,6 +82,7 @@ export async function recordPayment(
 			receiptPreference: input.receipt ?? "EMAIL",
 			orderId: input.orderId ?? null,
 			role: input.role ?? null,
+			terminalId: input.method === "CASH" ? null : (input.terminalId ?? null),
 		},
 	});
 	if (error || !data)
@@ -109,6 +114,7 @@ export async function recordPayment(
 			amount: Number(data.data.amount),
 			method: data.data.method as PaymentMethod,
 			failureReason: data.data.failureReason,
+			terminalName: data.data.terminalName ?? null,
 		},
 	};
 }
