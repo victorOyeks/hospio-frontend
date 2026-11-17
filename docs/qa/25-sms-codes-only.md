@@ -39,7 +39,7 @@ text.
 
 1. Sign up a new account with your own email and the allow-listed number (or use **Verify phone** on an account with that
    number).
-2. **Check your phone** sends the code by SMS. It arrives as one page: "Your Hospio360 code is …".
+2. **Check your phone** sends the code by SMS. It arrives as one page, word for word: "Your Hospio360 verification code is 123456. This code expires in 10 minutes. Do not share with anyone." (with your own 6 digits).
 3. Enter it: the phone is verified.
 
 ## 2. Nothing offers SMS any more
