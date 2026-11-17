@@ -49,6 +49,7 @@ function patchToast() {
 
 export function UpdateNotice() {
 	const [stale, setStale] = useState(false);
+	const [reloading, setReloading] = useState(false);
 
 	const check = useCallback(async () => {
 		if (BUILD === "dev") return;
@@ -80,8 +81,19 @@ export function UpdateNotice() {
 	}, [check]);
 
 	if (!stale) return null;
+	const reload = () => {
+		setReloading(true);
+		window.location.reload();
+	};
+	// An open side panel or modal (Radix) sets `pointer-events: none` on everything outside it and closes itself on a press
+	// outside: the notice opts back in to pointer events and keeps its presses to itself, so Reload works over any panel.
 	return (
-		<div className="fixed inset-x-0 top-3 z-[60] mx-auto flex w-[min(640px,calc(100%-24px))] items-center gap-3 rounded-xl border border-brand/20 bg-card px-4 py-3 shadow-lg">
+		<div
+			role="alert"
+			style={{ pointerEvents: "auto" }}
+			onPointerDown={(e) => e.stopPropagation()}
+			className="pointer-events-auto fixed inset-x-0 top-3 z-[100] mx-auto flex w-[min(640px,calc(100%-24px))] items-center gap-3 rounded-xl border border-brand/20 bg-card px-4 py-3 shadow-lg"
+		>
 			<RefreshCwIcon className="size-5 shrink-0 text-brand" />
 			<div className="min-w-0 flex-1 text-[13px]">
 				<p className="font-semibold text-ink">Reload Hospio360 to carry on</p>
@@ -92,10 +104,11 @@ export function UpdateNotice() {
 			</div>
 			<button
 				type="button"
-				onClick={() => window.location.reload()}
-				className="shrink-0 rounded-lg bg-brand px-3 py-2 text-[13px] font-semibold text-white hover:opacity-90"
+				onClick={reload}
+				disabled={reloading}
+				className="shrink-0 rounded-lg bg-brand px-3 py-2 text-[13px] font-semibold text-white hover:opacity-90 disabled:opacity-70"
 			>
-				Reload
+				{reloading ? "Reloading…" : "Reload"}
 			</button>
 		</div>
 	);
