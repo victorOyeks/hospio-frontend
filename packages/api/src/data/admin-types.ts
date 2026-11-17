@@ -404,9 +404,12 @@ export type IntegrationItem = {
 	key: string;
 	name: string;
 	kind: string;
-	status: "CONNECTED" | "DISCONNECTED" | "ERROR" | "NOT_CONFIGURED";
+	/** TEST_MODE: a test provider is in force, so nothing real happens (e.g. nothing is charged). */
+	status: "CONNECTED" | "DISCONNECTED" | "ERROR" | "NOT_CONFIGURED" | "TEST_MODE";
 	detail: string;
 	lastCheck?: string;
+	/** The service that made the check. */
+	checkedBy?: string;
 };
 
 /** Integrations page: one provider's keys (GET/PUT /platform/admin/integrations). */

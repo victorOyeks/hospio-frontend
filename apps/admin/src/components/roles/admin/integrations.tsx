@@ -2,6 +2,7 @@
 
 import {
 	CheckCircle2Icon,
+	FlaskConicalIcon,
 	Loader2Icon,
 	LockIcon,
 	PlugZapIcon,
@@ -11,6 +12,7 @@ import {
 import { useState } from "react";
 import { toast } from "sonner";
 import {
+	runConnectionChecks,
 	saveIntegration,
 	testIntegration,
 } from "@hospio/api/actions/integrations";
@@ -23,7 +25,7 @@ import type {
 } from "@hospio/api/data/admin-types";
 import { Note } from "@hospio/ui/shared/detail-list";
 import { ToggleField, TextField } from "@hospio/ui/shared/field";
-import { fmtWhen } from "@hospio/ui/shared/format";
+import { fmtDate, fmtWhen } from "@hospio/ui/shared/format";
 import { PageHeader } from "@hospio/ui/shared/page-header";
 import { SectionCard } from "@hospio/ui/shared/section-card";
 import { StatusPill } from "@hospio/ui/shared/status-pill";
@@ -281,14 +283,57 @@ function ProviderCard({ initial }: { initial: IntegrationCard }) {
 	);
 }
 
-/** The connection checks the server reported before it kept keys in the portal (database, Kafka, Smile ID and the rest). */
-export function IntegrationStatusList({ items }: { items: IntegrationItem[] }) {
+const STATUS_TONE: Record<IntegrationItem["status"], "success" | "danger" | "info" | "grey"> = {
+	CONNECTED: "success",
+	ERROR: "danger",
+	TEST_MODE: "info",
+	NOT_CONFIGURED: "grey",
+	DISCONNECTED: "grey",
+};
+
+/**
+ * Connection checks (database, Kafka, POS provider, WhatsApp, email, SMS): each row is checked by the service that owns it, when
+ * the page opens and again on "Run checks again". Nothing is sent or charged by a check; any platform role can run them.
+ */
+export function IntegrationStatusList({ items: initial }: { items: IntegrationItem[] }) {
+	const [items, setItems] = useState(initial);
+	const [running, setRunning] = useState(false);
+	const run = async () => {
+		setRunning(true);
+		try {
+			const r = await runConnectionChecks();
+			if (r.ok) setItems(r.data);
+			else toast.error(r.error);
+		} catch {
+			toast.error("The checks couldn't be run. Try again in a moment.");
+		} finally {
+			setRunning(false);
+		}
+	};
 	return (
-		<SectionCard title="Connection checks" subtitle="What the server reported when this page loaded" flush>
+		<SectionCard
+			title="Connection checks"
+			subtitle="Each service checks its own connection live. Nothing is sent or charged."
+			flush
+			headerRight={
+				<button
+					type="button"
+					className={cn(btn.secondary, "flex items-center gap-2")}
+					onClick={run}
+					disabled={running}
+					aria-busy={running}
+				>
+					{running ? <Loader2Icon className="size-4 animate-spin" /> : <RefreshCwIcon className="size-4" />}
+					{running ? "Checking…" : "Run checks again"}
+				</button>
+			}
+		>
 			{items.map((i) => (
-				<div key={i.key} className="flex items-center gap-3 border-t border-line px-5 py-3">
+				<div key={i.key} className={cn("flex items-center gap-3 border-t border-line px-5 py-3", running && "opacity-60")}>
 					{i.status === "CONNECTED" ? (
 						<CheckCircle2Icon className="size-4 shrink-0 text-success" />
+					) : i.status === "TEST_MODE" ? (
+						<FlaskConicalIcon className="size-4 shrink-0 text-info" />
 					) : (
 						<XCircleIcon className={cn("size-4 shrink-0", i.status === "ERROR" ? "text-danger" : "text-ink-3")} />
 					)}
@@ -298,11 +343,12 @@ export function IntegrationStatusList({ items }: { items: IntegrationItem[] }) {
 						</p>
 						<p className="text-xs text-ink-3">
 							{i.detail || "—"}
-							{i.lastCheck ? ` · checked ${fmtWhen(i.lastCheck)}` : ""}
+							{i.lastCheck ? ` · checked ${fmtDate(i.lastCheck, "d MMM, h:mm:ssaaa")}` : ""}
+							{i.checkedBy ? ` by ${i.checkedBy}` : ""}
 						</p>
 					</div>
-					<StatusPill tone={i.status === "CONNECTED" ? "success" : i.status === "ERROR" ? "danger" : "grey"}>
-						{i.status.toLowerCase().replace(/_/g, " ")}
+					<StatusPill tone={STATUS_TONE[i.status]}>
+						{i.status === "TEST_MODE" ? "test mode" : i.status.toLowerCase().replace(/_/g, " ")}
 					</StatusPill>
 				</div>
 			))}

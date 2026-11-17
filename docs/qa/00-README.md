@@ -61,6 +61,7 @@ allow-listed number 09035911994, so sign-up and phone codes for any other number
 | 45 | `45-onboarding-pos-terminals.md` | Onboarding → Connections terminals match today: Moniepoint/OPay/test only, provider-specific reference, desk assignment, POS key status | Ready |
 | 46 | `46-lock-screen-resume.md` | Resume after the lock screen: the same person goes back to the page they were on (shared-device lock or signing in again), anyone else to their home page; drafts of Check in, New booking, bar sale, kitchen order, till handover and housekeeping report come back for the same person only, cleared on save/cancel/sign-out/someone else, 4 h; no payments, PINs or amounts kept | Ready |
 | 47 | `47-samuel-defects-nov.md` | Defect log DEF-076 to DEF-086: empty number fields (tables, menu quantities, choices), outlet store picker and empty lists, cancelling the last dish cancels the order, menu quantity validation, one price change at a time with 'awaiting approval', order-ready notification opens Room service, manager selling by design | Ready |
+| 48 | `48-connection-checks.md` | Integrations → Connection checks: live rows from the service that owns each (database, Kafka, POS provider with test mode, WhatsApp, email, SMS with real sender), Run checks again updates the times, nothing sent or charged, no keys shown, Support sees the card | Ready |
 
 ## Before you start
 

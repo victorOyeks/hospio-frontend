@@ -423,6 +423,8 @@ export const Integration = z.object({
 	status: z.string(),
 	detail: str,
 	lastCheck: str,
+	/** The service that made the check (platform-service, messaging-service, payment-service). */
+	checkedBy: str,
 });
 export const PlatformSettings = z.record(z.string(), JsonMap);
 
