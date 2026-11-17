@@ -19,7 +19,10 @@ import {
 	getUser,
 } from "@hospio/api/dal";
 import { live } from "@hospio/api/data/live";
-import { isHousekeepingSupervisor } from "@hospio/api/supervisor";
+import {
+	isHousekeepingSupervisor,
+	seesAllOutlets,
+} from "@hospio/api/supervisor";
 import { DEMO_AUTH } from "@hospio/api/demo/mode";
 import {
 	REFRESHED_COOKIE,
@@ -92,6 +95,7 @@ export async function DashboardShell({ children }: PropsWithChildren) {
 		inbox,
 		approvals,
 		brand,
+		desk,
 	] = await Promise.all([
 		// getBusiness answers from the fixture (LIVE) in demo mode, so nothing changes there.
 		ownerHotel ? getBusiness() : Promise.resolve(null),
@@ -116,6 +120,12 @@ export async function DashboardShell({ children }: PropsWithChildren) {
 		// Hotel setup → Brand & colours: the hotel's colour, sidebar, short name and logo on every screen.
 		APP === "hotel" && activeHotel
 			? data.hotels.brand().catch(() => null)
+			: Promise.resolve(null),
+		// The bar and kitchen: their outlets for "Serving at" (shown only when there are several of their kind).
+		APP === "hotel" && (role === "BAR" || role === "KITCHEN")
+			? data.outlets
+					.desk(role, seesAllOutlets(session, role))
+					.catch(() => null)
 			: Promise.resolve(null),
 	]);
 	if (ownerHotel) {
@@ -181,6 +191,23 @@ export async function DashboardShell({ children }: PropsWithChildren) {
 						badges={badges}
 						supervisor={
 							role !== "HOUSEKEEPING" || isHousekeepingSupervisor(session)
+						}
+						outletSwitch={
+							desk &&
+							desk.outlets.length > 1 &&
+							(role === "BAR" || role === "KITCHEN")
+								? {
+										desk: role,
+										outlets: desk.outlets.map((o) => ({
+											id: o.id,
+											name: o.name,
+											kind: o.kind,
+										})),
+										current: desk.outlet?.id,
+										all: desk.all,
+										canSeeAll: seesAllOutlets(session, role),
+									}
+								: null
 						}
 					/>
 					{/* min-w-0: wide tables scroll inside their card instead of pushing the page sideways. */}

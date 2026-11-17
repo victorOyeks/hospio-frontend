@@ -192,7 +192,7 @@ export const kitchenLinks: NavLink[] = [
 		badge: "unpaidSales",
 	},
 	{ title: "Menu", url: "/dashboard/menu", icon: BookOpenIcon },
-	{ title: "Kitchen store", url: "/dashboard/store", icon: PackageIcon },
+	{ title: "Store", url: "/dashboard/store", icon: PackageIcon },
 	{ title: "My payments", url: "/dashboard/payments", icon: CreditCardIcon },
 	{ title: "Till", url: "/dashboard/till", icon: WalletIcon },
 	{ title: "My shifts", url: "/dashboard/shifts", icon: CalendarDaysIcon },
@@ -201,7 +201,7 @@ export const kitchenLinks: NavLink[] = [
 ];
 
 export const barLinks: NavLink[] = [
-	{ title: "Bar today", url: "/dashboard", icon: WineIcon },
+	{ title: "Today", url: "/dashboard", icon: WineIcon },
 	{ title: "Tabs", url: "/dashboard/tabs", icon: ReceiptIcon },
 	{
 		title: "Sales",
@@ -210,7 +210,7 @@ export const barLinks: NavLink[] = [
 		badge: "unpaidSales",
 	},
 	{ title: "Menu", url: "/dashboard/menu", icon: BookOpenIcon },
-	{ title: "Bar stock", url: "/dashboard/stock", icon: PackageIcon },
+	{ title: "Stock", url: "/dashboard/stock", icon: PackageIcon },
 	{ title: "My payments", url: "/dashboard/payments", icon: CreditCardIcon },
 	{ title: "Till", url: "/dashboard/till", icon: WalletIcon },
 	{ title: "My shifts", url: "/dashboard/shifts", icon: CalendarDaysIcon },

@@ -228,7 +228,7 @@ export const kitchenHelp: HelpModule = {
 			when: "The kitchen shelf is running low.",
 			topic: "Stock",
 			steps: [
-				"Open “Kitchen store”.",
+				"Open “Store”.",
 				"Tap “Ask the store” (or “Request these” on the running-low bar).",
 				"Running-low items are already added. To add more, pick them under “Add an item” and set the quantities.",
 				"Add a “Note for the store” if needed, then tap “Send request”.",
@@ -238,7 +238,7 @@ export const kitchenHelp: HelpModule = {
 				"Your requests and their status (“Waiting”, “Issued”, “Part issued”, “Declined”) show on the same screen.",
 			],
 			route: "/dashboard/store",
-			screen: "Kitchen store",
+			screen: "Store",
 		},
 		{
 			id: "kit-use-waste",
@@ -246,7 +246,7 @@ export const kitchenHelp: HelpModule = {
 			when: "Stock was used outside a sale, or spoiled or expired.",
 			topic: "Stock",
 			steps: [
-				"Open “Kitchen store” and tap the item.",
+				"Open “Store” and tap the item.",
 				"Pick “Used” or “Wasted”.",
 				"Set how many. For waste, pick the “Reason”.",
 				"Tap “Record use” or “Write off”.",
@@ -256,7 +256,7 @@ export const kitchenHelp: HelpModule = {
 				"A write-off tells the manager and shows on the stock movement report with your name.",
 			],
 			route: "/dashboard/store",
-			screen: "Kitchen store",
+			screen: "Store",
 		},
 		{
 			id: "kit-till",
@@ -311,6 +311,22 @@ export const kitchenHelp: HelpModule = {
 			],
 			route: "/dashboard/payments",
 			screen: "My payments",
+		},
+		{
+			id: "kitchen-switch-outlet",
+			title: "Switch the outlet you serve at",
+			when: "Your hotel has more than one kitchen outlet (a Kitchen and a Restaurant).",
+			topic: "Outlets",
+			steps: [
+				"In the sidebar, under the branch, tap “Serving at”.",
+				"Pick the outlet you are working at. The page you are on reloads for that outlet.",
+				"Every page title now starts with the outlet's name, with its own colour and icon.",
+			],
+			goodToKnow: [
+				"The choice is kept on this device. Another device keeps its own.",
+				"Managers and staff with Full access also get “All outlets”, which shows every outlet together on Sales.",
+				"With only one outlet there is nothing to switch, so “Serving at” doesn't show.",
+			],
 		},
 	],
 };

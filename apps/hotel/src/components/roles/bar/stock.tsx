@@ -2,7 +2,7 @@
 
 import { ClipboardCheckIcon, WineOffIcon } from "lucide-react";
 import { parseAsString, useQueryState } from "nuqs";
-import { useEffect, useState } from "react";
+import { type ReactNode, useEffect, useState } from "react";
 import { Note } from "@hospio/ui/shared/detail-list";
 import { SelectField, TextareaField } from "@hospio/ui/shared/field";
 import { naira, plural } from "@hospio/ui/shared/format";
@@ -19,12 +19,17 @@ import { cn } from "@hospio/ui/utils";
 import { StoreScreen } from "../shared-staff/store-screen";
 import { BigButton, Stepper } from "../shared-staff/tablet";
 
-/** Bar · Bar stock (3264:12805) = the shared store screen plus breakage (3264:13155) and the end-of-night count (3264:13329). */
+/** Bar · Stock (3264:12805), titled with the outlet ("Patio Lounge · stock") = the shared store screen plus breakage (3264:13155) and the end-of-night count (3264:13329). */
 export function BarStockScreen({
 	items,
 	requests,
 	storeId,
+	title = "Bar · stock",
+	mark,
 }: {
+	title?: string;
+	/** The outlet's colour and icon by the title (several bar outlets). */
+	mark?: ReactNode;
 	items: StockItemRow[];
 	requests: TeamRequests;
 	storeId?: string;
@@ -64,7 +69,8 @@ export function BarStockScreen({
 				requests={requests}
 				team="BAR"
 				storeId={storeId}
-				title="Bar stock"
+				title={title}
+				mark={mark}
 				subtitle="Drinks behind the bar and in the bar store · counted every night"
 				extraActions={
 					<>

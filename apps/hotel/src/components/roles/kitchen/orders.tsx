@@ -19,6 +19,7 @@ import { useEffect, useState } from "react";
 import { Note, TotalsList } from "@hospio/ui/shared/detail-list";
 import { ChoiceCards, SelectField, TextField } from "@hospio/ui/shared/field";
 import { fmtTime, naira, plural } from "@hospio/ui/shared/format";
+import { OutletMark } from "@hospio/ui/shared/outlet-mark";
 import { PageHeader } from "@hospio/ui/shared/page-header";
 import {
 	PanelSection,
@@ -113,7 +114,7 @@ const where = (o: OrderRow) =>
 				? `Table ${o.tableNo}`
 				: kindLabel[o.kind];
 
-/** Kitchen · Orders board (3250:12362), ticket (3250:12507), new order (3250:12700), charge to room (3250:12839 / 3250:13011), take payment (3364:12470), sale done. */
+/** Kitchen · Orders board (3250:12362), titled with the outlet ("Restaurant · orders"), ticket (3250:12507), new order (3250:12700), charge to room (3250:12839 / 3250:13011), take payment (3364:12470), sale done. */
 export function KitchenOrdersScreen({
 	orders,
 	menu,
@@ -124,7 +125,10 @@ export function KitchenOrdersScreen({
 	terminals,
 	closed = [],
 	outlets = [],
+	peers = [],
 }: {
+	/** The ids of the kitchen's outlets (KITCHEN and RESTAURANT): with several, the outlet's colour and icon mark the title and cards. */
+	peers?: string[];
 	orders: OrderRow[];
 	/** The hotel's outlets: names the outlet that makes a line sold here. */
 	outlets?: { id: string; name: string }[];
@@ -148,6 +152,8 @@ export function KitchenOrdersScreen({
 	const { run, pending } = useAction();
 	const tables = (outlet?.tables ?? []).filter((t) => t.active);
 	const outletName = outlet?.name ?? "Restaurant";
+	const several = peers.length > 1;
+	const newLabel = several ? `New order at ${outletName}` : "New order";
 	const openId = open ?? orderParam;
 
 	useEffect(() => {
@@ -460,7 +466,16 @@ export function KitchenOrdersScreen({
 	return (
 		<>
 			<PageHeader
-				title="Orders"
+				title={`${outletName} · orders`}
+				mark={
+					<OutletMark
+						id={outlet?.id}
+						peers={peers}
+						kind={outlet?.kind}
+						size="lg"
+						title={outletName}
+					/>
+				}
 				subtitle={`${outletName} and room service · ${openCount} open · ${plural(rows.filter((o) => colOf(o) === "OPEN" || colOf(o) === "SENT").length, "order")} cooking`}
 			>
 				<Link
@@ -480,7 +495,7 @@ export function KitchenOrdersScreen({
 						void setIsNew("1");
 					}}
 				>
-					<PlusIcon className="size-5" /> New order
+					<PlusIcon className="size-5" /> {newLabel}
 				</BigButton>
 			</PageHeader>
 			{!outlet && (
@@ -583,6 +598,12 @@ export function KitchenOrdersScreen({
 								>
 									<div className="flex items-center justify-between">
 										<span className="flex items-center gap-2 text-[15px] font-bold text-ink">
+											<OutletMark
+												id={outlet?.id}
+												peers={peers}
+												kind={outlet?.kind}
+												size="sm"
+											/>
 											{o.kind === "ROOM_SERVICE" ? (
 												<BedDoubleIcon className="size-4 text-ink-3" />
 											) : o.kind === "TAKEAWAY" ? (
@@ -1079,7 +1100,7 @@ export function KitchenOrdersScreen({
 			<SidePanel
 				open={panel?.kind === "new"}
 				onOpenChange={(o) => !o && close()}
-				title="New order"
+				title={newLabel}
 				subtitle={`${outletName} · pick the items, then where it goes`}
 				icon={PlusIcon}
 				width="lg"

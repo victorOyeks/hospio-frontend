@@ -11,7 +11,7 @@ export const barHelp: HelpModule = {
 			when: "A guest buys drinks and pays now.",
 			topic: "Sales",
 			steps: [
-				"On “Bar today”, tap “New sale” (or tap a free seat).",
+				"On “Today”, tap “New sale” (or tap a free seat).",
 				"Pick a “Seat”, or leave it as “Walk-up”.",
 				"Tap the drinks to add them.",
 				"Under “How they pay”, keep “Pay now” and tap “Take payment”.",
@@ -25,7 +25,7 @@ export const barHelp: HelpModule = {
 				"Receipts go by email when the guest has one. A guest with no email gets it by WhatsApp. You can always print it.",
 			],
 			route: "/dashboard",
-			screen: "Bar today",
+			screen: "Today",
 		},
 		{
 			id: "bar-open-tab",
@@ -33,20 +33,20 @@ export const barHelp: HelpModule = {
 			when: "A guest wants to keep ordering and pay at the end.",
 			topic: "Tabs",
 			steps: [
-				"On “Bar today”, tap “New sale” (or tap a free seat).",
+				"On “Today”, tap “New sale” (or tap a free seat).",
 				"Pick the “Seat” and add a “Name (optional)” for the tab.",
 				"Add the first drinks.",
 				"Under “How they pay”, pick “Open a tab”.",
 				"Tap “Open a tab”.",
 			],
 			goodToKnow: [
-				"The tab shows on “Tabs” and on its seat on “Bar today”.",
+				"The tab shows on “Tabs” and on its seat on “Today”.",
 				"Each tab has a limit (shown under “Open a tab”). At the limit the guest must pay before adding more; a manager can allow more.",
 				"A seat that already has a tab is not offered for another tab.",
 				"If tabs are switched off in Hotel setup, “Open a tab” says “Switched off”.",
 			],
 			route: "/dashboard",
-			screen: "Bar today",
+			screen: "Today",
 		},
 		{
 			id: "bar-add-to-tab",
@@ -54,7 +54,7 @@ export const barHelp: HelpModule = {
 			when: "A guest on a tab orders more, or changes seat.",
 			topic: "Tabs",
 			steps: [
-				"Open “Tabs” and tap the tab (or tap its seat on “Bar today”).",
+				"Open “Tabs” and tap the tab (or tap its seat on “Today”).",
 				"To add, tap “Add drinks”, pick the drinks and tap “Add to tab”.",
 				"To move, tap “Move”, pick the “New seat” and tap “Move”.",
 				"To take a drink off, tap the ✕ beside it, give a “Reason” and tap “Remove”.",
@@ -91,7 +91,7 @@ export const barHelp: HelpModule = {
 			when: "A hotel guest wants drinks added to their room bill.",
 			topic: "Sales",
 			steps: [
-				"On “Bar today”, tap “Charge to a room”.",
+				"On “Today”, tap “Charge to a room”.",
 				"Add the drinks.",
 				"Pick the “Hotel guest” and check the “What happens” lines.",
 				"Tap “Charge to room”.",
@@ -102,7 +102,7 @@ export const barHelp: HelpModule = {
 				"If charging to rooms is switched off in Hotel setup, the choice says “Switched off”.",
 			],
 			route: "/dashboard",
-			screen: "Bar today",
+			screen: "Today",
 		},
 		{
 			id: "bar-collect-unpaid",
@@ -117,7 +117,7 @@ export const barHelp: HelpModule = {
 				"Or tap “Charge to room”, pick the “Hotel guest” and tap “Charge to room”.",
 			],
 			goodToKnow: [
-				"You can also open a sale from “Recent sales” on “Bar today”.",
+				"You can also open a sale from “Recent sales” on “Today”.",
 				"You can take less than the balance. The sale becomes “Part paid”.",
 				"If an older day still owes money, an amber bar shows above the totals. Tap “Show them”.",
 				"With Edit access you only settle sales you opened. Someone with Full access or a manager settles the rest.",
@@ -150,7 +150,7 @@ export const barHelp: HelpModule = {
 			topic: "Sales",
 			steps: [
 				"When you close a tab or collect a sale from “Sales”, tap “Print receipt” on the done screen once the payment is approved.",
-				"For a sale paid on “Bar today” or an older sale, open it from “Recent sales” or “Sales”.",
+				"For a sale paid on “Today” or an older sale, open it from “Recent sales” or “Sales”.",
 				"Tap “Print receipt”. The receipt opens in a new tab ready to print.",
 			],
 			goodToKnow: [
@@ -164,7 +164,7 @@ export const barHelp: HelpModule = {
 			when: "The bar closes for the night.",
 			topic: "Stock",
 			steps: [
-				"Open “Bar stock” and tap “End-of-night count” (or tap “Count stock” on “Bar today”).",
+				"Open “Stock” and tap “End-of-night count” (or tap “Count stock” on “Today”).",
 				"For each line, set what is really behind the bar. It shows what the system says.",
 				"Check the short or over amount at the bottom.",
 				"Tap “Save count”.",
@@ -175,7 +175,7 @@ export const barHelp: HelpModule = {
 				"Drinks sold come off the bar store by themselves when a sale is paid or charged.",
 			],
 			route: "/dashboard/stock",
-			screen: "Bar stock",
+			screen: "Stock",
 		},
 		{
 			id: "bar-breakage",
@@ -183,7 +183,7 @@ export const barHelp: HelpModule = {
 			when: "A bottle was dropped, spilled or faulty.",
 			topic: "Stock",
 			steps: [
-				"Open “Bar stock” and tap “Breakage”.",
+				"Open “Stock” and tap “Breakage”.",
 				"Pick “What” broke and how many.",
 				"Pick “How” and add a “Note” if needed.",
 				"Tap “Record breakage”.",
@@ -193,7 +193,7 @@ export const barHelp: HelpModule = {
 				"It shows on the stock movement report with your name.",
 			],
 			route: "/dashboard/stock",
-			screen: "Bar stock",
+			screen: "Stock",
 		},
 		{
 			id: "bar-ask-store",
@@ -201,17 +201,17 @@ export const barHelp: HelpModule = {
 			when: "The bar is running low.",
 			topic: "Stock",
 			steps: [
-				"Open “Bar stock” and tap “Ask the store” (or “Request these” on the running-low bar).",
+				"Open “Stock” and tap “Ask the store” (or “Request these” on the running-low bar).",
 				"Running-low drinks are already added. To add more, pick them under “Add an item” and set the quantities.",
 				"Add a “Note for the store” if needed.",
 				"Tap “Send request”.",
 			],
 			goodToKnow: [
 				"The main store issues what they have and you get an alert.",
-				"Your requests and their status show on “Bar stock”.",
+				"Your requests and their status show on “Stock”.",
 			],
 			route: "/dashboard/stock",
-			screen: "Bar stock",
+			screen: "Stock",
 		},
 		{
 			id: "bar-change-price",
@@ -259,7 +259,7 @@ export const barHelp: HelpModule = {
 			steps: [
 				"At the start, open “Till”, tap “Open till” and count the float.",
 				"At the end, settle or move every open tab.",
-				"On “Bar today”, tap “Close shift”.",
+				"On “Today”, tap “Close shift”.",
 				"Count the drawer and enter the “Cash counted”. If it differs, fill in “Why the cash is different”.",
 				"Tap “Close shift”.",
 			],
@@ -305,6 +305,22 @@ export const barHelp: HelpModule = {
 			],
 			route: "/dashboard/payments",
 			screen: "My payments",
+		},
+		{
+			id: "bar-switch-outlet",
+			title: "Switch the outlet you serve at",
+			when: "Your hotel has more than one bar outlet (a Bar and a Patio Lounge).",
+			topic: "Outlets",
+			steps: [
+				"In the sidebar, under the branch, tap “Serving at”.",
+				"Pick the outlet you are working at. The page you are on reloads for that outlet.",
+				"Every page title now starts with the outlet's name, with its own colour and icon.",
+			],
+			goodToKnow: [
+				"The choice is kept on this device. Another device keeps its own.",
+				"Managers and staff with Full access also get “All outlets”, which shows every outlet together on Tabs and Sales.",
+				"With only one outlet there is nothing to switch, so “Serving at” doesn't show.",
+			],
 		},
 	],
 };
