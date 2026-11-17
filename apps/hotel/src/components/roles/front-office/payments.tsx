@@ -37,6 +37,7 @@ export const payTone: Record<PaymentStatus, { label: string; tone: "success" | "
 	NO_RESPONSE: { label: "No response", tone: "danger" },
 	FAILED: { label: "Failed", tone: "danger" },
 	REFUNDED: { label: "Refunded", tone: "grey" },
+	TIMED_OUT: { label: "Timed out", tone: "warning" },
 };
 
 import { PAYMENT_TABS, type PaymentTab } from "./tabs";
@@ -114,7 +115,7 @@ export function MyPaymentsScreen({ payments: result, opened, terminals, me, role
 
 			<SidePanel open={!!pay} onOpenChange={(o) => !o && void setOpenId(null)} title={pay ? `${naira(pay.amount)} · ${pay.guestName}` : ""} subtitle={pay ? `${pay.reference} · ${fmtWhen(pay.createdAt)} · taken by ${pay.takenBy}` : undefined} icon={CreditCardIcon} footer={pay && (
 				<>
-					{(pay.status === "DECLINED" || pay.status === "NO_RESPONSE") && <button type="button" className={btn.primary} onClick={() => { void setOpenId(null); void setIsNew("1"); }}><RotateCcwIcon className="mr-1 inline size-4" /> Try again</button>}
+					{(pay.status === "DECLINED" || pay.status === "NO_RESPONSE" || pay.status === "TIMED_OUT") && <button type="button" className={btn.primary} onClick={() => { void setOpenId(null); void setIsNew("1"); }}><RotateCcwIcon className="mr-1 inline size-4" /> Try again</button>}
 					{pay.status === "PROCESSING" && <button type="button" className={btn.secondary} disabled={checking} onClick={() => void check(() => verifyPayment(pay.id), (r) => (r.status === "APPROVED" ? "The POS approved it" : `The POS says ${payTone[r.status]?.label.toLowerCase() ?? r.status}`), (r) => setPayments((xs) => xs.map((p) => (p.id === pay.id ? { ...p, status: r.status, resolvedAt: r.status === "PROCESSING" ? p.resolvedAt : new Date().toISOString() } : p))))}>Check with the POS</button>}
 					{pay.status === "APPROVED" && <button type="button" className={btn.secondary} onClick={() => setRefundFor(pay)}>Request refund <ManagerMark className="ml-1" /></button>}
 					{pay.status === "APPROVED" && <a href={`/receipt?payment=${encodeURIComponent(pay.id)}`} target="_blank" rel="noopener" className={btn.primary}><PrinterIcon className="mr-1 inline size-4" /> Print receipt</a>}
@@ -124,6 +125,7 @@ export function MyPaymentsScreen({ payments: result, opened, terminals, me, role
 					<div className="flex flex-col gap-6">
 						{pay.status === "PROCESSING" && <Note tone="info">The POS hasn't confirmed this card payment yet. "Check with the POS" asks the provider where it stands; it is approved only when the POS says so.</Note>}
 						{(pay.status === "DECLINED" || pay.status === "FAILED") && <Note tone="danger">{pay.status === "FAILED" ? "Didn't go through" : "Declined"}{pay.failureReason ? `: ${pay.failureReason}` : " at the POS"}. Nothing was taken from the guest.</Note>}
+						{pay.status === "TIMED_OUT" && <Note tone="warning">The POS gave no final answer within 5 minutes, so this timed out. If the guest did pay, it turns Approved on its own as soon as the provider confirms (it keeps checking for 30 minutes). Check the terminal before trying again.</Note>}
 						{pay.status === "NO_RESPONSE" && <Note tone="danger">The terminal didn't answer. Nothing was charged — check with the guest's bank before trying again.</Note>}
 						<PanelSection title="Payment">
 							<DetailList columns={2} items={[{ label: "Method", value: pay.method === "CARD" ? `Card · ${pay.terminal ?? "POS"}` : pay.method === "TRANSFER" ? (pay.terminal ? `Bank transfer · ${pay.terminal}` : "Bank transfer") : "Cash" }, ...(pay.failureReason && (pay.status === "DECLINED" || pay.status === "FAILED") ? [{ label: "Reason", value: <span className="font-semibold text-danger">{pay.failureReason}</span> }] : []), { label: "Provider ref", value: pay.providerRef ?? "—" }, { label: "For", value: pay.description }, { label: "Folio", value: pay.folioId ? <a href={`/dashboard/folios?open=${pay.folioId}`} className="text-brand">Open folio →</a> : "—" }, { label: "Receipt", value: pay.receiptSent === "EMAIL" ? "Emailed" : pay.receiptSent === "WHATSAPP" ? "Not sent · WhatsApp is coming soon" : pay.receiptSent === "NONE" ? "Not sent" : "Print or email it from the receipt page" }, { label: "Resolved", value: fmtWhen(pay.resolvedAt) }]} />

@@ -1001,6 +1001,7 @@ export const PaymentResponse = z.object({
 		"NO_RESPONSE",
 		"FAILED",
 		"REFUNDED",
+		"TIMED_OUT",
 	]),
 	terminalId: z.string().nullable(),
 	providerRef: z.string().nullable(),

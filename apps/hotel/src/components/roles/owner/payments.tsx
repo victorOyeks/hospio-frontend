@@ -56,6 +56,7 @@ const statusTone: Record<
 	NO_RESPONSE: "warning",
 	FAILED: "danger",
 	REFUNDED: "grey",
+	TIMED_OUT: "warning",
 };
 const statusLabel: Record<PaymentRow["status"], string> = {
 	PENDING: "Pending",
@@ -65,6 +66,7 @@ const statusLabel: Record<PaymentRow["status"], string> = {
 	NO_RESPONSE: "No response",
 	FAILED: "Failed",
 	REFUNDED: "Refunded",
+	TIMED_OUT: "Timed out",
 };
 const methodLabel: Record<string, string> = {
 	CARD: "Card",

@@ -34,12 +34,13 @@ export function PaymentPanel({ payment: p, onClose, onRefund, onDispute, onStatu
 				{p.status === "APPROVED" && <a href={`/receipt?payment=${encodeURIComponent(p.id)}`} target="_blank" rel="noopener" className={btn.secondary}>Print receipt</a>}
 				{p.status === "APPROVED" && <Button variant="outline" className={btn.secondary} disabled={pending} onClick={() => run(() => withDeliveries(resendReceipt(p.id), `Receipt for ${p.guestName}`), (r) => `Receipt emailed to ${r.sentTo}`)}>Email receipt again</Button>}
 				{p.status === "APPROVED" && <Button className={btn.primary} onClick={() => { onClose(); onRefund(p); }}><RotateCcwIcon className="size-4" /> Refund</Button>}
-				{(p.status === "DECLINED" || p.status === "FAILED") && p.method === "CARD" && <Button className={btn.primary} disabled={pending} onClick={retry}>Retry on POS</Button>}
-				{p.status === "NO_RESPONSE" && p.method === "CARD" && <Button variant="outline" className={btn.secondary} disabled={pending || live.pending} onClick={retry}>Retry on POS</Button>}
-				{(p.status === "NO_RESPONSE" || p.status === "PROCESSING") && <Button className={btn.primary} disabled={pending || live.pending} onClick={() => live.run(() => verifyPayment(p.id), "Checked with the provider", (r) => { onStatus(p.id, r.status); onClose(); })}>Check with provider</Button>}
+				{(p.status === "DECLINED" || p.status === "FAILED") && (p.method === "CARD" || p.method === "TRANSFER") && <Button className={btn.primary} disabled={pending} onClick={retry}>Retry on POS</Button>}
+				{(p.status === "NO_RESPONSE" || p.status === "TIMED_OUT") && (p.method === "CARD" || p.method === "TRANSFER") && <Button variant="outline" className={btn.secondary} disabled={pending || live.pending} onClick={retry}>Retry on POS</Button>}
+				{(p.status === "NO_RESPONSE" || p.status === "PROCESSING" || p.status === "TIMED_OUT") && <Button className={btn.primary} disabled={pending || live.pending} onClick={() => live.run(() => verifyPayment(p.id), "Checked with the provider", (r) => { onStatus(p.id, r.status); onClose(); })}>Check with provider</Button>}
 			</>}
 		>
 			<div className="flex flex-col gap-6">
+				{p.status === "TIMED_OUT" && <Note tone="warning">The POS gave no final answer within 5 minutes. If the guest did pay, it turns Approved on its own when the provider confirms (checked for 30 minutes). Check the terminal before retrying.</Note>}
 				{p.status === "NO_RESPONSE" && <Note tone="warning">The bank never answered. Ask the guest for the debit alert before taking it again.</Note>}
 				{(p.status === "DECLINED" || p.status === "FAILED") && <Note tone="danger">{p.status === "FAILED" ? "Didn't go through" : "Declined"}{p.failureReason ? `: ${p.failureReason}` : " by the bank"} · nothing was taken from the guest.</Note>}
 				<PanelSection title="Payment">

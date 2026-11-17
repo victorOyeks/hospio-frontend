@@ -95,7 +95,9 @@ export function FinanceToday({
 	const unmatched = payments.filter(
 		(p) =>
 			p.method === "TRANSFER" &&
-			(p.status === "PROCESSING" || p.status === "NO_RESPONSE"),
+			(p.status === "PROCESSING" ||
+				p.status === "NO_RESPONSE" ||
+				p.status === "TIMED_OUT"),
 	);
 	const paidOut = expenses.filter(
 		(e) =>

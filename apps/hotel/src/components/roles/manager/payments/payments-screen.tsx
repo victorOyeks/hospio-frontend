@@ -71,6 +71,7 @@ export const paymentTone: Record<PaymentStatus, PillTone> = {
 	NO_RESPONSE: "warning",
 	FAILED: "danger",
 	REFUNDED: "grey",
+	TIMED_OUT: "warning",
 };
 export const methodLabel = {
 	CARD: "Card",
@@ -298,7 +299,7 @@ export function PaymentsScreen({
 									),
 								disabled: p.status !== "APPROVED",
 							},
-							...(p.status === "NO_RESPONSE" || p.status === "PROCESSING"
+							...(p.status === "NO_RESPONSE" || p.status === "PROCESSING" || p.status === "TIMED_OUT"
 								? [
 										{
 											label: "Check with provider",
@@ -455,6 +456,7 @@ export function PaymentsScreen({
 										"PROCESSING",
 										"DECLINED",
 										"NO_RESPONSE",
+										"TIMED_OUT",
 										"REFUNDED",
 									] as PaymentStatus[]
 								).map((s) => ({ value: s, label: humanize(s) }))}

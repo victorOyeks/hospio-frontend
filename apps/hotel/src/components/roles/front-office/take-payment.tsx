@@ -242,7 +242,11 @@ export function usePaymentSteps(
 					bookingId: tgt?.bookingId,
 				});
 				if (r.data.status === "APPROVED") setCard("approved");
-				else if (r.data.status === "DECLINED" || r.data.status === "FAILED")
+				else if (
+					r.data.status === "DECLINED" ||
+					r.data.status === "FAILED" ||
+					r.data.status === "TIMED_OUT"
+				)
 					setCard("declined");
 				else if (r.data.status === "NO_RESPONSE") setCard("no_response");
 				else setCard("sent");
@@ -282,7 +286,12 @@ export function usePaymentSteps(
 				if (status === "APPROVED") {
 					setRecorded((x) => (x ? { ...x, status: "APPROVED" } : x));
 					setCard("approved");
-				} else if (status === "DECLINED" || status === "FAILED" || status === "CANCELLED") {
+				} else if (
+					status === "DECLINED" ||
+					status === "FAILED" ||
+					status === "CANCELLED" ||
+					status === "TIMED_OUT"
+				) {
 					const reason = r?.ok ? r.data.failureReason : null;
 					setRecorded((x) => (x ? { ...x, status: status as PaymentStatus, failureReason: reason } : x));
 					setCard("declined");
@@ -347,7 +356,9 @@ export function usePaymentSteps(
 			card === "approved"
 				? "Approved on the terminal"
 				: card === "declined"
-					? "Declined on the terminal"
+					? recorded?.status === "TIMED_OUT"
+						? "Timed out on the POS"
+						: "Declined on the terminal"
 					: card === "no_response"
 						? cardError
 							? "The card wasn't sent"
@@ -774,7 +785,9 @@ export function usePaymentSteps(
 											: card === "stalled"
 												? `${posName} hasn't answered yet`
 											: card === "declined"
-												? recorded?.status === "FAILED"
+												? recorded?.status === "TIMED_OUT"
+													? `${posName} timed out`
+													: recorded?.status === "FAILED"
 													? "The payment didn't go through"
 													: "The payment was declined"
 												: cardError
@@ -790,6 +803,8 @@ export function usePaymentSteps(
 										: "The guest taps or inserts the card. Checking with the POS every few seconds: this changes to approved or declined as soon as it answers."
 									: card === "stalled"
 										? "No answer for 3 minutes. If the guest paid, it shows in My payments and on the folio as soon as the POS confirms. Check again, or continue and find it in My payments."
+									: card === "declined" && recorded?.status === "TIMED_OUT"
+										? "No final answer from the POS in 5 minutes. Check the terminal: if it shows Approved, this turns Approved on its own within a minute (find it in My payments). Otherwise try again or take cash."
 									: card === "declined"
 										? "Nothing was charged. Ask the guest to try again on the POS (another card or a transfer), or take cash."
 										: card === "no_response"
@@ -802,7 +817,7 @@ export function usePaymentSteps(
 								POS: <span className="font-semibold text-ink-2">{posName}</span> · serial {posRef}
 							</p>
 						)}
-						{card === "declined" && recorded?.failureReason && (
+						{card === "declined" && recorded?.failureReason && recorded.status !== "TIMED_OUT" && (
 							<p className="mx-auto mt-3 max-w-sm rounded-lg bg-danger-soft px-3 py-2 text-[13px] font-semibold text-danger">
 								Reason: {recorded.failureReason}
 							</p>

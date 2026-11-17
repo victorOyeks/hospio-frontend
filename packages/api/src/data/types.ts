@@ -284,7 +284,9 @@ export type PaymentStatus =
 	| "DECLINED"
 	| "NO_RESPONSE"
 	| "FAILED"
-	| "REFUNDED";
+	| "REFUNDED"
+	/** No final answer from the POS within 5 minutes; a late answer from the provider still settles it. */
+	| "TIMED_OUT";
 export type PaymentRow = {
 	id: Id;
 	reference: string;
