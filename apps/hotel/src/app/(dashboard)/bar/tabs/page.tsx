@@ -1,4 +1,5 @@
 import { BarTabsScreen } from "@/components/roles/bar/tabs";
+import { OutletSwitch } from "@/components/roles/shared-staff/outlet-switch";
 import { data } from "@hospio/api/data";
 
 export const dynamic = "force-dynamic";
@@ -14,6 +15,7 @@ export default async function BarTabsPage() {
 		buckets,
 		settings,
 		terminals,
+		outlets,
 	] = await Promise.all([
 		outlet ? data.outlets.orders(outlet.id) : Promise.resolve([]),
 		outlet
@@ -25,18 +27,27 @@ export default async function BarTabsPage() {
 		data.bookings.buckets(),
 		data.outlets.settings(),
 		data.payments.terminals(),
+		data.outlets.list(),
 	]);
 	return (
-		<BarTabsScreen
-			outlet={outlet}
-			orders={orders}
-			closedTabs={closed.filter((o) => o.kind === "TAB").length}
-			menu={menu}
-			categories={categories}
-			happyHours={happyHours}
-			inHouse={buckets.inHouse}
-			settings={settings}
-			terminals={terminals}
-		/>
+		<>
+			<OutletSwitch
+				desk="BAR"
+				outlets={await data.outlets.forRoleAll("BAR")}
+				current={outlet?.id}
+			/>
+			<BarTabsScreen
+				outlet={outlet}
+				orders={orders}
+				closedTabs={closed.filter((o) => o.kind === "TAB").length}
+				menu={menu}
+				categories={categories}
+				happyHours={happyHours}
+				inHouse={buckets.inHouse}
+				settings={settings}
+				terminals={terminals}
+				outlets={outlets}
+			/>
+		</>
 	);
 }

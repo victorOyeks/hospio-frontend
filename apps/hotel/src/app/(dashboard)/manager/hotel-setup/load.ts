@@ -61,11 +61,12 @@ export async function loadSetup() {
 	];
 }
 
-/** The outlets with their tables, and the stores an outlet can draw from, for Restaurants & tables. */
+/** The outlets with their tables, the stores an outlet can draw from and the POS terminals it can take payment on, for Restaurants & tables. */
 export async function loadOutlets() {
-	const [outlets, stores] = await Promise.all([
+	const [outlets, stores, terminals] = await Promise.all([
 		data.outlets.list(),
 		data.inventory.stores(),
+		data.payments.terminals(),
 	]);
-	return { outlets, stores };
+	return { outlets, stores, terminals };
 }

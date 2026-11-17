@@ -27,6 +27,8 @@ import {
 	chargeOrderToRoom,
 	moveTab,
 	readOrder,
+	sendOrder,
+	setLinesStatus,
 } from "@hospio/api/actions/fnb";
 import { useAction } from "@hospio/api/actions/use-action";
 import type {
@@ -48,7 +50,10 @@ import {
 	ReasonModal,
 	activeHappyHour,
 	liveLines,
+	madeElsewhere,
 	roomLabel,
+	stationName,
+	stationStatus,
 	sitsAt,
 	toLineInputs,
 	useOrderRows,
@@ -74,7 +79,10 @@ export function BarTabsScreen({
 	inHouse,
 	settings,
 	terminals,
+	outlets = [],
 }: {
+	/** The hotel's outlets: names the outlet that makes a line (the kitchen's pepper soup). */
+	outlets?: { id: string; name: string }[];
 	outlet: OutletRow | null;
 	orders: OrderRow[];
 	closedTabs: number;
@@ -117,6 +125,22 @@ export function BarTabsScreen({
 	const free = tables.filter((t) => !tabs.some((o) => sitsAt(o, t)));
 	const discount = activeHappyHour(happyHours)?.discountPct ?? 0;
 	const atLimit = (o: OrderRow) => o.total >= LIMIT;
+	const elsewhere = (l: { preparedAt?: string }) =>
+		madeElsewhere(l, outlet?.id);
+	const station = (l: { preparedAt?: string }) =>
+		stationName(outlets, l.preparedAt);
+	const serveLine = (o: OrderRow, lineId: string, name: string) =>
+		run(
+			() => setLinesStatus(o.id, [lineId], "SERVED", outletName),
+			`${name} served`,
+			(a) =>
+				apply(o.id, a, (x) => ({
+					...x,
+					lines: x.lines.map((l) =>
+						l.id === lineId ? { ...l, status: "SERVED" } : l,
+					),
+				})),
+		);
 
 	return (
 		<>
@@ -176,6 +200,15 @@ export function BarTabsScreen({
 							{liveLines(o).map((l, i) => (
 								<li key={l.id ?? i}>
 									{l.qty} {l.name}
+									{elsewhere(l) && l.status !== "SERVED" ? (
+										<StatusPill
+											tone={stationStatus(l.status, station(l)).tone}
+											dot={false}
+											className="ml-1"
+										>
+											{stationStatus(l.status, station(l)).label}
+										</StatusPill>
+									) : null}
 								</li>
 							))}
 						</ul>
@@ -300,10 +333,36 @@ export function BarTabsScreen({
 													Happy hour −{naira(l.discount ?? 0)}
 												</span>
 											) : null}
+											{elsewhere(l) && l.status === "READY" ? (
+												<span className="block text-xs text-success">
+													Ready in {station(l)} · collect it
+												</span>
+											) : null}
 										</span>
 										<span className="text-[13px] text-ink-2">
 											{naira(l.price * l.qty)}
 										</span>
+										{elsewhere(l) &&
+											l.status !== "CANCELLED" &&
+											(l.status === "READY" && l.id ? (
+												<button
+													type="button"
+													disabled={pending}
+													onClick={() =>
+														serveLine(current, l.id ?? "", l.name)
+													}
+													className="rounded-control border border-line px-3 py-2 text-xs font-semibold text-ink hover:bg-subtle"
+												>
+													Served
+												</button>
+											) : (
+												<StatusPill
+													tone={stationStatus(l.status, station(l)).tone}
+													dot={false}
+												>
+													{stationStatus(l.status, station(l)).label}
+												</StatusPill>
+											))}
 										{l.status !== "CANCELLED" &&
 											l.id &&
 											!current.paid &&
@@ -396,9 +455,17 @@ export function BarTabsScreen({
 										);
 										// A tab over its limit is refused with the service's own sentence; keep it on the details panel.
 										if (!r.ok) setMessage(r.error);
+										// Something another outlet makes (the kitchen's pepper soup) goes there as a ticket now.
+										if (r.ok && lines.some((l) => elsewhere(l.item))) {
+											const sent = await sendOrder(current.id, outletName);
+											if (!sent.ok) return sent;
+											return { ok: true as const, data: sent.data ?? r.data };
+										}
 										return r;
 									},
-									"Added to the tab",
+									lines.some((l) => elsewhere(l.item))
+										? `Added to the tab · sent to ${Array.from(new Set(lines.filter((l) => elsewhere(l.item)).map((l) => station(l.item)))).join(", ")}`
+										: "Added to the tab",
 									(a) => {
 										apply(current.id, a, (x) => {
 											const add = cartTotal(lines, discount);
@@ -411,7 +478,8 @@ export function BarTabsScreen({
 														qty: l.qty,
 														price: l.item.price,
 														options: l.option,
-														status: "NEW",
+														preparedAt: l.item.preparedAt,
+														status: elsewhere(l.item) ? "SENT" : "NEW",
 													})),
 												],
 												subtotal: x.subtotal + add,
@@ -574,6 +642,7 @@ export function BarTabsScreen({
 								amount: current.total,
 								description: `Tab ${current.number}`,
 								roomNumber: current.roomNumber,
+								terminalId: outlet?.terminalId,
 							}
 						: null
 				}

@@ -32,6 +32,7 @@ import {
 	cancelOrderLine,
 	chargeOrderToRoom,
 	closeOrder,
+	markStationReady,
 	readOrder,
 	sendOrder,
 	setLinesStatus,
@@ -59,7 +60,10 @@ import {
 	lineLabel,
 	lineTone,
 	liveLines,
+	madeElsewhere,
 	roomLabel,
+	stationName,
+	stationStatus,
 	toLineInputs,
 	useOrderRows,
 } from "../shared-staff/outlet-shared";
@@ -119,8 +123,11 @@ export function KitchenOrdersScreen({
 	settings,
 	terminals,
 	closed = [],
+	outlets = [],
 }: {
 	orders: OrderRow[];
+	/** The hotel's outlets: names the outlet that makes a line sold here. */
+	outlets?: { id: string; name: string }[];
 	/** Today's closed orders, for Recent sales. */
 	closed?: OrderRow[];
 	menu: MenuItemRow[];
@@ -162,6 +169,19 @@ export function KitchenOrdersScreen({
 	const openCount = rows.filter(
 		(o) => o.status === "OPEN" || o.status === "SENT" || o.status === "READY",
 	).length;
+	// A ticket is another outlet's order with only the lines made here: cooking while any is still sent,
+	// then ready until that outlet serves it (it then leaves the board). Its money is not ours to show.
+	const isTicket = (o: OrderRow) => !!o.ticketFrom;
+	const colOf = (o: OrderRow): OrderRow["status"] =>
+		isTicket(o)
+			? liveLines(o).some((l) => l.status === "SENT" || l.status === "NEW")
+				? "SENT"
+				: "READY"
+			: o.status;
+	const here = (l: OrderRow["lines"][number]) =>
+		!madeElsewhere(l, outlet?.id);
+	const station = (l: OrderRow["lines"][number]) =>
+		stationName(outlets, l.preparedAt);
 	const settled = (o: OrderRow) => o.paid || o.chargedToRoom;
 	// Staff cancel an order only before anything on it went to the kitchen; after that it needs a manager.
 	const untouched = (o: OrderRow) =>
@@ -310,10 +330,51 @@ export function KitchenOrdersScreen({
 					};
 				}),
 		);
+	// Lines another outlet makes are marked ready there; here they are only served once they are ready.
 	const idsFor = (o: OrderRow, from: string[]) =>
 		liveLines(o)
-			.filter((l) => from.includes(l.status))
+			.filter((l) =>
+				here(l)
+					? from.includes(l.status)
+					: from.includes("READY") && l.status === "READY",
+			)
 			.map((l) => l.id ?? "");
+	const cooksHere = (o: OrderRow) => idsFor(o, ["NEW", "SENT"]).length > 0;
+	const waitingOn = (o: OrderRow) =>
+		Array.from(
+			new Set(
+				liveLines(o)
+					.filter((l) => !here(l) && l.status === "SENT")
+					.map(station),
+			),
+		).join(", ");
+	// A ticket from another outlet: everything still cooking for it here is ready at once (station ready),
+	// or one line at a time. The answer is checked for being the ticket before it replaces the row.
+	const ticketReady = (o: OrderRow) =>
+		run(
+			() => markStationReady(o.id, outlet?.id ?? "", outletName),
+			`${o.number} ready · ${o.ticketFrom} told to collect`,
+			(a) =>
+				apply(o.id, a?.ticketFrom ? a : null, (x) => ({
+					...x,
+					lines: x.lines.map((l) =>
+						l.status === "SENT" ? { ...l, status: "READY" } : l,
+					),
+				})),
+		);
+	const ticketLineReady = (o: OrderRow, lineId: string, name: string) =>
+		run(
+			() => setLinesStatus(o.id, [lineId], "READY", outletName),
+			`${name} ready`,
+			// The answer is the whole order of the other outlet; the ticket keeps only its own lines.
+			() =>
+				apply(o.id, null, (x) => ({
+					...x,
+					lines: x.lines.map((l) =>
+						l.id === lineId ? { ...l, status: "READY" } : l,
+					),
+				})),
+		);
 	const allReady = (o: OrderRow) =>
 		markLines(
 			o,
@@ -400,7 +461,7 @@ export function KitchenOrdersScreen({
 		<>
 			<PageHeader
 				title="Orders"
-				subtitle={`${outletName} and room service · ${openCount} open · ${plural(rows.filter((o) => o.status === "OPEN" || o.status === "SENT").length, "order")} cooking`}
+				subtitle={`${outletName} and room service · ${openCount} open · ${plural(rows.filter((o) => colOf(o) === "OPEN" || colOf(o) === "SENT").length, "order")} cooking`}
 			>
 				<Link
 					href="/dashboard/payments"
@@ -436,7 +497,7 @@ export function KitchenOrdersScreen({
 			)}
 			<div className="grid grid-cols-4 gap-3">
 				{cols.map((c) => {
-					const list = rows.filter((o) => o.status === c.key);
+					const list = rows.filter((o) => colOf(o) === c.key);
 					return (
 						<BoardColumn
 							key={c.key}
@@ -444,7 +505,72 @@ export function KitchenOrdersScreen({
 							count={list.length}
 							tone={c.tone}
 						>
-							{list.map((o) => (
+							{list.map((o) =>
+								isTicket(o) ? (
+									<BoardCard
+										key={o.id}
+										label={`Open the ticket from ${o.ticketFrom}`}
+										onClick={() => {
+											setPanel({ kind: "ticket", id: o.id });
+											void setOpen(o.id);
+										}}
+										accent={colOf(o) === "READY" ? "success" : "brand"}
+									>
+										<div className="flex items-center justify-between">
+											<span className="text-[15px] font-bold text-ink">
+												From {o.ticketFrom} · {where(o)}
+											</span>
+											<span
+												className={cn(
+													"text-xs",
+													colOf(o) === "SENT" && minutesSince(o.openedAt) > 15
+														? "font-semibold text-warning"
+														: "text-ink-3",
+												)}
+											>
+												{minutesSince(o.openedAt)} min
+											</span>
+										</div>
+										<p className="text-[13px] text-ink-3">
+											{o.number}
+											{o.guestName ? ` · ${o.guestName}` : ""}
+										</p>
+										<ul className="text-[15px] text-ink">
+											{liveLines(o).map((l, i) => (
+												<li
+													key={l.id ?? i}
+													className={cn(l.status === "READY" && "text-ink-3")}
+												>
+													{l.qty} {l.name}
+													{l.options ? (
+														<span className="ml-1 rounded-md bg-warning-soft px-1 text-xs font-medium text-warning">
+															{l.options}
+														</span>
+													) : null}
+													{l.status === "READY" && colOf(o) !== "READY" ? (
+														<CheckIcon className="ml-1 inline size-3 text-success" />
+													) : null}
+												</li>
+											))}
+										</ul>
+										{colOf(o) === "SENT" ? (
+											<BigButton
+												className="mt-1 h-11"
+												pending={pending}
+												onClick={(e) => {
+													e.stopPropagation();
+													ticketReady(o);
+												}}
+											>
+												<CheckIcon className="size-4" /> Ready
+											</BigButton>
+										) : (
+											<p className="text-xs text-ink-3">
+												Waiting for {o.ticketFrom} to collect
+											</p>
+										)}
+									</BoardCard>
+								) : (
 								<BoardCard
 									key={o.id}
 									label={`Open ${o.number}`}
@@ -509,6 +635,11 @@ export function KitchenOrdersScreen({
 												{l.status === "READY" && o.status !== "READY" ? (
 													<CheckIcon className="ml-1 inline size-3 text-success" />
 												) : null}
+												{!here(l) ? (
+													<span className="ml-1 text-xs text-ink-3">
+														· {station(l)}
+													</span>
+												) : null}
 											</li>
 										))}
 									</ul>
@@ -525,18 +656,23 @@ export function KitchenOrdersScreen({
 											<FlameIcon className="size-4" /> Start
 										</BigButton>
 									)}
-									{o.status === "SENT" && (
-										<BigButton
-											className="mt-1 h-11"
-											pending={pending}
-											onClick={(e) => {
-												e.stopPropagation();
-												allReady(o);
-											}}
-										>
-											<CheckIcon className="size-4" /> Ready
-										</BigButton>
-									)}
+									{o.status === "SENT" &&
+										(cooksHere(o) ? (
+											<BigButton
+												className="mt-1 h-11"
+												pending={pending}
+												onClick={(e) => {
+													e.stopPropagation();
+													allReady(o);
+												}}
+											>
+												<CheckIcon className="size-4" /> Ready
+											</BigButton>
+										) : (
+											<p className="text-xs text-ink-3">
+												Waiting for {waitingOn(o) || "the other outlet"}
+											</p>
+										))}
 									{o.status === "READY" && (
 										<BigButton
 											tone="secondary"
@@ -551,7 +687,8 @@ export function KitchenOrdersScreen({
 										</BigButton>
 									)}
 								</BoardCard>
-							))}
+								),
+							)}
 						</BoardColumn>
 					);
 				})}
@@ -559,7 +696,7 @@ export function KitchenOrdersScreen({
 
 			<RecentSales
 				orders={[
-					...rows.filter((o) => o.kind !== "TAB"),
+					...rows.filter((o) => o.kind !== "TAB" && !isTicket(o)),
 					...closed.filter((c) => !rows.some((r) => r.id === c.id)),
 				]}
 				bar={false}
@@ -584,7 +721,7 @@ export function KitchenOrdersScreen({
 
 			{/* Ticket */}
 			<SidePanel
-				open={panel?.kind === "ticket" && !!current}
+				open={panel?.kind === "ticket" && !!current && !isTicket(current)}
 				onOpenChange={(o) => !o && close()}
 				title={current ? `${current.number} · ${where(current)}` : ""}
 				subtitle={
@@ -604,7 +741,7 @@ export function KitchenOrdersScreen({
 									<FlameIcon className="size-5" /> Start cooking
 								</BigButton>
 							)}
-							{current.status === "SENT" && (
+							{current.status === "SENT" && cooksHere(current) && (
 								<BigButton pending={pending} onClick={() => allReady(current)}>
 									<CheckIcon className="size-5" /> All ready
 								</BigButton>
@@ -682,11 +819,23 @@ export function KitchenOrdersScreen({
 													Happy hour −{naira(l.discount ?? 0)}
 												</span>
 											)}
+											{!here(l) && l.status === "READY" && (
+												<span className="block text-xs text-success">
+													Ready in {station(l)} · collect it
+												</span>
+											)}
 										</span>
 										<span className="text-[13px] text-ink-2">
 											{naira(l.price * l.qty)}
 										</span>
-										{(l.status === "SENT" || l.status === "NEW") &&
+										{!here(l) && l.status !== "READY" ? (
+											<StatusPill
+												tone={stationStatus(l.status, station(l)).tone}
+												dot={false}
+											>
+												{stationStatus(l.status, station(l)).label}
+											</StatusPill>
+										) : (l.status === "SENT" || l.status === "NEW") &&
 										["OPEN", "SENT", "READY"].includes(current.status) ? (
 											<button
 												type="button"
@@ -837,6 +986,90 @@ export function KitchenOrdersScreen({
 								Charging to rooms is switched off in Hotel setup → Restaurant &
 								bar.
 							</p>
+						)}
+					</div>
+				)}
+			</SidePanel>
+
+			{/* A ticket from another outlet: its lines made here, no money */}
+			<SidePanel
+				open={panel?.kind === "ticket" && !!current && isTicket(current)}
+				onOpenChange={(o) => !o && close()}
+				title={current ? `From ${current.ticketFrom} · ${where(current)}` : ""}
+				subtitle={
+					current
+						? `${current.number}${current.guestName ? ` · ${current.guestName}` : ""} · sent ${fmtTime(current.sentAt ?? current.openedAt)}`
+						: undefined
+				}
+				icon={ChefHatIcon}
+				footer={
+					current && (
+						<>
+							<BigButton tone="secondary" onClick={close}>
+								Close
+							</BigButton>
+							{colOf(current) === "SENT" && (
+								<BigButton
+									pending={pending}
+									onClick={() => ticketReady(current)}
+								>
+									<CheckIcon className="size-5" /> All ready
+								</BigButton>
+							)}
+						</>
+					)
+				}
+			>
+				{current && (
+					<div className="flex flex-col gap-5">
+						<Note tone="info">
+							{current.ticketFrom} sold this and keeps the bill. Mark it ready
+							here; their staff collect it and serve it.
+						</Note>
+						<PanelSection title="To make here">
+							<ul className="divide-y divide-line rounded-control border border-line">
+								{liveLines(current).map((l, i) => (
+									<li
+										key={l.id ?? i}
+										className="flex items-center gap-3 px-4 py-3"
+									>
+										<span className="min-w-0 flex-1">
+											<span className="block text-[15px] font-semibold text-ink">
+												{l.qty} × {l.name}
+											</span>
+											{l.options && (
+												<span className="block text-xs text-warning">
+													{l.options}
+												</span>
+											)}
+											{l.notes && (
+												<span className="block text-xs text-ink-3">
+													{l.notes}
+												</span>
+											)}
+										</span>
+										{l.status === "SENT" && l.id ? (
+											<button
+												type="button"
+												disabled={pending}
+												onClick={() =>
+													ticketLineReady(current, l.id ?? "", l.name)
+												}
+												className="rounded-control border border-line px-3 py-2 text-xs font-semibold text-ink hover:bg-subtle"
+											>
+												Ready
+											</button>
+										) : (
+											<StatusPill tone={lineTone(l.status)} dot={false}>
+												{lineLabel(l.status)}
+											</StatusPill>
+										)}
+									</li>
+								))}
+							</ul>
+						</PanelSection>
+						{current.notes && (
+							<p className="text-[13px] text-ink-2">Note: {current.notes}</p>
 						)}
 					</div>
 				)}
@@ -1073,6 +1306,7 @@ export function KitchenOrdersScreen({
 									.map((l) => `${l.qty} ${l.name}`)
 									.join(", ")}`,
 								roomNumber: current.roomNumber,
+								terminalId: outlet?.terminalId,
 							}
 						: null
 				}

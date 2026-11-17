@@ -2,6 +2,7 @@
 
 import {
 	BanIcon,
+	CopyIcon,
 	EyeOffIcon,
 	ListIcon,
 	PencilIcon,
@@ -12,6 +13,7 @@ import {
 	Trash2Icon,
 } from "lucide-react";
 import { parseAsString, useQueryState } from "nuqs";
+import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import { DataTable, TwoLine } from "@hospio/ui/shared/data-table";
 import { Note, TotalsList } from "@hospio/ui/shared/detail-list";
@@ -36,6 +38,8 @@ import { StatusPill } from "@hospio/ui/shared/status-pill";
 import { SearchBox, Toolbar } from "@hospio/ui/shared/toolbar";
 import {
 	changeItemPrice,
+	copyMenu,
+	readMenuCategories,
 	saveCategory,
 	saveHappyHour,
 	saveMenuItem,
@@ -60,6 +64,7 @@ type Panel =
 	| { kind: "price"; item: MenuItemRow }
 	| { kind: "categories" }
 	| { kind: "happy" }
+	| { kind: "copy" }
 	| null;
 type Draft = {
 	name: string;
@@ -69,7 +74,11 @@ type Draft = {
 	active: boolean;
 	groups: OptionGroup[];
 	recipe: { stockItemId: string; quantity: number | "" }[];
+	/** The outlet that makes it; HERE = this outlet. */
+	madeAt: string;
 };
+/** "Made at: This outlet" (a select can't hold an empty value). */
+const HERE = "here";
 const emptyDraft = (category: string): Draft => ({
 	name: "",
 	category,
@@ -78,7 +87,21 @@ const emptyDraft = (category: string): Draft => ({
 	active: true,
 	groups: [],
 	recipe: [],
+	madeAt: HERE,
 });
+type CopyDraft = {
+	from: string;
+	/** The source's categories; null while they load. */
+	sourceCategories: { name: string; items: number }[] | null;
+	categories: string[];
+	madeAtSource: boolean;
+};
+const emptyCopy: CopyDraft = {
+	from: "",
+	sourceCategories: null,
+	categories: [],
+	madeAtSource: false,
+};
 const DAY_KEYS = ["MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"];
 type HappyDraft = {
 	id?: string;
@@ -112,6 +135,7 @@ export function MenuScreen({
 	happyHours: initialHappy,
 	title = "Menu & prices",
 	canManage = true,
+	outlets = [],
 }: {
 	menu: MenuItemRow[];
 	outlet: { id: string; name: string; kind: OutletKind };
@@ -121,6 +145,8 @@ export function MenuScreen({
 	title?: string;
 	/** Manager or Full access on the outlet's role: add, edit, categories and happy hours. Others mark sold out and ask for price changes. */
 	canManage?: boolean;
+	/** Every outlet of the hotel: where an item can be made, and the menus to copy from. */
+	outlets?: { id: string; name: string; kind: OutletKind }[];
 }) {
 	const [items, setItems] = useState(menu);
 	useEffect(() => setItems(menu), [menu]);
@@ -133,6 +159,7 @@ export function MenuScreen({
 	const [panel, setPanel] = useState<Panel>(null);
 	const [soldOut, setSoldOut] = useState<MenuItemRow | null>(null);
 	const { run, pending } = useAction();
+	const router = useRouter();
 	const isBar = outlet.kind === "BAR";
 	const showHappy = initialHappy !== undefined;
 	const noun = isBar ? "drink" : "item";
@@ -157,6 +184,40 @@ export function MenuScreen({
 	const [reason, setReason] = useState("");
 	const [newCat, setNewCat] = useState("");
 	const [happy, setHappy] = useState<HappyDraft>(emptyHappy());
+	const others = outlets.filter((o) => o.id !== outlet.id);
+	const outletName = (id?: string) =>
+		others.find((o) => o.id === id)?.name ?? "another outlet";
+	const [copy, setCopy] = useState<CopyDraft>(emptyCopy);
+	const copyFrom = others.find((o) => o.id === copy.from);
+	const pickSource = (from: string) => {
+		const source = others.find((o) => o.id === from);
+		setCopy({
+			...emptyCopy,
+			from,
+			// A kitchen keeps cooking what it already cooks; a bar's drinks are poured here.
+			madeAtSource: source?.kind !== "BAR",
+		});
+		void readMenuCategories(from).then((r) =>
+			setCopy((c) =>
+				c.from === from ? { ...c, sourceCategories: r.ok ? r.data : [] } : c,
+			),
+		);
+	};
+	const runCopy = () =>
+		copyFrom &&
+		run(
+			() =>
+				copyMenu(outlet.id, {
+					fromOutletId: copyFrom.id,
+					categories: copy.categories,
+					madeAtSource: copy.madeAtSource,
+				}),
+			(r) => `${r.copied} added, ${r.skipped} already on the menu`,
+			() => {
+				close();
+				router.refresh();
+			},
+		);
 
 	const close = () => setPanel(null);
 	const patch = (m: MenuItemRow) =>
@@ -190,6 +251,7 @@ export function MenuScreen({
 				stockItemId: r.stockItemId,
 				quantity: r.quantity,
 			})),
+			madeAt: item.preparedAt ?? HERE,
 		});
 		setPanel({ kind: "edit", item });
 	};
@@ -222,6 +284,9 @@ export function MenuScreen({
 						})),
 					active: draft.active,
 					sortOrder: editing?.sortOrder,
+					...(others.length
+						? { preparedAt: draft.madeAt === HERE ? "" : draft.madeAt }
+						: {}),
 				}),
 			editing ? "Item updated" : `${isBar ? "Drink" : "Item"} added`,
 			(m) => {
@@ -255,6 +320,17 @@ export function MenuScreen({
 						}}
 					>
 						<SunIcon className="size-5" /> Happy hours
+					</BigButton>
+				)}
+				{canManage && others.length > 0 && (
+					<BigButton
+						tone="secondary"
+						onClick={() => {
+							setCopy(emptyCopy);
+							setPanel({ kind: "copy" });
+						}}
+					>
+						<CopyIcon className="size-5" /> Copy menu from…
 					</BigButton>
 				)}
 				{canManage && (
@@ -320,15 +396,23 @@ export function MenuScreen({
 						accessorKey: "name",
 						header: "Item",
 						cell: ({ row }) => (
-							<TwoLine
-								primary={row.original.name}
-								secondary={
-									row.original.description ??
-									(row.original.options?.length
-										? `Choices: ${row.original.options.join(", ")}`
-										: undefined)
-								}
-							/>
+							<div className="flex flex-col gap-1">
+								<TwoLine
+									primary={row.original.name}
+									secondary={
+										row.original.description ??
+										(row.original.options?.length
+											? `Choices: ${row.original.options.join(", ")}`
+											: undefined)
+									}
+								/>
+								{row.original.preparedAt &&
+									row.original.preparedAt !== outlet.id && (
+										<StatusPill tone="info" dot={false} className="self-start">
+											Made in {outletName(row.original.preparedAt)}
+										</StatusPill>
+									)}
+							</div>
 						),
 					},
 					{ accessorKey: "category", header: "Category" },
@@ -580,6 +664,22 @@ export function MenuScreen({
 						onChange={(v) => setDraft({ ...draft, description: v })}
 						rows={2}
 					/>
+					{others.length > 0 && (
+						<SelectField
+							label="Made at"
+							value={draft.madeAt}
+							onChange={(v) => setDraft({ ...draft, madeAt: v })}
+							options={[
+								{ value: HERE, label: "This outlet" },
+								...others.map((o) => ({ value: o.id, label: o.name })),
+							]}
+							hint={
+								draft.madeAt === HERE
+									? "Staff here make it."
+									: `Sold here, made in ${outletName(draft.madeAt)}. It goes there as a ticket; they mark it ready and staff here serve it.`
+							}
+						/>
+					)}
 					<ToggleField
 						label="On the menu"
 						checked={draft.active}
@@ -786,6 +886,100 @@ export function MenuScreen({
 							menu hides it from every picker. Orders that already have it are
 							not affected.
 						</Note>
+					)}
+				</div>
+			</SidePanel>
+
+			<SidePanel
+				open={panel?.kind === "copy"}
+				onOpenChange={(o) => !o && close()}
+				title="Copy menu from…"
+				subtitle={`Into ${outlet.name}`}
+				icon={CopyIcon}
+				footer={
+					<>
+						<BigButton tone="secondary" onClick={close}>
+							Cancel
+						</BigButton>
+						<BigButton
+							pending={pending}
+							disabled={!copyFrom}
+							onClick={runCopy}
+						>
+							Copy items
+						</BigButton>
+					</>
+				}
+			>
+				<div className="flex flex-col gap-4">
+					<SelectField
+						label="Copy from"
+						value={copy.from}
+						onChange={pickSource}
+						options={others.map((o) => ({ value: o.id, label: o.name }))}
+						placeholder="Pick an outlet"
+					/>
+					{copyFrom && (
+						<>
+							<PanelSection title="Categories">
+								{copy.sourceCategories === null ? (
+									<p className="text-[13px] text-ink-3">Loading…</p>
+								) : copy.sourceCategories.length === 0 ? (
+									<p className="text-[13px] text-ink-3">
+										Every item on {copyFrom.name}'s menu is copied.
+									</p>
+								) : (
+									<>
+										<div className="flex flex-wrap gap-2">
+											{copy.sourceCategories.map((c) => (
+												<button
+													key={c.name}
+													type="button"
+													onClick={() =>
+														setCopy({
+															...copy,
+															categories: copy.categories.includes(c.name)
+																? copy.categories.filter((x) => x !== c.name)
+																: [...copy.categories, c.name],
+														})
+													}
+													className={cn(
+														"rounded-pill px-4 py-2 text-[13px] font-semibold",
+														copy.categories.includes(c.name)
+															? "bg-brand text-white"
+															: "bg-subtle text-ink-2 hover:text-ink",
+													)}
+												>
+													{c.name} · {c.items}
+												</button>
+											))}
+										</div>
+										<p className="text-xs text-ink-3">
+											{copy.categories.length
+												? `Only ${copy.categories.join(", ")}.`
+												: "None picked: every category is copied."}
+										</p>
+									</>
+								)}
+							</PanelSection>
+							<ToggleField
+								label={`Keep them made at ${copyFrom.name}`}
+								checked={copy.madeAtSource}
+								onChange={(v) => setCopy({ ...copy, madeAtSource: v })}
+								hint={
+									copy.madeAtSource
+										? `Orders here send these items to ${copyFrom.name} as tickets.`
+										: "Staff here make them."
+								}
+							/>
+							<WhatHappens
+								items={[
+									"Items on the menu are copied with their price, choices, recipe and category",
+									"An item whose name is already on this menu is skipped",
+									"Change prices here afterwards without touching the source",
+								]}
+							/>
+						</>
 					)}
 				</div>
 			</SidePanel>

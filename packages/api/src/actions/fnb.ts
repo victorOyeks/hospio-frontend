@@ -3,6 +3,8 @@
 import type { ActionResult } from "@hospio/api/actions/auth";
 import { api, errorMessage } from "@hospio/api/api/client";
 import { withSession } from "@hospio/api/api/server";
+import { cookies } from "next/headers";
+import { outletCookie } from "@hospio/api/data/fnb";
 import { live } from "@hospio/api/data/live";
 import {
 	salesQuery,
@@ -258,6 +260,35 @@ export async function setLinesStatus(
 	}
 	revalidateOps();
 	return { ok: true, data: last ? toOrderRow(last, outletName) : null };
+}
+
+/**
+ * The kitchen's Ready on a ticket from another outlet (or its own order): every line still cooking that is
+ * made at `stationId` becomes READY. The answer is the ticket as the board sees it.
+ */
+export async function markStationReady(
+	orderId: string,
+	stationId: string,
+	outletName?: string,
+): Promise<ActionResult<OrderRow | null>> {
+	if (!fnbLive()) {
+		await demoDelay(300);
+		return { ok: true, data: null };
+	}
+	const { data, error } = await api(
+		"@post/fnb/orders/:id/stations/:stationId/ready",
+		{
+			...(await withSession()),
+			params: { id: orderId, stationId },
+		},
+	);
+	if (error || !data)
+		return {
+			ok: false,
+			error: errorMessage(error, "The ticket could not be marked ready"),
+		};
+	revalidateOps();
+	return { ok: true, data: toOrderRow(data.data, outletName) };
 }
 
 /** Close a settled order (the ticket is done). The service refuses an order that is not paid or on a room. */
@@ -563,6 +594,8 @@ export type MenuItemInput = {
 	recipe: { stockItemId: string; quantity: number }[];
 	active: boolean;
 	sortOrder?: number;
+	/** Another outlet that makes it; "" = made here. Left out, the item keeps what it had. */
+	preparedAt?: string;
 };
 
 /** Add or edit a dish or drink: choices as JSON, the recipe per portion, and whether it is on the menu. */
@@ -588,6 +621,7 @@ export async function saveMenuItem(
 				options: input.options.flatMap((g) => g.choices.map((c) => c.name)),
 				optionGroups: input.options.length ? input.options : undefined,
 				recipe: input.recipe.length ? input.recipe : undefined,
+				preparedAt: input.preparedAt || undefined,
 			},
 		};
 	}
@@ -600,6 +634,7 @@ export async function saveMenuItem(
 		recipe: input.recipe,
 		sortOrder: input.sortOrder ?? null,
 		active: input.active,
+		preparedAt: input.preparedAt ?? null,
 	};
 	const s = await withSession();
 	const { data, error } = id
@@ -620,6 +655,75 @@ export async function saveMenuItem(
 		};
 	revalidateOps();
 	return { ok: true, data: toMenuItemRow(data.data, outlet) };
+}
+
+/** The categories on another outlet's menu with how many items each has, for Copy menu from. */
+export async function readMenuCategories(
+	outletId: string,
+): Promise<ActionResult<{ name: string; items: number }[]>> {
+	if (!fnbLive()) return { ok: true, data: [] };
+	const { data, error } = await api("@get/fnb/outlets/:outletId/menu", {
+		...(await withSession()),
+		params: { outletId },
+		query: {},
+	});
+	if (error || !data)
+		return {
+			ok: false,
+			error: errorMessage(error, "The menu could not be read"),
+		};
+	const counts = new Map<string, number>();
+	for (const m of data.data)
+		if (m.active !== false)
+			counts.set(m.category, (counts.get(m.category) ?? 0) + 1);
+	return {
+		ok: true,
+		data: Array.from(counts, ([name, items]) => ({ name, items })),
+	};
+}
+
+export type MenuCopyResult = {
+	copied: number;
+	skipped: number;
+	categories: number;
+};
+
+/**
+ * Copy another outlet's menu here (only `categories` when given). Names already on this menu are skipped.
+ * With `madeAtSource` the copies stay made at the source (the kitchen keeps cooking the pepper soup).
+ * Needs Full on the outlet or a manager; the service refuses otherwise.
+ */
+export async function copyMenu(
+	outletId: string,
+	input: { fromOutletId: string; categories?: string[]; madeAtSource: boolean },
+): Promise<ActionResult<MenuCopyResult>> {
+	if (!fnbLive()) {
+		await demoDelay(400);
+		return { ok: true, data: { copied: 0, skipped: 0, categories: 0 } };
+	}
+	const { data, error } = await api("@post/fnb/outlets/:outletId/menu/copy", {
+		...(await withSession()),
+		params: { outletId },
+		body: {
+			fromOutletId: input.fromOutletId,
+			categories: input.categories ?? [],
+			madeAtSource: input.madeAtSource,
+		},
+	});
+	if (error || !data)
+		return {
+			ok: false,
+			error: errorMessage(error, "The menu could not be copied"),
+		};
+	revalidateOps();
+	return {
+		ok: true,
+		data: {
+			copied: data.data.copied,
+			skipped: data.data.skipped,
+			categories: data.data.categories ?? 0,
+		},
+	};
 }
 
 export async function saveCategory(
@@ -710,6 +814,24 @@ export async function saveHappyHour(
 	return { ok: true, data: toHappyHourRow(data.data) };
 }
 
+/**
+ * Which outlet this desk works on this device, when the hotel has several of its kind (a Bar and a Patio Lounge).
+ * `data.outlets.forRole` reads it; kept for a year.
+ */
+export async function chooseOutlet(
+	desk: "KITCHEN" | "BAR",
+	outletId: string,
+): Promise<ActionResult<null>> {
+	const jar = await cookies();
+	jar.set(outletCookie(desk), outletId, {
+		path: "/",
+		maxAge: 60 * 60 * 24 * 365,
+		sameSite: "lax",
+		secure: process.env.NODE_ENV === "production",
+	});
+	return { ok: true, data: null };
+}
+
 // ---- Hotel setup: outlets and tables ------------------------------------------------------------------
 
 export async function saveOutlet(
@@ -719,6 +841,8 @@ export async function saveOutlet(
 		kind: OutletRow["kind"];
 		storeId?: string;
 		status: OutletRow["status"];
+		/** The POS terminal its payments go to first; "" = the role's terminal. Left out, kept. */
+		terminalId?: string;
 	},
 	tables: TableRow[] = [],
 ): Promise<ActionResult<OutletRow>> {
@@ -732,6 +856,7 @@ export async function saveOutlet(
 				kind: input.kind,
 				status: input.status,
 				storeId: input.storeId,
+				terminalId: input.terminalId || undefined,
 				tables,
 			},
 		};
@@ -741,6 +866,7 @@ export async function saveOutlet(
 		kind: input.kind,
 		storeId: input.storeId ?? null,
 		status: input.status,
+		terminalId: input.terminalId ?? null,
 	};
 	const s = await withSession();
 	const { data, error } = id

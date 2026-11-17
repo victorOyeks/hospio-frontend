@@ -16,7 +16,7 @@ export default async function OwnerHotelSetupPage({
 }) {
 	const { section } = await params;
 	const key = section?.[0] ?? "basics";
-	const [hotel, sections, { outlets, stores }] = await Promise.all([
+	const [hotel, sections, { outlets, stores, terminals }] = await Promise.all([
 		getActiveHotel(),
 		loadSetup(),
 		loadOutlets(),
@@ -30,6 +30,7 @@ export default async function OwnerHotelSetupPage({
 			hotelId={hotel?.id}
 			outlets={outlets}
 			stores={stores}
+			terminals={terminals}
 			isOwner
 		/>
 	);

@@ -54,6 +54,7 @@ import type {
 	HotelSetupSection,
 	OutletRow,
 	StoreRow,
+	TerminalRow,
 } from "@hospio/api/data/types";
 import { SharedDevicesSection } from "./hotel-setup-devices";
 import {
@@ -125,6 +126,7 @@ export function HotelSetupScreen({
 	isOwner,
 	outlets = [],
 	stores = [],
+	terminals = [],
 }: {
 	sections: HotelSetupSection[];
 	activeKey: string;
@@ -134,6 +136,8 @@ export function HotelSetupScreen({
 	/** The kitchens and bars with their tables, and the stores they can draw from (Restaurants & tables). */
 	outlets?: OutletRow[];
 	stores?: StoreRow[];
+	/** The hotel's POS terminals: an outlet may take payment on its own one. */
+	terminals?: TerminalRow[];
 }) {
 	const section = sections.find((s) => s.key === activeKey) ?? sections[0];
 	const locked = !!section.ownerOnly && !isOwner;
@@ -174,6 +178,7 @@ export function HotelSetupScreen({
 						key={section.key}
 						outlets={outlets}
 						stores={stores}
+						terminals={terminals}
 						locked={locked}
 					/>
 				) : section.key === "pos" ? (

@@ -14,6 +14,8 @@ export type DeskPayment = {
 	amount: number;
 	description: string;
 	roomNumber?: string;
+	/** The selling outlet's own POS: picked first while it is online. */
+	terminalId?: string;
 };
 
 /**
@@ -49,6 +51,8 @@ export function OrderPaymentPanel({
 		if (open) setRun((n) => n + 1);
 	}, [open]);
 	const mine = terminals.filter((t) => t.roles.includes(desk));
+	const own = terminals.find((t) => t.id === payment?.terminalId);
+	const choices = mine.length ? mine : terminals;
 	if (!payment) return null;
 	return (
 		<PaymentSteps
@@ -60,8 +64,11 @@ export function OrderPaymentPanel({
 				description: payment.description,
 				orderId: payment.orderId,
 				role: desk,
+				terminalId: payment.terminalId,
 			}}
-			terminals={mine.length ? mine : terminals}
+			terminals={
+				own && !choices.includes(own) ? [own, ...choices] : choices
+			}
 			onDone={onDone}
 			onFinish={() => {
 				onOpenChange(false);
