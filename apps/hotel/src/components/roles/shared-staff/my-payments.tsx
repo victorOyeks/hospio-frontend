@@ -37,6 +37,7 @@ const tone: Record<
 	DECLINED: "danger",
 	FAILED: "danger",
 	REFUNDED: "grey",
+	TIMED_OUT: "warning",
 };
 const label: Record<PaymentRow["status"], string> = {
 	APPROVED: "Approved",
@@ -46,6 +47,7 @@ const label: Record<PaymentRow["status"], string> = {
 	DECLINED: "Declined",
 	FAILED: "Failed",
 	REFUNDED: "Refunded",
+	TIMED_OUT: "Timed out",
 };
 
 /**
@@ -251,6 +253,7 @@ export function MyPaymentsScreen({
 						/>
 						{(current.status === "PROCESSING" ||
 							current.status === "NO_RESPONSE" ||
+							current.status === "TIMED_OUT" ||
 							current.status === "PENDING") && (
 							<PanelSection title="Verify">
 								{current.status === "NO_RESPONSE" ? (
@@ -287,7 +290,8 @@ export function MyPaymentsScreen({
 							</PanelSection>
 						)}
 						{(current.status === "DECLINED" ||
-							current.status === "NO_RESPONSE") &&
+							current.status === "NO_RESPONSE" ||
+							current.status === "TIMED_OUT") &&
 							(current.method === "CARD" || current.method === "TRANSFER") && (
 								<BigButton
 									tone="secondary"

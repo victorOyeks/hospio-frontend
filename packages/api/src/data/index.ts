@@ -202,10 +202,10 @@ function demoPaymentPage(q: PaymentQuery): PageResult<PaymentRow> {
 	const counts: Record<string, number> = { all: base.length };
 	for (const p of base) counts[p.status] = (counts[p.status] ?? 0) + 1;
 	counts.toVerify = base.filter((p) =>
-		["PENDING", "PROCESSING", "NO_RESPONSE"].includes(p.status),
+		["PENDING", "PROCESSING", "NO_RESPONSE", "TIMED_OUT"].includes(p.status),
 	).length;
 	counts.attention = base.filter((p) =>
-		["DECLINED", "NO_RESPONSE", "PROCESSING"].includes(p.status),
+		["DECLINED", "NO_RESPONSE", "PROCESSING", "TIMED_OUT"].includes(p.status),
 	).length;
 	counts.today = base.filter((p) => lagosDayOf(p.createdAt) === today).length;
 	counts.mine = base.length;
