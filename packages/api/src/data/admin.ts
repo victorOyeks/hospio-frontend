@@ -1657,6 +1657,7 @@ export const adminData = {
 						debitEnabled: i % 3 === 0,
 						posPaused: i % 7 === 6,
 						keysIn: i % 3 !== 2,
+						providers: i % 3 === 2 ? [] : i % 2 ? ["OPAY"] : ["MONIEPOINT", "OPAY"],
 						debitConfigured: i % 3 !== 2,
 					},
 					lastFee:
@@ -1691,7 +1692,8 @@ export const adminData = {
 			return base.map((h) => {
 				const st = stateOf.get(h.id);
 				const ps = posOf.get(h.id);
-				const provider = st?.provider ?? ps?.provider ?? null;
+				// The provider the fee is debited from, else the first provider with keys.
+				const provider = st?.provider ?? ps?.providers[0] ?? null;
 				const c = st || ps ? true : null;
 				return {
 					...h,
@@ -1700,7 +1702,8 @@ export const adminData = {
 								provider,
 								debitEnabled: !!st?.debitEnabled,
 								posPaused: !!(st?.posPaused || ps?.posPaused),
-								keysIn: !!ps?.complete,
+								keysIn: !!ps && ps.providers.length > 0,
+								providers: ps?.providers ?? [],
 								debitConfigured: provider ? !!configured.get(provider) : false,
 							}
 						: {

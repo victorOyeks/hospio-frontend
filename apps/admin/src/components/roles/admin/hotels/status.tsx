@@ -44,11 +44,11 @@ export const providerName = (p?: string | null) => (p === "OPAY" ? "OPay" : p ==
 
 export function KeysCell({ c }: { c: HotelCollectionSummary | null }) {
 	if (!c) return <span className="text-ink-3">—</span>;
-	const name = providerName(c.provider);
+	const names = (c.providers?.length ? c.providers : c.keysIn && c.provider ? [c.provider] : []).map(providerName).filter(Boolean);
 	return (
 		<span className="flex flex-col gap-[2px]">
 			{c.keysIn ? <StatusPill tone="success">Keys in</StatusPill> : <StatusPill tone="warning">No keys</StatusPill>}
-			<span className="text-[11px] text-ink-3">{name ?? "No provider chosen"}</span>
+			<span className="text-[11px] text-ink-3">{names.length ? names.join(" · ") : "No provider yet"}</span>
 		</span>
 	);
 }
