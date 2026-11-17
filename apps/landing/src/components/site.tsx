@@ -203,7 +203,12 @@ export function SiteFooter() {
 					))}
 				</div>
 				<div className="flex flex-col gap-2 text-[13px] text-ink-2 sm:flex-row sm:items-center sm:justify-between">
-					<p>© {new Date().getFullYear()} Hospio360, a product of Oyeks Global</p>
+					<div className="flex flex-col gap-1">
+						<p>
+							© {new Date().getFullYear()} Hospio360, a product of Oyeks Global Ltd (RC 10001123)
+						</p>
+						<p>9 Remi Omoniyi Crescent, Ikorodu, Lagos State, Nigeria</p>
+					</div>
 					<a href={`mailto:${CONTACT_EMAIL}`} className="hover:text-ink">
 						{CONTACT_EMAIL}
 					</a>
