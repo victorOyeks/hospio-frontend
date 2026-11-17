@@ -60,6 +60,7 @@ allow-listed number 09035911994, so sign-up and phone codes for any other number
 | 44 | `44-outlet-switcher.md` | "Serving at" in the sidebar for bars and kitchens with several outlets: neutral menu labels, outlet-named titles, outlet colours, switching keeps the page, All outlets on Tabs and Sales for managers and leads, one-outlet hotels unchanged | Ready |
 | 45 | `45-onboarding-pos-terminals.md` | Onboarding → Connections terminals match today: Moniepoint/OPay/test only, provider-specific reference, desk assignment, POS key status | Ready |
 | 46 | `46-lock-screen-resume.md` | Resume after the lock screen: the same person goes back to the page they were on (shared-device lock or signing in again), anyone else to their home page; drafts of Check in, New booking, bar sale, kitchen order, till handover and housekeeping report come back for the same person only, cleared on save/cancel/sign-out/someone else, 4 h; no payments, PINs or amounts kept | Ready |
+| 47 | `47-samuel-defects-nov.md` | Defect log DEF-076 to DEF-086: empty number fields (tables, menu quantities, choices), outlet store picker and empty lists, cancelling the last dish cancels the order, menu quantity validation, one price change at a time with 'awaiting approval', order-ready notification opens Room service, manager selling by design | Ready |
 
 ## Before you start
 

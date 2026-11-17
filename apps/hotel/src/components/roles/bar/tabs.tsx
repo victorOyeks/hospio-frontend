@@ -772,8 +772,18 @@ export function BarTabsScreen({
 					run(
 						() =>
 							cancelOrderLine(current.id, cancel.lineId, reason, outletName),
-						"Removed from the tab",
+						(a) =>
+							a?.status === "CANCELLED"
+								? `${cancel.name} removed · nothing is left, so ${current.number} is cancelled`
+								: "Removed from the tab",
 						(a) => {
+							if (a?.status === "CANCELLED") {
+								// The last drink of a sale that is not a tab: fnb-service cancelled the sale with it (DEF-085).
+								put(a);
+								setCancel(null);
+								close();
+								return;
+							}
 							apply(current.id, a, (x) => ({
 								...x,
 								lines: x.lines.map((l) =>

@@ -1095,7 +1095,7 @@ export type MenuItemRow = {
 	sortOrder?: number;
 	/** Stock drawn per portion when the order is settled. */
 	recipe?: { stockItemId: Id; quantity: number }[];
-	/** A price change waiting for the manager (set by the screen after the 202 answer). */
+	/** A price change waiting for the manager (fnb-service `pendingPrice`; the screen sets it after the 202 answer too). */
 	pendingPrice?: number;
 	/** The outlet that makes it (e.g. the kitchen for a bar's pepper soup); unset = made where it is sold. */
 	preparedAt?: Id;
