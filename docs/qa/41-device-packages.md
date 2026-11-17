@@ -55,10 +55,10 @@ at all (own devices). See hospio-backend docs/plan-device-packages.md.
 ## 6. The data plan after installation
 
 1. Hotel panel → Devices on an installed package with a data plan: a **Data plan** box shows Running, the price, the next invoice
-   and "No renewal recorded yet".
+   (the first due day not invoiced yet: on a due day whose invoice is out, next month) and "No renewal recorded yet".
 2. **Mark renewed with provider** (any admin): pick a day → "Renewed through … · <you>". A past day is refused.
 3. Finance or Super admin: **Change price** (0 or empty refused) → later invoices use the new price; issued ones keep theirs.
-4. **Stop data plan** → Stopped from the next due day; no more data plan invoices; invoices already issued stay owed. **Start data plan
+4. **Stop data plan** (the confirm names the day it takes effect: the first due day after today, even when today's invoice is still to come) → Stopped from that day; no more data plan invoices; invoices already issued stay owed. **Start data plan
    again** → billed from the next due day; the stopped months are never billed. A package with no data plan offers **Add a data plan**.
 5. Support sees the box and Mark renewed, but not Change price / Stop / Start.
 6. Fees & billing → Devices → **Data plan renewals**: running plans whose subscription runs out within 7/14/30 days (never recorded
