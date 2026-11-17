@@ -4,6 +4,7 @@ import { BanknoteIcon, ReceiptIcon, WalletIcon } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import type { DailyFeeRow } from "@hospio/api/actions/daily-fees";
+import type { DevicePackageView } from "@hospio/api/actions/device-packages";
 import { DetailList, Note } from "@hospio/ui/shared/detail-list";
 import { EmptyState } from "@hospio/ui/shared/empty-state";
 import { fmtWhen, naira } from "@hospio/ui/shared/format";
@@ -20,6 +21,27 @@ import { cell, tableHead, tableRow } from "@hospio/ui/shared/ui";
  * debited at 6am from the hotel's POS provider account (Moniepoint or OPay) once automatic debit is on, so there is nothing to
  * pay here. Until then the days show as "Statement only". `?month=YYYY-MM` shows one month; without it, the last 30 days.
  */
+
+/** How a devices package is paid for, in the owner's words. */
+function devicePayLabel(p: DevicePackageView) {
+	switch (p.paymentOption) {
+		case "TRANSACTION":
+			return `Paid from sales: ${p.deviceRate ?? 2.5}% of each day's sales, with the Hospio fee`;
+		case "MONTHLY":
+			return `Paid monthly: ${p.months} × ${naira(p.monthlyInstalment ?? 0)}`;
+		case "ONE_TIME":
+			return "Paid in full at installation";
+		default:
+			return "Own devices";
+	}
+}
+
+function deviceStatus(s: string) {
+	if (s === "PAID_OFF") return <StatusPill tone="success">Paid off</StatusPill>;
+	if (s === "INSTALLED") return <StatusPill tone="warning">Paying off</StatusPill>;
+	if (s === "DRAFT") return <StatusPill tone="info">Agreed · not installed yet</StatusPill>;
+	return <StatusPill tone="grey">{s}</StatusPill>;
+}
 
 const providerName = (p?: string | null) => (p === "OPAY" ? "OPay" : p === "MONIEPOINT" ? "Moniepoint" : p ? p : null);
 
@@ -68,9 +90,12 @@ export function HospioFees({
 	error,
 	month,
 	audience = "owner",
+	devices = [],
 }: {
 	days: DailyFeeRow[];
 	error: string | null;
+	/** The devices & internet Hospio360 supplied, one package per hotel (none when the hotel uses its own). */
+	devices?: DevicePackageView[];
 	/** YYYY-MM, or null for the last 30 days. */
 	month?: string | null;
 	audience?: "owner" | "manager";
@@ -84,6 +109,8 @@ export function HospioFees({
 	const collected = days.reduce((s, d) => s + (d.collected ?? 0), 0);
 	const shadow = days.some((d) => d.status === "SHADOW");
 	const hotels = new Set(days.map((d) => d.hotelId)).size;
+	const anyDevice = days.some((d) => (d.deviceFee ?? 0) > 0 || (d.deviceCarriedIn ?? 0) > 0);
+	const supplied = devices.filter((p) => p.paymentOption !== "OWN_DEVICES" || p.dataPlanMonthly > 0);
 	return (
 		<>
 			<PageHeader
@@ -123,6 +150,48 @@ export function HospioFees({
 				<KpiCard label="Hospio fees" value={naira(fees)} icon={ReceiptIcon} hint={days[0] ? `${days[0].rate} % of sales` : undefined} />
 				<KpiCard label="Debited" value={naira(collected)} icon={WalletIcon} />
 			</div>
+			{supplied.length > 0 && (
+				<SectionCard
+					title="Devices & internet"
+					subtitle="What Hospio360 supplied and how it is being paid for. Hospio360 owns the devices until they are paid off."
+					flush
+				>
+					<ul className="divide-y divide-line">
+						{supplied.map((p) => {
+							const pct = p.total > 0 ? Math.min(100, Math.round((p.paid / p.total) * 100)) : 0;
+							return (
+								<li key={p.id} className="flex flex-col gap-2 px-5 py-4">
+									<div className="flex flex-wrap items-center justify-between gap-2">
+										<p className="text-[14px] font-semibold text-ink">
+											{audience === "owner" && p.hotelName ? `${p.hotelName} · ` : ""}
+											{devicePayLabel(p)}
+										</p>
+										{deviceStatus(p.status)}
+									</div>
+									<p className="text-[13px] text-ink-2">{p.items.map((i) => `${i.quantity} × ${i.name}`).join(" · ") || "—"}</p>
+									{p.total > 0 && (
+										<>
+											<div className="h-2 w-full overflow-hidden rounded-full bg-subtle">
+												<div className="h-full rounded-full bg-brand" style={{ width: `${pct}%` }} />
+											</div>
+											<p className="text-[12px] text-ink-3">
+												{naira(p.paid)} of {naira(p.total)} paid · {naira(p.remaining)} left
+												{p.expectedFinish ? ` · expected to finish around ${day(p.expectedFinish, true)}` : ""}
+											</p>
+										</>
+									)}
+									{p.dataPlanMonthly > 0 && <p className="text-[12px] text-ink-3">Data plan: {naira(p.dataPlanMonthly)} a month</p>}
+									{p.payments.length > 0 && (
+										<p className="text-[12px] text-ink-3">
+											Last payment {naira(p.payments[0].amount)} on {day(p.payments[0].paidOn)}
+										</p>
+									)}
+								</li>
+							);
+						})}
+					</ul>
+				</SectionCard>
+			)}
 			<SectionCard title="Days" subtitle="Open a day for what was sold and how the fee was taken" flush>
 				{days.length === 0 ? (
 					<EmptyState title="No days yet" hint="The first day appears after midnight, with its statement in your email." className="m-5" />
@@ -135,6 +204,7 @@ export function HospioFees({
 									{hotels > 1 && <th className={cell}>Hotel</th>}
 									<th className={cell}>Sales</th>
 									<th className={cell}>Fee</th>
+									{anyDevice && <th className={cell}>Devices</th>}
 									<th className={cell}>Debited</th>
 									<th className={cell}>From</th>
 									<th className={cell}>Status</th>
@@ -147,6 +217,7 @@ export function HospioFees({
 										{hotels > 1 && <td className={cell}>{d.hotelName ?? "—"}</td>}
 										<td className={cell}>{naira(d.sales)}</td>
 										<td className={cell}>{naira(d.fee)}</td>
+										{anyDevice && <td className={cell}>{(d.deviceFee ?? 0) > 0 ? naira(d.deviceFee ?? 0) : "—"}</td>}
 										<td className={cell}>{naira(d.collected ?? 0)}</td>
 										<td className={cell}>
 											{providerName(d.provider) ? (
@@ -190,6 +261,13 @@ export function HospioFees({
 							items={[
 								{ label: `Fee at ${open.rate} %`, value: naira(open.fee) },
 								{ label: "From earlier days", value: naira(open.carriedIn ?? 0) },
+								...((open.deviceFee ?? 0) > 0 || (open.deviceCarriedIn ?? 0) > 0
+									? [
+											{ label: `Devices at ${open.deviceRate ?? 0} %`, value: naira(open.deviceFee ?? 0) },
+											{ label: "Devices from earlier days", value: naira(open.deviceCarriedIn ?? 0) },
+											{ label: "Paid to devices", value: naira(open.devicePaid ?? 0) },
+										]
+									: []),
 								{ label: "Debited", value: naira(open.collected ?? 0) },
 								{ label: "Status", value: status(open.status) },
 								{ label: "Due that day", value: naira(open.due) },

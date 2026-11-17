@@ -8,6 +8,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import type { DailyFeeRow } from "@hospio/api/actions/daily-fees";
+import type { DevicePackageView } from "@hospio/api/actions/device-packages";
 import type {
 	FeeStatementItem,
 	PaymentSummaryData,
@@ -25,6 +26,7 @@ import { KpiCard } from "@hospio/ui/shared/kpi-card";
 import { SectionCard } from "@hospio/ui/shared/section-card";
 import { StatusPill } from "@hospio/ui/shared/status-pill";
 import { cn } from "@hospio/ui/utils";
+import { optionLabel, PackageProgress, packageStatus } from "../devices/device-package";
 import { howPaidLabel, throughPos } from "../shared";
 import { BusinessTabHeader } from "./nav";
 
@@ -74,6 +76,7 @@ export function MoneyTab({
 	dailyFees = null,
 	dailyFeesError = null,
 	feeRate,
+	devicePackages = [],
 }: {
 	businessId: string;
 	businessName: string;
@@ -84,6 +87,8 @@ export function MoneyTab({
 	dailyFees?: DailyFeeRow[] | null;
 	dailyFeesError?: string | null;
 	feeRate?: number;
+	/** The business's devices & internet packages, one per hotel. */
+	devicePackages?: DevicePackageView[];
 }) {
 	const outstanding = statements.reduce((a, s) => a + s.outstanding, 0);
 	const daily = dailyFees !== null;
@@ -324,6 +329,29 @@ export function MoneyTab({
 				</SectionCard>
 				)}
 			</div>
+			{devicePackages.length > 0 && (
+				<SectionCard title="Devices & internet" subtitle="What Hospio360 supplied to each hotel and how it is being paid for" flush>
+					<ul className="divide-y divide-line">
+						{devicePackages.map((p) => (
+							<li key={p.id}>
+								<Link href={`/dashboard/hotels?hotel=${p.hotelId}&htab=devices`} className="flex items-center gap-4 px-5 py-3 hover:bg-subtle/60">
+									<div className="min-w-0 flex-1">
+										<p className="text-[13px] font-semibold text-ink">
+											{p.hotelName ?? "Hotel"} · {optionLabel(p.paymentOption)}
+										</p>
+										{p.total > 0 ? (
+											<PackageProgress p={p} />
+										) : (
+											<p className="text-xs text-ink-3">{p.dataPlanMonthly > 0 ? `Data plan ${naira(p.dataPlanMonthly)} a month` : "Nothing supplied"}</p>
+										)}
+									</div>
+									{packageStatus(p)}
+								</Link>
+							</li>
+						))}
+					</ul>
+				</SectionCard>
+			)}
 			{summary.byProvider.length > 0 && (
 				<SectionCard
 					title="Payments received by how they were paid"

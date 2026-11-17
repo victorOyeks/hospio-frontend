@@ -46,6 +46,12 @@ export const DailyFee = z.object({
 	lastError: str,
 	statementSentAt: str,
 	debitedAt: str,
+	devicePackageId: str,
+	deviceRate: num,
+	deviceFee: num,
+	deviceCarriedIn: num,
+	platformPaid: num,
+	devicePaid: num,
 });
 
 export const ProviderState = z.object({

@@ -66,6 +66,7 @@ import {
 	usePageParam,
 	useRefresh,
 } from "./live";
+import { DevicesTab } from "./devices/devices-admin";
 import { DailyFeesTab } from "./fees-daily";
 import { GuestMessageBilling } from "./guest-messages";
 import { can, ReadOnlyNote, StagePill } from "./shared";
@@ -125,6 +126,7 @@ export function FeesScreen({
 		{ key: "rules", label: "Fee rules" },
 		{ key: "statements", label: "Statements", count: openStatements.length || undefined },
 		...(money ? [{ key: "messages", label: "Guest messages" }] : []),
+		{ key: "devices", label: "Devices" },
 	];
 	const [viewParam, setView] = useQueryState("view", parseAsString.withOptions({ history: "push", scroll: false }));
 	const defaultView = money ? "daily" : "statements";
@@ -245,6 +247,7 @@ export function FeesScreen({
 				/>
 			)}
 			{view === "messages" && <GuestMessageBilling />}
+			{view === "devices" && <DevicesTab />}
 			{view === "statements" && (
 				<>
 					<div className="grid grid-cols-2 gap-4 md:grid-cols-4">

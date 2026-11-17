@@ -51,6 +51,8 @@ import {
 
 export type WizardCtx = {
 	editable: boolean;
+	/** The signed-in admin's role (what money actions they may take). */
+	role: AdminRole;
 	business: BusinessRow;
 	setBusiness: (b: BusinessRow) => void;
 	draft: OnboardingRow;
@@ -230,6 +232,7 @@ export function OnboardingWizard({
 	const ctx: WizardCtx = useMemo(
 		() => ({
 			editable,
+			role,
 			business,
 			setBusiness,
 			draft,
@@ -248,6 +251,7 @@ export function OnboardingWizard({
 		}),
 		[
 			editable,
+			role,
 			business,
 			draft,
 			hotels,
