@@ -179,6 +179,7 @@ export function HotelSetupScreen({
 				) : section.key === "pos" ? (
 					<div className="flex min-w-0 flex-col gap-4">
 						<SectionForm
+							isOwner={isOwner}
 							key={section.key}
 							section={section}
 							locked={locked}
@@ -190,6 +191,7 @@ export function HotelSetupScreen({
 				) : section.key === "housekeeping" ? (
 					<div className="flex min-w-0 flex-col gap-4">
 						<SectionForm
+							isOwner={isOwner}
 							key={section.key}
 							section={section}
 							locked={locked}
@@ -200,6 +202,7 @@ export function HotelSetupScreen({
 					</div>
 				) : (
 					<SectionForm
+						isOwner={isOwner}
 						key={section.key}
 						section={section}
 						locked={locked}
@@ -244,11 +247,14 @@ function SectionForm({
 	locked,
 	why,
 	hotelId,
+	isOwner = false,
 }: {
 	section: HotelSetupSection;
 	locked: boolean;
 	why?: string;
 	hotelId?: string;
+	/** Owner-only fields (who pays the Hospio fee) are read-only for anyone else. */
+	isOwner?: boolean;
 }) {
 	const router = useRouter();
 	const [values, setValues] = useState<Record<string, unknown>>(() =>
@@ -295,7 +301,7 @@ function SectionForm({
 							field={f}
 							value={values[f.key]}
 							onChange={(v) => set(f.key, v)}
-							disabled={locked}
+							disabled={locked || (!!f.ownerOnly && !isOwner)}
 							wide={f.type === "list"}
 						/>
 					))}

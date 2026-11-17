@@ -1128,6 +1128,8 @@ export type OrderRow = {
 	subtotal: number;
 	tax: number;
 	discount?: number;
+	/** "Service charge (x%)": Hospio's fee passed to the guest, part of the total. */
+	serviceCharge?: number;
 	total: number;
 	paid: boolean;
 	chargedToRoom: boolean;
@@ -1383,6 +1385,8 @@ export type HotelSetupSection = {
 		format?: "shift" | "department";
 		/** A number whose default is 0, meaning "none": shown empty with a "None" hint, saved as 0 when left empty. */
 		zeroIsNone?: boolean;
+		/** Only the owner changes it (a manager sees it read-only). */
+		ownerOnly?: boolean;
 	}[];
 };
 

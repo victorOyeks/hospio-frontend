@@ -137,6 +137,8 @@ export const OrderItem = z.object({
 	subtotal: num,
 	tax: num,
 	discount: num,
+	/** Hospio's fee passed to the guest ("Service charge (x%)"), part of the total; 0 when the hotel absorbs it. */
+	serviceCharge: num,
 	total: z.number(),
 	chargedToRoom: bool,
 	paid: bool,

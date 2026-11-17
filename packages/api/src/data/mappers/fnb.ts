@@ -244,6 +244,7 @@ export function toOrderRow(o: Order, outletName?: string): OrderRow {
 		subtotal: num(o.subtotal),
 		tax: num(o.tax),
 		discount: o.discount ?? undefined,
+		serviceCharge: o.serviceCharge ?? undefined,
 		total: num(o.total),
 		paid: o.paid === true,
 		chargedToRoom: o.chargedToRoom === true,
