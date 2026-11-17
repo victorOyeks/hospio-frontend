@@ -75,6 +75,28 @@ export const DevicePackage = z.object({
 	updatedAt: str,
 });
 
+export const DeviceInvoice = z.object({
+	id: z.string(),
+	packageId: z.string(),
+	businessId: z.string(),
+	hotelId: z.string(),
+	hotelName: str,
+	number: z.string(),
+	kind: z.string(),
+	sequence: z.number(),
+	ofCount: num,
+	amount: z.number(),
+	dueOn: z.string(),
+	status: z.string(),
+	paidAmount: z.number(),
+	paidAt: str,
+	paidVia: str,
+	paidReference: str,
+	lastError: str,
+	daysOverdue: z.number(),
+	posPaused: z.boolean(),
+});
+
 const hotelParams = z.object({ businessId: z.string(), hotelId: z.string() });
 const idParams = z.object({ id: z.string() });
 const catalogueBody = z.object({
@@ -131,6 +153,40 @@ export const devicePackageRoutes = {
 		output: envelope(DevicePackage),
 	},
 	"@post/platform/admin/device-packages/:id/cancel": { params: idParams, output: envelope(DevicePackage) },
+	"@get/platform/admin/device-packages/:id/invoices": { params: idParams, output: envelope(z.array(DeviceInvoice)) },
+	"@get/platform/admin/devices/invoices": {
+		query: z.object({ status: z.array(z.string()).optional() }).optional(),
+		output: envelope(z.array(DeviceInvoice)),
+	},
+	"@post/platform/admin/device-invoices/:id/mark-paid": {
+		params: idParams,
+		input: z.object({ reference: z.string(), note: z.string().nullable() }),
+		output: envelope(DeviceInvoice),
+	},
+	"@post/platform/admin/devices/invoices/run": {
+		output: envelope(
+			z.object({
+				issued: z.number(),
+				paid: z.number(),
+				failed: z.number(),
+				overdue: z.number(),
+				reminded: z.number(),
+				flagged: z.number(),
+				paused: z.number(),
+				voided: z.number(),
+			}),
+		),
+	},
+	"@get/platform/owner/devices/invoices": { output: envelope(z.array(DeviceInvoice)) },
+	"@post/platform/owner/devices/invoices/:id/pay": {
+		params: idParams,
+		input: z.object({ callbackUrl: z.string().nullable() }),
+		output: envelope(z.object({ authorizationUrl: z.string(), reference: z.string() })),
+	},
+	"@post/platform/owner/devices/invoices/confirm": {
+		query: z.object({ reference: z.string() }),
+		output: envelope(DeviceInvoice),
+	},
 	"@get/platform/owner/devices": { output: envelope(z.array(DevicePackage)) },
 	"@get/platform/devices": { output: envelope(DevicePackage.nullable()) },
 } as const;
