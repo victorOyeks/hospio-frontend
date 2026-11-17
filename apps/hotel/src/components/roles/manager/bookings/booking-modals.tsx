@@ -1,5 +1,6 @@
 "use client";
 
+import { DraftNote, useDraft } from "@hospio/ui/shared/draft";
 import { GuestMessageModal } from "../../shared-staff/guest-message";
 import {
 	dueOnBooking,
@@ -178,6 +179,21 @@ function CheckInPanel({
 	const [skip, setSkip] = useState(false);
 	const [idChecked, setIdChecked] = useState(false);
 	const [override, setOverride] = useState(false);
+	// The room and the ID tick come back after the lock screen for the same person; the payment, and checking in without
+	// it, are decided again. The panel unmounts when it closes, so closing deletes the draft by hand.
+	const draft = useDraft(
+		`check-in:${b.id}`,
+		true,
+		{ roomId, idChecked },
+		(d) => {
+			if (rooms.some((r) => r.id === d.roomId)) setRoomId(d.roomId);
+			setIdChecked(d.idChecked);
+		},
+	);
+	const close = () => {
+		draft.clear();
+		onClose();
+	};
 	const pay = usePaymentSteps(
 		{
 			terminals,
@@ -229,7 +245,7 @@ function CheckInPanel({
 	return (
 		<SidePanel
 			open
-			onOpenChange={(o) => !o && onClose()}
+			onOpenChange={(o) => !o && close()}
 			title={paying ? v.title : `Check in ${b.guestName}`}
 			subtitle={
 				paying
@@ -258,7 +274,7 @@ function CheckInPanel({
 						<Button
 							variant="outline"
 							className={btn.secondary}
-							onClick={onClose}
+							onClick={close}
 						>
 							Cancel
 						</Button>
@@ -294,7 +310,7 @@ function CheckInPanel({
 									`${b.guestName} checked in to ${room.number}`,
 									(changes) => {
 										onPatch(b.id, changes);
-										onClose();
+										close();
 									},
 								)
 							}
@@ -309,6 +325,13 @@ function CheckInPanel({
 				v.body
 			) : (
 				<div className="flex flex-col gap-5">
+					<DraftNote
+						draft={draft}
+						onClear={() => {
+							setRoomId(b.roomId ?? ready[0]?.id ?? anyReady[0]?.id ?? "");
+							setIdChecked(false);
+						}}
+					/>
 					<SelectField
 						label="Room"
 						value={roomId}

@@ -51,10 +51,13 @@ import type {
 	TillRow,
 } from "@hospio/api/data/types";
 import { cn } from "@hospio/ui/utils";
+import { DraftNote, useDraft } from "@hospio/ui/shared/draft";
 import {
 	type CartLine,
 	MenuPicker,
+	cartFromDraft,
 	cartTotal,
+	draftLines,
 } from "../shared-staff/menu-picker";
 import {
 	activeHappyHour,
@@ -165,6 +168,21 @@ export function BarTodayScreen({
 		setPanel({ kind: "sale" });
 		void setIsNew("1");
 	};
+
+	// The sale being built (seat, name, drinks, how they pay) comes back after the lock screen for the same person, until
+	// it is sent or cancelled. Take payment is never drafted: the cart is sent first, then paid.
+	const draft = useDraft(
+		outlet ? `bar-sale:${outlet.id}` : null,
+		panel?.kind === "sale",
+		{ lines: draftLines(lines), tableId, settle, roomId, name },
+		(d) => {
+			setLines(cartFromDraft(menu, d.lines));
+			if (tables.some((t) => t.id === d.tableId)) setTableId(d.tableId);
+			setSettle(d.settle);
+			if (inHouse.some((b) => b.id === d.roomId)) setRoomId(d.roomId);
+			setName(d.name);
+		},
+	);
 
 	const happy = activeHappyHour(happyHours);
 	const discount = happy?.discountPct ?? 0;
@@ -493,6 +511,16 @@ export function BarTodayScreen({
 				}
 			>
 				<div className="flex flex-col gap-5">
+					<DraftNote
+						draft={draft}
+						onClear={() => {
+							setLines([]);
+							setTableId("");
+							setSettle("NOW");
+							setRoomId("");
+							setName("");
+						}}
+					/>
 					<div className="grid grid-cols-2 gap-3">
 						<SelectField
 							label="Seat"

@@ -21,6 +21,7 @@ import {
 import { Input } from "@hospio/ui/primitives/input";
 import { login, loginWithCode } from "@hospio/api/actions";
 import { isAppRole, OTHER_APP_URL } from "@hospio/api/app";
+import { resumeTarget } from "@hospio/ui/shared/draft";
 
 const schema = z.object({
 	email: z.email("Enter your email"),
@@ -42,7 +43,7 @@ export function AuthForm({ from, email = "" }: { from?: string; email?: string }
 		defaultValues: { email, password: "" },
 	});
 
-	function signedIn(data: { mustChangePassword: boolean; roles: string[] }, email: string) {
+	function signedIn(data: { mustChangePassword: boolean; roles: string[]; userId: string }, email: string) {
 		// An account with none of this app's roles belongs on the other app: go there with a full
 			// navigation. A client-side push would be redirected cross-origin by the middleware and the
 			// RSC fetch would fail on CORS before the browser fell back to a plain navigation.
@@ -51,8 +52,9 @@ export function AuthForm({ from, email = "" }: { from?: string; email?: string }
 			return;
 		}
 		toast.success("Signed in");
-		// Only return to an app page; "/" and anything outside the app go to the dashboard.
-		const back = from?.startsWith("/dashboard") ? from : "/dashboard";
+		// Only back to a page of this app (no open redirect), and only for the person who was on it: someone else signing
+		// in on this tab goes to their own dashboard and the last person's drafts are cleared.
+		const back = resumeTarget(data.userId, from);
 		router.replace(data.mustChangePassword ? "/reset-password" : back);
 	}
 

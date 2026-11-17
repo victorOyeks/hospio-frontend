@@ -8,6 +8,7 @@ import {
 	WalletIcon,
 } from "lucide-react";
 import { useEffect, useState } from "react";
+import { DraftNote, useDraft, useHasDraft } from "@hospio/ui/shared/draft";
 import { DetailList, Note, TotalsList } from "@hospio/ui/shared/detail-list";
 import { withDeliveries } from "@hospio/ui/shared/deliveries-store";
 import {
@@ -88,6 +89,22 @@ export function TillScreen({
 	const paidOut = open?.cashOut ?? 0;
 	const variance =
 		open && typeof counted === "number" ? counted - open.expected : 0;
+	// The colleague and the note of a half-done handover come back after the lock screen for the same person; the cash is
+	// counted again (amounts are never kept).
+	const handoverDraft = useDraft(
+		"till-handover",
+		modal === "handover",
+		{ toStaff, note },
+		(d) => {
+			if (staff.some((s) => s.id === d.toStaff)) setToStaff(d.toStaff);
+			setNote(String(d.note ?? ""));
+		},
+		{ toStaff: "", note: "" },
+	);
+	const handoverWaiting = useHasDraft("till-handover");
+	useEffect(() => {
+		if (handoverWaiting && open) setModal((m) => m ?? "handover");
+	}, [handoverWaiting, open]);
 	const closeAll = () => {
 		setModal(null);
 		setCounted("");
@@ -618,6 +635,13 @@ export function TillScreen({
 				}
 			>
 				<div className="flex flex-col gap-4">
+					<DraftNote
+						draft={handoverDraft}
+						onClear={() => {
+							setToStaff("");
+							setNote("");
+						}}
+					/>
 					<SelectField
 						label="Handing over to"
 						value={toStaff}

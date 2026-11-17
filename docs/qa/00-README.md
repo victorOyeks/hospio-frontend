@@ -59,6 +59,7 @@ allow-listed number 09035911994, so sign-up and phone codes for any other number
 | 43 | `43-outlets-serving-each-other.md` | A patio bar selling the kitchen's starters: outlet POS terminal, copy menu (made at the source), Made at, kitchen tickets and Ready, patio serves, one bill on the patio terminal, edge cases | Ready |
 | 44 | `44-outlet-switcher.md` | "Serving at" in the sidebar for bars and kitchens with several outlets: neutral menu labels, outlet-named titles, outlet colours, switching keeps the page, All outlets on Tabs and Sales for managers and leads, one-outlet hotels unchanged | Ready |
 | 45 | `45-onboarding-pos-terminals.md` | Onboarding → Connections terminals match today: Moniepoint/OPay/test only, provider-specific reference, desk assignment, POS key status | Ready |
+| 46 | `46-lock-screen-resume.md` | Resume after the lock screen: the same person goes back to the page they were on (shared-device lock or signing in again), anyone else to their home page; drafts of Check in, New booking, bar sale, kitchen order, till handover and housekeeping report come back for the same person only, cleared on save/cancel/sign-out/someone else, 4 h; no payments, PINs or amounts kept | Ready |
 
 ## Before you start
 

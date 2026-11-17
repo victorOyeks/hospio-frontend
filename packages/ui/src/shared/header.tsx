@@ -21,6 +21,7 @@ import { PLATFORM_ROLES, roleLabels, type HotelRole } from "@hospio/api/roles";
 import { AdminSearch } from "@hospio/ui/shared/admin-search";
 import { cn } from "@hospio/ui/utils";
 import { type DeviceSetupHotel, LockButton, SetupDeviceModal } from "@hospio/ui/shared/shared-device";
+import { forgetEverything, rememberPage } from "@hospio/ui/shared/draft";
 
 function initials(name: string) {
 	return name.split(" ").filter(Boolean).map((w) => w[0]).slice(0, 2).join("").toUpperCase();
@@ -118,7 +119,12 @@ export function Header({
 						<DropdownMenuItem
 							className="rounded-lg text-danger focus:text-danger"
 							disabled={pending}
-							onSelect={() => startTransition(() => logout())}
+							onSelect={() => {
+								// Lock (shared device) keeps this person's page and drafts for when they unlock; signing out forgets them.
+								if (device) rememberPage(user.id);
+								else forgetEverything();
+								startTransition(() => logout());
+							}}
 						>
 							<LogOutIcon /> {device ? "Lock" : "Sign out"}
 						</DropdownMenuItem>

@@ -50,10 +50,13 @@ import type {
 	TerminalRow,
 } from "@hospio/api/data/types";
 import { cn } from "@hospio/ui/utils";
+import { DraftNote, useDraft } from "@hospio/ui/shared/draft";
 import {
 	type CartLine,
 	MenuPicker,
+	cartFromDraft,
 	cartTotal,
+	draftLines,
 } from "../shared-staff/menu-picker";
 import {
 	ReasonModal,
@@ -209,6 +212,24 @@ export function KitchenOrdersScreen({
 	const est = estimate(itemsTotal, settings);
 	const roomChargeOff = !settings.roomCharge;
 	const table = tables.find((t) => t.id === tableId);
+
+	// The order being built comes back after the lock screen for the same person, until it is sent or cancelled. Take
+	// payment is never drafted: the order is sent first, then paid.
+	const draft = useDraft(
+		outlet ? `kitchen-order:${outlet.id}` : null,
+		panel?.kind === "new",
+		{ lines: draftLines(lines), kind, tableId, roomId, walkIn, settle, pickRoom },
+		(d) => {
+			setLines(cartFromDraft(menu, d.lines));
+			setKind(d.kind);
+			if (!d.tableId || tables.some((t) => t.id === d.tableId))
+				setTableId(d.tableId);
+			if (inHouse.some((b) => b.id === d.roomId)) setRoomId(d.roomId);
+			setWalkIn(d.walkIn);
+			setSettle(d.settle);
+			if (inHouse.some((b) => b.id === d.pickRoom)) setPickRoom(d.pickRoom);
+		},
+	);
 
 	const resetNew = () => {
 		setLines([]);
@@ -1141,6 +1162,7 @@ export function KitchenOrdersScreen({
 				}
 			>
 				<div className="flex flex-col gap-5">
+					<DraftNote draft={draft} onClear={resetNew} />
 					<ChoiceCards
 						value={kind}
 						onChange={(k) => {

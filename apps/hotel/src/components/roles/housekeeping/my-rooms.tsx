@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import { parseAsString, useQueryState } from "nuqs";
 import { useEffect, useState } from "react";
+import { DraftNote, useDraft, useHasDraft } from "@hospio/ui/shared/draft";
 import { toast } from "sonner";
 import { Note } from "@hospio/ui/shared/detail-list";
 import {
@@ -162,6 +163,25 @@ export function MyRoomsScreen({
 	const problemRoom =
 		rooms.find((r) => r.number === problem.room) ??
 		null;
+	// A half-written problem report comes back after the lock screen for the same person (the photo is chosen again).
+	const problemDraft = useDraft(
+		"hk-problem",
+		panel?.kind === "problem",
+		{ problem, ooo },
+		(d) => {
+			setProblem({
+				room: String(d.problem?.room ?? ""),
+				what: String(d.problem?.what ?? ""),
+				priority: String(d.problem?.priority ?? "NORMAL"),
+			});
+			setOoo(d.ooo !== false);
+		},
+		{ problem: { room: "", what: "", priority: "NORMAL" }, ooo: true },
+	);
+	const problemWaiting = useHasDraft("hk-problem");
+	useEffect(() => {
+		if (problemWaiting && !open) setPanel((p) => p ?? { kind: "problem" });
+	}, [problemWaiting, open]);
 	const [noteFor, setNoteFor] = useState<string | null>(null);
 	const [linen, setLinen] = useState({
 		"Bath towel": 6,
@@ -615,6 +635,13 @@ export function MyRoomsScreen({
 				}
 			>
 				<div className="flex flex-col gap-4">
+					<DraftNote
+						draft={problemDraft}
+						onClear={() => {
+							setProblem({ room: "", what: "", priority: "NORMAL" });
+							setOoo(true);
+						}}
+					/>
 					<SelectField
 						label="Where"
 						value={problem.room}
