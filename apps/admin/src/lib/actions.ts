@@ -62,3 +62,32 @@ export async function createTerminal(
 	revalidatePath("/admin/onboarding");
 	return { ok: true, data: toRow(data.data) };
 }
+
+/** Gives a desk (Front office, Bar, Kitchen, Laundry) the terminal at one hotel: card payments from that desk go to it. */
+export async function assignTerminalDesk(
+	terminalId: string,
+	role: "FRONT_OFFICE" | "BAR" | "KITCHEN" | "LAUNDRY",
+	hotelId: string,
+): Promise<ActionResult<null>> {
+	if (!live("payment")) {
+		await demoDelay(200);
+		return { ok: true, data: null };
+	}
+	const { error } = await api("@post/payment/terminals/:id/assign", {
+		...(await withSession({ hotelId })),
+		params: { id: terminalId },
+		body: { role },
+	});
+	if (error)
+		return { ok: false, error: errorMessage(error, "The terminal could not be given to that desk") };
+	revalidatePath("/admin/onboarding");
+	return { ok: true, data: null };
+}
+
+/** Which POS providers have their keys saved for each hotel (Moniepoint, OPay); null when this admin can't read them. */
+export async function posKeysByHotel(): Promise<Record<string, string[]> | null> {
+	if (!live("payment")) return {};
+	const { data, error } = await api("@get/payment/admin/pos-configs", await withSession());
+	if (error || !data) return null;
+	return Object.fromEntries(data.data.map((c) => [c.hotelId, c.providers.map((p) => p.toUpperCase())]));
+}

@@ -302,7 +302,11 @@ export const fnbData = {
 				loadOutlets(),
 				cookies().catch(() => null),
 			]);
-			const outlets = ofDesk(role, all);
+			// Closed outlets stay out of "Serving at", the marks and the all-outlets views; the one this device still works
+			// stays listed so its open orders can be finished.
+			const outlets = ofDesk(role, all).filter(
+				(o) => o.status === "OPEN" || o.id === outlet?.id,
+			);
 			return {
 				outlet,
 				outlets,

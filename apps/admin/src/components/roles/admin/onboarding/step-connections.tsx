@@ -1,11 +1,12 @@
 "use client";
 
 import { CreditCardIcon, MessageSquareIcon, PlusIcon } from "lucide-react";
-import { useRef, useState } from "react";
+import Link from "next/link";
+import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { saveSetupSection } from "@hospio/api/actions/hotel-config";
 import type { TerminalRow } from "@hospio/api/data/types";
-import { createTerminal } from "@/lib/actions";
+import { assignTerminalDesk, createTerminal, posKeysByHotel } from "@/lib/actions";
 import { EmptyState } from "@hospio/ui/shared/empty-state";
 import { FieldRow, SelectField, TextField } from "@hospio/ui/shared/field";
 import { PillTabs } from "@hospio/ui/shared/pill-tabs";
@@ -29,16 +30,29 @@ import {
  * number (hotel-config MESSAGING.whatsappNumber). The step saves the terminals it made and the numbers.
  */
 
+/** The POS providers payments go through today (docs/pos-providers.md); the test terminal moves no money. */
 const PROVIDERS = [
-	{
-		value: "logging",
-		label: "Logging (test)",
-		hint: "Records payments without a card machine",
-	},
-	{ value: "moniepoint", label: "Moniepoint" },
-	{ value: "opay", label: "OPay" },
-	{ value: "paystack", label: "Paystack terminal" },
+	{ value: "moniepoint", label: "Moniepoint", hint: "The hotel's own Moniepoint POS" },
+	{ value: "opay", label: "OPay", hint: "The hotel's own OPay POS" },
+	{ value: "logging", label: "Test terminal", hint: "No card machine: records payments, moves no money" },
 ];
+
+/** What the terminal reference is on each provider's device. */
+const REF: Record<string, { placeholder: string; hint: string }> = {
+	moniepoint: { placeholder: "e.g. C5BP008D071J7555", hint: "The terminal serial on the back of the Moniepoint POS (or in the Moniepoint app)" },
+	opay: { placeholder: "e.g. S6805370059963", hint: "The device SN on the OPay POS (Settings → About)" },
+	logging: { placeholder: "e.g. TEST-FD-01", hint: "Any reference for the test terminal" },
+};
+
+const DESKS = [
+	{ value: "", label: "No desk yet" },
+	{ value: "FRONT_OFFICE", label: "Front office" },
+	{ value: "BAR", label: "Bar" },
+	{ value: "KITCHEN", label: "Kitchen & restaurant" },
+	{ value: "LAUNDRY", label: "Laundry" },
+];
+const deskLabel = (r: string) => DESKS.find((d) => d.value === r)?.label ?? r;
+const providerLabel = (p: string) => PROVIDERS.find((x) => x.value === p.toLowerCase())?.label ?? p;
 
 type SavedTerminal = NonNullable<
 	WizardData["connections"]
@@ -65,9 +79,15 @@ export function ConnectionsStep({ ctx }: { ctx: WizardCtx }) {
 	savedRef.current = savedNumbers;
 	const [form, setForm] = useState({
 		name: "",
-		provider: "logging",
+		provider: "moniepoint",
 		terminalRef: "",
+		desk: "FRONT_OFFICE",
 	});
+	// Which providers have the hotel's keys saved (null: this admin can't see keys, so nothing is said).
+	const [keys, setKeys] = useState<Record<string, string[]> | null>(null);
+	useEffect(() => {
+		void posKeysByHotel().then(setKeys);
+	}, []);
 	const { pending, call, busy } = useWizardSave();
 	const hotel = hotels.find((h) => h.id === hotelId) ?? hotels[0];
 	const terminals = ctx.terminals[hotelId] ?? [];
@@ -97,6 +117,12 @@ export function ConnectionsStep({ ctx }: { ctx: WizardCtx }) {
 				"Terminal added",
 			);
 			if (!made) return;
+			// The desk that uses it: card payments from that desk go to this terminal.
+			if (form.desk) {
+				const assigned = await assignTerminalDesk(made.id, form.desk as "FRONT_OFFICE" | "BAR" | "KITCHEN" | "LAUNDRY", hotelId);
+				if (assigned.ok) made.roles = [form.desk];
+				else toast.error(`${made.name} was added, but not given to ${deskLabel(form.desk)}: ${assigned.error}`, { duration: 8000 });
+			}
 			ctx.setTerminals(hotelId, [...terminals, made]);
 			setSavedTerminals((list) => [
 				...list,
@@ -108,7 +134,7 @@ export function ConnectionsStep({ ctx }: { ctx: WizardCtx }) {
 					terminalRef: made.ref,
 				},
 			]);
-			setForm({ name: "", provider: form.provider, terminalRef: "" });
+			setForm({ name: "", provider: form.provider, terminalRef: "", desk: form.desk });
 		});
 
 	const saveNumber = async (id: string): Promise<boolean> => {
@@ -233,7 +259,8 @@ export function ConnectionsStep({ ctx }: { ctx: WizardCtx }) {
 									<span className="flex items-center gap-2">
 										<CreditCardIcon className="size-4 text-ink-3" /> {t.name}{" "}
 										<span className="text-xs text-ink-3">
-											· {t.provider} · {t.ref}
+											· {providerLabel(t.provider)} · {t.ref}
+											{t.roles.length > 0 && ` · ${t.roles.map(deskLabel).join(", ")}`}
 										</span>
 									</span>
 								}
@@ -251,7 +278,7 @@ export function ConnectionsStep({ ctx }: { ctx: WizardCtx }) {
 						<p className="mb-3 text-[11px] font-semibold uppercase tracking-[0.06em] text-ink-3">
 							Add a terminal
 						</p>
-						<FieldRow className="md:grid-cols-3">
+						<FieldRow className="md:grid-cols-2 xl:grid-cols-4">
 							<TextField
 								label="Name"
 								value={form.name}
@@ -268,10 +295,33 @@ export function ConnectionsStep({ ctx }: { ctx: WizardCtx }) {
 								label="Terminal reference"
 								value={form.terminalRef}
 								onChange={(v) => setForm((f) => ({ ...f, terminalRef: v }))}
-								placeholder="MP-2201-FD"
-								hint="The serial or merchant terminal id on the device"
+								placeholder={REF[form.provider]?.placeholder}
+								hint={REF[form.provider]?.hint}
+							/>
+							<SelectField
+								label="Desk"
+								value={form.desk}
+								onChange={(v) => setForm((f) => ({ ...f, desk: v }))}
+								options={DESKS}
+								hint="Card payments from this desk go to this terminal"
 							/>
 						</FieldRow>
+						{form.provider !== "logging" && keys && (
+							keys[hotelId]?.includes(form.provider.toUpperCase()) ? (
+								<p className="mt-2 text-[12px] text-success">
+									{providerLabel(form.provider)} keys are saved for {hotel?.name ?? "this hotel"}: payments can go to this terminal.
+								</p>
+							) : (
+								<p className="mt-2 text-[12px] text-warning">
+									{hotel?.name ?? "This hotel"} has no {providerLabel(form.provider)} keys yet, so payments can't reach this terminal until a Super
+									admin adds them in{" "}
+									<Link href={`/dashboard/hotels?hotel=${hotelId}&htab=fees`} className="font-semibold underline">
+										the hotel's POS & Hospio fees
+									</Link>
+									.
+								</p>
+							)
+						)}
 						<button
 							type="button"
 							className={cn(btn.secondary, "mt-3 flex items-center gap-2")}
