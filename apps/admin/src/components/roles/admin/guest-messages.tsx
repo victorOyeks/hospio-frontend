@@ -52,7 +52,23 @@ function InvoiceStatus({ status }: { status: string }) {
 	);
 }
 
-/** Each hotel's guest-message plan: on/off, prices (the defaults or its own), suspension. Onboarding and the hotel page. */
+/**
+ * What a plan means for sending, from its two separate controls: the hotel's subscription (the switch; the hotel's manager can
+ * change it too, in Hotel setup) and Hospio360's hold for non-payment (added on its own when an invoice goes overdue, lifted on its
+ * own when it is paid, or by hand here).
+ */
+function sendingState(p: CommPlanView) {
+	if (!p.enabled) return { tone: "grey" as const, label: "Not subscribed", detail: "Nothing is sent or billed" };
+	if (p.suspended) return { tone: "danger" as const, label: "On hold", detail: holdDetail(p) };
+	return { tone: "success" as const, label: "Sending", detail: "Booking emails and WhatsApp go to guests" };
+}
+
+function holdDetail(p: CommPlanView) {
+	const why = p.suspendedReason ? p.suspendedReason.charAt(0).toUpperCase() + p.suspendedReason.slice(1) : "Held by Hospio360";
+	return p.suspendedAt ? `${why} · since ${fmtLongDate(p.suspendedAt)}` : why;
+}
+
+/** Each hotel's guest-message plan: subscription, Hospio360's hold, prices. Onboarding and the hotel page. */
 export function GuestMessagePlans({
 	businessId,
 	hotels,
@@ -67,6 +83,10 @@ export function GuestMessagePlans({
 	const [plans, setPlans] = useState<CommPlanView[] | null>(null);
 	const [error, setError] = useState<string | null>(null);
 	const [editing, setEditing] = useState<CommPlanView | null>(null);
+	const [holding, setHolding] = useState<CommPlanView | null>(null);
+	const [lifting, setLifting] = useState<CommPlanView | null>(null);
+	const [reason, setReason] = useState("");
+	const [busy, setBusy] = useState(false);
 	const ids = hotels.map((h) => h.id).join(",");
 
 	const load = useCallback(async () => {
@@ -84,21 +104,37 @@ export function GuestMessagePlans({
 	async function toggle(p: CommPlanView, on: boolean) {
 		const r = await setHotelMessagePlan(p.hotelId, { businessId, enabled: on });
 		if (!r.ok) return toast.error(r.error);
-		toast.success(`${nameOf(p)}: guest messages ${on ? "on" : "off"}`);
+		toast.success(
+			on
+				? `${nameOf(p)} is subscribed to guest messages${p.suspended ? " (still on hold until the hold is lifted)" : ""}`
+				: `${nameOf(p)} is unsubscribed: nothing is sent or billed`,
+		);
 		void load();
 	}
 
-	async function suspension(p: CommPlanView, suspended: boolean) {
-		const r = await setHotelMessageSuspension(p.hotelId, suspended, suspended ? "suspended by Hospio360" : undefined);
+	async function hold(p: CommPlanView, on: boolean, why?: string) {
+		setBusy(true);
+		const r = await setHotelMessageSuspension(p.hotelId, on, why);
+		setBusy(false);
 		if (!r.ok) return toast.error(r.error);
-		toast.success(`${nameOf(p)}: guest messages ${suspended ? "suspended" : "resumed"}`);
+		toast.success(on ? `${nameOf(p)}: guest messages on hold` : `${nameOf(p)}: hold lifted, guest messages go again`);
+		setHolding(null);
+		setLifting(null);
+		setReason("");
 		void load();
 	}
 
 	const nameOf = (p: CommPlanView) => hotels.find((h) => h.id === p.hotelId)?.name ?? p.hotelName ?? "Hotel";
+	const link = "text-[13px] font-semibold text-brand hover:underline";
 
 	return (
 		<SectionCard title={title} subtitle={subtitle} flush>
+			<p className="mx-5 mb-4 text-[12px] leading-relaxed text-ink-3">
+				<span className="font-semibold text-ink-2">Subscribed</span> is the hotel's choice to use the paid service (their manager
+				can change it in Hotel setup). <span className="font-semibold text-ink-2">On hold</span> is Hospio360 stopping it for
+				non-payment: added on its own when an invoice goes overdue and lifted on its own when it is paid. Messages go only when
+				a hotel is subscribed and not on hold.
+			</p>
 			{error && <Note tone="danger" className="mx-5 mb-4">{error}</Note>}
 			{!plans ? (
 				<div className="mx-5 mb-5 h-24 animate-pulse rounded-xl bg-subtle" />
@@ -106,11 +142,12 @@ export function GuestMessagePlans({
 				<p className="px-5 pb-5 text-[13px] text-ink-3">Add the business's hotels first.</p>
 			) : (
 				<div className="overflow-x-auto">
-					<table className="w-full min-w-[720px]">
+					<table className="w-full min-w-[820px]">
 						<thead className={tableHead}>
 							<tr>
 								<th className="px-4 py-2 text-left">Hotel</th>
-								<th className="px-4 py-2 text-left">Service</th>
+								<th className="px-4 py-2 text-left">Subscribed</th>
+								<th className="px-4 py-2 text-left">Sending</th>
 								<th className="px-4 py-2 text-left">Prices (email · WhatsApp)</th>
 								<th className="px-4 py-2 text-right">This month</th>
 								<th className="px-4 py-2 text-right">Unpaid</th>
@@ -118,42 +155,57 @@ export function GuestMessagePlans({
 							</tr>
 						</thead>
 						<tbody>
-							{plans.map((p) => (
-								<tr key={p.hotelId} className={tableRow}>
-									<td className={cn(cell, "font-semibold")}>{nameOf(p)}</td>
-									<td className={cell}>
-										<div className="flex items-center gap-2">
-											<Switch checked={p.enabled} onCheckedChange={(on) => void toggle(p, on)} aria-label={`Guest messages for ${nameOf(p)}`} />
-											{p.suspended ? (
-												<StatusPill tone="danger">Suspended</StatusPill>
-											) : p.enabled ? (
-												<StatusPill tone="success">On</StatusPill>
-											) : (
-												<StatusPill tone="grey">Off</StatusPill>
+							{plans.map((p) => {
+								const st = sendingState(p);
+								return (
+									<tr key={p.hotelId} className={tableRow}>
+										<td className={cn(cell, "font-semibold")}>{nameOf(p)}</td>
+										<td className={cell}>
+											<span className="flex items-center gap-2 text-[13px] text-ink-2">
+												<Switch checked={p.enabled} onCheckedChange={(on) => void toggle(p, on)} aria-label={`${nameOf(p)} subscribed to guest messages`} />
+												{p.enabled ? "Yes" : "No"}
+											</span>
+										</td>
+										<td className={cn(cell, "max-w-[260px]")}>
+											<StatusPill tone={st.tone}>{st.label}</StatusPill>
+											<span className="mt-1 block text-xs text-ink-3">{st.detail}</span>
+											{!p.enabled && p.suspended && (
+												<span className="mt-1 block text-xs text-danger">Also on hold: {holdDetail(p)}</span>
 											)}
-										</div>
-									</td>
-									<td className={cell}>
-										{naira(p.prices.email)} · {naira(p.prices.whatsapp)}
-										<span className="block text-xs text-ink-3">{p.customPrices ? "The hotel's own prices" : "Default prices"}</span>
-									</td>
-									<td className={cn(cell, "text-right")}>{naira(p.thisMonth.total)}</td>
-									<td className={cn(cell, "text-right", p.outstanding > 0 && "font-semibold text-danger")}>{naira(p.outstanding)}</td>
-									<td className={cn(cell, "whitespace-nowrap text-right")}>
-										<button type="button" className="text-[13px] font-semibold text-brand hover:underline" onClick={() => setEditing(p)}>
-											Prices
-										</button>
-										<span className="text-ink-3"> · </span>
-										<button
-											type="button"
-											className="text-[13px] font-semibold text-brand hover:underline"
-											onClick={() => void suspension(p, !p.suspended)}
-										>
-											{p.suspended ? "Resume" : "Suspend"}
-										</button>
-									</td>
-								</tr>
-							))}
+										</td>
+										<td className={cell}>
+											{naira(p.prices.email)} · {naira(p.prices.whatsapp)}
+											<span className="block text-xs text-ink-3">{p.customPrices ? "The hotel's own prices" : "Default prices"}</span>
+										</td>
+										<td className={cn(cell, "text-right")}>{naira(p.thisMonth.total)}</td>
+										<td className={cn(cell, "text-right", p.outstanding > 0 && "font-semibold text-danger")}>{naira(p.outstanding)}</td>
+										<td className={cn(cell, "whitespace-nowrap text-right")}>
+											<button type="button" className={link} onClick={() => setEditing(p)}>
+												Prices
+											</button>
+											{(p.suspended || p.enabled) && <span className="text-ink-3"> · </span>}
+											{p.suspended ? (
+												<button type="button" className={link} onClick={() => setLifting(p)}>
+													Lift hold…
+												</button>
+											) : (
+												p.enabled && (
+													<button
+														type="button"
+														className={link}
+														onClick={() => {
+															setReason(p.outstanding > 0 ? `Unpaid guest-message invoices (${naira(p.outstanding)})` : "");
+															setHolding(p);
+														}}
+													>
+														Put on hold…
+													</button>
+												)
+											)}
+										</td>
+									</tr>
+								);
+							})}
 						</tbody>
 					</table>
 				</div>
@@ -167,6 +219,34 @@ export function GuestMessagePlans({
 					setEditing(null);
 					void load();
 				}}
+			/>
+			<ConfirmModal
+				open={!!holding}
+				onOpenChange={(o) => !o && setHolding(null)}
+				tone="danger"
+				title={holding ? `Put ${nameOf(holding)}'s guest messages on hold?` : ""}
+				subtitle="Booking emails and WhatsApp to guests stop until the hold is lifted. The hotel stays subscribed but can't lift the hold itself; it is lifted on its own when their unpaid invoices are paid, or by you here."
+				confirmLabel="Put on hold"
+				pending={busy}
+				confirmDisabled={reason.trim().length < 5}
+				onConfirm={() => holding && void hold(holding, true, reason.trim())}
+			>
+				<TextField label="Reason (the hotel sees it)" value={reason} onChange={setReason} placeholder="e.g. Unpaid guest-message invoices" />
+			</ConfirmModal>
+			<ConfirmModal
+				open={!!lifting}
+				onOpenChange={(o) => !o && setLifting(null)}
+				title={lifting ? `Lift the hold on ${nameOf(lifting)}?` : ""}
+				subtitle={
+					lifting
+						? lifting.outstanding > 0
+							? `${naira(lifting.outstanding)} is still unpaid (${lifting.openInvoices} invoice${lifting.openInvoices === 1 ? "" : "s"}). Lifting the hold lets messages go before it is paid; the amount stays owed.`
+							: `Nothing is unpaid. ${lifting.enabled ? "Guest messages go again straight away." : "The hotel isn't subscribed, so nothing is sent until it subscribes."}`
+						: undefined
+				}
+				confirmLabel="Lift hold"
+				pending={busy}
+				onConfirm={() => lifting && void hold(lifting, false)}
 			/>
 		</SectionCard>
 	);

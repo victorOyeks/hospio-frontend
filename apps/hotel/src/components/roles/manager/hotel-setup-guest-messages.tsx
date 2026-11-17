@@ -109,10 +109,17 @@ export function GuestMessagesSection({ isOwner }: { isOwner: boolean }) {
 		<div className="flex min-w-0 flex-col gap-4">
 			{plan.suspended && (
 				<Note tone="danger">
-					<span className="font-semibold">Guest messages are paused.</span>{" "}
-					{plan.suspendedReason}. Booking confirmations, receipts and other
-					guest messages are not being sent. Pay the invoice below to turn them
-					back on.
+					<span className="font-semibold">
+						Guest messages are on hold by Hospio360.
+					</span>{" "}
+					{plan.suspendedReason
+						? `${plan.suspendedReason.charAt(0).toUpperCase()}${plan.suspendedReason.slice(1)}. `
+						: ""}
+					Booking confirmations, receipts and other guest messages are not
+					being sent.{" "}
+					{unpaid.length > 0
+						? "Pay the unpaid invoice below and they start again on their own."
+						: "Contact Hospio360 support to lift the hold."}
 				</Note>
 			)}
 
