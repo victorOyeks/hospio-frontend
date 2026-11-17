@@ -200,7 +200,7 @@ export function MyPaymentsScreen({
 								{row.original.failureReason &&
 									(row.original.status === "DECLINED" ||
 										row.original.status === "FAILED") && (
-										<span className="text-[11px] text-danger">
+										<span className="block max-w-[220px] truncate text-[11px] text-danger" title={row.original.failureReason}>
 											{row.original.failureReason}
 										</span>
 									)}
