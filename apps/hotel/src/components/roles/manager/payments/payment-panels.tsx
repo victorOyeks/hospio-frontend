@@ -41,11 +41,12 @@ export function PaymentPanel({ payment: p, onClose, onRefund, onDispute, onStatu
 		>
 			<div className="flex flex-col gap-6">
 				{p.status === "NO_RESPONSE" && <Note tone="warning">The bank never answered. Ask the guest for the debit alert before taking it again.</Note>}
-				{p.status === "DECLINED" && <Note tone="danger">Declined by the bank · nothing was taken from the guest.</Note>}
+				{(p.status === "DECLINED" || p.status === "FAILED") && <Note tone="danger">{p.status === "FAILED" ? "Didn't go through" : "Declined"}{p.failureReason ? `: ${p.failureReason}` : " by the bank"} · nothing was taken from the guest.</Note>}
 				<PanelSection title="Payment">
 					<DetailList columns={2} items={[
 						{ label: "For", value: p.description }, { label: "Method", value: methodLabel[p.method] },
 						{ label: "Taken by", value: `${p.takenBy} · ${humanize(p.role)}` }, { label: "Terminal", value: p.terminal ?? "—" },
+						...(p.failureReason && (p.status === "DECLINED" || p.status === "FAILED") ? [{ label: "Reason", value: <span className="font-semibold text-danger">{p.failureReason}</span> }] : []),
 						{ label: "Provider ref", value: p.providerRef ?? "—" }, { label: "Room", value: p.roomNumber ?? "—" },
 					]} />
 				</PanelSection>

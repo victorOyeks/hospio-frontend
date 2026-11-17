@@ -423,6 +423,10 @@ export function OwnerPayments({
 										value: `${selected.takenBy} · ${roleLabel[selected.role] ?? selected.role}`,
 									},
 									{ label: "For", value: selected.description },
+									...(selected.failureReason &&
+									(selected.status === "DECLINED" || selected.status === "FAILED")
+										? [{ label: "Reason", value: selected.failureReason }]
+										: []),
 									{ label: "Provider ref", value: selected.providerRef ?? "—" },
 									{ label: "Created", value: fmtWhen(selected.createdAt) },
 									{

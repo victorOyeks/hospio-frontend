@@ -29,6 +29,12 @@ front office `victor@royalsuites.ng`.
 2. Open it. The detail list has a **Reason** row.
 3. A declined or unanswered **transfer** also has **Try again on POS** (it used to be card only).
 
+## 2b. Payments pages (front desk, manager, owner)
+
+1. **Payments** (front desk) and the manager's Payments list show the reason under **Declined**.
+2. Open the payment: a red note reads "Declined: Insufficient funds. Nothing was taken from the guest", and the detail list has a
+   **Reason** row. The owner's payment detail has the Reason row too.
+
 ## 3. The provider refuses the request
 
 1. Assign a terminal with a wrong serial and take a payment on it.
