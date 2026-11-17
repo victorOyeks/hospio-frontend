@@ -41,6 +41,9 @@ outlet per device and `hms.outlet.<desk>.all` remembers "All outlets".
 7. Pick *Bar* from **Serving at** while on Menu: you stay on Menu, now **Bar · menu**, with the bar's colour.
 8. Refresh the browser: the choice is kept on this device. On another device the default is
    the first open bar.
+9. Close an outlet in Hotel setup → Restaurants & tables (e.g. a third test bar): it leaves **Serving at**, the
+   all-outlets pills and the colour marks. A hotel left with one open outlet of the kind sees no switcher. A device that
+   was serving at the outlet when it closed keeps it listed (to finish its open orders) until it picks another.
 
 ## 3. All outlets (hotel B)
 
