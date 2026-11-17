@@ -431,6 +431,7 @@ export function BarTabsScreen({
 						</PanelSection>
 						{inHouse.length > 0 &&
 							settings.roomCharge &&
+							!settled(current) &&
 							current.status !== "CLOSED" &&
 							current.status !== "CANCELLED" && (
 								<BigButton
