@@ -612,7 +612,7 @@ export const fnbRoutes = {
 		),
 	},
 	"@get/fnb/sales/history/unpaid": {
-		query: z.object({ desk: z.string() }).partial().optional(),
+		query: z.object({ desk: z.string(), outletId: z.string() }).partial().optional(),
 		output: envelope(z.object({ count: z.number(), amount: z.number() })),
 	},
 	"@get/fnb/sales/history/:id": { output: envelope(SaleDetailItem) },

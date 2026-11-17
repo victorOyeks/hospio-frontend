@@ -7,6 +7,7 @@ import {
 } from "@hospio/ui/primitives/sidebar";
 import { NavMain } from "./nav-main";
 import { BranchSwitcher } from "./branch-switcher";
+import { OutletSwitcher, type OutletSwitchProps } from "./outlet-switcher";
 import type { HotelRole } from "@hospio/api/roles";
 import type { Hotel } from "@hospio/api/api/schema";
 
@@ -17,6 +18,7 @@ export function AppSidebar({
 	brandLogo,
 	badges,
 	supervisor,
+	outletSwitch,
 	...props
 }: React.ComponentProps<typeof Sidebar> & {
 	role: HotelRole;
@@ -26,6 +28,8 @@ export function AppSidebar({
 	brandLogo?: string | null;
 	badges?: React.ComponentProps<typeof NavMain>["badges"];
 	supervisor?: boolean;
+	/** The bar and kitchen desks: "Serving at" under the branch card when the hotel has several outlets of their kind. */
+	outletSwitch?: OutletSwitchProps | null;
 }) {
 	return (
 		<Sidebar
@@ -39,6 +43,7 @@ export function AppSidebar({
 					active={activeHotel}
 					logoUrl={brandLogo}
 				/>
+				{outletSwitch && <OutletSwitcher {...outletSwitch} />}
 			</SidebarHeader>
 			<SidebarContent className="scrollbar-hidden px-4">
 				<NavMain role={role} badges={badges} supervisor={supervisor} />

@@ -1,13 +1,13 @@
 import { MenuScreen } from "@/components/roles/shared-staff/menu-screen";
-import { OutletSwitch } from "@/components/roles/shared-staff/outlet-switch";
+import { deskOutlets } from "@/components/roles/shared-staff/desk-outlets";
 import { getSession } from "@hospio/api/dal";
 import { data } from "@hospio/api/data";
 
 export const dynamic = "force-dynamic";
 
 export default async function BarMenuPage() {
-	const [outlet, session, outlets] = await Promise.all([
-		data.outlets.forRole("BAR"),
+	const [{ outlet, peers }, session, outlets] = await Promise.all([
+		deskOutlets("BAR"),
 		getSession(),
 		data.outlets.list(),
 	]);
@@ -29,21 +29,16 @@ export default async function BarMenuPage() {
 		data.inventory.items(),
 	]);
 	return (
-		<>
-			<OutletSwitch
-				desk="BAR"
-				outlets={await data.outlets.forRoleAll("BAR")}
-				current={outlet?.id}
-			/>
-			<MenuScreen
-				menu={menu}
-				outlet={outlet}
-				canManage={canManage}
-				outlets={outlets}
-				categories={categories}
-				happyHours={happyHours}
-				stock={items.filter((i) => i.storeId === outlet.storeId)}
-			/>
-		</>
+		<MenuScreen
+			peers={peers}
+			title={`${outlet.name} · menu`}
+			menu={menu}
+			outlet={outlet}
+			canManage={canManage}
+			outlets={outlets}
+			categories={categories}
+			happyHours={happyHours}
+			stock={items.filter((i) => i.storeId === outlet.storeId)}
+		/>
 	);
 }

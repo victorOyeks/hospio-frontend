@@ -1,11 +1,11 @@
 import { redirect } from "next/navigation";
-import { OutletSwitch } from "@/components/roles/shared-staff/outlet-switch";
 import { BarTodayScreen } from "@/components/roles/bar/today";
+import { deskOutlets } from "@/components/roles/shared-staff/desk-outlets";
 import { data } from "@hospio/api/data";
 
 export const dynamic = "force-dynamic";
 
-/** Bar · today: the bar outlet's open board, today's closed sales, menu, happy hours, stock, sales summary and the bar's till. */
+/** Bar · Today: the outlet picked in "Serving at" (the first bar by default):'s open board, today's closed sales, menu, happy hours, stock, sales summary and the bar's till. */
 export default async function BarHome({
 	searchParams,
 }: {
@@ -14,7 +14,7 @@ export default async function BarHome({
 	const { order } = await searchParams;
 	// A notification link (/dashboard?order=…) lands on the tab.
 	if (order) redirect(`/dashboard/tabs?open=${encodeURIComponent(order)}`);
-	const outlet = await data.outlets.forRole("BAR");
+	const { outlet, peers } = await deskOutlets("BAR");
 	const [
 		orders,
 		closed,
@@ -45,27 +45,21 @@ export default async function BarHome({
 		data.outlets.list(),
 	]);
 	return (
-		<>
-			<OutletSwitch
-				desk="BAR"
-				outlets={await data.outlets.forRoleAll("BAR")}
-				current={outlet?.id}
-			/>
-			<BarTodayScreen
-				outlet={outlet}
-				orders={orders}
-				closed={closed}
-				menu={menu}
-				categories={categories}
-				happyHours={happyHours}
-				inHouse={buckets.inHouse}
-				stock={items.filter((i) => i.storeId === outlet?.storeId)}
-				settings={settings}
-				terminals={terminals}
-				sales={sales}
-				till={till}
-				outlets={outlets}
-			/>
-		</>
+		<BarTodayScreen
+			outlet={outlet}
+			peers={peers}
+			orders={orders}
+			closed={closed}
+			menu={menu}
+			categories={categories}
+			happyHours={happyHours}
+			inHouse={buckets.inHouse}
+			stock={items.filter((i) => i.storeId === outlet?.storeId)}
+			settings={settings}
+			terminals={terminals}
+			sales={sales}
+			till={till}
+			outlets={outlets}
+		/>
 	);
 }

@@ -4,7 +4,7 @@ import type { ActionResult } from "@hospio/api/actions/auth";
 import { api, errorMessage } from "@hospio/api/api/client";
 import { withSession } from "@hospio/api/api/server";
 import { cookies } from "next/headers";
-import { outletCookie } from "@hospio/api/data/fnb";
+import { allOutletsCookie, outletCookie } from "@hospio/api/data/fnb";
 import { live } from "@hospio/api/data/live";
 import {
 	salesQuery,
@@ -815,20 +815,27 @@ export async function saveHappyHour(
 }
 
 /**
- * Which outlet this desk works on this device, when the hotel has several of its kind (a Bar and a Patio Lounge).
- * `data.outlets.forRole` reads it; kept for a year.
+ * Which outlet this desk works on this device, when the hotel has several of its kind (a Bar and a Patio Lounge),
+ * or "ALL" for the all-outlets view of Tabs and Sales (pages honour it only for a manager or lead, see seesAllOutlets).
+ * `data.outlets.forRole` / `data.outlets.desk` read it; kept for a year. Picking an outlet turns "All outlets" off.
  */
 export async function chooseOutlet(
 	desk: "KITCHEN" | "BAR",
 	outletId: string,
 ): Promise<ActionResult<null>> {
 	const jar = await cookies();
-	jar.set(outletCookie(desk), outletId, {
+	const options = {
 		path: "/",
 		maxAge: 60 * 60 * 24 * 365,
-		sameSite: "lax",
+		sameSite: "lax" as const,
 		secure: process.env.NODE_ENV === "production",
-	});
+	};
+	if (outletId === "ALL") {
+		jar.set(allOutletsCookie(desk), "1", options);
+		return { ok: true, data: null };
+	}
+	jar.set(outletCookie(desk), outletId, options);
+	jar.set(allOutletsCookie(desk), "", { ...options, maxAge: 0 });
 	return { ok: true, data: null };
 }
 
