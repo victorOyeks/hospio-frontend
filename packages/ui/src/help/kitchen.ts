@@ -57,7 +57,7 @@ export const kitchenHelp: HelpModule = {
 				"On “Orders”, tap the order to open the ticket.",
 				"Tap “Take payment”.",
 				"Pick the method: “Card on the POS”, “Bank transfer” or “Cash”.",
-				"Card: tap “Send to POS” and wait for the result. Transfer: tap “Show transfer details”, then “I've confirmed the transfer” when it lands. Cash: tap “Count cash”, enter the cash received, then “Cash received”.",
+				"Card: tap “Send to POS” and wait for the result. Bank transfer: also tap “Send to POS”; the guest chooses transfer on the POS and the result comes back on its own. Cash: tap “Count cash”, enter the cash received, then “Cash received”.",
 				"Under “Receipt”, pick “Email” and tap “Email receipt & record”, or pick “Print” and tap “Record payment”. Or tap “Skip receipt”.",
 				"You see “Sale done”.",
 			],

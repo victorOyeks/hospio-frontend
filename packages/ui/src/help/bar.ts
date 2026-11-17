@@ -15,7 +15,7 @@ export const barHelp: HelpModule = {
 				"Pick a “Seat”, or leave it as “Walk-up”.",
 				"Tap the drinks to add them.",
 				"Under “How they pay”, keep “Pay now” and tap “Take payment”.",
-				"Pick “Card on the POS”, “Bank transfer” or “Cash” and follow the steps.",
+				"Pick “Card on the POS”, “Bank transfer on the POS” or “Cash”. Card and transfer both go to the POS, where the guest chooses how to pay.",
 				"Under “Receipt”, pick “Email” and tap “Email receipt & record”, or pick “Print” and tap “Record payment”. Or tap “Skip receipt”. You see “Sale done”.",
 			],
 			goodToKnow: [
@@ -301,7 +301,7 @@ export const barHelp: HelpModule = {
 			],
 			goodToKnow: [
 				"Don't send a second charge while one is waiting.",
-				"If the POS doesn't answer, take cash or a bank transfer instead. With no terminal linked yet, the card choice says so.",
+				"If the POS doesn't answer, take cash instead. With no terminal linked yet, the card choice says so.",
 			],
 			route: "/dashboard/payments",
 			screen: "My payments",

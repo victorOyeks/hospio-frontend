@@ -74,7 +74,7 @@ export const laundryHelp: HelpModule = {
 			steps: [
 				"Open the order from “Jobs” and tap “Take payment”.",
 				"Pick the method: “Card on the POS”, “Bank transfer” or “Cash”.",
-				"For card, pick the terminal and let the guest tap or insert. For a transfer, show the account and confirm when it lands. For cash, enter what you received.",
+				"For card, pick the terminal and let the guest tap or insert. A transfer also goes to the POS: the guest chooses transfer there. For cash, enter what you received.",
 				"Under “Receipt”, keep “Email” and check the guest's email, then tap “Email receipt & record”. Or pick “Print” and tap “Record payment”, or tap “Skip receipt”.",
 				"Tap “Back to the orders”. The order shows “Paid” and can now be delivered.",
 			],

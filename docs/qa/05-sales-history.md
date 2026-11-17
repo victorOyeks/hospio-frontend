@@ -85,9 +85,9 @@ rooms**. **Unpaid** includes open tabs and tickets still being cooked. Cancelled
    **Amount** to 1,000 → Cash → finish as above. **Expect:** **Part paid**, Paid so far ₦1,000, Balance ₦1,400; the
    button now reads **Collect the balance**; **Cancel sale** is gone and a note says "Part paid: collect the
    balance. Cancelling needs the payment refunded first".
-2. **Do:** **Collect the balance** → Bank transfer → **Show transfer details** → **I've confirmed the
-   transfer** → **Skip receipt** → **Back to the orders**. **Expect:** Paid; two payments (Cash ₦1,000, Transfer
-   ₦1,400); the list row shows "Cash + Transfer".
+2. **Do:** **Collect the balance** → Cash → **Count cash** → **Cash received** → **Skip receipt** → **Back
+   to the orders**. **Expect:** Paid; two payments (Cash ₦1,000, Cash
+   ₦1,400). (A transfer now goes to the POS like a card and is approved when the POS confirms it.)
    **Do:** on that paid sale's panel → **Print receipt**. **Expect:** the receipt opens in a new tab with both
    payments; "Email receipt" there sends it to the address typed (sent for real; use `@hospio-qa.test`).
 3. **Do:** make an unpaid sale, open it → **Charge to room** → Hotel guest **A107 · QA LM Guest 2120**.

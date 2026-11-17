@@ -21,7 +21,7 @@ import {
 } from "@hospio/ui/shared/field";
 import { naira } from "@hospio/ui/shared/format";
 import { Note, TotalsList } from "@hospio/ui/shared/detail-list";
-import { PanelSection, SidePanel } from "@hospio/ui/shared/side-panel";
+import { SidePanel } from "@hospio/ui/shared/side-panel";
 import { StatusPill } from "@hospio/ui/shared/status-pill";
 import { btn } from "@hospio/ui/shared/ui";
 import { useHotelActions } from "@hospio/api/actions/hotel-scope";
@@ -65,7 +65,6 @@ type Step =
 	| "who"
 	| "method"
 	| "card"
-	| "transfer"
 	| "cash"
 	| "receipt"
 	| "done";
@@ -144,6 +143,8 @@ export function usePaymentSteps(
 		target?.description ?? "Room charges",
 	);
 	const [method, setMethod] = useState<PaymentMethod>("CARD");
+	// Card and bank transfer both go to the POS: the guest picks card or transfer on the terminal itself. Only cash doesn't.
+	const toPos = method === "CARD" || method === "TRANSFER";
 	const [terminal, setTerminal] = useState(
 		terminals.find((t) => t.status === "ONLINE")?.id ?? "",
 	);
@@ -198,7 +199,7 @@ export function usePaymentSteps(
 		const n = typeof amount === "number" ? amount : 0;
 		const t = setTimeout(() => !cancelled() && setCard("paying"), 700);
 		recordPayment({
-			method: "CARD",
+			method,
 			amount: n,
 			folioId: folioId || tgt?.folioId,
 			bookingId: tgt?.bookingId,
@@ -328,7 +329,6 @@ export function usePaymentSteps(
 							: card === "stalled"
 								? "Still waiting for the POS"
 								: "Waiting for the guest on the POS",
-		transfer: "Bank transfer",
 		cash: "Cash",
 		receipt: "Send a receipt",
 		done:
@@ -409,10 +409,7 @@ export function usePaymentSteps(
 			});
 		else
 			toast.info(`${naira(amt)} ${label} is processing`, {
-				description:
-					method === "TRANSFER"
-						? "Finance matches it to the bank line"
-						: "The POS confirms it; see My payments",
+				description: "The POS confirms it; see My payments",
 			});
 		onDone?.(payment);
 		setStep("done");
@@ -449,22 +446,10 @@ export function usePaymentSteps(
 						<button
 							type="button"
 							className={btn.primary}
-							disabled={amt <= 0 || (method === "CARD" && !terminal)}
-							onClick={() =>
-								setStep(
-									method === "CARD"
-										? "card"
-										: method === "TRANSFER"
-											? "transfer"
-											: "cash",
-								)
-							}
+							disabled={amt <= 0 || (toPos && !terminal)}
+							onClick={() => setStep(toPos ? "card" : "cash")}
 						>
-							{method === "CARD"
-								? "Send to POS"
-								: method === "TRANSFER"
-									? "Show transfer details"
-									: "Count cash"}
+							{toPos ? "Send to POS" : "Count cash"}
 						</button>
 					</>
 				);
@@ -534,25 +519,6 @@ export function usePaymentSteps(
 						</button>
 						<button type="button" className={btn.primary} onClick={onFinish}>
 							Minimize
-						</button>
-					</>
-				);
-			case "transfer":
-				return (
-					<>
-						<button
-							type="button"
-							className={btn.secondary}
-							onClick={() => setStep("method")}
-						>
-							Back
-						</button>
-						<button
-							type="button"
-							className={btn.primary}
-							onClick={() => setStep("receipt")}
-						>
-							I've confirmed the transfer
 						</button>
 					</>
 				);
@@ -706,12 +672,12 @@ export function usePaymentSteps(
 							{
 								value: "CARD",
 								label: "Card on the POS",
-								hint: "Guest taps or inserts · result comes back on its own",
+								hint: "Sent to the POS · the guest taps or inserts a card there",
 							},
 							{
 								value: "TRANSFER",
-								label: "Bank transfer",
-								hint: "Show the account · confirm when it lands",
+								label: "Bank transfer on the POS",
+								hint: "Sent to the POS · the guest chooses transfer there and pays to the account it shows",
 							},
 							{
 								value: "CASH",
@@ -721,7 +687,7 @@ export function usePaymentSteps(
 							},
 						]}
 					/>
-					{method === "CARD" && (
+					{toPos && (
 						<SelectField
 							label="Terminal"
 							value={terminal}
@@ -738,17 +704,16 @@ export function usePaymentSteps(
 							empty="No POS terminal at this hotel yet"
 						/>
 					)}
-					{method === "CARD" && terminals.length === 0 && (
+					{toPos && terminals.length === 0 && (
 						<Note tone="warning">
-							A card payment goes to a POS terminal, and this hotel has none
-							linked yet. Take a bank transfer or cash for now; the manager links
-							terminals in Payments → Terminals → Link terminal.
+							Card and transfer payments go to a POS terminal, and this hotel has none linked yet. Take cash for now;
+							the manager links terminals in Payments → Terminals → Link terminal.
 						</Note>
 					)}
-					{method === "CARD" &&
+					{toPos &&
 						terminals.find((t) => t.id === terminal)?.status === "OFFLINE" && (
 							<Note tone="danger">
-								That terminal is offline. Pick another or take cash/transfer.
+								That terminal is offline. Pick another or take cash.
 							</Note>
 						)}
 				</div>
@@ -790,11 +755,13 @@ export function usePaymentSteps(
 							{card === "approved"
 								? `${recorded?.id ? `Payment ${recorded.id.slice(0, 8).toUpperCase()} · ` : ""}posted to the folio.`
 								: card === "sent"
-									? "The guest taps or inserts the card. Checking with the POS every few seconds: this changes to approved or declined as soon as it answers."
+									? method === "TRANSFER"
+										? "The guest chooses transfer on the POS and pays to the account it shows. Checking with the POS every few seconds: this changes to approved as soon as the transfer lands."
+										: "The guest taps or inserts the card. Checking with the POS every few seconds: this changes to approved or declined as soon as it answers."
 									: card === "stalled"
 										? "No answer for 3 minutes. If the guest paid, it shows in My payments and on the folio as soon as the POS confirms. Check again, or continue and find it in My payments."
 									: card === "declined"
-										? "Nothing was charged. Ask the guest for another card, or take a transfer or cash."
+										? "Nothing was charged. Ask the guest to try again on the POS (another card or a transfer), or take cash."
 										: card === "no_response"
 											? (cardError ??
 												"Check the terminal is on and connected, then try again. Nothing was charged.")
@@ -828,36 +795,6 @@ export function usePaymentSteps(
 							Result
 						</StatusPill>
 					</div>
-				</div>
-			)}
-
-			{step === "transfer" && (
-				<div className="flex flex-col gap-4">
-					<PanelSection title="Guest transfers to">
-						<div className="rounded-xl border border-line bg-subtle/60 p-4">
-							<p className="text-[11px] font-semibold uppercase tracking-[0.04em] text-ink-3">
-								GTBank
-							</p>
-							<p className="text-2xl font-bold tracking-wide text-ink">
-								0123456789
-							</p>
-							<p className="text-[13px] text-ink-2">Simpas Hotels Ltd</p>
-							<p className="mt-2 text-[13px] font-semibold text-ink">
-								{naira(amt)} · reference{" "}
-								{folio?.reference ?? guestName.split(" ")[0].toUpperCase()}
-							</p>
-						</div>
-					</PanelSection>
-					<Note tone="info">
-						Finance matches the bank line to this payment. It shows as
-						“processing” in My payments until then.
-					</Note>
-					<TextField
-						label="Sender's name or bank reference"
-						value={contact}
-						onChange={setContact}
-						placeholder="As it shows on the alert"
-					/>
 				</div>
 			)}
 
@@ -964,11 +901,7 @@ export function usePaymentSteps(
 						{recorded && recorded.status !== "APPROVED"
 							? `It shows in My payments as processing until it is confirmed; ${guestName}'s folio updates then.`
 							: `${guestName}'s folio is updated and the payment is in My payments.`}{" "}
-						{method === "CASH"
-							? "The cash is counted in your till."
-							: method === "TRANSFER"
-								? "Finance will match the transfer."
-								: ""}
+						{method === "CASH" ? "The cash is counted in your till." : ""}
 					</p>
 					{recorded?.id &&
 						(recorded.status === "APPROVED" || card === "approved") && (
