@@ -140,6 +140,7 @@ export function DevicePackagePanel({
 				p={pkg}
 				role={role}
 				onChange={(x) => setPkg(x.status === "CANCELLED" ? null : x)}
+				onReload={() => void load()}
 				onEdit={canEdit ? () => setEditing(true) : undefined}
 			/>
 		</SectionCard>
@@ -319,11 +320,13 @@ function PackageSummary({
 	p,
 	role,
 	onChange,
+	onReload,
 	onEdit,
 }: {
 	p: DevicePackageView;
 	role: AdminRole;
 	onChange: (p: DevicePackageView) => void;
+	onReload?: () => void;
 	onEdit?: () => void;
 }) {
 	const [installing, setInstalling] = useState(false);
@@ -404,7 +407,7 @@ function PackageSummary({
 			{p.status !== "DRAFT" && (p.paymentOption === "MONTHLY" || p.dataPlanMonthly > 0) && (
 				<div className="flex flex-col gap-2">
 					<p className="text-xs font-semibold uppercase tracking-[0.04em] text-ink-3">Monthly invoices</p>
-					<PackageInvoices packageId={p.id} money={money} />
+					<PackageInvoices packageId={p.id} money={money} onPaid={onReload} />
 				</div>
 			)}
 			{p.payments.length > 0 && (

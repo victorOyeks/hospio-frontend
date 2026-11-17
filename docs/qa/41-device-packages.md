@@ -32,7 +32,8 @@ at all (own devices). See hospio-backend docs/plan-device-packages.md.
 3. One time: **Record payment** (money roles): more than is left is refused; a used reference is refused; paying the rest
    → **Paid off**.
 4. Monthly: the first instalment invoice is issued on the install day; **Fees & billing → Devices → Run now** (Super admin)
-   issues and debits; **Mark paid** needs a reference.
+   issues and debits; **Mark paid** needs a reference. Marking an instalment paid in the hotel panel updates the package's
+   paid / left bar and its payments list straight away (no reload).
 5. A package with money on it can't be removed.
 
 ## 4. Overdue (monthly)
