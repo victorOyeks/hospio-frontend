@@ -84,6 +84,8 @@ export const MenuItemItem = z.object({
 	sortOrder: num,
 	/** The outlet that makes it (e.g. the kitchen for a bar's pepper soup); null = made where it is sold. */
 	preparedAt: str,
+	/** A cook's or bartender's price change still waiting for the manager; null when none (DEF-086). */
+	pendingPrice: num,
 });
 
 export const PriceChangeAnswer = z.object({

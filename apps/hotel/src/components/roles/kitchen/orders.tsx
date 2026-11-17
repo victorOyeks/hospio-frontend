@@ -181,8 +181,17 @@ export function KitchenOrdersScreen({
 	// A ticket is another outlet's order with only the lines made here: cooking while any is still sent,
 	// then ready until that outlet serves it (it then leaves the board). Its money is not ours to show.
 	const isTicket = (o: OrderRow) => !!o.ticketFrom;
+	// An order whose every dish was taken off has nothing to make or pay: it is not on the board (DEF-078). fnb-service
+	// cancels such an order now; this keeps one left from before off the board too.
+	const emptied = (o: OrderRow) =>
+		!isTicket(o) &&
+		o.kind !== "TAB" &&
+		o.lines.length > 0 &&
+		liveLines(o).length === 0;
 	const colOf = (o: OrderRow): OrderRow["status"] =>
-		isTicket(o)
+		emptied(o)
+			? "CANCELLED"
+			: isTicket(o)
 			? liveLines(o).some((l) => l.status === "SENT" || l.status === "NEW")
 				? "SENT"
 				: "READY"
@@ -335,6 +344,8 @@ export function KitchenOrdersScreen({
 		status: "READY" | "SERVED",
 		msg: string,
 	) =>
+		// Nothing left to mark (every dish cancelled): no call and no "ready · waiter called" (DEF-078).
+		ids.length > 0 &&
 		run(
 			() => setLinesStatus(o.id, ids, status, outletName),
 			msg,
@@ -426,9 +437,18 @@ export function KitchenOrdersScreen({
 				c.lineId
 					? cancelOrderLine(c.id, c.lineId, reason, outletName)
 					: cancelOrder(c.id, reason, outletName),
-			c.lineId ? "Item cancelled" : "Order cancelled",
+			(a) =>
+				!c.lineId
+					? "Order cancelled"
+					: a?.status === "CANCELLED"
+						? `${c.label} cancelled · nothing is left, so ${target?.number ?? "the order"} is cancelled`
+						: "Item cancelled",
 			(a) => {
-				if (c.lineId)
+				if (c.lineId && a?.status === "CANCELLED") {
+					// The last dish: fnb-service cancelled the order with it, so it leaves the board (DEF-085).
+					put(a);
+					close();
+				} else if (c.lineId)
 					apply(c.id, a, (x) => ({
 						...x,
 						lines: x.lines.map((l) =>
@@ -1200,6 +1220,12 @@ export function KitchenOrdersScreen({
 								label: roomLabel(b),
 							}))}
 							placeholder="Which guest"
+							empty="Nobody is checked in right now"
+							hint={
+								inHouse.length === 0
+									? "Room service is for guests who are checked in. Front office checks them in first."
+									: undefined
+							}
 							required
 						/>
 					)}

@@ -5,7 +5,15 @@ import { data } from "@hospio/api/data";
 
 export const dynamic = "force-dynamic";
 
-export default async function FrontDeskTodayPage() {
+export default async function FrontDeskTodayPage({
+	searchParams,
+}: {
+	searchParams: Promise<{ order?: string }>;
+}) {
+	// "Order K-0035 is ready" links to /dashboard?order=…, which is the board for the kitchen and bar. Front office
+	// opens room-service orders, so it goes to that order in Room service, not Today (DEF-083).
+	const { order } = await searchParams;
+	if (order) redirect(`/dashboard/room-service?open=${encodeURIComponent(order)}`);
 	const [user, hotel] = await Promise.all([getUser(), getActiveHotel()]);
 	if (!user) redirect("/auth");
 	const [buckets, rooms, folios, terminals, till, clock] = await Promise.all([

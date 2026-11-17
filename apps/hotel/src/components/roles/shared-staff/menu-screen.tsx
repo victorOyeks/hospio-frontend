@@ -80,6 +80,16 @@ type Draft = {
 };
 /** "Made at: This outlet" (a select can't hold an empty value). */
 const HERE = "here";
+/**
+ * What is wrong with a recipe row, if anything (DEF-081: -12 was dropped without a word and the item saved). A row with
+ * neither a stock item nor a quantity is just left out.
+ */
+const recipeProblem = (r: Draft["recipe"][number]) => {
+	if (!r.stockItemId && r.quantity === "") return null;
+	if (!r.stockItemId) return "Pick the stock item";
+	if (r.quantity === "") return "Enter how much";
+	return Number(r.quantity) > 0 ? null : "Above 0";
+};
 const emptyDraft = (category: string): Draft => ({
 	name: "",
 	category,
@@ -224,11 +234,16 @@ export function MenuScreen({
 		);
 
 	const close = () => setPanel(null);
+	// One price change at a time for staff who need approval (DEF-086); the manager and Full access change it at once.
+	const waitingOnManager = (m: MenuItemRow) =>
+		!canManage && m.pendingPrice != null;
 	const patch = (m: MenuItemRow) =>
 		setItems((it) =>
 			it.some((x) => x.id === m.id)
 				? it.map((x) =>
-						x.id === m.id ? { ...x, ...m, pendingPrice: x.pendingPrice } : x,
+						x.id === m.id
+							? { ...x, ...m, pendingPrice: m.pendingPrice ?? x.pendingPrice }
+							: x,
 					)
 				: [...it, m],
 		);
@@ -281,7 +296,7 @@ export function MenuScreen({
 					price: Number(draft.price),
 					options: draft.groups,
 					recipe: draft.recipe
-						.filter((r) => r.stockItemId && Number(r.quantity) > 0)
+						.filter((r) => r.stockItemId && r.quantity !== "")
 						.map((r) => ({
 							stockItemId: r.stockItemId,
 							quantity: Number(r.quantity),
@@ -557,7 +572,8 @@ export function MenuScreen({
 							pending={pending}
 							disabled={
 								newPrice === "" ||
-								(panel?.kind === "price" && newPrice === panel.item.price)
+								(panel?.kind === "price" &&
+									(newPrice === panel.item.price || waitingOnManager(panel.item)))
 							}
 							onClick={() =>
 								panel?.kind === "price" &&
@@ -586,6 +602,12 @@ export function MenuScreen({
 			>
 				{panel?.kind === "price" && (
 					<div className="flex flex-col gap-4">
+						{waitingOnManager(panel.item) && (
+							<Note tone="warning">
+								{naira(panel.item.pendingPrice ?? 0)} is already waiting for the
+								manager's approval. You can ask again once they decide.
+							</Note>
+						)}
 						<MoneyField
 							label="New price"
 							value={newPrice}
@@ -634,7 +656,10 @@ export function MenuScreen({
 						<BigButton
 							pending={pending}
 							disabled={
-								!draft.name.trim() || draft.price === "" || !draft.category
+								!draft.name.trim() ||
+								draft.price === "" ||
+								!draft.category ||
+								draft.recipe.some((r) => recipeProblem(r) !== null)
 							}
 							onClick={saveItem}
 						>
@@ -760,7 +785,9 @@ export function MenuScreen({
 										/>
 										<input
 											type="number"
-											value={c.priceDelta}
+											// Empty means no difference: 0 is never typed in for the user (DEF-082).
+											value={c.priceDelta || ""}
+											placeholder="+₦0"
 											onChange={(e) =>
 												setGroup(i, {
 													choices: g.choices.map((x, m) =>
@@ -824,8 +851,8 @@ export function MenuScreen({
 							<PlusIcon className="size-4" /> Add a group of choices
 						</BigButton>
 						<p className="text-xs text-ink-3">
-							The number beside a choice is the price difference in naira (0 for
-							none).
+							The number beside a choice is the price difference in naira; leave
+							it empty for none.
 						</p>
 					</PanelSection>
 					<PanelSection title="Recipe · stock used per portion">
@@ -847,6 +874,11 @@ export function MenuScreen({
 											label: `${s.name} (${s.unit})`,
 										}))}
 										placeholder="Pick stock"
+										error={
+											recipeProblem(r) === "Pick the stock item"
+												? recipeProblem(r) ?? undefined
+												: undefined
+										}
 									/>
 								</div>
 								<div className="w-28">
@@ -856,6 +888,12 @@ export function MenuScreen({
 										value={String(r.quantity)}
 										onChange={(v) =>
 											setRecipe(i, { quantity: v === "" ? "" : Number(v) })
+										}
+										placeholder="e.g. 0.2"
+										error={
+											recipeProblem(r) && recipeProblem(r) !== "Pick the stock item"
+												? (recipeProblem(r) ?? undefined)
+												: undefined
 										}
 									/>
 								</div>
@@ -881,7 +919,8 @@ export function MenuScreen({
 								onClick={() =>
 									setDraft((d) => ({
 										...d,
-										recipe: [...d.recipe, { stockItemId: "", quantity: 1 }],
+										// Starts empty (DEF-080/082): the grey hint is never a value.
+										recipe: [...d.recipe, { stockItemId: "", quantity: "" }],
 									}))
 								}
 							>

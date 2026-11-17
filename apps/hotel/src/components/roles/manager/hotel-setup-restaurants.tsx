@@ -1,6 +1,7 @@
 "use client";
 
 import { ChefHatIcon, PencilIcon, PlusIcon, WineIcon } from "lucide-react";
+import Link from "next/link";
 import { useEffect, useState } from "react";
 import { saveOutlet, saveTable } from "@hospio/api/actions/fnb";
 import { useAction } from "@hospio/api/actions/use-action";
@@ -35,6 +36,10 @@ type OutletDraft = {
 };
 /** "Use the role's terminal" (a select can't hold an empty value). */
 const ROLE_TERMINAL = "role";
+/** "No store" (a select can't hold an empty value): the outlet draws no stock. */
+const NO_STORE = "none";
+/** Seats is a whole number from 1; empty until typed (DEF-076: the grey "e.g. 4" is a hint, never a value). */
+const seatsOk = (v: string) => /^\d+$/.test(v.trim()) && Number(v) >= 1 && Number(v) <= 500;
 type TableDraft = {
 	outletId: string;
 	id?: string;
@@ -99,7 +104,9 @@ export function RestaurantsSection({
 					{
 						name: outlet.name.trim(),
 						kind: outlet.kind,
-						storeId: outlet.storeId || undefined,
+						// "" unlinks the store; left out (undefined) keeps it.
+						storeId:
+							outlet.storeId === NO_STORE ? "" : outlet.storeId || undefined,
 						status: outlet.open ? "OPEN" : "CLOSED",
 						terminalId:
 							outlet.terminalId === ROLE_TERMINAL ? "" : outlet.terminalId,
@@ -119,7 +126,7 @@ export function RestaurantsSection({
 			() =>
 				saveTable(table.outletId, table.id, {
 					number: table.number.trim(),
-					seats: Math.max(1, Number(table.seats) || 4),
+					seats: Number(table.seats),
 					active: table.active,
 				}),
 			table.id ? "Saved" : "Table added",
@@ -250,7 +257,7 @@ export function RestaurantsSection({
 												setTable({
 													outletId: o.id,
 													number: "",
-													seats: "4",
+													seats: "",
 													active: true,
 												})
 											}
@@ -316,8 +323,37 @@ export function RestaurantsSection({
 							label="Store it draws stock from"
 							value={outlet.storeId}
 							onChange={(v) => setOutlet({ ...outlet, storeId: v })}
-							options={stores.map((s) => ({ value: s.id, label: s.name }))}
+							options={
+								// No stores yet: an empty list says so (it opened to nothing and looked broken, DEF-077).
+								stores.length
+									? [
+											...stores.map((s) => ({ value: s.id, label: s.name })),
+											{
+												value: NO_STORE,
+												label: "No store",
+												hint: "No stock is drawn",
+											},
+										]
+									: []
+							}
 							placeholder="No store"
+							empty="No store yet · add one in Inventory first"
+							hint={
+								stores.length === 0 ? (
+									<>
+										This hotel has no stores yet.{" "}
+										<Link
+											href="/dashboard/inventory"
+											prefetch={false}
+											className="font-semibold text-brand hover:underline"
+										>
+											Add a store in Inventory
+										</Link>
+										, then come back and pick it. Until then the outlet draws no
+										stock.
+									</>
+								) : undefined
+							}
 						/>
 						<SelectField
 							label="POS terminal"
@@ -360,7 +396,9 @@ export function RestaurantsSection({
 						</Button>
 						<Button
 							className={btn.primary}
-							disabled={pending || !table?.number.trim()}
+							disabled={
+								pending || !table?.number.trim() || !seatsOk(table?.seats ?? "")
+							}
 							onClick={submitTable}
 						>
 							Save
@@ -382,6 +420,13 @@ export function RestaurantsSection({
 							type="number"
 							value={table.seats}
 							onChange={(v) => setTable({ ...table, seats: v })}
+							placeholder="e.g. 4"
+							required
+							error={
+								table.seats.trim() && !seatsOk(table.seats)
+									? "Seats is a whole number from 1"
+									: undefined
+							}
 						/>
 						<ToggleField
 							label="In use"

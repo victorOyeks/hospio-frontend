@@ -183,6 +183,7 @@ export function toMenuItemRow(
 		sortOrder: m.sortOrder ?? undefined,
 		recipe: recipe.length ? recipe : undefined,
 		preparedAt: m.preparedAt || undefined,
+		pendingPrice: m.pendingPrice ?? undefined,
 	};
 }
 
