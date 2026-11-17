@@ -315,17 +315,20 @@ export function ToggleField({
 	checked,
 	onChange,
 	className,
+	disabled,
 }: {
 	label: string;
 	hint?: ReactNode;
 	checked: boolean;
 	onChange: (v: boolean) => void;
 	className?: string;
+	disabled?: boolean;
 }) {
 	return (
 		<div
 			className={cn(
 				"flex items-center gap-3 rounded-control border border-line px-4 py-3",
+				disabled && "opacity-70",
 				className,
 			)}
 		>
@@ -336,6 +339,7 @@ export function ToggleField({
 			<Switch
 				checked={checked}
 				onCheckedChange={onChange}
+				disabled={disabled}
 				aria-label={label}
 				className="data-[state=checked]:bg-brand"
 			/>

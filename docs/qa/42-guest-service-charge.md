@@ -7,8 +7,8 @@ fee rate and the hotel keeps its full price. Off (default): the hotel pays the f
 
 ## Steps
 
-1. As the **manager**: Hotel setup → Money & payments → **Guests pay the Hospio fee** is read-only; saving other payment fields
-   still works.
+1. As the **manager**: Hotel setup → Money & payments → **Guests pay the Hospio fee** is read-only (the switch is greyed out
+   and can't be clicked); saving other payment fields still works.
 2. As the **owner**: switch it on and save. The hint names the rate (e.g. 1.5 %).
 3. Post a charge on a folio (or check in a guest): the folio shows "Service charge (1.5%) · …" next to each charge; voiding a
    charge voids its service charge; moving a charge moves it too.
