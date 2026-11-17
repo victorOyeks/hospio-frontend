@@ -93,7 +93,7 @@ export function MyPaymentsScreen({ payments: result, opened, terminals, me, role
 			{ accessorKey: "method", header: "Method", cell: ({ row }) => <TwoLine primary={row.original.method === "CARD" ? "Card" : row.original.method === "TRANSFER" ? "Transfer" : "Cash"} secondary={row.original.terminal ?? row.original.providerRef ?? ""} /> },
 			{ accessorKey: "takenBy", header: "By" },
 			{ accessorKey: "amount", header: "Amount", cell: ({ row }) => <span className="font-semibold">{naira(row.original.amount)}</span> },
-			{ accessorKey: "status", header: "Status", cell: ({ row }) => <span className="flex flex-col items-start gap-[2px]"><StatusPill tone={payTone[row.original.status].tone}>{payTone[row.original.status].label}</StatusPill>{row.original.failureReason && (row.original.status === "DECLINED" || row.original.status === "FAILED") && <span className="text-[11px] text-danger">{row.original.failureReason}</span>}</span>, enableSorting: false },
+			{ accessorKey: "status", header: "Status", cell: ({ row }) => <span className="flex flex-col items-start gap-[2px]"><StatusPill tone={payTone[row.original.status].tone}>{payTone[row.original.status].label}</StatusPill>{row.original.failureReason && (row.original.status === "DECLINED" || row.original.status === "FAILED") && <span className="block max-w-[220px] truncate text-[11px] text-danger" title={row.original.failureReason}>{row.original.failureReason}</span>}</span>, enableSorting: false },
 		],
 		[],
 	);

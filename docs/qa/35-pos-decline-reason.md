@@ -34,6 +34,8 @@ front office `victor@royalsuites.ng`.
 1. **Payments** (front desk) and the manager's Payments list show the reason under **Declined**.
 2. Open the payment: a red note reads "Declined: Insufficient funds. Nothing was taken from the guest", and the detail list has a
    **Reason** row. The owner's payment detail has the Reason row too.
+3. A long reason (e.g. OPay's "C_1113 not within ip white list …") shows on one line in the list, cut with "…"; hover shows
+   it all, and the payment's detail shows it in full.
 
 ## 3. The provider refuses the request
 
