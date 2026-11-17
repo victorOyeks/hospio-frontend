@@ -98,3 +98,24 @@ export function Crumbs({ items }: { items: { label: string; href?: string }[] })
 		</nav>
 	);
 }
+
+/** How a payment came in, as payment-service's summary names it ("cash", "desk-transfer", "moniepoint", "opay", "logging"). */
+export function howPaidLabel(key: string): string {
+	switch (key) {
+		case "cash":
+			return "Cash";
+		case "desk-transfer":
+			return "Bank transfer (recorded at desk)";
+		case "moniepoint":
+			return "Moniepoint POS";
+		case "opay":
+			return "OPay POS";
+		case "logging":
+			return "Test POS (staging)";
+		default:
+			return key;
+	}
+}
+
+/** True for money that went through a POS terminal (card or transfer), not cash or a desk transfer. */
+export const throughPos = (key: string) => key !== "cash" && key !== "desk-transfer" && key !== "unknown";

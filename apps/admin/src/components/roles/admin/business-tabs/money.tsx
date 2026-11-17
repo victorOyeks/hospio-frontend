@@ -25,6 +25,7 @@ import { KpiCard } from "@hospio/ui/shared/kpi-card";
 import { SectionCard } from "@hospio/ui/shared/section-card";
 import { StatusPill } from "@hospio/ui/shared/status-pill";
 import { cn } from "@hospio/ui/utils";
+import { howPaidLabel, throughPos } from "../shared";
 import { BusinessTabHeader } from "./nav";
 
 const feeTone = {
@@ -90,6 +91,12 @@ export function MoneyTab({
 	const dayCollected = (dailyFees ?? []).reduce((a, d) => a + (d.collected ?? 0), 0);
 	const unpaidDays = (dailyFees ?? []).filter((d) => d.status === "UNPAID" || d.status === "PART_PAID").length;
 	const shadow = (dailyFees ?? []).some((d) => d.status === "SHADOW");
+	const paidBy = (keys: (k: string) => boolean) =>
+		summary.byProvider.filter((p) => keys(p.provider)).reduce((a, p) => a + p.gross, 0);
+	const cash = paidBy((k) => k === "cash");
+	const deskTransfers = paidBy((k) => k === "desk-transfer");
+	const pos = paidBy(throughPos);
+	const posProviders = summary.byProvider.filter((p) => throughPos(p.provider));
 	return (
 		<>
 			<BusinessTabHeader
@@ -121,11 +128,28 @@ export function MoneyTab({
 				/>
 				)}
 				<KpiCard
-					label="Guest payments"
+					label="Payments received this month"
 					value={nairaShort(summary.gross)}
 					icon={CreditCardIcon}
-					hint={`${plural(summary.count, "payment")} · card and transfer`}
+					hint={`${plural(summary.count, "payment")} · cash ${nairaShort(cash)} · desk transfer ${nairaShort(deskTransfers)} · POS ${nairaShort(pos)}`}
 				/>
+				{daily ? (
+					<>
+						<KpiCard
+							label="Into the hotel's POS accounts"
+							value={nairaShort(pos)}
+							icon={BanknoteIcon}
+							hint="Card and transfer on Moniepoint or OPay · straight to the hotel"
+						/>
+						<KpiCard
+							label="Hospio fees debited"
+							value={nairaShort(dayCollected)}
+							icon={ReceiptIcon}
+							hint={shadow ? "Automatic debit isn't on yet" : `of ${nairaShort(dayFees)} this month`}
+						/>
+					</>
+				) : (
+					<>
 				<KpiCard
 					label="Settled to the hotel"
 					value={nairaShort(
@@ -142,6 +166,8 @@ export function MoneyTab({
 					icon={ReceiptIcon}
 					hint="From the settlements shown"
 				/>
+					</>
+				)}
 			</div>
 			<div className="grid gap-4 xl:grid-cols-2">
 				{daily ? (
@@ -226,6 +252,33 @@ export function MoneyTab({
 					)}
 				</SectionCard>
 				)}
+				{daily ? (
+					<SectionCard
+						title="Where the money goes"
+						subtitle="This month · POS payments go straight to the hotel's own accounts"
+						action={{ label: "Payments", href: `/dashboard/payments?businessId=${businessId}` }}
+						bodyClassName="pt-2"
+					>
+						<p className="mb-3 text-[13px] text-ink-2">
+							Card and transfer payments on the hotel's Moniepoint or OPay terminals land in the hotel's own account. Hospio360
+							doesn't hold or settle them; its {feeRate ?? ""}% fee is debited from that account each morning.
+						</p>
+						{posProviders.length === 0 ? (
+							<p className="text-[13px] text-ink-3">No approved POS payments this month yet.</p>
+						) : (
+							<ul className="divide-y divide-line rounded-xl border border-line text-[13px]">
+								{posProviders.map((p) => (
+									<li key={p.provider} className="flex items-center justify-between px-4 py-2">
+										<span className="font-medium text-ink">{howPaidLabel(p.provider)}</span>
+										<span className="text-ink-2">
+											{plural(p.count, "payment")} · <span className="font-semibold text-ink">{naira(p.gross)}</span>
+										</span>
+									</li>
+								))}
+							</ul>
+						)}
+					</SectionCard>
+				) : (
 				<SectionCard
 					title="Settlements"
 					subtitle="Per provider and day"
@@ -269,11 +322,12 @@ export function MoneyTab({
 						</ul>
 					)}
 				</SectionCard>
+				)}
 			</div>
 			{summary.byProvider.length > 0 && (
 				<SectionCard
-					title="Guest payments by provider"
-					subtitle="Approved card and transfer payments"
+					title="Payments received by how they were paid"
+					subtitle="Approved payments this month: cash, transfers recorded at the desk, and POS"
 					bodyClassName="pt-2"
 				>
 					<ul className="divide-y divide-line rounded-xl border border-line text-[13px]">
@@ -282,7 +336,7 @@ export function MoneyTab({
 								key={p.provider}
 								className="flex items-center justify-between px-4 py-2"
 							>
-								<span className="font-medium text-ink">{p.provider}</span>
+								<span className="font-medium text-ink">{howPaidLabel(p.provider)}</span>
 								<span className="text-ink-2">
 									{plural(p.count, "payment")} ·{" "}
 									<span className="font-semibold text-ink">

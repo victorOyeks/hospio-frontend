@@ -37,7 +37,12 @@ Password for every account: `Hospio123!`. Owner of Royal Suites; manager of Simp
 2. **Daily fees →** opens Fees & billing → Daily fees filtered to the business.
 3. No "Fee statements" or "Fees outstanding ₦151k" any more (the two seeded test statements were removed on 17 Nov, and the
    staging seed no longer creates them).
-4. A business on a monthly fee model (% of payments, per room night, % of booking value, flat) still shows its fee statements.
+4. The cards read: **Payments received this month** (with the cash / desk transfer / POS split), **Into the hotel's POS
+   accounts**, **Hospio fees debited**. The right panel is **Where the money goes** (POS payments land in the hotel's own
+   Moniepoint/OPay account; Hospio360 debits its fee), not Settlements.
+5. **Payments received by how they were paid** lists Cash, Bank transfer (recorded at desk), Moniepoint POS, OPay POS — no
+   "logging". Payments & POS → "By how it was paid" uses the same names.
+6. A business on a monthly fee model (% of payments, per room night, % of booking value, flat) still shows its fee statements.
 
 ## What to report
 
