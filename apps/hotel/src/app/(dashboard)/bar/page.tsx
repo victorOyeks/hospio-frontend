@@ -27,6 +27,7 @@ export default async function BarHome({
 		terminals,
 		sales,
 		till,
+		outlets,
 	] = await Promise.all([
 		outlet ? data.outlets.orders(outlet.id) : Promise.resolve([]),
 		outlet
@@ -41,6 +42,7 @@ export default async function BarHome({
 		data.payments.terminals(),
 		outlet ? data.outlets.sales(undefined, outlet.id) : Promise.resolve(null),
 		data.finance.myTill("BAR"),
+		data.outlets.list(),
 	]);
 	return (
 		<>
@@ -62,6 +64,7 @@ export default async function BarHome({
 				terminals={terminals}
 				sales={sales}
 				till={till}
+				outlets={outlets}
 			/>
 		</>
 	);

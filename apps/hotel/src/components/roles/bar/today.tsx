@@ -96,7 +96,10 @@ export function BarTodayScreen({
 	terminals,
 	sales,
 	till,
+	outlets = [],
 }: {
+	/** The hotel's outlets: names the outlet that makes a line sold here (the kitchen's pepper soup). */
+	outlets?: { id: string; name: string }[];
 	outlet: OutletRow | null;
 	orders: OrderRow[];
 	closed: OrderRow[];
@@ -415,6 +418,7 @@ export function BarTodayScreen({
 				desk="BAR"
 				terminals={terminals}
 				inHouse={inHouse}
+				outlets={outlets}
 				onChanged={(id) =>
 					void readOrder(id, outletName).then((r) => {
 						if (!r.ok || !r.data) return;

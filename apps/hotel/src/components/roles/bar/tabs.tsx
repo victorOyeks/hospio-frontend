@@ -125,6 +125,9 @@ export function BarTabsScreen({
 	const free = tables.filter((t) => !tabs.some((o) => sitsAt(o, t)));
 	const discount = activeHappyHour(happyHours)?.discountPct ?? 0;
 	const atLimit = (o: OrderRow) => o.total >= LIMIT;
+	/** Paid or on a room, kept open only while another outlet (the kitchen) finishes its part: nothing left to collect. */
+	const settled = (o: OrderRow) => o.paid || o.chargedToRoom;
+	const unpaid = tabs.filter((o) => !settled(o));
 	const elsewhere = (l: { preparedAt?: string }) =>
 		madeElsewhere(l, outlet?.id);
 	const station = (l: { preparedAt?: string }) =>
@@ -146,7 +149,7 @@ export function BarTabsScreen({
 		<>
 			<PageHeader
 				title="Open tabs"
-				subtitle={`${plural(tabs.length, "tab")} open · ${naira(tabs.reduce((s, o) => s + o.total, 0))} unpaid · limit ${naira(LIMIT)} per tab`}
+				subtitle={`${plural(tabs.length, "tab")} open · ${naira(unpaid.reduce((s, o) => s + o.total, 0))} unpaid · limit ${naira(LIMIT)} per tab`}
 			>
 				<ShiftPill until="1am" />
 			</PageHeader>
@@ -160,7 +163,7 @@ export function BarTabsScreen({
 				<KpiCard label="Open tabs" value={tabs.length} icon={ReceiptIcon} />
 				<KpiCard
 					label="Unpaid"
-					value={naira(tabs.reduce((s, o) => s + o.total, 0))}
+					value={naira(unpaid.reduce((s, o) => s + o.total, 0))}
 					icon={ReceiptIcon}
 				/>
 				<KpiCard
@@ -216,7 +219,11 @@ export function BarTabsScreen({
 							<span className="text-[17px] font-bold text-ink">
 								{naira(o.total)}
 							</span>
-							{atLimit(o) ? (
+							{settled(o) ? (
+								<StatusPill tone="success">
+									{o.chargedToRoom ? "On the room" : "Paid"}
+								</StatusPill>
+							) : atLimit(o) ? (
 								<StatusPill tone="danger">At limit</StatusPill>
 							) : (
 								<StatusPill tone="brand">Open</StatusPill>
@@ -243,7 +250,8 @@ export function BarTabsScreen({
 				footer={
 					current &&
 					current.status !== "CLOSED" &&
-					current.status !== "CANCELLED" ? (
+					current.status !== "CANCELLED" &&
+					!settled(current) ? (
 						<>
 							<BigButton
 								tone="ghost"
@@ -278,7 +286,25 @@ export function BarTabsScreen({
 				{current && (
 					<div className="flex flex-col gap-5">
 						{message && <Note tone="danger">{message}</Note>}
-						{atLimit(current) && (
+						{settled(current) &&
+							current.status !== "CLOSED" &&
+							current.status !== "CANCELLED" && (
+								<Note tone="info">
+									{current.chargedToRoom ? "Charged to the room" : "Paid"}
+									{(() => {
+										const away = current.lines.find(
+											(l) =>
+												elsewhere(l) &&
+												l.status !== "SERVED" &&
+												l.status !== "CANCELLED",
+										);
+										return away
+											? `. ${station(away)} is still making part of it: serve it when it is ready and the tab closes.`
+											: ". Serve what is left and the tab closes.";
+									})()}
+								</Note>
+							)}
+						{!settled(current) && atLimit(current) && (
 							<Note tone="danger">
 								This tab has reached the {naira(LIMIT)} limit. Take a payment or
 								settle it before adding more; a manager can allow more.
