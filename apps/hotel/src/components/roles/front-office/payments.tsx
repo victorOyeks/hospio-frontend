@@ -92,7 +92,7 @@ export function MyPaymentsScreen({ payments: result, opened, terminals, me, role
 			{ accessorKey: "method", header: "Method", cell: ({ row }) => <TwoLine primary={row.original.method === "CARD" ? "Card" : row.original.method === "TRANSFER" ? "Transfer" : "Cash"} secondary={row.original.terminal ?? row.original.providerRef ?? ""} /> },
 			{ accessorKey: "takenBy", header: "By" },
 			{ accessorKey: "amount", header: "Amount", cell: ({ row }) => <span className="font-semibold">{naira(row.original.amount)}</span> },
-			{ accessorKey: "status", header: "Status", cell: ({ row }) => <StatusPill tone={payTone[row.original.status].tone}>{payTone[row.original.status].label}</StatusPill>, enableSorting: false },
+			{ accessorKey: "status", header: "Status", cell: ({ row }) => <span className="flex flex-col items-start gap-[2px]"><StatusPill tone={payTone[row.original.status].tone}>{payTone[row.original.status].label}</StatusPill>{row.original.failureReason && (row.original.status === "DECLINED" || row.original.status === "FAILED") && <span className="text-[11px] text-danger">{row.original.failureReason}</span>}</span>, enableSorting: false },
 		],
 		[],
 	);
@@ -123,9 +123,10 @@ export function MyPaymentsScreen({ payments: result, opened, terminals, me, role
 				{pay && (
 					<div className="flex flex-col gap-6">
 						{pay.status === "PROCESSING" && <Note tone="info">The POS hasn't confirmed this card payment yet. "Check with the POS" asks the provider where it stands; it is approved only when the POS says so.</Note>}
+						{(pay.status === "DECLINED" || pay.status === "FAILED") && <Note tone="danger">{pay.status === "FAILED" ? "Didn't go through" : "Declined"}{pay.failureReason ? `: ${pay.failureReason}` : " at the POS"}. Nothing was taken from the guest.</Note>}
 						{pay.status === "NO_RESPONSE" && <Note tone="danger">The terminal didn't answer. Nothing was charged — check with the guest's bank before trying again.</Note>}
 						<PanelSection title="Payment">
-							<DetailList columns={2} items={[{ label: "Method", value: pay.method === "CARD" ? `Card · ${pay.terminal}` : pay.method === "TRANSFER" ? "Bank transfer" : "Cash" }, { label: "Provider ref", value: pay.providerRef ?? "—" }, { label: "For", value: pay.description }, { label: "Folio", value: pay.folioId ? <a href={`/dashboard/folios?open=${pay.folioId}`} className="text-brand">Open folio →</a> : "—" }, { label: "Receipt", value: pay.receiptSent === "EMAIL" ? "Emailed" : pay.receiptSent === "WHATSAPP" ? "Not sent · WhatsApp is coming soon" : pay.receiptSent === "NONE" ? "Not sent" : "Print or email it from the receipt page" }, { label: "Resolved", value: fmtWhen(pay.resolvedAt) }]} />
+							<DetailList columns={2} items={[{ label: "Method", value: pay.method === "CARD" ? `Card · ${pay.terminal ?? "POS"}` : pay.method === "TRANSFER" ? (pay.terminal ? `Bank transfer · ${pay.terminal}` : "Bank transfer") : "Cash" }, ...(pay.failureReason && (pay.status === "DECLINED" || pay.status === "FAILED") ? [{ label: "Reason", value: <span className="font-semibold text-danger">{pay.failureReason}</span> }] : []), { label: "Provider ref", value: pay.providerRef ?? "—" }, { label: "For", value: pay.description }, { label: "Folio", value: pay.folioId ? <a href={`/dashboard/folios?open=${pay.folioId}`} className="text-brand">Open folio →</a> : "—" }, { label: "Receipt", value: pay.receiptSent === "EMAIL" ? "Emailed" : pay.receiptSent === "WHATSAPP" ? "Not sent · WhatsApp is coming soon" : pay.receiptSent === "NONE" ? "Not sent" : "Print or email it from the receipt page" }, { label: "Resolved", value: fmtWhen(pay.resolvedAt) }]} />
 						</PanelSection>
 					</div>
 				)}

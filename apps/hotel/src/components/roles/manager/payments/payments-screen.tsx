@@ -261,9 +261,18 @@ export function PaymentsScreen({
 			accessorKey: "status",
 			header: "Status",
 			cell: ({ row }) => (
-				<StatusPill tone={paymentTone[row.original.status]}>
-					{humanize(row.original.status)}
-				</StatusPill>
+				<span className="flex flex-col items-start gap-[2px]">
+					<StatusPill tone={paymentTone[row.original.status]}>
+						{humanize(row.original.status)}
+					</StatusPill>
+					{row.original.failureReason &&
+						(row.original.status === "DECLINED" ||
+							row.original.status === "FAILED") && (
+							<span className="text-[11px] text-danger">
+								{row.original.failureReason}
+							</span>
+						)}
+				</span>
 			),
 		},
 		{
