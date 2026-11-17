@@ -10,7 +10,8 @@ import type { OwnerHotelRow, PortalUserRow } from "@hospio/api/data/types";
 import { roleLabels } from "@hospio/api/roles";
 import { Button } from "@hospio/ui/primitives/button";
 import { Checkbox } from "@hospio/ui/primitives/checkbox";
-import { plural } from "@hospio/ui/shared/format";
+import type { DevicePackageView } from "@hospio/api/actions/device-packages";
+import { naira, plural } from "@hospio/ui/shared/format";
 import { btn } from "@hospio/ui/shared/ui";
 import { cn } from "@hospio/ui/utils";
 
@@ -28,12 +29,15 @@ export function HandoverReview({
 	users,
 	firstName,
 	setupCount,
+	devices = [],
 }: {
 	business: Business | null;
 	hotels: OwnerHotelRow[];
 	users: PortalUserRow[];
 	firstName: string;
 	setupCount: number;
+	/** Devices & internet Hospio360 supplies, one package per hotel. */
+	devices?: DevicePackageView[];
 }) {
 	const router = useRouter();
 	const [agreed, setAgreed] = useState(false);
@@ -74,7 +78,26 @@ export function HandoverReview({
 					: "Default hotel settings",
 		},
 		{ label: "Fee", value: fee },
+		...devices
+			.filter((p) => p.paymentOption !== "OWN_DEVICES" || p.dataPlanMonthly > 0)
+			.map((p) => ({
+				label: `Devices${p.hotelName && hotels.length > 1 ? ` · ${p.hotelName}` : ""}`,
+				value: [
+					p.items.map((i) => `${i.quantity} × ${i.name}`).join(", "),
+					p.paymentOption === "TRANSACTION"
+						? `${naira(p.total)}, paid from ${p.deviceRate ?? 2.5}% of each day's sales`
+						: p.paymentOption === "MONTHLY"
+							? `${naira(p.total)} in ${p.months} monthly payments of ${naira(p.monthlyInstalment ?? 0)}`
+							: p.paymentOption === "ONE_TIME"
+								? `${naira(p.total)}, paid at installation`
+								: null,
+					p.dataPlanMonthly > 0 ? `data plan ${naira(p.dataPlanMonthly)} a month` : null,
+				]
+					.filter(Boolean)
+					.join(" · "),
+			})),
 	];
+	const supplied = devices.some((p) => p.total > 0);
 
 	return (
 		<div className="grid w-full max-w-[1000px] gap-5 xl:grid-cols-[320px_1fr]">
@@ -131,9 +154,15 @@ export function HandoverReview({
 						className="mt-[2px] data-[state=checked]:border-brand data-[state=checked]:bg-brand"
 					/>
 					<label htmlFor="handover-agree">
-						I've checked the setup and I accept the handover
+						I've checked the setup and I accept the handover{supplied ? ", including the devices and how they are paid for" : ""}
 					</label>
 				</div>
+				{supplied && (
+					<p className="text-xs text-ink-2">
+						The devices remain Hospio360's until they are paid off. If you leave before then, you pay what is left or
+						return them.
+					</p>
+				)}
 				<p className="text-xs text-ink-3">
 					Hospio360 support can still help and make changes when needed. Every
 					change is shown in your Activity log with a reason, and you can undo

@@ -8,6 +8,7 @@ import { lmRoutes } from "./routes-lm";
 import { mlRoutes } from "./routes-ml";
 import { opsRoutes } from "./routes-ops";
 import { ownerRoutes } from "./routes-owner";
+import { devicePackageRoutes } from "./routes-device-packages";
 import { feeRoutes } from "./routes-fees";
 import { paymentRoutes } from "./routes-payments";
 import { profileRoutes } from "./routes-profile";
@@ -1116,6 +1117,7 @@ const paging = z
 export const schema = createSchema({
 	...ownerRoutes,
 	...feeRoutes,
+	...devicePackageRoutes,
 	...mlRoutes,
 	...adminRoutes,
 	...opsRoutes,

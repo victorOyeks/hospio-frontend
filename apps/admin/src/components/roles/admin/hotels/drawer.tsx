@@ -13,6 +13,7 @@ import { SectionCard } from "@hospio/ui/shared/section-card";
 import { SidePanel } from "@hospio/ui/shared/side-panel";
 import { btn } from "@hospio/ui/shared/ui";
 import { cn } from "@hospio/ui/utils";
+import { DevicePackagePanel } from "../devices/device-package";
 import { GuestMessagePlans } from "../guest-messages";
 import { HotelFeesPanel } from "../hotel-fees";
 import { Loading, useLoaded } from "../live";
@@ -33,7 +34,7 @@ export type HotelRef = {
 	manager?: string;
 };
 
-type HotelTab = "overview" | "fees" | "messages";
+type HotelTab = "overview" | "fees" | "devices" | "messages";
 
 /**
  * One hotel in a side panel, opened from any list with `?hotel=<id>` so the link can be shared and Back closes it. Its
@@ -48,6 +49,7 @@ export function HotelDrawer({ hotels, role }: { hotels: HotelRef[]; role: AdminR
 	const tabs: { key: HotelTab; label: string }[] = [
 		{ key: "overview", label: "Overview" },
 		...(money ? [{ key: "fees" as const, label: "POS & Hospio fees" }] : []),
+		{ key: "devices", label: "Devices" },
 		{ key: "messages", label: "Guest messages" },
 	];
 	const active: HotelTab = tabs.some((t) => t.key === tab) ? (tab as HotelTab) : "overview";
@@ -83,6 +85,9 @@ export function HotelDrawer({ hotels, role }: { hotels: HotelRef[]; role: AdminR
 					<PillTabs tabs={tabs} value={active} onChange={(k) => void setTab(k === "overview" ? null : k)} />
 					{active === "overview" && <HotelOverview hotel={hotel} />}
 					{active === "fees" && <HotelFeesPanel key={hotel.id} businessId={hotel.businessId} hotelId={hotel.id} role={role} />}
+					{active === "devices" && (
+						<DevicePackagePanel key={hotel.id} businessId={hotel.businessId} hotelId={hotel.id} hotelName={hotel.name} role={role} />
+					)}
 					{active === "messages" && (
 						<GuestMessagePlans key={hotel.id} businessId={hotel.businessId} hotels={[{ id: hotel.id, name: hotel.name }]} />
 					)}

@@ -3,6 +3,7 @@
 import { PlugIcon } from "lucide-react";
 import Link from "next/link";
 import { useQueryState } from "nuqs";
+import { DeviceCatalogueSettings } from "./devices/devices-admin";
 import { useState } from "react";
 import { saveSettings } from "@hospio/api/actions/platform-admin";
 import { useAction } from "@hospio/api/actions/use-action";
@@ -99,6 +100,7 @@ export function SettingsScreen({
 				tabs={[
 					{ key: "general", label: "General" },
 					{ key: "fees", label: "Fee defaults" },
+					{ key: "devices", label: "Device catalogue" },
 					{ key: "security", label: "Security" },
 				]}
 				value={active}
@@ -149,6 +151,8 @@ export function SettingsScreen({
 					{save("general")}
 				</SectionCard>
 			)}
+
+			{active === "devices" && <DeviceCatalogueSettings editable={editable} />}
 
 			{active === "fees" && (
 				<div className="grid gap-4 xl:grid-cols-2">

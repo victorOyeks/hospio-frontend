@@ -12,6 +12,7 @@ import { PillTabs } from "@hospio/ui/shared/pill-tabs";
 import { StatusPill } from "@hospio/ui/shared/status-pill";
 import { btn } from "@hospio/ui/shared/ui";
 import { cn } from "@hospio/ui/utils";
+import { DevicePackagePanel } from "../devices/device-package";
 import type { WizardCtx } from "./wizard";
 import {
 	KeyRow,
@@ -281,6 +282,20 @@ export function ConnectionsStep({ ctx }: { ctx: WizardCtx }) {
 						>
 							<PlusIcon className="size-4" /> Add terminal
 						</button>
+					</div>
+				)}
+			</StepCard>
+			<StepCard
+				title="Devices & internet"
+				subtitle="What Hospio360 supplies to each hotel (tablets, router, data plan) and how it is paid for: own devices, from transactions, monthly or one time"
+			>
+				{ctx.hotels.length === 0 ? (
+					<p className="text-[13px] text-ink-3">Add the hotels first.</p>
+				) : (
+					<div className="flex flex-col gap-4">
+						{ctx.hotels.map((h) => (
+							<DevicePackagePanel key={h.id} businessId={ctx.business.id} hotelId={h.id} hotelName={h.name} role={ctx.role} />
+						))}
 					</div>
 				)}
 			</StepCard>
