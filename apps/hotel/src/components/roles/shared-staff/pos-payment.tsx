@@ -16,6 +16,11 @@ export type DeskPayment = {
 	roomNumber?: string;
 	/** The selling outlet's own POS: picked first while it is online. */
 	terminalId?: string;
+	/** The part of a split bill this pays. */
+	partId?: string;
+	/** The location records tips (Hotel setup → Restaurant & bar): offer a tip on top; `tipFor` is who served. */
+	tipAllowed?: boolean;
+	tipFor?: string;
 };
 
 /**
@@ -34,6 +39,7 @@ export function OrderPaymentPanel({
 	onDone,
 	onFinish,
 	editAmount,
+	doneLabel,
 }: {
 	open: boolean;
 	onOpenChange: (open: boolean) => void;
@@ -45,6 +51,7 @@ export function OrderPaymentPanel({
 	onFinish?: () => void;
 	/** Let the desk take less than the amount (a part payment); fixed otherwise. */
 	editAmount?: boolean;
+	doneLabel?: string;
 }) {
 	const [run, setRun] = useState(0);
 	useEffect(() => {
@@ -65,6 +72,9 @@ export function OrderPaymentPanel({
 				orderId: payment.orderId,
 				role: desk,
 				terminalId: payment.terminalId,
+				partId: payment.partId,
+				tipAllowed: payment.tipAllowed,
+				tipFor: payment.tipFor,
 			}}
 			terminals={
 				own && !choices.includes(own) ? [own, ...choices] : choices
@@ -75,7 +85,7 @@ export function OrderPaymentPanel({
 				onFinish?.();
 			}}
 			onBack={() => onOpenChange(false)}
-			doneLabel="Back to the orders"
+			doneLabel={doneLabel ?? "Back to the orders"}
 			editAmount={editAmount}
 		>
 			{(v) => (

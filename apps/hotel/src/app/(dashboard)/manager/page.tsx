@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 import { ManagerDashboard } from "@/components/roles/manager/dashboard";
+import { saleRequests } from "@hospio/api/actions/bill";
 import { getActiveHotel, getUser } from "@hospio/api/dal";
 import { data } from "@hospio/api/data";
 import { lagosDate } from "@hospio/api/data/mappers/finance";
@@ -22,6 +23,7 @@ export default async function ManagerHomePage() {
 		folios,
 		shifts,
 		outletSales,
+		floorRequests,
 	] = await Promise.all([
 		data.bookings.buckets(),
 		data.rooms.list(),
@@ -32,6 +34,8 @@ export default async function ManagerHomePage() {
 		data.folios.summaries(),
 		data.staff.shifts(lagosDate(), lagosDate()),
 		data.outlets.managementSales(),
+		// Voids, discounts and complimentary items asked for from an outlet screen, waiting for a manager (phase 4).
+		saleRequests().catch(() => []),
 	]);
 	// A lounge, bar or restaurant gets the venue dashboard (hospio-backend docs/plan-venue-type.md phase 2).
 	const venue =
@@ -64,6 +68,7 @@ export default async function ManagerHomePage() {
 				outletSales,
 			}}
 			venue={venue}
+			floorRequests={floorRequests}
 		/>
 	);
 }

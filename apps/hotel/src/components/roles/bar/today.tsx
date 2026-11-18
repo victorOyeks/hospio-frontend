@@ -638,6 +638,8 @@ export function BarTodayScreen({
 										: "drink",
 								)}`,
 								terminalId: outlet?.terminalId,
+								tipAllowed: settings.recordTips,
+								tipFor: current.openedBy,
 							}
 						: null
 				}

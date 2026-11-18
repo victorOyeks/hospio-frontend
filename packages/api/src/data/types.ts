@@ -489,6 +489,8 @@ export type TillRow = {
 	/** Pay-outs, cash refunds and expenses paid from the drawer. */
 	cashOut?: number;
 	expected: number;
+	/** Cash tips held in the drawer for staff: part of `expected`, not takings. Undefined where there are none. */
+	cashTips?: number;
 	counted?: number;
 	variance?: number;
 	status: "OPEN" | "CLOSED";
@@ -503,7 +505,8 @@ export type TillEntryRow = {
 	amount: number;
 	method: string;
 	description: string;
-	kind: "PAYMENT" | "PAY_IN" | "PAY_OUT" | "REFUND" | "OTHER";
+	/** TIP: a cash tip put in the drawer, held for staff (not takings). */
+	kind: "PAYMENT" | "PAY_IN" | "PAY_OUT" | "REFUND" | "TIP" | "OTHER";
 };
 export type TransactionRow = {
 	id: Id;
@@ -1163,6 +1166,10 @@ export type OrderRow = {
 	 * outlet are listed and the money fields are the whole order's, so the board never shows them.
 	 */
 	ticketFrom?: string;
+	/** What is still to pay (the total less money taken and parts put on rooms); undefined from an older service. */
+	balance?: number;
+	/** The number of parts the bill is split into while a split stands; 0 or undefined when it isn't. */
+	splitParts?: number;
 };
 
 /** Where a sale stands in the sales history (fnb-service SaleBucket). */
@@ -1396,9 +1403,12 @@ export type HotelSetupSection = {
 			| "time"
 			| "list"
 			| "money"
-			| "percent";
+			| "percent"
+			| "choices";
 		value: unknown;
 		options?: string[];
+		/** `choices` fields: the boxes to tick. The value is the ticked `value`s (saved comma-separated). */
+		choices?: { value: string; label: string }[];
 		help?: string;
 		/** List fields whose entries must read as a shift or a department (data/rota-setup). */
 		format?: "shift" | "department";
@@ -1671,6 +1681,10 @@ export type OutletSettingsRow = {
 	waitersTakePayment: boolean;
 	/** Waiters may take cash; it goes into the cashier's open till. */
 	waiterCash: boolean;
+	/** The roles that give a discount without asking, up to the discount limit (CASHIER, BAR, KITCHEN, WAITER). */
+	discountRoles: string[];
+	/** A tip can be added when a sale is paid; it is never counted as sales. */
+	recordTips: boolean;
 	vatPct: number;
 	serviceChargePct: number;
 	pricesIncludeTax: boolean;

@@ -14,6 +14,8 @@ type FieldDef = {
 	label: string;
 	type: FieldType;
 	options?: string[];
+	/** For `choices` fields: the boxes to tick. Stored as the ticked values, comma-separated. */
+	choices?: { value: string; label: string }[];
 	help?: string;
 	default: unknown /** API key when it differs from `key`. */;
 	api?: string /** For `list` fields: the hotel-config list this field edits. */;
@@ -348,6 +350,26 @@ export const SETUP_CATALOGUE: SectionDef[] = [
 				help: "Only with “Waiters take payment” on. The cash goes into the cashier's till, which must be open. Off: waiters take card and transfer only",
 				default: false,
 			},
+			{
+				key: "discountRoles",
+				label: "Who gives a discount without asking",
+				type: "choices",
+				choices: [
+					{ value: "CASHIER", label: "Cashier" },
+					{ value: "BAR", label: "Bar staff" },
+					{ value: "KITCHEN", label: "Kitchen / restaurant staff" },
+					{ value: "WAITER", label: "Waiters" },
+				],
+				help: "Up to the “Discount limit” in Approval limits. Managers and owners give any discount. Anything above the limit, a complimentary item, or anyone not ticked here asks a manager",
+				default: "CASHIER,BAR",
+			},
+			{
+				key: "recordTips",
+				label: "Record tips",
+				type: "toggle",
+				help: "A tip can be added when a sale is paid. Tips are never counted as sales",
+				default: false,
+			},
 		],
 	},
 	{
@@ -660,6 +682,17 @@ export const fieldKeyToApi: Record<
 	]),
 );
 
+/** Screen fields saved as a comma-separated string of the ticked values: section → field keys. */
+const choiceFields: Record<string, Set<string>> = Object.fromEntries(
+	SETUP_CATALOGUE.map((s) => [s.key, new Set(s.fields.filter((f) => f.type === "choices").map((f) => f.key))]),
+);
+
+/** "CASHIER,BAR" (or a list) → the ticked values, in the order given. An empty string is nobody. */
+export function splitChoices(v: unknown): string[] {
+	const parts = Array.isArray(v) ? v.map(String) : typeof v === "string" ? v.split(",") : [];
+	return parts.map((x) => x.trim()).filter(Boolean);
+}
+
 const typeOf = (v: unknown): FieldType =>
 	typeof v === "boolean" ? "toggle" : typeof v === "number" ? "number" : "text";
 const labelOf = (key: string) =>
@@ -706,6 +739,18 @@ export function toSetupSections(
 				raw === undefined || raw === null || f.retired?.includes(String(raw))
 					? f.default
 					: raw;
+			if (f.type === "choices") {
+				const offered = (f.choices ?? []).map((c) => c.value);
+				return {
+					key: f.key,
+					label: f.label,
+					type: f.type,
+					value: splitChoices(value).filter((x) => offered.includes(x)),
+					choices: f.choices,
+					help: f.help,
+					ownerOnly: f.ownerOnly,
+				};
+			}
 			const options =
 				f.type === "select" && f.options
 					? Array.from(new Set([...f.options, String(value)]))
@@ -816,7 +861,7 @@ export function toApiSetup(
 					: [],
 			});
 		} else if (section && sectionKey !== "danger" && key !== "platformFeePct") {
-			settings[aliases[key] ?? key] = value;
+			settings[aliases[key] ?? key] = choiceFields[sectionKey]?.has(key) ? splitChoices(value).join(",") : value;
 		}
 	}
 	return { section, settings, lists: listSaves };

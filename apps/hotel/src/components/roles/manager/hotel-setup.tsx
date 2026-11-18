@@ -580,6 +580,39 @@ export function SetupField({
 					disabled={disabled}
 				/>
 			);
+		case "choices": {
+			const ticked = Array.isArray(value) ? value.map(String) : [];
+			return (
+				<Field label={field.label} hint={field.help} className="md:col-span-2">
+					<div className="grid gap-2 sm:grid-cols-2">
+						{(field.choices ?? []).map((c) => (
+							<label
+								key={c.value}
+								className={cn(
+									"flex min-w-0 items-center gap-3 rounded-control border border-line px-4 py-3 text-[13px] text-ink",
+									disabled && "opacity-70",
+								)}
+							>
+								<input
+									type="checkbox"
+									checked={ticked.includes(c.value)}
+									disabled={disabled}
+									onChange={() =>
+										onChange(
+											(field.choices ?? [])
+												.map((x) => x.value)
+												.filter((x) => (x === c.value ? !ticked.includes(x) : ticked.includes(x))),
+										)
+									}
+									className="accent-brand"
+								/>
+								<span className="min-w-0 break-words">{c.label}</span>
+							</label>
+						))}
+					</div>
+				</Field>
+			);
+		}
 		case "list": {
 			const props = {
 				className: cls,

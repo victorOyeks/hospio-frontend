@@ -16,6 +16,7 @@ import { DataTable, TwoLine } from "@hospio/ui/shared/data-table";
 import { AvatarName, DetailList, Note } from "@hospio/ui/shared/detail-list";
 import { TextareaField } from "@hospio/ui/shared/field";
 import { fmtWhen, humanize, naira } from "@hospio/ui/shared/format";
+import { approvalKindLabel, approvalSourceLabel, floorApprovalEffects } from "@/lib/approval-labels";
 import { KpiCard } from "@hospio/ui/shared/kpi-card";
 import { Modal } from "@hospio/ui/shared/modal";
 import { PageHeader } from "@hospio/ui/shared/page-header";
@@ -58,6 +59,8 @@ const statusLabel = (s: ApprovalRow["status"]) =>
 			: humanize(s);
 
 const whatHappens = (a: ApprovalRow): string[] => {
+	const floor = floorApprovalEffects(a.kind);
+	if (floor) return floor;
 	switch (a.kind) {
 		case "EXPENSE":
 			return [
@@ -178,7 +181,7 @@ export function ApprovalsScreen({
 			cell: ({ row }) => (
 				<TwoLine
 					primary={row.original.description}
-					secondary={`${humanize(row.original.kind)} · ${humanize(row.original.sourceModule)}`}
+					secondary={`${approvalKindLabel(row.original.kind)} · ${approvalSourceLabel(row.original.sourceModule)}`}
 				/>
 			),
 		},
@@ -345,7 +348,7 @@ export function ApprovalsScreen({
 				title={current?.description ?? ""}
 				subtitle={
 					current
-						? `${humanize(current.kind)} · asked by ${current.requesterName} · ${fmtWhen(current.createdAt)}`
+						? `${approvalKindLabel(current.kind)} · asked by ${current.requesterName} · ${fmtWhen(current.createdAt)}`
 						: undefined
 				}
 				icon={ClipboardCheckIcon}
@@ -456,8 +459,8 @@ export function ApprovalsScreen({
 											"—"
 										),
 									},
-									{ label: "Type", value: humanize(current.kind) },
-									{ label: "From", value: humanize(current.sourceModule) },
+									{ label: "Type", value: approvalKindLabel(current.kind) },
+									{ label: "From", value: approvalSourceLabel(current.sourceModule) },
 									{ label: "Hotel", value: current.hotelName ?? "This hotel" },
 									{
 										label: "Needs",

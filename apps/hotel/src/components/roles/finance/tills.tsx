@@ -119,6 +119,11 @@ export function TillsScreen({ tills: initial }: { tills: TillRow[] }) {
 								<td className="py-3 text-right">{naira(t.cashIn)}</td>
 								<td className="py-3 text-right font-semibold">
 									{naira(t.expected)}
+									{t.status === "OPEN" && (t.cashTips ?? 0) > 0 && (
+										<p className="text-[11px] font-normal text-ink-3">
+											Cash tips held {naira(t.cashTips ?? 0)} (in the drawer, not takings)
+										</p>
+									)}
 								</td>
 								<td className="py-3 text-right">
 									{t.status === "CLOSED" && (
@@ -237,6 +242,9 @@ export function TillsScreen({ tills: initial }: { tills: TillRow[] }) {
 							rows={[
 								{ label: "Opening float", value: naira(closing.openingFloat) },
 								{ label: "Cash taken", value: naira(closing.cashIn) },
+								...((closing.cashTips ?? 0) > 0
+									? [{ label: "Cash tips held (in the drawer, not takings)", value: naira(closing.cashTips ?? 0) }]
+									: []),
 								{
 									label: "Expected",
 									value: naira(closing.expected),

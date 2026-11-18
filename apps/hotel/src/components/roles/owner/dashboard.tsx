@@ -27,7 +27,9 @@ import { OutletSalesCard } from "../manager/outlet-sales";
 import { venueLabel } from "@hospio/api/venue";
 import { StatusPill } from "@hospio/ui/shared/status-pill";
 import { btn } from "@hospio/ui/shared/ui";
+import type { SaleRequestView } from "@hospio/api/actions/bill";
 import type { Me } from "@hospio/api/api/schema";
+import { floorRequestTitle } from "@/lib/approval-labels";
 import type {
 	ActivityRow,
 	ApprovalRow,
@@ -68,6 +70,7 @@ export function OwnerDashboard({
 	activeAccommodation = true,
 	venues = [],
 	activeId,
+	floorRequests = [],
 }: {
 	user: Me;
 	businessName: string;
@@ -86,6 +89,8 @@ export function OwnerDashboard({
 	venues?: VenueLocationToday[];
 	/** The location in the branch box: its venue shows first. */
 	activeId?: string;
+	/** Voids, discounts and complimentary items staff asked for from an outlet screen, still waiting, at every location (phase 4). */
+	floorRequests?: (SaleRequestView & { hotelName?: string })[];
 }) {
 	const [open, setOpen] = useParam("open");
 	const [download, setDownload] = useState(false);
@@ -113,6 +118,8 @@ export function OwnerDashboard({
 			? Math.round(((revenueMonth - lastMonth) / lastMonth) * 1000) / 10
 			: 0;
 	const selected = approvals.find((a) => a.id === open) ?? null;
+	// A manager can decide these too; the owner sees them so nothing waits on the floor.
+	const floor = floorRequests.filter((r) => r.status === "PENDING");
 	const toneIcon = {
 		danger: AlertTriangleIcon,
 		warning: FlagIcon,
@@ -288,13 +295,34 @@ export function OwnerDashboard({
 
 				<SectionCard
 					title="Approvals waiting"
-					subtitle="Needs the owner"
-					count={waiting.length}
+					subtitle={floor.length > 0 ? "Needs the owner, and requests from the floor" : "Needs the owner"}
+					count={waiting.length + floor.length}
 					action={{ label: "All", href: "/dashboard/financials?tab=expenses" }}
 					bodyClassName="gap-2 pt-2"
 				>
+					{floor.map((r) => (
+						<Link
+							key={r.id}
+							href={`/dashboard?open=${r.approvalId}`}
+							className="flex items-center gap-3 rounded-xl border border-line px-3 py-[10px] text-left hover:bg-subtle/60"
+						>
+							<div className="min-w-0 flex-1">
+								<p className="truncate text-[13px] font-semibold text-ink" title={floorRequestTitle(r)}>
+									{floorRequestTitle(r)}
+								</p>
+								<p className="truncate text-xs text-ink-3" title={r.reason}>
+									{r.reason}
+									{hotels.length > 1 && r.hotelName ? ` · ${r.hotelName}` : ""}
+								</p>
+							</div>
+							{r.worth ? <span className="text-[13px] font-bold text-ink">{nairaShort(r.worth)}</span> : null}
+							<StatusPill tone="warning" dot={false}>
+								Review
+							</StatusPill>
+						</Link>
+					))}
 					{waiting.length === 0 ? (
-						<EmptyState title="Nothing waiting on you" />
+						floor.length === 0 && <EmptyState title="Nothing waiting on you" />
 					) : (
 						waiting.map((a) => (
 							<button

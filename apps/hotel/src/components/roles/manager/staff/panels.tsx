@@ -57,6 +57,12 @@ import { StatusPill } from "@hospio/ui/shared/status-pill";
 import { btn } from "@hospio/ui/shared/ui";
 import type { ShiftRow, StaffRow } from "@hospio/api/data/types";
 import { cn } from "@hospio/ui/utils";
+import {
+	saveStaffOutlets,
+	StaffOutletsField,
+	StaffOutletsLine,
+	worksOutlets,
+} from "@hospio/ui/shared/staff-outlets";
 
 export const ROLE_OPTIONS = [
 	{ value: "MANAGER", label: "Manager" },
@@ -324,6 +330,11 @@ export function StaffProfilePanel({
 									))}
 								</div>
 							</PanelSection>
+							<StaffOutletsLine
+								hotelId={staff.hotelId || undefined}
+								role={staff.role}
+								userId={staff.userId ?? staff.id}
+							/>
 							<StaffPinActions key={staff.id} staff={staff} />
 							<PanelSection title="Quick actions">
 								<div className="grid grid-cols-2 gap-2">
@@ -499,6 +510,7 @@ export function StaffFormPanel({
 	const router = useRouter();
 	const { run, pending: saving } = useAction();
 	const [created, setCreated] = useState<UserCreated | null>(null);
+	const [outletsError, setOutletsError] = useState<string | null>(null);
 	const pending = saving;
 	const [form, setForm] = useState({
 		fullName: staff?.fullName ?? "",
@@ -514,6 +526,8 @@ export function StaffFormPanel({
 	});
 	const set = <K extends keyof typeof form>(k: K, v: (typeof form)[K]) =>
 		setForm((f) => ({ ...f, [k]: v }));
+	/** The outlets ticked for a waiter, cashier, bar or kitchen person; null = not touched (every outlet for someone new). */
+	const [outletIds, setOutletIds] = useState<string[] | null>(null);
 	const editing = !!staff;
 	const emailOk = /^\S+@\S+\.\S+$/.test(form.email);
 	const close = () => {
@@ -525,8 +539,8 @@ export function StaffFormPanel({
 	const add = () => {
 		if (!hotelId) return;
 		run(
-			() =>
-				withDeliveries(
+			async () => {
+				const r = await withDeliveries(
 					createUser({
 						fullName: form.fullName.trim(),
 						email: form.email.trim(),
@@ -536,7 +550,14 @@ export function StaffFormPanel({
 						hotelId,
 					}),
 					`Invite for ${form.fullName.trim()}`,
-				),
+				);
+				// Their outlets, once the account exists. The person is added either way, so a refusal here is said, not thrown away.
+				if (r.ok && worksOutlets(form.role) && outletIds && outletIds.length > 0) {
+					const o = await saveStaffOutlets(r.data.userId, outletIds, hotelId);
+					if (!o.ok) setOutletsError(o.error);
+				}
+				return r;
+			},
 			`${form.fullName.trim()} added`,
 			setCreated,
 		);
@@ -616,6 +637,12 @@ export function StaffFormPanel({
 			}
 		>
 			{created ? (
+				<>
+				{outletsError && (
+					<Note tone="warning">
+						Their outlets were not saved ({outletsError}). They work every outlet until you set them with Edit.
+					</Note>
+				)}
 				<InviteCard
 					fullName={form.fullName.trim()}
 					email={form.email.trim()}
@@ -629,6 +656,7 @@ export function StaffFormPanel({
 					inviteExpiresAt={created.inviteExpiresAt}
 					temporaryPasswordExpiresAt={created.temporaryPasswordExpiresAt}
 				/>
+				</>
 			) : (
 				<div className="flex flex-col gap-4">
 					<TextField
@@ -687,6 +715,13 @@ export function StaffFormPanel({
 									setupLink="departments"
 								/>
 							</FieldRow>
+							<StaffOutletsField
+								hotelId={hotelId}
+								role={form.role}
+								value={outletIds}
+								onChange={setOutletIds}
+								disabled={pending}
+							/>
 							<ChoiceCards
 								label="Access level"
 								value={form.level}

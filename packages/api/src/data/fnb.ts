@@ -263,6 +263,28 @@ const ofDesk = (role: OutletDesk, all: OutletRow[]) =>
 		? all
 		: all.filter((o) => (role === "BAR" ? o.kind === "BAR" : o.kind !== "BAR"));
 
+/**
+ * The signed-in person's own outlets (GET /fnb/staff-outlets/mine; hospio-backend docs/plan-venue-type.md, phase 4): null when
+ * they work every outlet of the location (no list, a manager, the owner, or the answer could not be read).
+ */
+const loadMyOutletIds = cache(async (): Promise<string[] | null> => {
+	if (!live("fnb")) return null;
+	const { data: res } = await api("@get/fnb/staff-outlets/mine", await withSession()).catch(() => ({ data: null }));
+	return res?.data?.restricted ? res.data.outletIds : null;
+});
+
+/**
+ * The outlets of a desk this person works: the desk's own (`ofDesk`), kept to the ones a manager assigned them when they are
+ * restricted. If none of their outlets belongs to this desk the desk's outlets are kept (the server refuses with its own message).
+ */
+async function ofDeskMine(role: OutletDesk, all: OutletRow[]): Promise<OutletRow[]> {
+	const desk = ofDesk(role, all);
+	const ids = await loadMyOutletIds();
+	if (!ids) return desk;
+	const mine = desk.filter((o) => ids.includes(o.id));
+	return mine.length > 0 ? mine : desk;
+}
+
 /** Where a desk works on this device: its outlets, the one picked and whether "All outlets" is on. */
 export type DeskOutlets = {
 	outlet: OutletRow | null;
@@ -284,7 +306,7 @@ export const fnbData = {
 				loadOutlets(),
 				cookies().catch(() => null),
 			]);
-			const mine = ofDesk(role, all);
+			const mine = await ofDeskMine(role, all);
 			const picked = jar?.get(outletCookie(role))?.value;
 			// A waiter or cashier starts where guests sit (a bar or restaurant floor) rather than at the kitchen's own outlet.
 			const floor = role === "WAITER" || role === "CASHIER";
@@ -298,9 +320,9 @@ export const fnbData = {
 				null
 			);
 		},
-		/** The outlets a desk can work (the switch shows when there is more than one). */
+		/** The outlets a desk can work (the switch shows when there is more than one); a person kept to some outlets gets only those. */
 		forRoleAll: async (role: OutletDesk): Promise<OutletRow[]> =>
-			ofDesk(role, await loadOutlets()),
+			ofDeskMine(role, await loadOutlets()),
 		/**
 		 * The desk's outlets, the one this device works (`forRole`) and whether "All outlets" is on: the cookie set by
 		 * `chooseOutlet(desk, "ALL")`, honoured only when `canSeeAll` (seesAllOutlets) and there is more than one outlet.
@@ -316,7 +338,7 @@ export const fnbData = {
 			]);
 			// Closed outlets stay out of "Serving at", the marks and the all-outlets views; the one this device still works
 			// stays listed so its open orders can be finished.
-			const outlets = ofDesk(role, all).filter(
+			const outlets = (await ofDeskMine(role, all)).filter(
 				(o) => o.status === "OPEN" || o.id === outlet?.id,
 			);
 			return {

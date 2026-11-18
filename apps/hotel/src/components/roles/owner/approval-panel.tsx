@@ -23,6 +23,7 @@ import { decideAsOwner } from "@hospio/api/actions/owner";
 import { useAction } from "@hospio/api/actions/use-action";
 import { withDeliveries } from "@hospio/ui/shared/deliveries-store";
 import type { ApprovalRow } from "@hospio/api/data/types";
+import { approvalKindLabel, approvalSourceLabel } from "@/lib/approval-labels";
 
 /** Owner · 01 Approvals waiting → approve spend / decline / ask manager. */
 export function ApprovalPanel({
@@ -73,14 +74,16 @@ export function ApprovalPanel({
 				title={a?.description ?? ""}
 				subtitle={
 					a
-						? `${humanize(a.kind)} · ${a.hotelName ?? "This hotel"} · asked ${fmtWhen(a.createdAt)}`
+						? `${approvalKindLabel(a.kind)} · ${a.hotelName ?? "This hotel"} · asked ${fmtWhen(a.createdAt)}`
 						: undefined
 				}
 				icon={ShieldCheckIcon}
 				footerInfo={
-					limit
-						? `Spend over ${naira(limit)} comes to you by your approval limits`
-						: "Needs the owner by your approval limits"
+					a && a.approverLevel !== "OWNER"
+						? "A manager can decide this too. Whoever decides first is recorded"
+						: limit
+							? `Spend over ${naira(limit)} comes to you by your approval limits`
+							: "Needs the owner by your approval limits"
 				}
 				footer={
 					a?.status === "PENDING" ? (
@@ -149,8 +152,8 @@ export function ApprovalPanel({
 										value: `${a.requesterName} · ${humanize(a.requesterRole)}`,
 									},
 									{ label: "Hotel", value: a.hotelName ?? "This hotel" },
-									{ label: "From", value: humanize(a.sourceModule) },
-									{ label: "Type", value: humanize(a.kind) },
+									{ label: "From", value: approvalSourceLabel(a.sourceModule) },
+									{ label: "Type", value: approvalKindLabel(a.kind) },
 									{
 										label: "Needs",
 										value: a.approverLevel === "OWNER" ? "Owner" : "Manager",

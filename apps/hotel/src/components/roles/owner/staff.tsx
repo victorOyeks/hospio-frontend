@@ -71,6 +71,12 @@ import {
 	ReinstateModal,
 	SuspendStaffModal,
 } from "../shared-staff/staff-account";
+import {
+	saveStaffOutlets,
+	StaffOutletsField,
+	StaffOutletsLine,
+	worksOutlets,
+} from "@hospio/ui/shared/staff-outlets";
 import { DownloadModal, HotelFilter } from "./common";
 
 type Hotel = { hotelId: string; name: string; hasAccommodation?: boolean };
@@ -491,6 +497,11 @@ export function OwnerStaffScreen({
 								]}
 							/>
 						</PanelSection>
+						<StaffOutletsLine
+							hotelId={selected.hotelId}
+							role={selected.role}
+							userId={selected.userId ?? selected.id}
+						/>
 						{!invited(selected) && (
 							<StaffPinActions key={selected.key} staff={selected} asOwner />
 						)}
@@ -709,12 +720,17 @@ function AddStaffPanel({
 	const [form, setForm] = useState(blank);
 	const set = <K extends keyof typeof form>(k: K, v: (typeof form)[K]) =>
 		setForm((f) => ({ ...f, [k]: v }));
+	/** The outlets ticked at the chosen hotel; null = not touched (every outlet). Another hotel starts again. */
+	const [outletIds, setOutletIds] = useState<string[] | null>(null);
+	const [outletsError, setOutletsError] = useState<string | null>(null);
 	const emailOk = /^\S+@\S+\.\S+$/.test(form.email.trim());
 	const hotelId = form.hotelId || defaultHotel;
 	const hotelName = hotels.find((h) => h.hotelId === hotelId)?.name;
 	const close = () => {
 		setCreated(null);
 		setForm({ ...blank, hotelId: defaultHotel });
+		setOutletIds(null);
+		setOutletsError(null);
 		onClose();
 	};
 	const add = () =>
@@ -740,6 +756,11 @@ function AddStaffPanel({
 							ok: false as const,
 							error: `${form.fullName.trim()} was added, but the job title was not saved: ${t.error}`,
 						};
+				}
+				// Their outlets, once the account exists. The person is added either way, so a refusal here is said on the next step.
+				if (r.ok && worksOutlets(form.role) && outletIds && outletIds.length > 0) {
+					const o = await saveStaffOutlets(r.data.userId, outletIds, hotelId);
+					if (!o.ok) setOutletsError(o.error);
 				}
 				return r;
 			},
@@ -790,6 +811,12 @@ function AddStaffPanel({
 			}
 		>
 			{created ? (
+				<>
+				{outletsError && (
+					<Note tone="warning">
+						Their outlets were not saved ({outletsError}). They work every outlet until you set them with Edit details.
+					</Note>
+				)}
 				<InviteCard
 					fullName={form.fullName.trim()}
 					email={form.email.trim()}
@@ -803,6 +830,7 @@ function AddStaffPanel({
 					inviteExpiresAt={created.inviteExpiresAt}
 					temporaryPasswordExpiresAt={created.temporaryPasswordExpiresAt}
 				/>
+				</>
 			) : (
 				<div className="flex flex-col gap-4">
 					<TextField
@@ -833,7 +861,10 @@ function AddStaffPanel({
 					<SelectField
 						label="Hotel"
 						value={hotelId}
-						onChange={(v) => set("hotelId", v)}
+						onChange={(v) => {
+							set("hotelId", v);
+							setOutletIds(null);
+						}}
 						options={hotels.map((h) => ({ value: h.hotelId, label: h.name }))}
 					/>
 					<FieldRow>
@@ -853,6 +884,13 @@ function AddStaffPanel({
 							placeholder="e.g. Room attendant"
 						/>
 					</FieldRow>
+					<StaffOutletsField
+						hotelId={hotelId}
+						role={form.role}
+						value={outletIds}
+						onChange={setOutletIds}
+						disabled={pending}
+					/>
 					<ChoiceCards
 						label="Access level"
 						value={form.level}

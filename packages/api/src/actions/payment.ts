@@ -25,6 +25,10 @@ export type RecordPaymentInput = {
 	role?: string;
 	/** The POS picked for card or transfer; without it, the POS assigned to the desk. */
 	terminalId?: string;
+	/** The part of a split bill this pays. */
+	partId?: string;
+	/** A tip on top of the amount, where the location records tips: the guest pays amount + tip, only the amount is the sale. */
+	tipAmount?: number;
 };
 
 export type RecordedPayment = {
@@ -83,6 +87,8 @@ export async function recordPayment(
 			orderId: input.orderId ?? null,
 			role: input.role ?? null,
 			terminalId: input.method === "CASH" ? null : (input.terminalId ?? null),
+			partId: input.partId ?? null,
+			tipAmount: input.tipAmount && input.tipAmount > 0 ? input.tipAmount : null,
 		},
 	});
 	if (error || !data)

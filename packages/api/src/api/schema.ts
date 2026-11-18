@@ -15,6 +15,7 @@ import { billingRoutes } from "./routes-billing";
 import { paymentRoutes } from "./routes-payments";
 import { profileRoutes } from "./routes-profile";
 import { venueRoutes } from "./routes-venue";
+import { billRoutes } from "./routes-bill";
 import { partnerRoutes } from "./routes-partner";
 import { pagedOf, pageParams } from "./paged";
 
@@ -1163,6 +1164,7 @@ export const schema = createSchema({
 	...deviceRoutes,
 	...profileRoutes,
 	...venueRoutes,
+	...billRoutes,
 	...partnerRoutes,
 	// identity
 	"@post/identity/auth/refresh": {
@@ -1760,6 +1762,10 @@ export const schema = createSchema({
 			role: z.string().nullable().optional(),
 			/** The POS the desk picked for card or transfer; without it, the POS assigned to the role. */
 			terminalId: z.string().nullable().optional(),
+			/** The part of a split bill this pays (fnb order_split_parts). */
+			partId: z.string().nullable().optional(),
+			/** A tip on top of the amount (only where the location records tips): never part of the sale. */
+			tipAmount: z.number().nullable().optional(),
 		}),
 		output: envelope(PaymentResponse),
 	},

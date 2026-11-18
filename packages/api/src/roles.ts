@@ -180,24 +180,24 @@ export const ROLE_PERMISSIONS: Partial<Record<HotelRole, RolePermissionModule[]>
 	],
 	KITCHEN: [
 		// fnb OutletAccess: kitchen outlets only; cancelling a sent item needs FULL
-		{ key: "orders", name: "Orders & tickets", view: ["See the order board and the kitchen's sales"], edit: ["Take orders and move tickets along", "Charge an order to a room"], full: ["Cancel an item already sent"] },
+		{ key: "orders", name: "Orders & tickets", view: ["See the order board and the kitchen's sales", "Works every outlet, or only the ones a manager picked for them"], edit: ["Take orders and move tickets along", "Charge an order to a room", "Split a bill equally, by item or by amount; each part is paid its own way", "Give a discount up to the limit when Hotel setup lists kitchen staff; otherwise, above the limit or for a complimentary item, a manager approves", "Ask a manager to void an item already sent, or a sale", "Add a tip when a sale is paid, where the location records tips"], full: ["Cancel an item already sent"] },
 		{ key: "menu", name: "Menu", view: ["See the menu"], edit: ["Mark an item available or 86'd", "Change a price"], full: ["Add and edit categories, items and happy hours"] },
 		{ key: "stock", name: "Stock", view: ["See stores and stock"], edit: ["Use or waste stock", "Ask the store for stock", "Run a stock count"], full: [] },
 	],
 	BAR: [
-		{ key: "orders", name: "Orders & tabs", view: ["See the order board and the bar's sales"], edit: ["Take orders and move them along", "Charge a tab to a room"], full: ["Cancel an item already sent"] },
+		{ key: "orders", name: "Orders & tabs", view: ["See the order board and the bar's sales", "Works every outlet, or only the ones a manager picked for them"], edit: ["Take orders and move them along", "Charge a tab to a room", "Split a bill equally, by item or by amount; each part is paid its own way", "Give a discount up to the limit (unless Hotel setup takes bar staff off the list); above the limit or for a complimentary item, a manager approves", "Ask a manager to void an item already sent, or a sale", "Add a tip when a sale is paid, where the location records tips"], full: ["Cancel an item already sent"] },
 		{ key: "menu", name: "Menu", view: ["See the menu"], edit: ["Mark an item available or 86'd", "Change a price"], full: ["Add and edit categories, items and happy hours"] },
 		{ key: "stock", name: "Stock", view: ["See stores and stock"], edit: ["Use or waste stock", "Ask the store for stock", "Run a stock count"], full: [] },
 	],
 	// fnb OutletAccess (docs/plan-venue-type.md, phase 3): every outlet of the location; a waiter works the orders they opened.
 	WAITER: [
-		{ key: "orders", name: "Orders & tabs", view: ["See the tabs and sales they opened"], edit: ["Open a tab or order at a table and add items", "Send to the kitchen or bar and mark items served", "Move a tab to another table", "Take off an item before it is sent", "Charge their tab to a room (hotels)"], full: ["See and work every waiter's tabs (head waiter)"] },
-		{ key: "payments", name: "Payments", view: [], edit: ["Take payment for their own tabs, only when Hotel setup allows waiters to take payment", "Cash only when allowed too; it goes into the cashier's till"], full: ["Take payment for any waiter's tab, when waiters may take payment"] },
+		{ key: "orders", name: "Orders & tabs", view: ["See the tabs and sales they opened", "Works every outlet, or only the ones a manager picked for them"], edit: ["Open a tab or order at a table and add items", "Split a bill equally, by item or by amount; each part is paid its own way", "Ask a manager for a discount, a complimentary item or a void; give a discount up to the limit only when Hotel setup lists waiters", "Send to the kitchen or bar and mark items served", "Move a tab to another table", "Take off an item before it is sent", "Charge their tab to a room (hotels)"], full: ["See and work every waiter's tabs (head waiter)"] },
+		{ key: "payments", name: "Payments", view: [], edit: ["Take payment for their own tabs, only when Hotel setup allows waiters to take payment", "Cash only when allowed too; it goes into the cashier's till", "Add a tip when a sale is paid, where the location records tips"], full: ["Take payment for any waiter's tab, when waiters may take payment"] },
 		{ key: "menu", name: "Menu", view: ["See the menu and prices"], edit: [], full: [] },
 	],
 	// payment PaymentService: cashier desk and till; fnb: sees every order, rings nothing up
 	CASHIER: [
-		{ key: "payments", name: "Payments", view: ["See every open tab and sale at the outlets"], edit: ["Take payment for any open tab or sale (cash, card, transfer)", "Charge a sale to a room (hotels)", "Print or resend a receipt"], full: [] },
+		{ key: "payments", name: "Payments", view: ["See every open tab and sale at the outlets", "Works every outlet, or only the ones a manager picked for them"], edit: ["Take payment for any open tab or sale (cash, card, transfer)", "Split a bill equally, by item or by amount; each part is paid its own way", "Give a discount up to the limit (unless Hotel setup takes cashiers off the list); above the limit or for a complimentary item, a manager approves", "Ask a manager to void an item already sent, or a sale", "Add a tip when a sale is paid, where the location records tips", "Charge a sale to a room (hotels)", "Print or resend a receipt"], full: [] },
 		{ key: "till", name: "Till", view: ["See the cashier till"], edit: ["Open and close the till, pay in and out", "Hand the till over"], full: [] },
 		{ key: "menu", name: "Menu", view: ["See the menu and prices"], edit: [], full: [] },
 	],
@@ -227,4 +227,6 @@ export const MANAGER_ONLY_ACTIONS = [
 	"Close the day with open tabs or unsettled orders",
 	"Approve a stock count; outlets, tables and laundry prices",
 	"Cancel (void) an order that was sent; waiters and cashiers never void what was sent",
+	"Approve a void, a discount above the limit or a complimentary item, from the dashboard or with their own PIN on the staff member's device; give any discount themselves",
+	"Choose the outlets a waiter, cashier, bar or kitchen person works; set who gives discounts and whether tips are recorded",
 ];

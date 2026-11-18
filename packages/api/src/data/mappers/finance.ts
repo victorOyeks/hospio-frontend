@@ -61,6 +61,7 @@ export function toTillRow(t: TillItem): TillRow {
 		cashIn: t.cashIn ?? 0,
 		cashOut: t.cashOut ?? 0,
 		expected: t.expectedCash,
+		cashTips: t.cashTips && t.cashTips > 0 ? t.cashTips : undefined,
 		counted: t.countedCash ?? undefined,
 		variance: t.variance ?? undefined,
 		status: t.status === "CLOSED" ? "CLOSED" : "OPEN",
@@ -72,7 +73,7 @@ export function toTillRow(t: TillItem): TillRow {
 
 export function toTillEntryRow(e: TillEntryItem): TillEntryRow {
 	const kind =
-		e.kind === "PAY_IN" || e.kind === "PAY_OUT" || e.kind === "REFUND"
+		e.kind === "PAY_IN" || e.kind === "PAY_OUT" || e.kind === "REFUND" || e.kind === "TIP"
 			? e.kind
 			: e.paymentId
 				? "PAYMENT"
