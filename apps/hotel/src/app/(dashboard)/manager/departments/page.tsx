@@ -12,8 +12,7 @@ export default async function DepartmentsPage() {
 			hotelName={hotel?.name ?? "This hotel"}
 			approvalsWaiting={approvals.data.counts?.waiting ?? 0}
 			roomsReady={rooms.filter((r) => r.state === "ready").length}
-			staffOnShift={departments.reduce((s, d) => s + d.onShift, 0)}
-			staffScheduled={departments.reduce((s, d) => s + d.scheduled, 0)}
+			hasRooms={rooms.length > 0 || (hotel?.roomCount ?? 0) > 0}
 		/>
 	);
 }

@@ -1,5 +1,6 @@
 import { KitchenOrdersScreen } from "@/components/roles/kitchen/orders";
 import { deskOutlets } from "@/components/roles/shared-staff/desk-outlets";
+import { getActiveHotel } from "@hospio/api/dal";
 import { data } from "@hospio/api/data";
 
 export const dynamic = "force-dynamic";
@@ -16,6 +17,7 @@ export default async function KitchenHome() {
 		settings,
 		terminals,
 		outlets,
+		hotel,
 	] = await Promise.all([
 		outlet ? data.outlets.orders(outlet.id) : Promise.resolve([]),
 		outlet
@@ -27,6 +29,7 @@ export default async function KitchenHome() {
 		data.outlets.settings(),
 		data.payments.terminals(),
 		data.outlets.list(),
+		getActiveHotel(),
 	]);
 	return (
 		<KitchenOrdersScreen
@@ -40,6 +43,7 @@ export default async function KitchenHome() {
 			settings={settings}
 			terminals={terminals}
 			outlets={outlets}
+			hasRooms={(hotel?.roomCount ?? 0) > 0 || buckets.inHouse.length > 0}
 		/>
 	);
 }

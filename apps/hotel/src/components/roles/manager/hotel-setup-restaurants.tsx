@@ -14,6 +14,7 @@ import type {
 } from "@hospio/api/data/types";
 import { Button } from "@hospio/ui/primitives/button";
 import { Note } from "@hospio/ui/shared/detail-list";
+import { plural } from "@hospio/ui/shared/format";
 import { SelectField, TextField, ToggleField } from "@hospio/ui/shared/field";
 import { Modal } from "@hospio/ui/shared/modal";
 import { StatusPill } from "@hospio/ui/shared/status-pill";
@@ -246,7 +247,7 @@ export function RestaurantsSection({
 												{t.number}
 											</span>
 											<span className="text-xs text-ink-3">
-												{t.seats} seats{t.active ? "" : " · off"}
+												{plural(t.seats, "seat")}{t.active ? "" : " · off"}
 											</span>
 										</button>
 									))}

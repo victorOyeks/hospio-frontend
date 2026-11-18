@@ -62,7 +62,12 @@ export function HandoverReview({
 		},
 		{
 			label: plural(rooms, "room"),
-			value: hotels.length ? "Room types and prices set" : "—",
+			value:
+				rooms > 0
+					? "Room types and prices set"
+					: hotels.length
+						? "No rooms: bars, restaurants and lounges only"
+						: "—",
 		},
 		{
 			label: plural(people.length, "person", "people"),

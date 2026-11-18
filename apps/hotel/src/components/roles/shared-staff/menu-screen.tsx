@@ -176,7 +176,9 @@ export function MenuScreen({
 	const router = useRouter();
 	const isBar = outlet.kind === "BAR";
 	const showHappy = initialHappy !== undefined;
-	const noun = isBar ? "drink" : "item";
+	// A bar's menu can carry food the kitchen makes: "drink" only while it is poured at a bar.
+	const sellsFoodHere = isBar && outlets.some((o) => o.id !== outlet.id && o.kind !== "BAR");
+	const noun = isBar && !sellsFoodHere ? "drink" : "item";
 
 	const categoryNames = useMemo(() => {
 		const used = Array.from(new Set(items.map((m) => m.category)));
@@ -194,7 +196,15 @@ export function MenuScreen({
 					: m.category === tab && m.active !== false,
 	);
 	const [draft, setDraft] = useState<Draft>(emptyDraft(""));
+	// What the item being added is: a drink when a bar pours it, otherwise an item (the kitchen's pepper soup sold at the bar).
+	const madeAtKind =
+		draft.madeAt === HERE
+			? outlet.kind
+			: outlets.find((o) => o.id === draft.madeAt)?.kind;
+	const draftNoun = isBar && madeAtKind === "BAR" ? "drink" : "item";
 	const [newPrice, setNewPrice] = useState<number | "">("");
+	// A new price more than 10 times the current one is asked about first (a typo like ₦25,003,000 for ₦3,000).
+	const [checkBig, setCheckBig] = useState(false);
 	const [reason, setReason] = useState("");
 	const [newCat, setNewCat] = useState("");
 	const [happy, setHappy] = useState<HappyDraft>(emptyHappy());
@@ -307,7 +317,7 @@ export function MenuScreen({
 						? { preparedAt: draft.madeAt === HERE ? "" : draft.madeAt }
 						: {}),
 				}),
-			editing ? "Item updated" : `${isBar ? "Drink" : "Item"} added`,
+			editing ? "Item updated" : `${draftNoun === "drink" ? "Drink" : "Item"} added`,
 			(m) => {
 				patch({ ...m, available: editing?.available ?? m.available });
 				close();
@@ -499,6 +509,7 @@ export function MenuScreen({
 										icon: TagIcon,
 										onClick: () => {
 											setNewPrice(row.original.price);
+											setCheckBig(false);
 											setReason("");
 											setPanel({ kind: "price", item: row.original });
 										},
@@ -575,8 +586,17 @@ export function MenuScreen({
 								(panel?.kind === "price" &&
 									(newPrice === panel.item.price || waitingOnManager(panel.item)))
 							}
-							onClick={() =>
-								panel?.kind === "price" &&
+							onClick={() => {
+								if (panel?.kind !== "price") return;
+								if (
+									!checkBig &&
+									panel.item.price > 0 &&
+									Number(newPrice) > panel.item.price * 10
+								) {
+									setCheckBig(true);
+									return;
+								}
+								setCheckBig(false);
 								run(
 									() =>
 										changeItemPrice(panel.item.id, Number(newPrice), reason),
@@ -592,10 +612,10 @@ export function MenuScreen({
 										);
 										close();
 									},
-								)
-							}
+								);
+							}}
 						>
-							Save price
+							{checkBig ? `Yes, ${naira(Number(newPrice))} is right` : "Save price"}
 						</BigButton>
 					</>
 				}
@@ -611,9 +631,19 @@ export function MenuScreen({
 						<MoneyField
 							label="New price"
 							value={newPrice}
-							onChange={setNewPrice}
+							onChange={(v) => {
+								setNewPrice(v);
+								setCheckBig(false);
+							}}
 							required
 						/>
+						{checkBig && (
+							<Note tone="warning">
+								{naira(Number(newPrice))} is more than 10 times the current{" "}
+								{naira(panel.item.price)}. Check the number: press the button
+								again if it is right, or correct it.
+							</Note>
+						)}
 						<TextareaField
 							label="Why"
 							value={reason}
@@ -644,7 +674,7 @@ export function MenuScreen({
 			<SidePanel
 				open={panel?.kind === "add" || panel?.kind === "edit"}
 				onOpenChange={(o) => !o && close()}
-				title={panel?.kind === "edit" ? "Edit item" : `Add ${noun}`}
+				title={panel?.kind === "edit" ? "Edit item" : `Add ${draftNoun}`}
 				subtitle={outlet.name}
 				icon={PencilIcon}
 				width="lg"
@@ -663,7 +693,7 @@ export function MenuScreen({
 							}
 							onClick={saveItem}
 						>
-							{panel?.kind === "edit" ? "Save" : `Add ${noun}`}
+							{panel?.kind === "edit" ? "Save" : `Add ${draftNoun}`}
 						</BigButton>
 					</>
 				}
@@ -682,6 +712,13 @@ export function MenuScreen({
 							onChange={(v) => setDraft({ ...draft, category: v })}
 							options={categoryNames}
 							placeholder="Pick a category"
+							empty="No categories yet"
+							required
+							error={
+								categoryNames.length === 0
+									? "Add a category below first"
+									: undefined
+							}
 						/>
 						<MoneyField
 							label="Price"
@@ -696,6 +733,47 @@ export function MenuScreen({
 							}
 						/>
 					</div>
+					{categoryNames.length === 0 && (
+						<div className="flex flex-col gap-2 rounded-control border border-warning/40 bg-warning/5 p-3">
+							<p className="text-[13px] text-ink-2">
+								This menu has no categories yet, and every item needs one (Drinks,
+								Mains, Small chops…). Add one here:
+							</p>
+							<div className="flex gap-2">
+								<input
+									value={newCat}
+									onChange={(e) => setNewCat(e.target.value)}
+									placeholder="New category"
+									aria-label="New category"
+									className="h-11 flex-1 rounded-control border border-line bg-card px-3 text-[15px] outline-none focus:border-brand"
+								/>
+								<BigButton
+									tone="secondary"
+									className="h-11"
+									pending={pending}
+									disabled={!newCat.trim()}
+									onClick={() =>
+										run(
+											() =>
+												saveCategory(outlet.id, undefined, {
+													name: newCat.trim(),
+													sortOrder:
+														cats.reduce((m, c) => Math.max(m, c.sortOrder), 0) + 1,
+												}),
+											"Category added",
+											(r) => {
+												setCats((cs) => [...cs, r]);
+												setDraft((d) => ({ ...d, category: r.name }));
+												setNewCat("");
+											},
+										)
+									}
+								>
+									Add category
+								</BigButton>
+							</div>
+						</div>
+					)}
 					<TextareaField
 						label="Description"
 						value={draft.description}
