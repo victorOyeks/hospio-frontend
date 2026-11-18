@@ -35,7 +35,7 @@ const LEVEL_OPTIONS: { value: Level; label: string; hint: string }[] = [
 ];
 
 /** The roles a manager or the owner can give at a hotel (the owner role and Hospio360 roles are not given here). */
-const GIVABLE: HotelRole[] = ["MANAGER", "FRONT_OFFICE", "HOUSEKEEPING", "LAUNDRY", "MAINTENANCE", "KITCHEN", "BAR", "INVENTORY", "FINANCE"];
+const GIVABLE_ALL: HotelRole[] = ["MANAGER", "FRONT_OFFICE", "HOUSEKEEPING", "LAUNDRY", "MAINTENANCE", "KITCHEN", "BAR", "INVENTORY", "FINANCE"];
 
 const label = (role: string) => roleLabels[role as HotelRole] ?? role;
 /** "Tue 1 Dec" from yyyy-mm-dd, read as a calendar day (no time zone shift). */
@@ -64,6 +64,7 @@ export function RolesScreen({
 	overall,
 	hotelName,
 	hotelId,
+	accommodation = true,
 }: {
 	/** Staff access, a page at a time from identity (`?q=&holds=&sort=&page=`). */
 	result: PageResult<RolesAccessRow>;
@@ -71,8 +72,11 @@ export function RolesScreen({
 	overall: PageResult<RolesAccessRow>;
 	hotelName: string;
 	hotelId?: string;
+	/** False at a lounge, bar or restaurant (hospio-backend docs/plan-venue-type.md): no Front office role to give or list. */
+	accommodation?: boolean;
 }) {
 	const router = useRouter();
+	const GIVABLE = accommodation ? GIVABLE_ALL : GIVABLE_ALL.filter((r) => r !== "FRONT_OFFICE");
 	const list = useListParams({ extra: ["holds"] });
 	const [tab, setTab] = useQueryState("tab");
 	const active = (tab ?? "roles") as "roles" | "access";

@@ -14,6 +14,7 @@ import {
 	nextStep,
 	prevStep,
 	StepCard,
+	roomsOrKind,
 	StepFrame,
 	useWizardSave,
 	type WizardData,
@@ -128,6 +129,7 @@ export function TemplateStep({ ctx }: { ctx: WizardCtx }) {
 
 	return (
 		<StepFrame
+			venue={ctx.venue}
 			step="template"
 			subtitle={
 				hotels.length > 1
@@ -244,7 +246,7 @@ export function TemplateStep({ ctx }: { ctx: WizardCtx }) {
 											{h.name}
 										</span>
 										<span className="block text-xs text-ink-3">
-											{h.city || "—"} · {h.rooms} rooms
+											{h.city || "—"} · {roomsOrKind(h)}
 										</span>
 									</span>
 									{was && (

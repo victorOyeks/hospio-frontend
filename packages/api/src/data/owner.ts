@@ -44,6 +44,7 @@ import type {
 	SettlementView,
 	TransferRequestRow,
 } from "./types";
+import { hasAccommodation } from "@hospio/api/venue";
 
 /** FRONT_OFFICE or REVENUE → "Front office", "Revenue". */
 const humanize = (code: string) => {
@@ -84,10 +85,11 @@ function ownerStaffRows(u: UserSummary, names: Map<string, string>): OwnerStaffR
 /** The data seam, loaded when called: it imports this module, so a static import would be circular. */
 const seam = async () => (await import("./index")).data;
 
-type Hotel = { id: string; name: string };
+/** `hasAccommodation`: hospio-backend docs/plan-venue-type.md (rooms, stays, the front office). */
+type Hotel = { id: string; name: string; hasAccommodation: boolean };
 
 async function hotelsOf(): Promise<Hotel[]> {
-	return (await getHotels()).map((h) => ({ id: h.id, name: h.name }));
+	return (await getHotels()).map((h) => ({ id: h.id, name: h.name, hasAccommodation: hasAccommodation(h) }));
 }
 
 /** Run `load` once per hotel with that hotel's X-Hotel-Id and tag every row with it. */

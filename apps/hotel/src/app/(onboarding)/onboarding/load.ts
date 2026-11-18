@@ -3,6 +3,7 @@ import "server-only";
 import { redirect } from "next/navigation";
 import { getUser } from "@hospio/api/dal";
 import { data } from "@hospio/api/data";
+import { hasAccommodation, kindHasRooms } from "@hospio/api/venue";
 import {
 	OWNER_ONBOARDING_STEPS,
 	type OwnerOnboardingData,
@@ -38,13 +39,21 @@ export async function loadOnboarding() {
 	// Changes whenever the saved draft or the hotel list changes: step pages remount with the fresh copy.
 	const raw = JSON.stringify([
 		draft,
-		business?.hotels?.map((h) => [h.id, h.roomCount]),
+		business?.hotels?.map((h) => [h.id, h.roomCount, h.venueType]),
+		business?.venueKind,
 	]);
 	let hash = 0;
 	for (let i = 0; i < raw.length; i++)
 		hash = (hash * 31 + raw.charCodeAt(i)) | 0;
 	const version = hash.toString(36);
-	return { user, business, row, draft, done, next, version };
+	// The kind of business and whether the first location has rooms (hospio-backend docs/plan-venue-type.md): a lounge, bar or
+	// restaurant gets no check-in times and "Outlets" instead of "Rooms & prices" as step 3.
+	const kind = business?.venueKind ?? draft.business?.venueKind ?? "HOTEL";
+	const firstHotel =
+		business?.hotels?.find((h) => h.id === draft.hotel?.hotelId) ??
+		business?.hotels?.[0];
+	const accommodation = firstHotel ? hasAccommodation(firstHotel) : kindHasRooms(kind);
+	return { user, business, row, draft, done, next, version, kind, accommodation };
 }
 
 export type OnboardingLoad = Awaited<ReturnType<typeof loadOnboarding>>;

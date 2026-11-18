@@ -160,7 +160,7 @@ export function ManagerStep({
 			<StepCard
 				step="manager"
 				title={`Invite a manager for ${hotelName}`}
-				intro="They'll run the hotel day to day. You can invite more managers, an accountant or a co-owner later from Users."
+				intro="They'll run it day to day. You can invite more managers, an accountant or a co-owner later from Users."
 			>
 				{created ? (
 					<>

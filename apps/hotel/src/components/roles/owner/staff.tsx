@@ -60,7 +60,7 @@ import { useListParams } from "@hospio/ui/shared/list-params";
 import { btn } from "@hospio/ui/shared/ui";
 import {
 	ResetPasswordModal,
-	ROLE_OPTIONS,
+	roleOptionsFor,
 	StaffPinActions,
 } from "../manager/staff/panels";
 import {
@@ -73,7 +73,7 @@ import {
 } from "../shared-staff/staff-account";
 import { DownloadModal, HotelFilter } from "./common";
 
-type Hotel = { hotelId: string; name: string };
+type Hotel = { hotelId: string; name: string; hasAccommodation?: boolean };
 type Tab = "all" | "active" | "held" | "invited";
 type ModalKind =
 	| "pin"
@@ -841,7 +841,9 @@ function AddStaffPanel({
 							label="Role"
 							value={form.role}
 							onChange={(v) => set("role", v)}
-							options={ROLE_OPTIONS}
+							options={roleOptionsFor(
+								hotels.find((h) => h.hotelId === hotelId)?.hasAccommodation !== false,
+							)}
 							required
 						/>
 						<TextField

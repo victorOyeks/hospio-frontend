@@ -56,16 +56,23 @@ export type OwnerOnboardingData = {
 		address?: string;
 		city?: string;
 		timezone?: string;
+		/** "What kind of business?" (venue.ts BUSINESS_KINDS); kept on the business as venueKind too. */
+		venueKind?: string;
 	};
 	hotel?: { hotelId: string; name: string; city: string };
+	/**
+	 * Step 3. A hotel saves its room types; a lounge, bar or restaurant (no accommodation) saves its outlets instead
+	 * (hospio-backend docs/plan-venue-type.md), same step number.
+	 */
 	rooms?: {
-		roomTypes: {
+		roomTypes?: {
 			roomTypeId: string;
 			name: string;
 			price: number;
 			count: number;
 		}[];
-		created: number;
+		created?: number;
+		outlets?: { outletId: string; name: string; kind: string }[];
 	};
 	manager?: {
 		userId: string;

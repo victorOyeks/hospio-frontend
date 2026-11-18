@@ -21,6 +21,7 @@ import {
 } from "@hospio/api/actions/property";
 import type { AdminOnboardingData } from "@hospio/api/types";
 import { Note } from "@hospio/ui/shared/detail-list";
+import { hasAccommodation, venueLabel } from "@hospio/api/venue";
 import { EmptyState } from "@hospio/ui/shared/empty-state";
 import {
 	FieldRow,
@@ -219,7 +220,10 @@ function summary(snap: Snapshot): ByHotel[string] {
 }
 
 export function RoomsStep({ ctx }: { ctx: WizardCtx }) {
-	const { hotels, business, setHotels } = ctx;
+	const { hotels: allHotels, business, setHotels } = ctx;
+	// Only places with accommodation get rooms (hospio-backend docs/plan-venue-type.md): a lounge, bar or restaurant is skipped.
+	const hotels = allHotels.filter((h) => hasAccommodation(h));
+	const noRooms = allHotels.filter((h) => !hasAccommodation(h));
 	const [hotelId, setHotelId] = useState(hotels[0]?.id ?? "");
 	const [snaps, setSnaps] = useState<Record<string, Snapshot>>({});
 	const [loadError, setLoadError] = useState<string | null>(null);
@@ -416,9 +420,43 @@ export function RoomsStep({ ctx }: { ctx: WizardCtx }) {
 		if (after) await persist({ ...snaps, [hotelId]: after });
 	};
 
+	const notNeeded = noRooms.length > 0 && (
+		<Note>
+			{noRooms
+				.map(
+					(h) =>
+						`${h.name} is a ${venueLabel(h.venueType).toLowerCase()}: no rooms needed`,
+				)
+				.join(". ")}
+			.
+		</Note>
+	);
+
+	if (hotels.length === 0 && noRooms.length > 0) {
+		// No location has rooms: nothing to set up here; Continue records the step so the board shows it done.
+		const skip = () =>
+			busy(async () => {
+				const row = await ctx.saveStep("rooms", { byHotel: {} });
+				if (row) ctx.goTo(nextStep("rooms"));
+			});
+		return (
+			<StepFrame
+				venue={ctx.venue}
+				step="rooms"
+				onBack={() => ctx.goTo(prevStep("rooms"))}
+				onContinue={ctx.editable ? skip : undefined}
+				continueLabel="Continue"
+				pending={pending}
+				footerNote="Rooms can be added later from Hotel setup if a location starts taking guests overnight."
+			>
+				{notNeeded}
+			</StepFrame>
+		);
+	}
+
 	if (hotels.length === 0) {
 		return (
-			<StepFrame step="rooms" onBack={() => ctx.goTo(prevStep("rooms"))}>
+			<StepFrame venue={ctx.venue} step="rooms" onBack={() => ctx.goTo(prevStep("rooms"))}>
 				<EmptyState
 					title="Add a hotel first"
 					hint="Rooms belong to a hotel. Go back one step and add one."
@@ -447,6 +485,7 @@ export function RoomsStep({ ctx }: { ctx: WizardCtx }) {
 
 	return (
 		<StepFrame
+			venue={ctx.venue}
 			step="rooms"
 			subtitle={
 				hotel
@@ -474,6 +513,7 @@ export function RoomsStep({ ctx }: { ctx: WizardCtx }) {
 					onChange={setHotelId}
 				/>
 			)}
+			{notNeeded}
 			{loadError && (
 				<Note tone="danger">
 					{loadError}.{" "}

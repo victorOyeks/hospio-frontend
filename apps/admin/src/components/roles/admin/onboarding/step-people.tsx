@@ -22,6 +22,7 @@ import { PanelSection, SidePanel } from "@hospio/ui/shared/side-panel";
 import { StatusPill } from "@hospio/ui/shared/status-pill";
 import { btn } from "@hospio/ui/shared/ui";
 import { cn } from "@hospio/ui/utils";
+import { hasAccommodation } from "@hospio/api/venue";
 import type { WizardCtx } from "./wizard";
 import {
 	inviteLink,
@@ -51,6 +52,15 @@ export const PEOPLE_ROLES: HotelRole[] = [
 	"FINANCE",
 	"INVENTORY",
 ];
+
+/** Roles that only make sense where guests stay overnight (hospio-backend docs/plan-venue-type.md). */
+export const STAY_ROLES: HotelRole[] = ["FRONT_OFFICE", "HOUSEKEEPING"];
+
+/** The roles offered at a location: front office and housekeeping only where it has accommodation. */
+export const rolesFor = (hotel: WizardHotel | undefined): HotelRole[] =>
+	!hotel || hasAccommodation(hotel)
+		? PEOPLE_ROLES
+		: PEOPLE_ROLES.filter((r) => !STAY_ROLES.includes(r));
 
 export type PeopleLevel = "FULL" | "EDIT" | "VIEW";
 
@@ -273,6 +283,7 @@ export function PeopleStep({ ctx }: { ctx: WizardCtx }) {
 
 	return (
 		<StepFrame
+			venue={ctx.venue}
 			step="people"
 			onBack={() => ctx.goTo(prevStep("people"))}
 			onContinue={ctx.editable ? save : undefined}
@@ -491,7 +502,16 @@ function AddPersonPanel({
 		setRoleOnly(r);
 		if (!levelPicked) setLevel(defaultLevel(r));
 	};
-	const [hotelId, setHotelId] = useState(hotels[0]?.id ?? "");
+	const [hotelId, setHotelIdOnly] = useState(hotels[0]?.id ?? "");
+	const roleChoices = rolesFor(
+		hotels.find((h) => h.id === (hotelId || hotels[0]?.id)),
+	);
+	// A lounge, bar or restaurant has no front office or housekeeping: picking one drops a role it can't take.
+	const setHotelId = (id: string) => {
+		setHotelIdOnly(id);
+		const allowed = rolesFor(hotels.find((h) => h.id === id));
+		if (isHotelRole(role) && !allowed.includes(role)) setRole("MANAGER");
+	};
 	const { pending, busy } = useWizardSave();
 	const emailOk = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim());
 	const valid =
@@ -590,7 +610,7 @@ function AddPersonPanel({
 							label="Role"
 							value={role}
 							onChange={setRole}
-							options={PEOPLE_ROLES.map((r) => ({
+							options={roleChoices.map((r) => ({
 								value: r,
 								label: roleLabels[r],
 							}))}
@@ -678,7 +698,9 @@ function ImportPeopleModal({
 						? `unknown role "${c[3] ?? ""}"`
 						: !hotel
 							? `unknown hotel "${c[4] ?? ""}"`
-							: null,
+							: !rolesFor(hotel).includes(role)
+								? `${hotel.name} has no rooms, so no ${roleLabels[role].toLowerCase()}`
+								: null,
 		};
 	});
 	const good = parsed.filter(

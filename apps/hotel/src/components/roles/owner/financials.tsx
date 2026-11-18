@@ -627,7 +627,9 @@ function PnlTable({
 								<td>
 									<DeltaPill value={delta} />
 								</td>
-								<td className="pr-5">{h.occupancy}%</td>
+								<td className="pr-5">
+									{h.hasAccommodation === false ? "—" : `${h.occupancy}%`}
+								</td>
 							</tr>
 						);
 					})}
@@ -1083,7 +1085,14 @@ function PayrollTab({
 					label="Payroll this month"
 					value={nairaShort(hotels.reduce((s, h) => s + h.payrollMonth, 0))}
 					icon={BanknoteIcon}
-					hint="200 staff · 18% of revenue"
+					hint={(() => {
+						// Worked out from the figures, never a sample line.
+						const pay = hotels.reduce((s, h) => s + h.payrollMonth, 0);
+						const rev = hotels.reduce((s, h) => s + h.revenueMonth, 0);
+						return rev > 0 && pay > 0
+							? `${Math.round((pay / rev) * 100)}% of revenue this month`
+							: "This month";
+					})()}
 				/>
 				<KpiCard
 					label="Paid so far"

@@ -11,7 +11,7 @@ export default async function Page() {
 	]);
 	return (
 		<OwnerReports
-			hotels={hotels.map((h) => ({ hotelId: h.id, name: h.name }))}
+			hotels={hotels.map((h) => ({ hotelId: h.id, name: h.name, hasAccommodation: h.hasAccommodation }))}
 			schedules={reports.schedules}
 			runs={reports.runs}
 		/>

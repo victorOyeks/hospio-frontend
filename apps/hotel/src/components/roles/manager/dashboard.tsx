@@ -37,6 +37,7 @@ import type {
 } from "@hospio/api/data/types";
 import { GuestsTable } from "./guests-table";
 import { OutletSalesCard } from "./outlet-sales";
+import { hasAccommodation } from "@hospio/api/venue";
 
 export type DashboardData = {
 	buckets: ReturnType<typeof bookingBuckets>;
@@ -63,16 +64,18 @@ function greeting() {
 	return h < 12 ? "Good morning" : h < 17 ? "Good afternoon" : "Good evening";
 }
 
-const quickActions = [
+const quickActions: { label: string; href: string; icon: typeof FlagIcon; stay?: boolean }[] = [
 	{
 		label: "Check in",
 		href: "/dashboard/bookings?tab=arrivals",
 		icon: ArrowRightToLineIcon,
+		stay: true,
 	},
 	{
 		label: "Check out",
 		href: "/dashboard/bookings?tab=departures",
 		icon: ArrowLeftToLineIcon,
+		stay: true,
 	},
 	{
 		label: "Record payment",
@@ -102,6 +105,8 @@ export function ManagerDashboard({
 	data: DashboardData;
 }) {
 	const firstName = user.fullName.split(" ")[0];
+	// A lounge, bar or restaurant (hospio-backend docs/plan-venue-type.md): no rooms, arrivals or folios; sales and tills instead.
+	const stays = hasAccommodation(hotel);
 	const now = new Date();
 	const {
 		buckets,
@@ -208,7 +213,7 @@ export function ManagerDashboard({
 				subtitle={[
 					hotel?.name,
 					hotel?.city,
-					totalRooms ? `${totalRooms} rooms` : null,
+					stays && totalRooms ? `${totalRooms} rooms` : null,
 					format(now, "EEEE, d MMM yyyy"),
 				]
 					.filter(Boolean)
@@ -218,16 +223,18 @@ export function ManagerDashboard({
 					<CalendarIcon className="size-4 text-ink-2" /> Today ·{" "}
 					{format(now, "EEE d MMM")}
 				</span>
-				<Button asChild className={btn.primary}>
-					<Link href="/dashboard/bookings?new=1">
-						<PlusIcon className="size-[15px]" /> New booking
-					</Link>
-				</Button>
+				{stays && (
+					<Button asChild className={btn.primary}>
+						<Link href="/dashboard/bookings?new=1">
+							<PlusIcon className="size-[15px]" /> New booking
+						</Link>
+					</Button>
+				)}
 			</PageHeader>
 
 			{/* Quick actions */}
 			<div className="grid grid-cols-2 gap-[10px] md:grid-cols-3 xl:grid-cols-6">
-				{quickActions.map(({ label, href, icon: Icon }) => (
+				{quickActions.filter((q) => stays || !q.stay).map(({ label, href, icon: Icon }) => (
 					<Link
 						key={label}
 						href={href}
@@ -242,6 +249,39 @@ export function ManagerDashboard({
 			</div>
 
 			{/* KPI row */}
+			{!stays && (
+				<div className="grid grid-cols-2 gap-4 md:grid-cols-4">
+					<KpiCard
+						label="Sales today"
+						value={nairaShort(outletSales?.totals.sales ?? 0)}
+						icon={TrendingUpIcon}
+						hint={
+							outletSales
+								? `${plural(outletSales.totals.orders, "order")} · ${plural(outletSales.outlets.length, "outlet")}`
+								: "Sales could not be read right now"
+						}
+					/>
+					<KpiCard
+						label="Money taken today"
+						value={nairaShort(money.revenue)}
+						icon={WalletIcon}
+						hint={`${money.paymentsCount} payments · ${naira(money.expenses)} spent`}
+					/>
+					<KpiCard
+						label="Open tills"
+						value={money.openTills}
+						icon={CreditCardIcon}
+						hint={`${naira(money.cashInTills)} cash in hand`}
+					/>
+					<KpiCard
+						label="Cancelled today"
+						value={outletSales?.totals.cancelled ?? 0}
+						icon={ReceiptIcon}
+						hint="Orders cancelled at the outlets"
+					/>
+				</div>
+			)}
+			{stays && (
 			<div className="grid grid-cols-2 gap-4 md:grid-cols-3 xl:grid-cols-5">
 				<KpiCard
 					label="Occupancy tonight"
@@ -290,6 +330,7 @@ export function ManagerDashboard({
 					}
 				/>
 			</div>
+			)}
 
 			{/* Needs your action + Room status */}
 			<div className="grid gap-4 xl:grid-cols-[1fr_420px]">
@@ -336,6 +377,8 @@ export function ManagerDashboard({
 					)}
 				</SectionCard>
 
+				{!stays && <OutletSalesCard sales={outletSales} rooms={false} />}
+				{stays && (
 				<SectionCard
 					title="Room status"
 					subtitle={`Live · ${totalRooms} rooms`}
@@ -399,11 +442,12 @@ export function ManagerDashboard({
 						</>
 					)}
 				</SectionCard>
+				)}
 			</div>
 
 			{/* Today's guests + Staff on shift */}
-			<div className="grid gap-4 xl:grid-cols-[1fr_420px]">
-				<GuestsTable buckets={buckets} />
+			<div className={stays ? "grid gap-4 xl:grid-cols-[1fr_420px]" : "grid gap-4"}>
+				{stays && <GuestsTable buckets={buckets} />}
 
 				<SectionCard
 					title="Staff on shift"
@@ -563,7 +607,9 @@ export function ManagerDashboard({
 					</p>
 				</SectionCard>
 
-				<OutletSalesCard sales={outletSales} className="md:col-span-3" />
+				{stays && (
+					<OutletSalesCard sales={outletSales} className="md:col-span-3" />
+				)}
 			</div>
 		</>
 	);

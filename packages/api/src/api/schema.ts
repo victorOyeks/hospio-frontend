@@ -226,6 +226,11 @@ export const OnboardingStatus = z.enum([
 	"DONE",
 ]);
 
+/** A location's kind (common VenueType). Plain strings past the known ones still parse. */
+export const VenueType = z.string();
+/** The business's kind, asked in both wizards: HOTEL, LOUNGE, BAR, RESTAURANT, CLUB or MIXED. */
+export const BusinessKind = z.string();
+
 export const Hotel = z.object({
 	id: z.string(),
 	businessId: z.string(),
@@ -241,6 +246,10 @@ export const Hotel = z.object({
 	checkOutTime: z.string().nullable().optional(),
 	starRating: z.number().nullable().optional(),
 	managerUserId: z.string().nullable().optional(),
+	/** What kind of place the location is (hospio-backend docs/plan-venue-type.md); missing on older rows = HOTEL. */
+	venueType: VenueType.nullable().optional(),
+	/** Rooms, bookings, folios, charge-to-room: a hotel or any location with rooms. Gate on this, never on the type. */
+	hasAccommodation: z.boolean().nullable().optional(),
 });
 
 export const HotelRequest = z.object({
@@ -255,6 +264,8 @@ export const HotelRequest = z.object({
 	starRating: z.number().nullable().optional(),
 	/** Platform callers name the business; owners are inside theirs. */
 	businessId: z.string().nullable().optional(),
+	/** Left out on create: the business's kind decides (a lounge business's location is a lounge). */
+	venueType: VenueType.nullable().optional(),
 });
 
 /** The wizard steps by name, in order: the owner's four and the back office's ten (see types.ts). */
@@ -329,6 +340,9 @@ export const Business = z
 		createdAt: z.string().nullable().optional(),
 		hotels: z.array(Hotel).nullable().optional(),
 		onboarding: BusinessOnboarding.nullable().optional(),
+		venueKind: BusinessKind.nullable().optional(),
+		/** Any location with accommodation. */
+		hasAccommodation: z.boolean().nullable().optional(),
 	})
 	.transform((b) => ({
 		...b,
@@ -359,6 +373,9 @@ export const BusinessSummary = z.object({
 	feeAddendumRef: z.string().nullable().optional(),
 	createdAt: z.string(),
 	lastActiveAt: z.string().nullable().optional(),
+	venueKind: BusinessKind.nullable().optional(),
+	/** The kinds of its locations (HOTEL, LOUNGE …). */
+	venueTypes: z.array(VenueType).nullable().optional(),
 });
 
 /** PUT /businesses/mine (owner profile edits). */
@@ -374,6 +391,8 @@ export const MyBusinessRequest = z.object({
 	logoUrl: z.string().nullable().optional(),
 	brandColour: z.string().nullable().optional(),
 	timezone: z.string().nullable().optional(),
+	/** Left out, kept. */
+	venueKind: BusinessKind.nullable().optional(),
 });
 
 /** POST /businesses and PUT /businesses/{id} (platform). */
@@ -403,6 +422,8 @@ export const BusinessRequest = z.object({
 	contractStartsOn: z.string().nullable().optional(),
 	contractNotes: z.string().nullable().optional(),
 	source: BusinessSource.nullable().optional(),
+	/** Left out, kept. */
+	venueKind: BusinessKind.nullable().optional(),
 });
 
 const JsonObject = z.record(z.string(), z.unknown());

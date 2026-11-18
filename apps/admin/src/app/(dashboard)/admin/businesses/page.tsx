@@ -7,7 +7,7 @@ import { adminRole } from "../role";
 
 export const dynamic = "force-dynamic";
 
-/** Admin · Hotel businesses, paged by tenant-service: `?stage=&q=&sort=&page=` (page counts from 1). */
+/** Admin · Businesses, paged by tenant-service: `?stage=&q=&sort=&page=` (page counts from 1). */
 export default async function BusinessesPage({
 	searchParams,
 }: {

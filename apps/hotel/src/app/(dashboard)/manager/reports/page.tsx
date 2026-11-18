@@ -3,6 +3,7 @@ import { OwnerReports } from "@/components/roles/owner/reports";
 import { getActiveHotel, getHotels, getUser } from "@hospio/api/dal";
 import { data } from "@hospio/api/data";
 import { live } from "@hospio/api/data/live";
+import { hasAccommodation } from "@hospio/api/venue";
 
 export const dynamic = "force-dynamic";
 
@@ -20,7 +21,7 @@ export default async function ReportsPage() {
 		return (
 			<OwnerReports
 				owner={false}
-				hotels={hotels.map((h) => ({ hotelId: h.id, name: h.name }))}
+				hotels={hotels.map((h) => ({ hotelId: h.id, name: h.name, hasAccommodation: hasAccommodation(h) }))}
 				schedules={reports.schedules.filter(
 					(s) => s.requestedBy === user?.fullName,
 				)}

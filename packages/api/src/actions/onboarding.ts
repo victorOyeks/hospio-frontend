@@ -457,3 +457,56 @@ export async function acceptHandover(): Promise<ActionResult<Business>> {
 	revalidateOwner();
 	return { ok: true, data: data.data };
 }
+
+// ---- step 3 at a lounge, bar or restaurant: outlets (hospio-backend docs/plan-venue-type.md) ------------------
+
+export type OnboardingOutlet = { outletId: string; name: string; kind: string };
+
+/** The location's outlets so far (the step pre-fills when the owner comes back). */
+export async function onboardingOutlets(
+	hotelId: string,
+): Promise<ActionResult<OnboardingOutlet[]>> {
+	if (!live("fnb")) return { ok: true, data: [] };
+	const { data, error } = await api("@get/fnb/outlets", await withSession({ hotelId }));
+	if (error || !data)
+		return { ok: false, error: errorMessage(error, "The outlets could not be read") };
+	return {
+		ok: true,
+		data: data.data.map((o) => ({ outletId: o.id, name: o.name, kind: o.kind })),
+	};
+}
+
+/**
+ * One outlet for the new location (POST /fnb/outlets), linked to the store of its kind like Hotel setup → Restaurants & tables
+ * does (a bar the Bar store, a kitchen or restaurant the Kitchen store, else the Main store). The default stores arrive from the
+ * HOTEL_CREATED event a moment after the location is made, so an empty list is asked again once before going without a store.
+ */
+export async function createOnboardingOutlet(
+	hotelId: string,
+	input: { name: string; kind: "BAR" | "RESTAURANT" | "KITCHEN" },
+): Promise<ActionResult<OnboardingOutlet>> {
+	const name = input.name.trim();
+	if (!name) return { ok: false, error: "Enter the outlet's name" };
+	if (!live("fnb")) {
+		await demoDelay(300);
+		return { ok: true, data: { outletId: `out-${Date.now()}`, name, kind: input.kind } };
+	}
+	const s = await withSession({ hotelId });
+	let stores: { id: string; kind?: string | null; active?: boolean | null }[] = [];
+	for (let attempt = 0; attempt < 2 && stores.length === 0; attempt++) {
+		if (attempt > 0) await new Promise((r) => setTimeout(r, 1500));
+		const res = await api("@get/inventory/stores", s);
+		stores = (res.data?.data ?? []).filter((x) => x.active !== false);
+	}
+	const want = input.kind === "BAR" ? "BAR" : "KITCHEN";
+	const storeId =
+		stores.find((x) => x.kind === want)?.id ?? stores.find((x) => x.kind === "MAIN")?.id ?? null;
+	const { data, error } = await api("@post/fnb/outlets", {
+		...s,
+		body: { name, kind: input.kind, storeId, status: "OPEN", terminalId: null },
+	});
+	if (error || !data)
+		return { ok: false, error: errorMessage(error, "The outlet could not be created") };
+	revalidatePath("/onboarding");
+	return { ok: true, data: { outletId: data.data.id, name: data.data.name, kind: data.data.kind } };
+}

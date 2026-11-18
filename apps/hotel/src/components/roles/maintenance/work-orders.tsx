@@ -391,17 +391,20 @@ export function WorkOrdersScreen({
 					hint="Past their due time"
 				/>
 				<KpiCard label="On hold" value={held.length} icon={PauseIcon} />
-				<KpiCard
-					label="Rooms out of order"
-					value={open.filter((r) => r.roomOutOfOrder).length}
-					icon={DoorClosedIcon}
-					hint={
-						open
-							.filter((r) => r.roomOutOfOrder)
-							.map((r) => r.roomNumber)
-							.join(", ") || "None"
-					}
-				/>
+				{/* No rooms at a lounge, bar or restaurant (hospio-backend docs/plan-venue-type.md). */}
+				{rooms.length > 0 && (
+					<KpiCard
+						label="Rooms out of order"
+						value={open.filter((r) => r.roomOutOfOrder).length}
+						icon={DoorClosedIcon}
+						hint={
+							open
+								.filter((r) => r.roomOutOfOrder)
+								.map((r) => r.roomNumber)
+								.join(", ") || "None"
+						}
+					/>
+				)}
 			</div>
 			<PillTabs
 				tabs={tabs}

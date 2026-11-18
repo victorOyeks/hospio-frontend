@@ -5,6 +5,8 @@ import {
 } from "@/components/roles/shared-staff/sales-params";
 import { deskOutlets } from "@/components/roles/shared-staff/desk-outlets";
 import { data } from "@hospio/api/data";
+import { getActiveHotel } from "@hospio/api/dal";
+import { hasAccommodation } from "@hospio/api/venue";
 
 export const dynamic = "force-dynamic";
 
@@ -27,6 +29,8 @@ export default async function SalesPage({
 		data.bookings.buckets(),
 		data.payments.terminals(),
 	]);
+	// No rooms at a lounge, bar or restaurant (hospio-backend docs/plan-venue-type.md).
+	const rooms = hasAccommodation(await getActiveHotel());
 	return (
 		<SalesScreen
 			result={result}
@@ -45,7 +49,7 @@ export default async function SalesPage({
 						}
 					: undefined
 			}
-			subtitle={`${several && !desk.all ? `Every ${where} sale` : "Every kitchen and restaurant sale"} · open one to see it, collect it or charge it to a room`}
+			subtitle={`${several && !desk.all ? `Every ${where} sale` : "Every kitchen and restaurant sale"} · open one to see it${rooms ? ", collect it or charge it to a room" : " or collect it"}`}
 			payDesk={"KITCHEN"}
 			terminals={terminals}
 			inHouse={buckets.inHouse}

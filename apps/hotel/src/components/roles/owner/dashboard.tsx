@@ -24,6 +24,7 @@ import { PageHeader } from "@hospio/ui/shared/page-header";
 import { ProgressBar } from "@hospio/ui/shared/progress-bar";
 import { SectionCard } from "@hospio/ui/shared/section-card";
 import { OutletSalesCard } from "../manager/outlet-sales";
+import { venueLabel } from "@hospio/api/venue";
 import { StatusPill } from "@hospio/ui/shared/status-pill";
 import { btn } from "@hospio/ui/shared/ui";
 import type { Me } from "@hospio/api/api/schema";
@@ -60,6 +61,7 @@ export function OwnerDashboard({
 	worth,
 	limit,
 	outletSales,
+	activeAccommodation = true,
 }: {
 	user: Me;
 	businessName: string;
@@ -72,6 +74,8 @@ export function OwnerDashboard({
 	limit: number;
 	/** What the restaurant and bar sold today at the active hotel (null when it cannot be read). */
 	outletSales?: OutletSalesDayRow | null;
+	/** The active location has accommodation (hospio-backend docs/plan-venue-type.md); its outlet sales then mention rooms. */
+	activeAccommodation?: boolean;
 }) {
 	const [open, setOpen] = useParam("open");
 	const [download, setDownload] = useState(false);
@@ -85,6 +89,9 @@ export function OwnerDashboard({
 		0,
 	);
 	const occupancy = rooms > 0 ? Math.round((occupied / rooms) * 100) : 0;
+	// Occupancy only means something where there are rooms: a business of lounges, bars or restaurants sees sales instead.
+	const stays = hotels.some((h) => h.hasAccommodation !== false);
+	const allHotels = hotels.every((h) => h.hasAccommodation !== false);
 	const waiting = approvals.filter(
 		(a) =>
 			a.approverLevel === "OWNER" &&
@@ -112,7 +119,14 @@ export function OwnerDashboard({
 		<>
 			<PageHeader
 				title={`${greeting()}, ${user.fullName.split(" ")[0]}`}
-				subtitle={`${businessName} · ${plural(hotels.length, "hotel")} · ${rooms.toLocaleString()} rooms · ${format(now, "EEEE, d MMM yyyy")}`}
+				subtitle={[
+					businessName,
+					plural(hotels.length, allHotels ? "hotel" : "location"),
+					stays && rooms > 0 ? `${rooms.toLocaleString()} rooms` : null,
+					format(now, "EEEE, d MMM yyyy"),
+				]
+					.filter(Boolean)
+					.join(" · ")}
 			>
 				<span className="flex items-center gap-2 rounded-control border border-line bg-card px-3 py-[10px] text-[13px] font-medium text-ink">
 					<BuildingIcon className="size-4 text-ink-2" /> All branches (
@@ -151,12 +165,25 @@ export function OwnerDashboard({
 							: "Month to date"
 					}
 				/>
-				<KpiCard
-					label="Occupancy tonight"
-					value={`${occupancy}%`}
-					icon={BedDoubleIcon}
-					hint={`${occupied} of ${rooms} rooms`}
-				/>
+				{stays ? (
+					<KpiCard
+						label="Occupancy tonight"
+						value={`${occupancy}%`}
+						icon={BedDoubleIcon}
+						hint={`${occupied} of ${rooms} rooms`}
+					/>
+				) : (
+					<KpiCard
+						label="Sales today"
+						value={nairaShort(outletSales?.totals.sales ?? 0)}
+						icon={BedDoubleIcon}
+						hint={
+							outletSales
+								? `${plural(outletSales.totals.orders, "order")} at ${dailyScope}`
+								: "Sales could not be read right now"
+						}
+					/>
+				)}
 				<KpiCard
 					label="Approvals waiting"
 					value={waiting.length}
@@ -178,7 +205,7 @@ export function OwnerDashboard({
 					label="Open issues"
 					value={issues}
 					icon={FlagIcon}
-					hint={`${hotels.filter((h) => h.openIssues >= 5).length} hotels need attention`}
+					hint={`${plural(hotels.filter((h) => h.openIssues >= 5).length, allHotels ? "hotel" : "location")} need attention`}
 				/>
 			</div>
 
@@ -286,7 +313,9 @@ export function OwnerDashboard({
 											{h.name}
 										</p>
 										<p className="text-xs text-ink-3">
-											{h.city} · {h.rooms} rooms · {h.manager}
+											{[h.city, h.hasAccommodation === false ? venueLabel(h.venueType) : `${h.rooms} rooms`, h.manager]
+												.filter(Boolean)
+												.join(" · ")}
 										</p>
 									</div>
 									<StatusPill tone={hotelStatusTone[h.status]}>
@@ -300,11 +329,14 @@ export function OwnerDashboard({
 											{nairaShort(h.revenueToday)}
 										</p>
 									</div>
-									<div className="text-right">
-										<p className="text-[11px] text-ink-3">Occupancy</p>
-										<p className="text-lg font-bold text-ink">{h.occupancy}%</p>
-									</div>
+									{h.hasAccommodation !== false && (
+										<div className="text-right">
+											<p className="text-[11px] text-ink-3">Occupancy</p>
+											<p className="text-lg font-bold text-ink">{h.occupancy}%</p>
+										</div>
+									)}
 								</div>
+								{h.hasAccommodation !== false && (
 								<ProgressBar
 									value={h.occupancy}
 									max={100}
@@ -316,6 +348,7 @@ export function OwnerDashboard({
 												: "danger"
 									}
 								/>
+								)}
 								<div className="flex items-center justify-between text-xs">
 									<span className="text-ink-3">Profit this month</span>
 									<StatusPill
@@ -394,7 +427,7 @@ export function OwnerDashboard({
 				</SectionCard>
 			</div>
 
-			<OutletSalesCard sales={outletSales} />
+			<OutletSalesCard sales={outletSales} rooms={activeAccommodation} />
 
 			<ApprovalPanel
 				approval={selected}

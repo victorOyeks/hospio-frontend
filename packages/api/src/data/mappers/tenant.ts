@@ -17,6 +17,7 @@ import {
 	ADMIN_ONBOARDING_STEPS,
 	OWNER_ONBOARDING_STEPS,
 } from "@hospio/api/types";
+import { hasAccommodation } from "@hospio/api/venue";
 
 /** tenant-service responses → the rows the owner Hotels screen and the platform Businesses/Onboarding screens render. */
 
@@ -55,6 +56,8 @@ export function toOwnerHotelRow(
 		city: h.city ?? "",
 		code: `#${String(index + 1).padStart(3, "0")}`,
 		rooms: h.roomCount,
+		venueType: h.venueType ?? "HOTEL",
+		hasAccommodation: hasAccommodation(h),
 		occupancy: 0,
 		manager:
 			(h.managerUserId && managers.get(h.managerUserId)) ||
@@ -99,6 +102,8 @@ export function toHotelSummary(
 		address: h.address ?? "",
 		rooms: h.roomCount,
 		timezone: h.timezone ?? "Africa/Lagos",
+		venueType: h.venueType ?? "HOTEL",
+		hasAccommodation: hasAccommodation(h),
 		occupancy: 0,
 		manager:
 			(h.managerUserId && managers.get(h.managerUserId)) ||
@@ -135,6 +140,9 @@ export function toBusinessRow(b: BusinessSummary): BusinessRow {
 		adoption: 0,
 		openTickets: 0,
 		dueFees: 0,
+		venueKind: b.venueKind ?? undefined,
+		venueTypes: b.venueTypes ?? undefined,
+		hasAccommodation: b.venueTypes ? b.venueTypes.length === 0 || b.venueTypes.includes("HOTEL") || b.rooms > 0 : undefined,
 	};
 }
 
@@ -178,6 +186,9 @@ export function toBusinessRowFromBusiness(b: Business): BusinessRow {
 		brandColour: b.brandColour ?? undefined,
 		contractStartsOn: b.contractStartsOn ?? undefined,
 		contractNotes: b.contractNotes ?? undefined,
+		venueKind: b.venueKind ?? undefined,
+		venueTypes: [...new Set(hotels.map((h) => h.venueType ?? "HOTEL"))],
+		hasAccommodation: b.hasAccommodation ?? (hotels.length === 0 || hotels.some((h) => hasAccommodation(h))),
 		onboarding: b.onboarding ?? undefined,
 	};
 }

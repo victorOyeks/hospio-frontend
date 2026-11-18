@@ -3,6 +3,7 @@ import { OwnerDashboard } from "@/components/roles/owner/dashboard";
 import { getActiveHotel, getUser } from "@hospio/api/dal";
 import { data } from "@hospio/api/data";
 import { live } from "@hospio/api/data/live";
+import { hasAccommodation } from "@hospio/api/venue";
 import { lagosDay } from "@hospio/api/data/mappers/finance";
 import {
 	type SearchParamsRecord,
@@ -58,6 +59,7 @@ export default async function OwnerHomePage({
 			worth={worth}
 			limit={settings.limits.managerExpenseLimit}
 			outletSales={outletSales}
+			activeAccommodation={hasAccommodation(active)}
 		/>
 	);
 }

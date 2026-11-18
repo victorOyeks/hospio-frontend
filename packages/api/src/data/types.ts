@@ -31,6 +31,9 @@ export type OwnerHotelRow = {
 	city: string;
 	code: string;
 	rooms: number;
+	/** hospio-backend docs/plan-venue-type.md. */
+	venueType?: string;
+	hasAccommodation?: boolean;
 	occupancy: number;
 	manager: string;
 	managerUserId?: Id;
@@ -103,6 +106,9 @@ export type HotelSummary = {
 	timezone: string;
 	occupancy: number;
 	manager: string;
+	/** hospio-backend docs/plan-venue-type.md: the location's kind and whether it has accommodation (gate on this). */
+	venueType?: string;
+	hasAccommodation?: boolean;
 };
 
 export type RoomTypeRow = {
@@ -525,6 +531,8 @@ export type NightAuditRow = {
 	checklist: { key: string; label: string; done: boolean; detail?: string }[];
 	inHouse?: number;
 	rooms?: number;
+	/** False at a lounge, bar or restaurant: no arrivals, departures, occupancy or no-shows. Left out = a hotel. */
+	accommodation?: boolean;
 	note?: string;
 	report?: Record<string, unknown>;
 };
@@ -1449,6 +1457,10 @@ export type BusinessRow = {
 	brandColour?: string;
 	contractStartsOn?: string;
 	contractNotes?: string;
+	/** What kind of business (HOTEL, LOUNGE, BAR, RESTAURANT, CLUB, MIXED) and its locations' kinds. */
+	venueKind?: string;
+	venueTypes?: string[];
+	hasAccommodation?: boolean;
 	onboarding?: {
 		status: "IN_PROGRESS" | "READY_FOR_HANDOVER" | "DONE";
 		step: number;
@@ -1644,6 +1656,11 @@ export type OutletSalesDayRow = {
 /** What the hotel's settings say about the outlets and tax. */
 export type OutletSettingsRow = {
 	roomCharge: boolean;
+	/**
+	 * The active location has accommodation (hospio-backend docs/plan-venue-type.md). False at a lounge, bar or restaurant: the
+	 * screens leave out every room action ("Charge to a room", "Charged to rooms"), not just disable them.
+	 */
+	accommodation: boolean;
 	tabs: boolean;
 	tabLimit: number;
 	vatPct: number;

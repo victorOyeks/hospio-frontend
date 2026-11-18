@@ -30,6 +30,7 @@ import {
 import { demoDelay } from "@hospio/api/demo/mode";
 import { isHotelRole } from "@hospio/api/roles";
 import { live } from "./live";
+import { hasAccommodation } from "@hospio/api/venue";
 import {
 	failedPage,
 	type ListQuery,
@@ -1914,7 +1915,7 @@ export const data = {
 				safe(data.rooms.list(), []),
 				safe(data.outlets.list(), []),
 			]);
-			const hasRooms = rooms.length > 0 || (active?.roomCount ?? 0) > 0;
+			const hasRooms = rooms.length > 0 || hasAccommodation(active);
 			const kitchens = outlets.filter((o) => o.kind !== "BAR");
 			const bars = outlets.filter((o) => o.kind === "BAR");
 			const openOrders = async (list: typeof outlets) =>
@@ -1954,8 +1955,10 @@ export const data = {
 		...fnbData.outlets,
 		/** OUTLETS (room charge, tabs, tab limit) and TAXES_CURRENCY from Hotel setup; the contract's defaults when it cannot be read. */
 		settings: async (): Promise<OutletSettingsRow> => {
+			const accommodation = hasAccommodation(await getActiveHotel().catch(() => null));
 			const fallback: OutletSettingsRow = {
-				roomCharge: true,
+				roomCharge: accommodation,
+				accommodation,
 				tabs: true,
 				tabLimit: 50_000,
 				vatPct: 7.5,
@@ -1972,7 +1975,8 @@ export const data = {
 				typeof v === "number" && Number.isFinite(v) ? v : d;
 			const b = (v: unknown, d: boolean) => (typeof v === "boolean" ? v : d);
 			return {
-				roomCharge: b(value("outlets", "roomCharge"), fallback.roomCharge),
+				roomCharge: accommodation && b(value("outlets", "roomCharge"), fallback.roomCharge),
+				accommodation,
 				tabs: b(value("outlets", "tabs"), fallback.tabs),
 				tabLimit: n(value("outlets", "tabLimit"), fallback.tabLimit),
 				vatPct: n(value("taxes", "vatPct"), fallback.vatPct),

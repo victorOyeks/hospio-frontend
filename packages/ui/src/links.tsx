@@ -56,6 +56,11 @@ export type NavLink = {
 	group?: string;
 	/** Only these roles see the link; everyone with the menu when left out. */
 	roles?: HotelRole[];
+	/**
+	 * Needs accommodation (rooms, stays, bookings, folios): hidden, and the page answers "Not used at a lounge", when the active
+	 * location has none (hospio-backend docs/plan-venue-type.md).
+	 */
+	stay?: boolean;
 };
 
 /** Manager portal, in the order of the Figma sidebar. */
@@ -68,9 +73,9 @@ export const managerLinks: NavLink[] = [
 		icon: CheckCircle2Icon,
 		badge: "approvals",
 	},
-	{ title: "Rooms", url: "/dashboard/rooms", icon: BuildingIcon },
-	{ title: "Bookings", url: "/dashboard/bookings", icon: CalendarCheckIcon },
-	{ title: "Folios", url: "/dashboard/folios", icon: ReceiptIcon },
+	{ title: "Rooms", url: "/dashboard/rooms", icon: BuildingIcon, stay: true },
+	{ title: "Bookings", url: "/dashboard/bookings", icon: CalendarCheckIcon, stay: true },
+	{ title: "Folios", url: "/dashboard/folios", icon: ReceiptIcon, stay: true },
 	{ title: "Staff", url: "/dashboard/staff", icon: IdCardIcon },
 	{ title: "Financials", url: "/dashboard/financials", icon: BarChart3Icon },
 	{ title: "Payments", url: "/dashboard/payments", icon: CreditCardIcon },
@@ -79,6 +84,7 @@ export const managerLinks: NavLink[] = [
 		title: "Organizations",
 		url: "/dashboard/organizations",
 		icon: HandshakeIcon,
+		stay: true,
 	},
 	{ title: "Night audit", url: "/dashboard/night-audit", icon: MoonIcon },
 	{ title: "Messaging", url: "/dashboard/messaging", icon: MessageSquareIcon },
@@ -100,7 +106,7 @@ export const managerLinks: NavLink[] = [
 export const ownerLinks: NavLink[] = [
 	{ title: "Dashboard", url: "/dashboard", icon: HomeIcon },
 	{ title: "Hotels", url: "/dashboard/hotels", icon: BuildingIcon },
-	{ title: "Bookings", url: "/dashboard/bookings", icon: CalendarCheckIcon },
+	{ title: "Bookings", url: "/dashboard/bookings", icon: CalendarCheckIcon, stay: true },
 	{ title: "Staff", url: "/dashboard/staff", icon: IdCardIcon },
 	{ title: "Financials", url: "/dashboard/financials", icon: BarChart3Icon },
 	{ title: "Payments", url: "/dashboard/payments", icon: WalletIcon },
@@ -131,13 +137,13 @@ export const ownerLinks: NavLink[] = [
 
 export const frontOfficeLinks: NavLink[] = [
 	{ title: "Today", url: "/dashboard", icon: HomeIcon },
-	{ title: "Bookings", url: "/dashboard/bookings", icon: CalendarCheckIcon },
-	{ title: "Rooms", url: "/dashboard/rooms", icon: BedDoubleIcon },
-	{ title: "Folios", url: "/dashboard/folios", icon: ReceiptIcon },
-	{ title: "Room service", url: "/dashboard/room-service", icon: UtensilsIcon },
-	{ title: "Guest laundry", url: "/dashboard/laundry", icon: ShirtIcon },
+	{ title: "Bookings", url: "/dashboard/bookings", icon: CalendarCheckIcon, stay: true },
+	{ title: "Rooms", url: "/dashboard/rooms", icon: BedDoubleIcon, stay: true },
+	{ title: "Folios", url: "/dashboard/folios", icon: ReceiptIcon, stay: true },
+	{ title: "Room service", url: "/dashboard/room-service", icon: UtensilsIcon, stay: true },
+	{ title: "Guest laundry", url: "/dashboard/laundry", icon: ShirtIcon, stay: true },
 	{ title: "Repairs", url: "/dashboard/repairs", icon: WrenchIcon },
-	{ title: "Guests", url: "/dashboard/guests", icon: UsersIcon },
+	{ title: "Guests", url: "/dashboard/guests", icon: UsersIcon, stay: true },
 	{ title: "Lost & found", url: "/dashboard/lost-found", icon: SearchIcon },
 	{ title: "Messages", url: "/dashboard/messages", icon: MessageSquareIcon },
 	{ title: "Payments", url: "/dashboard/payments", icon: CreditCardIcon },
@@ -154,6 +160,7 @@ export const housekeepingLinks: NavLink[] = [
 		url: "/dashboard/inspect",
 		icon: ClipboardCheckIcon,
 		supervisorOnly: true,
+		stay: true,
 	},
 	{ title: "Lost & found", url: "/dashboard/lost-found", icon: SearchIcon },
 	{ title: "Linen", url: "/dashboard/linen", icon: ShirtIcon },
@@ -178,7 +185,7 @@ export const maintenanceLinks: NavLink[] = [
 	{ title: "Work orders", url: "/dashboard", icon: WrenchIcon },
 	{ title: "Preventive", url: "/dashboard/preventive", icon: CalendarDaysIcon },
 	{ title: "Maintenance store", url: "/dashboard/store", icon: PackageIcon },
-	{ title: "Rooms out of order", url: "/dashboard/rooms", icon: BedDoubleIcon },
+	{ title: "Rooms out of order", url: "/dashboard/rooms", icon: BedDoubleIcon, stay: true },
 	{ title: "My shifts", url: "/dashboard/shifts", icon: CalendarDaysIcon },
 	{ title: "Inbox", url: "/dashboard/inbox", icon: InboxIcon, badge: "inbox" },
 	{ title: "Notifications", url: "/dashboard/notifications", icon: BellIcon },
@@ -242,6 +249,7 @@ export const financeLinks: NavLink[] = [
 		title: "Organizations",
 		url: "/dashboard/organizations",
 		icon: HandshakeIcon,
+		stay: true,
 	},
 	{ title: "My shifts", url: "/dashboard/shifts", icon: CalendarDaysIcon },
 	{ title: "Inbox", url: "/dashboard/inbox", icon: InboxIcon, badge: "inbox" },
@@ -304,3 +312,26 @@ export const linksByRole: Record<HotelRole, NavLink[]> = {
 	FINANCE_ADMIN: adminLinks,
 	MARKETER: marketerLinks,
 };
+
+/**
+ * Pages that need accommodation for a role: its `stay` links (and everything under them) plus pages reached from a dashboard
+ * rather than the menu. The shell answers "Not used at a lounge" on these when the active location has no rooms.
+ */
+const STAY_ONLY_EXTRA: Partial<Record<HotelRole, string[]>> = {
+	// The front office's home is its arrivals and departures board.
+	FRONT_OFFICE: ["/dashboard"],
+};
+
+export function stayOnlyPaths(role: HotelRole): string[] {
+	return [
+		...linksByRole[role].filter((l) => l.stay).map((l) => l.url),
+		...(STAY_ONLY_EXTRA[role] ?? []),
+	];
+}
+
+/** Whether `pathname` (as the browser shows it, /dashboard/…) is a stay-only page for this role. */
+export function isStayOnlyPath(role: HotelRole, pathname: string): boolean {
+	const path = pathname.split("?")[0].replace(/\/$/, "");
+	// "/dashboard" (a home page) matches only itself, never every page under it.
+	return stayOnlyPaths(role).some((p) => path === p || (p !== "/dashboard" && path.startsWith(`${p}/`)));
+}

@@ -3,6 +3,7 @@ import {
 	BedDoubleIcon,
 	BuildingIcon,
 	CheckIcon,
+	StoreIcon,
 	ClockIcon,
 	HotelIcon,
 	type LucideIcon,
@@ -16,7 +17,7 @@ import {
 import { HomeIcon } from "@hospio/ui/svgs/home";
 import { btn } from "@hospio/ui/shared/ui";
 import { cn } from "@hospio/ui/utils";
-import { STEP_META, stepHref } from "./steps";
+import { placeWord, stepHref, stepMeta } from "./steps";
 
 const icons: Record<OwnerOnboardingStep, LucideIcon> = {
 	business: BuildingIcon,
@@ -30,11 +31,17 @@ export function WelcomeChecklist({
 	firstName,
 	done,
 	next,
+	kind,
+	accommodation,
 }: {
 	firstName: string;
 	done: OwnerOnboardingStep[];
 	next: OwnerOnboardingStep | "done";
+	/** The business's kind (hospio-backend docs/plan-venue-type.md): a lounge's step 3 is Outlets, not Rooms & prices. */
+	kind?: string | null;
+	accommodation?: boolean;
 }) {
+	const STEP_META = stepMeta(kind, accommodation);
 	const minutes = OWNER_ONBOARDING_STEPS.filter(
 		(s) => !done.includes(s),
 	).reduce((sum, s) => sum + STEP_META[s].minutes, 0);
@@ -56,12 +63,13 @@ export function WelcomeChecklist({
 				<p className="mt-1 text-[13px] text-ink-2">
 					{next === "done"
 						? "Everything is in. One last look and your dashboard is ready."
-						: `Let's set up your hotel business. It takes about ${Math.max(minutes, 1)} minutes, and you can stop and come back any time.`}
+						: `Let's set up your ${placeWord(kind) === "location" ? "" : `${placeWord(kind)} `}business. It takes about ${Math.max(minutes, 1)} minutes, and you can stop and come back any time.`}
 				</p>
 			</div>
 			<ol className="divide-y divide-line rounded-xl border border-line">
 				{OWNER_ONBOARDING_STEPS.map((key, i) => {
-					const Icon = icons[key];
+					const Icon =
+						key === "rooms" && STEP_META.rooms.short === "Outlets" ? StoreIcon : icons[key];
 					const isDone = done.includes(key);
 					const isNext = key === next;
 					return (

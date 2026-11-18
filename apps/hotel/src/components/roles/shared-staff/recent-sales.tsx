@@ -32,9 +32,12 @@ export function RecentSales({
 	bar,
 	onOpen,
 	limit = 8,
+	rooms = true,
 }: {
 	orders: OrderRow[];
 	bar: boolean;
+	/** False at a lounge, bar or restaurant: no "charge it to a room". */
+	rooms?: boolean;
 	onOpen: (id: string) => void;
 	limit?: number;
 }) {
@@ -45,7 +48,7 @@ export function RecentSales({
 	return (
 		<SectionCard
 			title="Recent sales"
-			subtitle="Tap a sale to see it, take payment or charge it to a room"
+			subtitle={rooms ? "Tap a sale to see it, take payment or charge it to a room" : "Tap a sale to see it or take payment"}
 			action={{ label: "All sales", href: "/dashboard/sales" }}
 			flush
 		>

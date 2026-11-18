@@ -263,6 +263,7 @@ export function toNightAuditRow(
 		noShows: a.noShows ?? 0,
 		inHouse: a.inHouse ?? undefined,
 		rooms: a.rooms ?? undefined,
+		accommodation: a.accommodation ?? true,
 		closedBy: closedByName ?? a.closedBy ?? undefined,
 		closedAt: a.closedAt ?? undefined,
 		note: a.note ?? undefined,

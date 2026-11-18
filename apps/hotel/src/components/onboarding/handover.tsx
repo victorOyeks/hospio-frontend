@@ -1,5 +1,6 @@
 "use client";
 
+import { venueLabel } from "@hospio/api/venue";
 import { Loader2Icon } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -34,7 +35,10 @@ export function HandoverReview({
 	setupCount,
 	devices = [],
 	legal = [],
+	outlets = {},
 }: {
+	/** Outlet names of each location without accommodation (hotel id → names). */
+	outlets?: Record<string, string[]>;
 	business: Business | null;
 	hotels: OwnerHotelRow[];
 	users: PortalUserRow[];
@@ -52,6 +56,10 @@ export function HandoverReview({
 	const legalDone = legalBoxes.every((b) => ticked[b.id]);
 	const { run, pending } = useAction();
 	const rooms = hotels.reduce((s, h) => s + h.rooms, 0);
+	// hospio-backend docs/plan-venue-type.md: rooms are counted only where there is accommodation; a lounge is named by its kind.
+	const stays = hotels.filter((h) => h.hasAccommodation !== false);
+	const venues = hotels.filter((h) => h.hasAccommodation === false);
+	const allHotels = venues.length === 0;
 	const people = users.filter((u) => u.role !== "OWNER");
 	const roles = Array.from(
 		new Set(people.map((u) => roleLabels[u.role])),
@@ -66,18 +74,34 @@ export function HandoverReview({
 
 	const rows: { label: string; value: string }[] = [
 		{
-			label: plural(hotels.length, "hotel"),
-			value: hotels.map((h) => h.name).join(" · ") || "None yet",
-		},
-		{
-			label: plural(rooms, "room"),
+			label: plural(hotels.length, allHotels ? "hotel" : "location"),
 			value:
-				rooms > 0
-					? "Room types and prices set"
-					: hotels.length
-						? "No rooms: bars, restaurants and lounges only"
-						: "—",
+				hotels
+					.map((h) =>
+						allHotels ? h.name : `${h.name} (${venueLabel(h.venueType)})`,
+					)
+					.join(" · ") || "None yet",
 		},
+		...(stays.length > 0
+			? [
+					{
+						label: plural(rooms, "room"),
+						value:
+							rooms > 0
+								? `Room types and prices set${venues.length ? ` at ${stays.map((h) => h.name).join(", ")}` : ""}`
+								: "Rooms not added yet",
+					},
+				]
+			: []),
+		...venues.map((h) => {
+			const names = outlets[h.hotelId] ?? [];
+			return {
+				label: venues.length > 1 ? `Outlets · ${h.name}` : plural(names.length, "outlet"),
+				value: names.length
+					? names.join(", ")
+					: "Outlets are added in Hotel setup → Restaurants & tables",
+			};
+		}),
 		{
 			label: plural(people.length, "person", "people"),
 			value: roles.length
@@ -88,7 +112,7 @@ export function HandoverReview({
 			label: "Hotel setup",
 			value:
 				setupCount > 0
-					? `${plural(setupCount, "section")} of defaults applied to every hotel`
+					? `${plural(setupCount, "section")} of defaults applied to every ${allHotels ? "hotel" : "location"}`
 					: "Default hotel settings",
 		},
 		{ label: "Fee", value: fee },
@@ -128,7 +152,7 @@ export function HandoverReview({
 						Step 3 of 3 · Check what we set up
 					</p>
 					<h1 className="mt-1 text-2xl font-bold tracking-[-0.01em] text-ink">
-						Your hotels are ready
+						{allHotels ? "Your hotels are ready" : "Your business is ready"}
 					</h1>
 				</div>
 				<dl className="divide-y divide-line border-y border-line">

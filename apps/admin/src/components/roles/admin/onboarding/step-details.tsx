@@ -8,6 +8,12 @@ import { useAction } from "@hospio/api/actions/use-action";
 import type { BusinessRequest } from "@hospio/api/api/schema";
 import { feeModelLabels } from "@hospio/api/data/mappers/tenant";
 import {
+	BUSINESS_KIND_OPTIONS,
+	type BusinessKindKey,
+	businessKind,
+} from "@hospio/api/venue";
+import {
+	ChoiceCards,
 	FieldRow,
 	SelectField,
 	TextareaField,
@@ -125,6 +131,10 @@ export function BusinessStep({ ctx }: { ctx: WizardCtx }) {
 	const [businessType, setType] = useState(
 		saved?.businessType ?? business.businessType ?? "",
 	);
+	// What kind of business (hospio-backend docs/plan-venue-type.md): sets each new location's type; Mixed picks per location.
+	const [venueKind, setVenueKind] = useState<BusinessKindKey>(
+		businessKind(business.venueKind),
+	);
 	const [address, setAddress] = useState(
 		saved?.address ?? business.address ?? "",
 	);
@@ -157,6 +167,7 @@ export function BusinessStep({ ctx }: { ctx: WizardCtx }) {
 				legalName: legalName.trim(),
 				registrationNumber: registrationNumber.trim(),
 				businessType: businessType || "",
+				venueKind,
 				address: address.trim(),
 				city: city.trim(),
 				email: email.trim(),
@@ -200,6 +211,7 @@ export function BusinessStep({ ctx }: { ctx: WizardCtx }) {
 
 	return (
 		<StepFrame
+			venue={ctx.venue}
 			step="business"
 			onContinue={ctx.editable ? save : undefined}
 			pending={pending}
@@ -210,6 +222,14 @@ export function BusinessStep({ ctx }: { ctx: WizardCtx }) {
 			}
 		>
 			<StepCard title="Business">
+				<ChoiceCards
+					label="What kind of business?"
+					hint="Sets what each new location starts as. A lounge, bar or restaurant needs no rooms and no check-in times."
+					value={venueKind}
+					onChange={setVenueKind}
+					options={BUSINESS_KIND_OPTIONS}
+					columns={2}
+				/>
 				<FieldRow>
 					<TextField
 						label="Trading name"
@@ -368,6 +388,7 @@ export function OwnerStep({ ctx }: { ctx: WizardCtx }) {
 
 	return (
 		<StepFrame
+			venue={ctx.venue}
 			step="owner"
 			onBack={() => ctx.goTo(prevStep("owner"))}
 			onContinue={ctx.editable ? save : undefined}
@@ -527,6 +548,7 @@ export function FeeStep({ ctx }: { ctx: WizardCtx }) {
 
 	return (
 		<StepFrame
+			venue={ctx.venue}
 			step="fee"
 			onBack={() => ctx.goTo(prevStep("fee"))}
 			onContinue={ctx.editable ? save : undefined}

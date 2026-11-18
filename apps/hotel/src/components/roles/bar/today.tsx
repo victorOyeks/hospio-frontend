@@ -216,6 +216,8 @@ export function BarTodayScreen({
 			: null;
 	const tabsOff = !settings.tabs;
 	const roomOff = !settings.roomCharge;
+	// A lounge, bar or restaurant has no rooms (docs/plan-venue-type.md in hospio-backend): every room action is left out.
+	const rooms = settings.accommodation;
 	const expected = till?.expected ?? 0;
 
 	const complete = () => {
@@ -338,11 +340,13 @@ export function BarTodayScreen({
 					label={`Open tabs · ${tabs.length}`}
 					href="/dashboard/tabs"
 				/>
-				<ActionTile
-					icon={BedDoubleIcon}
-					label="Charge to a room"
-					onClick={() => startSale(undefined, "ROOM")}
-				/>
+				{rooms && (
+					<ActionTile
+						icon={BedDoubleIcon}
+						label="Charge to a room"
+						onClick={() => startSale(undefined, "ROOM")}
+					/>
+				)}
 				<ActionTile
 					icon={PackageIcon}
 					label="Count stock"
@@ -412,10 +416,12 @@ export function BarTodayScreen({
 					<SectionCard title="Tonight so far" bodyClassName="pt-1">
 						<StatLine label="Sales" value={naira(stats.sales)} />
 						<StatLine label="Open tabs" value={naira(openTabsTotal)} />
-						<StatLine
-							label="Charged to rooms"
-							value={naira(stats.chargedToRooms)}
-						/>
+						{rooms && (
+							<StatLine
+								label="Charged to rooms"
+								value={naira(stats.chargedToRooms)}
+							/>
+						)}
 						<StatLine
 							label="Happy hour"
 							value={
@@ -448,7 +454,7 @@ export function BarTodayScreen({
 					)}
 				</div>
 			</div>
-			<RecentSales orders={recent} bar onOpen={(id) => void setSaleId(id)} />
+			<RecentSales orders={recent} bar rooms={rooms} onOpen={(id) => void setSaleId(id)} />
 
 			<SalePanel
 				saleId={panel ? null : saleId}
@@ -553,7 +559,7 @@ export function BarTodayScreen({
 						<ChoiceCards
 							value={settle}
 							onChange={setSettle}
-							columns={3}
+							columns={rooms ? 3 : 2}
 							options={[
 								{ value: "NOW", label: "Pay now" },
 								{
@@ -564,12 +570,16 @@ export function BarTodayScreen({
 										: `Limit ${naira(settings.tabLimit)}`,
 									disabled: tabsOff,
 								},
-								{
-									value: "ROOM",
-									label: "Charge to room",
-									hint: roomOff ? "Switched off" : "Hotel guest",
-									disabled: roomOff,
-								},
+								...(rooms
+									? [
+											{
+												value: "ROOM" as const,
+												label: "Charge to room",
+												hint: roomOff ? "Switched off" : "Hotel guest",
+												disabled: roomOff,
+											},
+										]
+									: []),
 							]}
 						/>
 						{settle === "ROOM" && (
@@ -724,7 +734,9 @@ export function BarTodayScreen({
 							{ label: "Card", value: naira(stats.byMethod.CARD ?? 0) },
 							{ label: "Transfer", value: naira(stats.byMethod.TRANSFER ?? 0) },
 							{ label: "Cash sales", value: naira(stats.byMethod.CASH ?? 0) },
-							{ label: "Charged to rooms", value: naira(stats.chargedToRooms) },
+							...(rooms
+								? [{ label: "Charged to rooms", value: naira(stats.chargedToRooms) }]
+								: []),
 							...(stats.cancelled
 								? [{ label: "Cancelled", value: String(stats.cancelled) }]
 								: []),
