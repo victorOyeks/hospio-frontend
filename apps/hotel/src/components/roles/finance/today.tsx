@@ -123,7 +123,7 @@ export function FinanceToday({
 					<MoonIcon className="mr-1 inline size-4" /> Start night audit
 				</Link>
 			</PageHeader>
-			<div className="grid grid-cols-2 gap-4 md:grid-cols-5">
+			<div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-5">
 				<KpiCard
 					label="Taken today"
 					value={nairaShort(money.revenue)}

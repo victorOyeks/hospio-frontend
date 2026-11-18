@@ -18,12 +18,13 @@ export function KpiCard({
 	return (
 		<div className="flex min-w-0 flex-1 flex-col gap-2 rounded-card border border-line bg-card p-[18px]">
 			<div className="flex items-center gap-2">
-				<p className="min-w-0 flex-1 truncate text-[13px] font-medium text-ink-2">{label}</p>
+				{/* Two lines rather than "Openi…" on narrow (tablet) cards; one line wherever it fits. */}
+				<p className="line-clamp-2 min-w-0 flex-1 text-[13px] font-medium leading-snug text-ink-2">{label}</p>
 				<span className="flex size-7 shrink-0 items-center justify-center rounded-lg bg-brand-soft text-brand">
 					<Icon className="size-[14px]" />
 				</span>
 			</div>
-			<div className="flex items-center gap-2">
+			<div className="flex flex-wrap items-center gap-2">
 				<p className="text-2xl font-bold leading-none text-ink">{value}</p>
 				{pill}
 			</div>
