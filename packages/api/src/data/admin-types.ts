@@ -148,6 +148,7 @@ export type FeeRuleRow = {
 	value: number;
 	startsOn?: string;
 	endsOn?: string;
+	addendumRef?: string;
 };
 export type GenerateStatementsResult = {
 	created: number;

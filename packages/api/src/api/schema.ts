@@ -309,6 +309,8 @@ export const Business = z
 		marketerId: z.string().nullable().optional(),
 		feeModel: z.string().nullable().optional(),
 		feeValue: z.number().nullable().optional(),
+		/** Fee lock: the signed addendum behind a rate other than the platform default; null at the default. */
+		feeAddendumRef: z.string().nullable().optional(),
 		currency: z.string(),
 		country: z.string().nullable().optional(),
 		timezone: z.string(),
@@ -353,6 +355,7 @@ export const BusinessSummary = z.object({
 	marketerId: z.string().nullable(),
 	feeModel: z.string().nullable(),
 	feeValue: z.number().nullable(),
+	feeAddendumRef: z.string().nullable().optional(),
 	createdAt: z.string(),
 	lastActiveAt: z.string().nullable().optional(),
 });
@@ -383,6 +386,8 @@ export const BusinessRequest = z.object({
 	ownerPhone: z.string().nullable().optional(),
 	feeModel: z.string().nullable().optional(),
 	feeValue: z.number().nullable().optional(),
+	/** Fee lock: required by the server when feeValue is not the platform default (max 120). */
+	feeAddendumRef: z.string().max(120).nullable().optional(),
 	currency: z.string().nullable().optional(),
 	country: z.string().nullable().optional(),
 	timezone: z.string().nullable().optional(),

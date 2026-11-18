@@ -188,6 +188,8 @@ export const FeeRule = z.object({
 	value: z.number(),
 	startsOn: str,
 	endsOn: str,
+	/** Fee lock: the signed addendum behind a rate other than the platform default. */
+	addendumRef: str.optional(),
 	createdAt: str,
 });
 
@@ -824,6 +826,8 @@ export const adminRoutes = {
 			value: z.number(),
 			startsOn: z.string(),
 			endsOn: str,
+			/** Fee lock: required when value is not the platform default (max 120). */
+			feeAddendumRef: z.string().max(120).nullable().optional(),
 		}),
 		output: envelope(FeeRule),
 	},

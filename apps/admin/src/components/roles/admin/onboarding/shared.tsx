@@ -122,6 +122,7 @@ export function businessRequestFrom(
 		ownerPhone: b.ownerPhone ?? null,
 		feeModel: b.feeModelKey ?? null,
 		feeValue: b.feeValue || null,
+		feeAddendumRef: b.feeAddendumRef ?? null,
 		currency: b.currency ?? "NGN",
 		country: b.country ?? "NG",
 		timezone: b.timezone ?? "Africa/Lagos",
