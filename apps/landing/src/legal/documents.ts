@@ -45,8 +45,8 @@ export function getLegalDocument(slug: string): LegalDocument | undefined {
 	return LEGAL_DOCUMENTS.find((d) => d.slug === slug);
 }
 
-/** The legal entity line shown on every legal page. */
-export const LEGAL_ENTITY = "Oyeks Global Limited (RC 10001123), Lagos, Nigeria";
+/** The legal entity line shown on every legal page, with the registered office (REGISTERED_OFFICE in components/site.tsx). */
+export const LEGAL_ENTITY = "Oyeks Global Limited (RC 10001123), registered office 9 Remi Omoniyi Crescent, Ikorodu, Lagos State, Nigeria";
 export const LEGAL_EMAIL = "hello@oyeksglobal.com";
 
 /** "2026-11-18" → "18 November 2026", without time-zone drift. */
