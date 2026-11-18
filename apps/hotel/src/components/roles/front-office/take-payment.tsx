@@ -146,12 +146,8 @@ function defaultTerminal(
 	)?.id ?? "";
 }
 
-/** Each till desk's Till page. */
-const TILL_PAGE: Record<string, string> = {
-	FRONT_OFFICE: "/front-desk/till",
-	BAR: "/bar/till",
-	KITCHEN: "/kitchen/till",
-};
+/** The desk's Till page (the dashboard routes it to the signed-in desk's own till). */
+const TILL_PAGE = "/dashboard/till";
 
 function deskLabel(role: string) {
 	return role === "FRONT_OFFICE" ? "Front office" : role.charAt(0) + role.slice(1).toLowerCase();
@@ -836,7 +832,7 @@ export function usePaymentSteps(
 								</button>
 							</div>
 							<a
-								href={TILL_PAGE[till.role] ?? "/front-desk/till"}
+								href={TILL_PAGE}
 								className="mt-2 inline-block text-[13px] font-semibold text-brand underline"
 							>
 								Go to the Till page
