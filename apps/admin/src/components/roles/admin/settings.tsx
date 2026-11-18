@@ -206,6 +206,22 @@ export function SettingsScreen({
 							onChange={(v) => set("fees", "hmsSharePct", num(v))}
 							disabled={!editable}
 						/>
+						<FieldRow>
+							<TextField
+								label="Invoice VAT (%)"
+								value={str(f.invoiceVatPct ?? 0)}
+								onChange={(v) => set("fees", "invoiceVatPct", num(v))}
+								disabled={!editable}
+								hint="VAT on Hospio360 invoices; 0 = not charged — confirm with the accountant"
+							/>
+							<TextField
+								label="Invoice minimum (₦)"
+								value={str(f.invoiceMinimum ?? 1000)}
+								onChange={(v) => set("fees", "invoiceMinimum", num(v))}
+								disabled={!editable}
+								hint="A month whose total is under this is carried into the next month's invoice"
+							/>
+						</FieldRow>
 						{save("fees")}
 					</SectionCard>
 					<SectionCard

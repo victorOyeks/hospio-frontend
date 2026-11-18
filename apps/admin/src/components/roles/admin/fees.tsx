@@ -727,7 +727,7 @@ function FeeModelModal({
 	const { run, pending } = useAction();
 	const [bizId, setBizId] = useState(initial || businesses[0]?.id || "");
 	const [rules, setRules] = useState<FeeRuleRow[] | null>(null);
-	// One fee model (a share of daily sales, debited daily): a rule only sets the rate.
+	// One fee model (a share of daily sales, billed on the monthly invoice): a rule only sets the rate.
 	const model = "PERCENT_OF_SALES";
 	// Fee lock: the platform default unless a signed addendum says otherwise.
 	const lock = useFeeLock(null, null);
@@ -757,7 +757,7 @@ function FeeModelModal({
 			open={open}
 			onOpenChange={onOpenChange}
 			title="Fee rate"
-			subtitle="A share of each day's sales, debited each morning from the hotel's POS provider account · a new rate applies from the date given"
+			subtitle="A share of each day's sales, billed on the business's Hospio360 monthly invoice · a new rate applies from the date given"
 			icon={PencilIcon}
 			size="form"
 			footer={
