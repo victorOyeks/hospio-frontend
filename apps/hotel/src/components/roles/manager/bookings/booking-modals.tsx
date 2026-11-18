@@ -16,6 +16,7 @@ import {
 	CreditCardIcon,
 } from "lucide-react";
 import { useEffect, useState } from "react";
+import { useWhatsAppKinds } from "@/lib/use-whatsapp-kinds";
 import { toast } from "sonner";
 import { Button } from "@hospio/ui/primitives/button";
 import { Note, TotalsList } from "@hospio/ui/shared/detail-list";
@@ -807,6 +808,8 @@ function ChangeDatesModal({
 	const { changeBookingDates } = useHotelActions();
 	const [checkIn, setCheckIn] = useState(b.checkInDate);
 	const [checkOut, setCheckOut] = useState(b.checkOutDate);
+	// A guest with a phone and no email gets the new dates on WhatsApp (hospio_booking_changed_v2) when it is approved.
+	const changedOnWhatsApp = useWhatsAppKinds().includes("BOOKING_CHANGED") && !!b.guestPhone;
 	const nights = nightsBetween(checkIn, checkOut);
 	const total = b.priceKind === "COMPLIMENTARY" ? 0 : nights * b.nightlyRate;
 	const diff = total - b.totalAmount;
@@ -844,7 +847,7 @@ function ChangeDatesModal({
 										}),
 										`New dates for ${b.guestName}`,
 									),
-								`Dates changed · ${fmtDay(checkIn)} → ${fmtDay(checkOut)}${b.guestEmail ? ` · email sent to ${b.guestEmail}` : b.guestPhone ? " · WhatsApp is coming soon, so the message is shown to copy" : " · no email or phone on file, so the guest was not told"}`,
+								`Dates changed · ${fmtDay(checkIn)} → ${fmtDay(checkOut)}${b.guestEmail ? ` · email sent to ${b.guestEmail}` : changedOnWhatsApp ? ` · the new dates go to ${b.guestPhone} on WhatsApp` : " · no email on file, so the guest was not told"}`,
 								({ deliveries: _sent, ...changes }) => {
 									onPatch(b.id, changes);
 									onClose();
@@ -895,9 +898,9 @@ function ChangeDatesModal({
 						: `Any free ${b.roomTypeName} room is held for the new dates. If none is free, the change is refused and nothing moves.`}{" "}
 					{b.guestEmail
 						? `${b.guestName.split(" ")[0]} gets the new dates by email.`
-						: b.guestPhone
-							? "WhatsApp is coming soon: the message to the guest is shown on screen to copy."
-							: "There is no email or phone on file, so the guest is not told."}
+						: changedOnWhatsApp
+							? `${b.guestName.split(" ")[0]} gets the new dates on WhatsApp.`
+							: "There is no email on file, so the guest is not told."}
 				</Note>
 			</div>
 		</Modal>

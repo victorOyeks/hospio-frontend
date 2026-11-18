@@ -21,6 +21,7 @@ import {
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
+import { useWhatsAppKinds } from "@/lib/use-whatsapp-kinds";
 import { createUser } from "@hospio/api/actions/identity";
 import { withDeliveries } from "@hospio/ui/shared/deliveries-store";
 import { createRoomsBulk, createRoomType } from "@hospio/api/actions/property";
@@ -1181,6 +1182,8 @@ export function ContactManagerPanel({
 }) {
 	const [msg, setMsg] = useState("");
 	const [whatsapp, setWhatsapp] = useState(false);
+	// Staff messages have no approved WhatsApp template: the copy is offered only once NOTICE can go (docs/sms-whatsapp.md).
+	const waKinds = useWhatsAppKinds();
 	const { run, pending } = useAction();
 	const named = !!hotel?.managerUserId && hotel.manager !== "—";
 	const who = named
@@ -1245,12 +1248,14 @@ export function ContactManagerPanel({
 					rows={5}
 					placeholder="e.g. Please send me the diesel usage for last week"
 				/>
-				<ToggleField
-					label="WhatsApp copy (coming soon)"
-					hint="WhatsApp isn't connected yet: the text is shown on screen to copy to their phone"
-					checked={whatsapp}
-					onChange={setWhatsapp}
-				/>
+				{waKinds.includes("NOTICE") && (
+					<ToggleField
+						label="WhatsApp copy"
+						hint="Also sent to their phone on WhatsApp"
+						checked={whatsapp}
+						onChange={setWhatsapp}
+					/>
+				)}
 			</div>
 		</SidePanel>
 	);

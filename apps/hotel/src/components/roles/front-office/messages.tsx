@@ -7,7 +7,7 @@ import type {
 } from "@hospio/api/data/guest-message-types";
 import { GuestInbox } from "../shared-staff/guest-inbox";
 
-/** Front office · Messages: the hotel's guest conversations; send by email (WhatsApp coming soon), mark done. */
+/** Front office · Messages: the hotel's guest conversations; send by email (WhatsApp only carries approved templates), mark done. */
 export function MessagesScreen({
 	result,
 	templates,

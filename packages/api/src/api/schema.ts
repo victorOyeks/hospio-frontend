@@ -1828,6 +1828,8 @@ export const schema = createSchema({
 				sms: z.boolean(),
 				whatsapp: z.boolean(),
 				whatsappCodes: z.boolean(),
+				/** The kinds of message that go on WhatsApp now (hospio-backend common WhatsAppTemplates, each template approved). */
+				whatsappKinds: z.array(z.string()).optional(),
 			}),
 		),
 	},

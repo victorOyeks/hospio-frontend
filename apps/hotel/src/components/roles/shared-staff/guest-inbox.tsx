@@ -66,7 +66,8 @@ import {
 	textarea as textareaCls,
 } from "@hospio/ui/shared/ui";
 import { cn } from "@hospio/ui/utils";
-import { channelOptions } from "./guest-message";
+import { useWhatsAppKinds } from "@/lib/use-whatsapp-kinds";
+import { channelOptions, NO_WHATSAPP_MESSAGES } from "./guest-message";
 
 type Tab = "waiting" | "open" | "mine" | "done" | "all";
 const TABS: Tab[] = ["waiting", "open", "mine", "done", "all"];
@@ -82,8 +83,8 @@ export type Assignable = { userId: string; name: string; hint?: string };
 
 /**
  * Guest messages at the sidebar's hotel (messaging-service): conversations per booking with what went out and what the
- * guest said, the channel of each, who has it and whether it is done. Email is sent for real; WhatsApp is saved
- * and shown on screen to copy (coming soon). Managers also reassign, edit templates and message everyone on shift.
+ * guest said, the channel of each, who has it and whether it is done. Typed messages go by email (WhatsApp carries only
+ * approved templates, so it is offered only for kinds in `useWhatsAppKinds`). Managers also reassign, edit templates and message everyone on shift.
  * Manager · Messaging and Front office · Messages both use it; the list is paged on the server (`?tab=&q=&page=`).
  */
 export function GuestInbox({
@@ -151,7 +152,7 @@ export function GuestInbox({
 		<>
 			<PageHeader
 				title="Messages"
-				subtitle={`${hotelName} · guests by email (WhatsApp coming soon) · conversations go 30 days after the last message`}
+				subtitle={`${hotelName} · guests by email (booking messages and receipts also go on WhatsApp) · conversations go 30 days after the last message`}
 			>
 				{canManage && (
 					<Button
@@ -411,17 +412,17 @@ function ConversationPane({
 	const [guestSaid, setGuestSaid] = useState<string | null>(null);
 	const c = conv?.conversation;
 	const cid = c?.id;
+	const waKinds = useWhatsAppKinds();
 
 	useEffect(() => {
 		if (!c) return;
 		setDraft("");
 		setSubject(c.subject ?? "");
+		// Email unless a typed message can go on WhatsApp (it can't today: no approved template).
 		setChannel(
-			c.channel === "EMAIL" || c.channel === "WHATSAPP"
-				? c.channel
-				: c.guestEmail
-					? "EMAIL"
-					: "WHATSAPP",
+			c.channel === "WHATSAPP" && waKinds.includes("MESSAGE")
+				? "WHATSAPP"
+				: "EMAIL",
 		);
 	}, [cid]);
 
@@ -577,7 +578,7 @@ function ConversationPane({
 				<footer className="flex flex-col gap-2 border-t border-line px-5 py-4">
 					<div className="flex flex-wrap items-center gap-2 text-xs">
 						<span className="text-ink-3">Send by</span>
-						{channelOptions(c.guestEmail, c.guestPhone).map((o) => (
+						{channelOptions(c.guestEmail, c.guestPhone, waKinds).map((o) => (
 							<button
 								key={o.value}
 								type="button"
@@ -624,11 +625,8 @@ function ConversationPane({
 								send();
 						}}
 					/>
-					{!connected && (
-						<p className="text-[11px] text-warning">
-							{CHANNEL_LABEL[channel]} is coming soon: the message is saved here
-							and shown on screen so you can copy it to the guest.
-						</p>
+					{!c.guestEmail && !waKinds.includes("MESSAGE") && (
+						<p className="text-[11px] text-warning">{NO_WHATSAPP_MESSAGES}</p>
 					)}
 					<div className="flex flex-wrap items-center gap-3">
 						<button
@@ -1049,6 +1047,7 @@ function NewMessagePanel({
 	const [channel, setChannel] = useState<GuestChannel>("EMAIL");
 	const [subject, setSubject] = useState(`Your stay at ${hotelName}`);
 	const [body, setBody] = useState("");
+	const waKinds = useWhatsAppKinds();
 	const connected = channel === "EMAIL";
 	const contact = connected ? email.trim() : phone.trim();
 	const reset = () => {
@@ -1067,7 +1066,7 @@ function NewMessagePanel({
 			footerInfo={
 				connected
 					? "The email goes out from the hotel's name; replies come to the front desk email"
-					: "WhatsApp is coming soon: the text is shown on screen to copy"
+					: "Sent on WhatsApp from Hospio360's number"
 			}
 			footer={
 				<>
@@ -1118,15 +1117,18 @@ function NewMessagePanel({
 					value={phone}
 					onChange={setPhone}
 					placeholder="0803 000 0000"
-					hint="For WhatsApp (coming soon)"
+					hint="Kept with the conversation"
 				/>
 				<ChoiceCards
 					label="Send by"
 					value={channel}
 					onChange={setChannel}
 					columns={2}
-					options={channelOptions(email.trim() || null, phone.trim() || null)}
+					options={channelOptions(email.trim() || null, phone.trim() || null, waKinds)}
 				/>
+				{!email.trim() && !waKinds.includes("MESSAGE") && (
+					<Note tone="info">{NO_WHATSAPP_MESSAGES}</Note>
+				)}
 				{connected && (
 					<TextField label="Subject" value={subject} onChange={setSubject} />
 				)}

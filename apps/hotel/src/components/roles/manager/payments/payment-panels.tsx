@@ -32,7 +32,7 @@ export function PaymentPanel({ payment: p, onClose, onRefund, onDispute, onStatu
 			footerInfo={p.status === "APPROVED" ? `Receipt ${p.receiptSent === "NONE" ? "not sent" : `sent by ${p.receiptSent?.toLowerCase()}`}` : undefined}
 			footer={<>
 				{p.status === "APPROVED" && <a href={`/receipt?payment=${encodeURIComponent(p.id)}`} target="_blank" rel="noopener" className={btn.secondary}>Print receipt</a>}
-				{p.status === "APPROVED" && <Button variant="outline" className={btn.secondary} disabled={pending} onClick={() => run(() => withDeliveries(resendReceipt(p.id), `Receipt for ${p.guestName}`), (r) => `Receipt emailed to ${r.sentTo}`)}>Email receipt again</Button>}
+				{p.status === "APPROVED" && <Button variant="outline" className={btn.secondary} disabled={pending} onClick={() => run(() => withDeliveries(resendReceipt(p.id), `Receipt for ${p.guestName}`), (r) => (r.sentVia === "WHATSAPP" ? `Receipt sent on WhatsApp to ${r.sentTo}` : `Receipt emailed to ${r.sentTo}`))}>Send receipt again</Button>}
 				{p.status === "APPROVED" && <Button className={btn.primary} onClick={() => { onClose(); onRefund(p); }}><RotateCcwIcon className="size-4" /> Refund</Button>}
 				{(p.status === "DECLINED" || p.status === "FAILED") && (p.method === "CARD" || p.method === "TRANSFER") && <Button className={btn.primary} disabled={pending} onClick={retry}>Retry on POS</Button>}
 				{(p.status === "NO_RESPONSE" || p.status === "TIMED_OUT") && (p.method === "CARD" || p.method === "TRANSFER") && <Button variant="outline" className={btn.secondary} disabled={pending || live.pending} onClick={retry}>Retry on POS</Button>}

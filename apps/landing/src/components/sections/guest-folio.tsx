@@ -24,7 +24,7 @@ const features: { icon: LucideIcon; title: string; text: string }[] = [
 	{
 		icon: SendIcon,
 		title: "Receipts by email, from your hotel’s name",
-		text: "Guests get confirmations and receipts by email, sent in your hotel’s name. WhatsApp is coming soon.",
+		text: "Guests get confirmations and receipts by email, sent in your hotel’s name, and on WhatsApp when they leave only a phone number.",
 	},
 ];
 

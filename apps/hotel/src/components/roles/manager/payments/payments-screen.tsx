@@ -287,7 +287,7 @@ export function PaymentsScreen({
 						actions={[
 							{ label: "Open payment", onClick: () => setOpenId(p.id) },
 							{
-								label: "Email receipt again",
+								label: "Send receipt again",
 								onClick: () =>
 									live.run(
 										() =>
@@ -295,7 +295,10 @@ export function PaymentsScreen({
 												resendReceipt(p.id),
 												`Receipt for ${p.guestName}`,
 											),
-										(r) => `Receipt emailed to ${r.sentTo}`,
+										(r) =>
+											r.sentVia === "WHATSAPP"
+												? `Receipt sent on WhatsApp to ${r.sentTo}`
+												: `Receipt emailed to ${r.sentTo}`,
 									),
 								disabled: p.status !== "APPROVED",
 							},

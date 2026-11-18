@@ -294,7 +294,7 @@ export const ownerHelp: HelpModule = {
 			goodToKnow: [
 				"Managers see your message in their Inbox and reply there.",
 				"“Message all managers” starts a separate conversation with each manager.",
-				"WhatsApp copy is coming soon: the text is shown on screen to copy to their phone.",
+				"Staff messages go in the app (Inbox); WhatsApp only carries approved guest templates, so there is no WhatsApp copy.",
 				"Guests are messaged from Bookings, not here. To message other staff, use “Message” on their row in Staff.",
 				"A conversation is deleted 30 days after its last message.",
 			],

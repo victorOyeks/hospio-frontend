@@ -27,3 +27,26 @@ export async function markAllNotificationsRead(): Promise<
 	revalidatePath("/", "layout");
 	return { ok: true, data: data.data };
 }
+
+/**
+ * GET /messaging/channels → whatsappKinds: the kinds of message that go on WhatsApp right now (hospio-backend docs/sms-whatsapp.md,
+ * common WhatsAppTemplates: booking confirmation, change, cancellation, arrival reminder, receipt, phone code; each with its template
+ * approved). The one list the screens offer WhatsApp from: a stay summary, folio, typed guest message or staff message has no
+ * template, so it is never offered. Empty when the API can't be reached; demo mode shows the approved set.
+ */
+export async function whatsAppKinds(): Promise<string[]> {
+	if (!live("messaging")) {
+		return [
+			"BOOKING_CONFIRMATION",
+			"BOOKING_CHANGED",
+			"BOOKING_CANCELLED",
+			"ARRIVAL_REMINDER",
+			"RECEIPT",
+		];
+	}
+	const { data } = await api(
+		"@get/messaging/channels",
+		await withSession(),
+	).catch(() => ({ data: null }));
+	return data?.data.whatsappKinds ?? [];
+}

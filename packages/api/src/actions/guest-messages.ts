@@ -20,7 +20,7 @@ import { live } from "@hospio/api/data/live";
 
 /**
  * Guest messaging (Manager · Messaging, Front office · Messages, the booking's Message guest): messaging-service at
- * the sidebar's hotel. Email is sent for real; WhatsApp is saved and shown on screen (coming soon).
+ * the sidebar's hotel. Typed messages go by email; WhatsApp only once a typed message has an approved template (useWhatsAppKinds).
  */
 
 const NOT_LIVE: ActionResult<never> = {
@@ -41,7 +41,7 @@ export type GuestSent = {
 	conversation: GuestConversationRow;
 	message: GuestMessageRow;
 	deliveries?: Delivery[] | null;
-	/** The service's one-line answer ("Email sent to …", "Saved · WhatsApp is coming soon …"). */
+	/** The service's one-line answer ("Email sent to …"). */
 	note: string;
 };
 

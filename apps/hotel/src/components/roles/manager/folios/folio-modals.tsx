@@ -3,6 +3,7 @@
 import { type ReceiptChoice, receiptOptions } from "@hospio/ui/shared/receipt-channels";
 import { ArrowRightLeftIcon, CreditCardIcon, PlusIcon, PrinterIcon, ReceiptIcon, ScissorsIcon } from "lucide-react";
 import { useEffect, useState } from "react";
+import { useWhatsAppKinds } from "@/lib/use-whatsapp-kinds";
 import { Button } from "@hospio/ui/primitives/button";
 import { Note, TotalsList } from "@hospio/ui/shared/detail-list";
 import { ChoiceCards, FieldRow, MoneyField, SelectField, TextField, TextareaField, ToggleField } from "@hospio/ui/shared/field";
@@ -154,6 +155,9 @@ function TransferModal({ f, others, onClose, onPatch }: { f: FolioRow; others: F
 function PrintModal({ f, onClose }: { f: FolioRow; onClose: () => void }) {
 	const send = useAction();
 	const act = useAction();
+	// WhatsApp only once the folio has an approved template (`FOLIO` in the backend's list); it has none today.
+	const waKinds = useWhatsAppKinds();
+	const folioOnWhatsApp = waKinds.includes("FOLIO") && !!f.guestPhone;
 	const [how, setHow] = useState<"print" | "email" | "whatsapp">(f.guestEmail ? "email" : "print");
 	const [summary, setSummary] = useState<string | null>(null);
 	const [copied, setCopied] = useState(false);
@@ -163,10 +167,10 @@ function PrintModal({ f, onClose }: { f: FolioRow; onClose: () => void }) {
 	const pending = send.pending || act.pending;
 	return (
 		<Modal open onOpenChange={(o) => !o && onClose()} title="Print or email the folio" subtitle={`${f.guestName} · ${f.reference}`} icon={PrinterIcon} size="form"
-			footer={<><Button variant="outline" className={btn.secondary} onClick={onClose}>Close</Button>{how === "print" ? <><Button variant="outline" className={btn.secondary} disabled={pending || !summary} onClick={() => { navigator.clipboard?.writeText(summary ?? "").then(() => setCopied(true)).catch(() => undefined); }}>{copied ? "Copied" : "Copy summary"}</Button><a href={`/receipt?folio=${encodeURIComponent(f.id)}`} target="_blank" rel="noopener" className={btn.primary}>Print receipt</a></> : <Button className={btn.primary} disabled={pending} onClick={() => send.run(() => withDeliveries(sendFolio(f.id, "EMAIL", f.guestEmail ?? ""), `Folio for ${f.guestName}`), `Folio emailed to ${f.guestEmail}`, onClose)}>Email folio</Button>}</>}
+			footer={<><Button variant="outline" className={btn.secondary} onClick={onClose}>Close</Button>{how === "print" ? <><Button variant="outline" className={btn.secondary} disabled={pending || !summary} onClick={() => { navigator.clipboard?.writeText(summary ?? "").then(() => setCopied(true)).catch(() => undefined); }}>{copied ? "Copied" : "Copy summary"}</Button><a href={`/receipt?folio=${encodeURIComponent(f.id)}`} target="_blank" rel="noopener" className={btn.primary}>Print receipt</a></> : <Button className={btn.primary} disabled={pending} onClick={() => send.run(() => withDeliveries(how === "whatsapp" ? sendFolio(f.id, "WHATSAPP", f.guestPhone ?? "") : sendFolio(f.id, "EMAIL", f.guestEmail ?? ""), `Folio for ${f.guestName}`), how === "whatsapp" ? `Folio sent on WhatsApp to ${f.guestPhone}` : `Folio emailed to ${f.guestEmail}`, onClose)}>{how === "whatsapp" ? "Send on WhatsApp" : "Email folio"}</Button>}</>}
 		>
 			<div className="flex flex-col gap-4">
-				<ChoiceCards value={how} onChange={setHow} columns={3} options={[{ value: "print", label: "Print / copy", hint: "Front desk" }, { value: "email", label: "Email", hint: f.guestEmail ?? "No email", disabled: !f.guestEmail }, { value: "whatsapp", label: "WhatsApp", hint: "Coming soon", disabled: true }]} />
+				<ChoiceCards value={how} onChange={setHow} columns={folioOnWhatsApp ? 3 : 2} options={[{ value: "print", label: "Print / copy", hint: "Front desk" }, { value: "email", label: "Email", hint: f.guestEmail ?? "No email", disabled: !f.guestEmail }, ...(folioOnWhatsApp ? [{ value: "whatsapp" as const, label: "WhatsApp", hint: f.guestPhone }] : [])]} />
 				<TextareaField label="Stay summary" value={summary ?? (act.pending ? "Preparing the summary…" : "")} rows={10} hint={how === "print" ? "Copy it to the desk printer or a document" : `Emailed to ${f.guestEmail} as written here`} />
 			</div>
 		</Modal>
