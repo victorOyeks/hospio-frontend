@@ -1,5 +1,6 @@
 import type { Hotel, ListItem, SetupSection } from "@hospio/api/api/schema";
 import type { HotelSetupSection } from "@hospio/api/data/types";
+import { hasAccommodation } from "@hospio/api/venue";
 
 /**
  * hotel-config's `section → key → value` catalogue (docs/onboarding.md) ↔ the sections and fields the
@@ -632,9 +633,9 @@ const labelOf = (key: string) =>
 export function toSetupSections(
 	setup: SetupSection,
 	lists: Partial<Record<SetupListName, ListItem[]>>,
-	hotel?: Pick<Hotel, "status"> | null,
+	hotel?: (Pick<Hotel, "status"> & Partial<Pick<Hotel, "venueType" | "hasAccommodation" | "roomCount">>) | null,
 ): HotelSetupSection[] {
-	return SETUP_CATALOGUE.map((def) => {
+	const sections = SETUP_CATALOGUE.map((def) => {
 		const values = def.api ? (setup[def.api] ?? {}) : {};
 		const fields: HotelSetupSection["fields"] = def.fields.map((f) => {
 			if (f.list) {
@@ -701,6 +702,32 @@ export function toSetupSections(
 			fields,
 		};
 	});
+	return hasAccommodation(hotel) ? sections : withoutStays(sections);
+}
+
+/** Sections that are only about rooms and stays, left out at a lounge, bar or restaurant (hospio-backend docs/plan-venue-type.md). */
+const STAY_SECTIONS = new Set(["rooms", "housekeeping"]);
+/** Fields about rooms and stays inside sections that stay. Hidden fields are never sent, so their stored values are kept. */
+const STAY_FIELDS: Record<string, string[]> = {
+	basics: ["checkInTime", "checkOutTime"],
+	outlets: ["roomCharge"],
+	messaging: ["sendConfirmation", "arrivalMessage"],
+	night: ["arrivalsResolvedFirst"],
+};
+
+export function withoutStays(sections: HotelSetupSection[]): HotelSetupSection[] {
+	return sections
+		.filter((x) => !STAY_SECTIONS.has(x.key))
+		.map((x) => {
+			const drop = STAY_FIELDS[x.key];
+			if (!drop) return x;
+			return {
+				...x,
+				title: x.key === "basics" ? "Location basics" : x.title,
+				description: x.key === "outlets" ? "Tabs and tab limits" : x.description,
+				fields: x.fields.filter((f) => !drop.includes(f.key)),
+			};
+		});
 }
 
 /**

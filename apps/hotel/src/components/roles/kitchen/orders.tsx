@@ -223,6 +223,8 @@ export function KitchenOrdersScreen({
 	const itemsTotal = cartTotal(lines);
 	const est = estimate(itemsTotal, settings);
 	const roomChargeOff = !settings.roomCharge;
+	// No rooms at a lounge, bar or restaurant (docs/plan-venue-type.md in hospio-backend): room actions are left out, not disabled.
+	const rooms = settings.accommodation && hasRooms;
 	const table = tables.find((t) => t.id === tableId);
 
 	// The order being built comes back after the lock screen for the same person, until it is sent or cancelled. Take
@@ -767,6 +769,7 @@ export function KitchenOrdersScreen({
 					...closed.filter((c) => !rows.some((r) => r.id === c.id)),
 				]}
 				bar={false}
+				rooms={rooms}
 				onOpen={(id) => {
 					setPanel(null);
 					void setOpen(null);
@@ -1010,9 +1013,10 @@ export function KitchenOrdersScreen({
 								<div
 									className={cn(
 										"grid gap-2",
-										untouched(current) ? "grid-cols-2" : "grid-cols-1",
+										untouched(current) && rooms ? "grid-cols-2" : "grid-cols-1",
 									)}
 								>
+									{rooms && (
 									<BigButton
 										tone="secondary"
 										disabled={roomChargeOff || inHouse.length === 0}
@@ -1029,6 +1033,7 @@ export function KitchenOrdersScreen({
 									>
 										<BedDoubleIcon className="size-5" /> Charge to room
 									</BigButton>
+									)}
 									{untouched(current) && (
 										<BigButton
 											tone="dangerSoft"
@@ -1049,7 +1054,7 @@ export function KitchenOrdersScreen({
 									with ✕, or ask a manager to cancel the whole order.
 								</p>
 							)}
-						{roomChargeOff && !settled(current) && (
+						{rooms && roomChargeOff && !settled(current) && (
 							<p className="text-xs text-ink-3">
 								Charging to rooms is switched off in Hotel setup → Restaurant &
 								bar.
@@ -1252,7 +1257,7 @@ export function KitchenOrdersScreen({
 						<ChoiceCards
 							value={settle}
 							onChange={setSettle}
-							columns={3}
+							columns={rooms ? 3 : 2}
 							options={[
 								{
 									value: "LATER",
@@ -1264,16 +1269,20 @@ export function KitchenOrdersScreen({
 									label: "Pay now",
 									hint: "Card, transfer or cash",
 								},
-								{
-									value: "ROOM",
-									label: "Charge to room",
-									hint: roomChargeOff
-										? "Switched off"
-										: guest
-											? `Room ${guest.roomNumber}`
-											: "Pick a hotel guest",
-									disabled: roomChargeOff,
-								},
+								...(rooms
+									? [
+											{
+												value: "ROOM" as const,
+												label: "Charge to room",
+												hint: roomChargeOff
+													? "Switched off"
+													: guest
+														? `Room ${guest.roomNumber}`
+														: "Pick a hotel guest",
+												disabled: roomChargeOff,
+											},
+										]
+									: []),
 							]}
 						/>
 						{kind !== "ROOM_SERVICE" && settle === "ROOM" && (

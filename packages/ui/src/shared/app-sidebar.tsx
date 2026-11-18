@@ -10,6 +10,7 @@ import { BranchSwitcher } from "./branch-switcher";
 import { OutletSwitcher, type OutletSwitchProps } from "./outlet-switcher";
 import type { HotelRole } from "@hospio/api/roles";
 import type { Hotel } from "@hospio/api/api/schema";
+import { hasAccommodation } from "@hospio/api/venue";
 
 export function AppSidebar({
 	role,
@@ -46,7 +47,7 @@ export function AppSidebar({
 				{outletSwitch && <OutletSwitcher {...outletSwitch} />}
 			</SidebarHeader>
 			<SidebarContent className="scrollbar-hidden px-4">
-				<NavMain role={role} badges={badges} supervisor={supervisor} />
+				<NavMain role={role} badges={badges} supervisor={supervisor} accommodation={hasAccommodation(activeHotel)} />
 			</SidebarContent>
 			<SidebarRail />
 		</Sidebar>

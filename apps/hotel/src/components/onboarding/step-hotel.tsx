@@ -8,10 +8,16 @@ import { createHotel, updateHotel } from "@hospio/api/actions/tenant";
 import { useAction } from "@hospio/api/actions/use-action";
 import type { Business, Me } from "@hospio/api/api/schema";
 import type { OwnerOnboardingData } from "@hospio/api/types";
-import { FieldRow, TextField } from "@hospio/ui/shared/field";
+import { FieldRow, SelectField, TextField } from "@hospio/ui/shared/field";
+import {
+	businessKind,
+	defaultVenueFor,
+	VENUE_TYPE_OPTIONS,
+	venueType as toVenueType,
+} from "@hospio/api/venue";
 import { SideCard, StepCard, StepFooter, StepPage } from "./common";
 import { useFreshOnOpen, useSaveLater, useStepForm } from "./persist";
-import { stepHref } from "./steps";
+import { placeWord, stepHref } from "./steps";
 import {
 	checkAddress,
 	checkCity,
@@ -26,11 +32,16 @@ export function HotelStep({
 	business,
 	draft,
 	user,
+	kind,
 }: {
 	business: Business | null;
 	draft: OwnerOnboardingData;
 	user?: Me | null;
+	/** The business's kind (hospio-backend docs/plan-venue-type.md); MIXED picks the location's type here. */
+	kind?: string | null;
+	accommodation?: boolean;
 }) {
+	const mixed = businessKind(kind) === "MIXED";
 	const router = useRouter();
 	const saved = draft.hotel;
 	// Coming back: the hotel exists; edit it instead of creating a second one.
@@ -46,7 +57,18 @@ export function HotelStep({
 		email: existing?.email ?? "",
 		checkInTime: existing?.checkInTime ?? "14:00",
 		checkOutTime: existing?.checkOutTime ?? "12:00",
+		venueType: existing?.venueType
+			? toVenueType(existing.venueType)
+			: defaultVenueFor(kind),
 	});
+	// Check-in times only where there are rooms: a hotel, or a location that already has some.
+	const rooms = form.venueType === "HOTEL" || (existing?.roomCount ?? 0) > 0;
+	const word = mixed
+		? form.venueType === "HOTEL"
+			? "hotel"
+			: "location"
+		: placeWord(kind);
+	const Word = word.charAt(0).toUpperCase() + word.slice(1);
 	const set = <K extends keyof typeof form>(k: K, v: string) =>
 		update({ [k]: v } as Partial<typeof form>);
 	const [errors, setErrors] = useState<
@@ -56,13 +78,15 @@ export function HotelStep({
 
 	const check = () =>
 		only({
-			name: checkName(form.name, "the hotel's name"),
+			name: checkName(form.name, `the ${word}'s name`),
 			address: checkAddress(form.address),
 			city: checkCity(form.city),
 			phone: checkPhone(form.phone),
 			email: checkEmail(form.email, false),
 			checkOutTime:
-				form.checkInTime && form.checkOutTime ? undefined : "Set both times",
+				!rooms || (form.checkInTime && form.checkOutTime)
+					? undefined
+					: "Set both times",
 		});
 
 	async function save() {
@@ -73,8 +97,13 @@ export function HotelStep({
 			phone: form.phone.trim() || null,
 			email: form.email.trim() || null,
 			timezone: business?.timezone ?? "Africa/Lagos",
-			checkInTime: form.checkInTime || null,
-			checkOutTime: form.checkOutTime || null,
+			...(rooms
+				? {
+						checkInTime: form.checkInTime || null,
+						checkOutTime: form.checkOutTime || null,
+					}
+				: {}),
+			venueType: form.venueType,
 		};
 		const r = saved?.hotelId
 			? await updateHotel(saved.hotelId, body)
@@ -93,9 +122,11 @@ export function HotelStep({
 		const e = check();
 		setErrors(e);
 		if (Object.keys(e).length) return;
-		run(save, saved?.hotelId ? "Hotel updated" : "Hotel created", () =>
-			router.push(stepHref("rooms")),
-		);
+		run(save, saved?.hotelId ? `${Word} updated` : `${Word} created`, () => {
+			router.push(stepHref("rooms"));
+			// The step bar names step 3 by whether this location has rooms (Rooms & prices, or Outlets).
+			router.refresh();
+		});
 	}
 
 	useSaveLater(async () => {
@@ -109,17 +140,21 @@ export function HotelStep({
 		<StepPage
 			aside={
 				<>
-					<SideCard dark eyebrow="Your hotels">
+					<SideCard dark eyebrow={`Your ${word === "hotel" ? "hotels" : "locations"}`}>
 						<div className="flex items-center gap-3 rounded-lg bg-white/10 px-3 py-2">
 							<BuildingIcon className="size-4 shrink-0" />
 							<div className="min-w-0">
 								<p className="truncate text-[13px] font-semibold text-white">
-									{form.name.trim() || "Your first hotel"}
+									{form.name.trim() || `Your first ${word}`}
 								</p>
 								<p className="truncate text-[11px] text-white/70">
 									{[
 										form.city.trim(),
-										existing ? `${existing.roomCount} rooms` : "rooms next",
+										rooms
+											? existing
+												? `${existing.roomCount} rooms`
+												: "rooms next"
+											: "outlets next",
 									]
 										.filter(Boolean)
 										.join(" · ")}
@@ -130,7 +165,7 @@ export function HotelStep({
 							<PlusIcon className="size-4 shrink-0" />
 							<div>
 								<p className="text-[13px] font-semibold text-white">
-									Add another hotel later
+									Add another {word} later
 								</p>
 								<p className="text-[11px] text-white/70">
 									From Hotels in your dashboard
@@ -138,10 +173,10 @@ export function HotelStep({
 							</div>
 						</div>
 					</SideCard>
-					<SideCard title="Several hotels?">
+					<SideCard title={`Several ${word === "hotel" ? "hotels" : "locations"}?`}>
 						<p>
 							Add the one you know best first. When setup is done, "Add hotel"
-							in your dashboard takes about two minutes per hotel.
+							in your dashboard takes about two minutes for each one.
 						</p>
 					</SideCard>
 				</>
@@ -151,10 +186,14 @@ export function HotelStep({
 				step="hotel"
 				title={
 					saved?.hotelId
-						? `Your first hotel · ${saved.name}`
-						: "Add your first hotel"
+						? `Your first ${word} · ${saved.name}`
+						: `Add your first ${word}`
 				}
-				intro="Start with one. You can add more hotels any time; each one gets its own rooms, staff and manager."
+				intro={
+					rooms
+						? "Start with one. You can add more hotels any time; each one gets its own rooms, staff and manager."
+						: `Start with one. You can add more locations any time; each one gets its own outlets, staff and manager.`
+				}
 			>
 				<form
 					className="flex flex-col gap-4"
@@ -163,14 +202,23 @@ export function HotelStep({
 						submit();
 					}}
 				>
+					{mixed && (
+						<SelectField
+							label="What kind of location is this?"
+							value={form.venueType}
+							onChange={(v) => set("venueType", v)}
+							options={VENUE_TYPE_OPTIONS}
+							hint="A hotel has rooms; a lounge, bar, restaurant or club sells at its outlets"
+						/>
+					)}
 					<TextField
-						label="Hotel name"
+						label={`${Word} name`}
 						value={form.name}
 						onChange={(v) => set("name", v)}
 						placeholder="Simpas Ikeja"
 						required
 						error={errors.name}
-						hint={`Guests see this with your trading name: "${trading} · ${form.name.trim() || "Hotel"}"`}
+						hint={`Guests see this with your trading name: "${trading} · ${form.name.trim() || Word}"`}
 					/>
 					<TextField
 						label="Address"
@@ -190,7 +238,7 @@ export function HotelStep({
 							error={errors.city}
 						/>
 						<TextField
-							label="Front desk phone"
+							label={rooms ? "Front desk phone" : "Phone"}
 							type="tel"
 							value={form.phone}
 							onChange={(v) => set("phone", v)}
@@ -201,7 +249,7 @@ export function HotelStep({
 					</FieldRow>
 					<FieldRow>
 						<TextField
-							label="Front desk email"
+							label={rooms ? "Front desk email" : "Email"}
 							type="email"
 							value={form.email}
 							onChange={(v) => set("email", v)}
@@ -209,28 +257,36 @@ export function HotelStep({
 							error={errors.email}
 							hint="Optional"
 						/>
-						<FieldRow>
-							<TextField
-								label="Check-in from"
-								type="time"
-								value={form.checkInTime}
-								onChange={(v) => set("checkInTime", v)}
-							/>
-							<TextField
-								label="Check-out by"
-								type="time"
-								value={form.checkOutTime}
-								onChange={(v) => set("checkOutTime", v)}
-								error={errors.checkOutTime}
-							/>
-						</FieldRow>
+						{rooms ? (
+							<FieldRow>
+								<TextField
+									label="Check-in from"
+									type="time"
+									value={form.checkInTime}
+									onChange={(v) => set("checkInTime", v)}
+								/>
+								<TextField
+									label="Check-out by"
+									type="time"
+									value={form.checkOutTime}
+									onChange={(v) => set("checkOutTime", v)}
+									error={errors.checkOutTime}
+								/>
+							</FieldRow>
+						) : (
+							<span />
+						)}
 					</FieldRow>
 					<StepFooter
 						back={stepHref("business")}
 						label="Continue"
 						pending={pending}
 						onContinue={submit}
-						info="You'll set room types next · photos and the brand colour live in Hotel setup"
+						info={
+							rooms
+								? "You'll set room types next · photos and the brand colour live in Hotel setup"
+								: "You'll add your outlets next (bar, restaurant, kitchen) · the brand colour lives in Hotel setup"
+						}
 					/>
 				</form>
 			</StepCard>

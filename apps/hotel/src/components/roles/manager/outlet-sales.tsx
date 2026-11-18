@@ -11,16 +11,23 @@ export function OutletSalesCard({
 	sales,
 	className,
 	href = "/dashboard/financials/sales",
+	rooms = true,
 }: {
 	sales: OutletSalesDayRow | null | undefined;
 	className?: string;
+	/** False at a lounge, bar or restaurant: nothing goes "on rooms" (hospio-backend docs/plan-venue-type.md). */
+	rooms?: boolean;
 	/** Where "Every sale" opens: the all-outlets sales history. */
 	href?: string;
 }) {
 	return (
 		<SectionCard
-			title="Restaurant & bar sales today"
-			subtitle="What was sold, including what went on rooms · not the same as money received"
+			title={rooms ? "Restaurant & bar sales today" : "Sales today"}
+			subtitle={
+				rooms
+					? "What was sold, including what went on rooms · not the same as money received"
+					: "What was sold at each outlet · open tabs count once they are settled"
+			}
 			className={className}
 			bodyClassName="gap-3 pt-2"
 			action={{ label: "Every sale", href }}
@@ -46,7 +53,7 @@ export function OutletSalesCard({
 									<span className="block font-semibold text-ink">{o.name}</span>
 									<span className="block text-xs text-ink-3">
 										{o.orders} orders · {nairaShort(o.paidAtOutlet)} paid at the
-										outlet · {nairaShort(o.chargedToRooms)} on rooms
+										outlet{rooms ? ` · ${nairaShort(o.chargedToRooms)} on rooms` : ""}
 										{o.cancelled ? ` · ${o.cancelled} cancelled` : ""}
 									</span>
 								</span>

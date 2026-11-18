@@ -33,6 +33,7 @@ import {
 	HOTEL_APP_URL,
 	inviteLink,
 	prevStep,
+	roomsOrKind,
 	StepCard,
 	StepFrame,
 	useWizardSave,
@@ -214,6 +215,7 @@ export function HandoverStep({ ctx }: { ctx: WizardCtx }) {
 
 	return (
 		<StepFrame
+			venue={ctx.venue}
 			step="handover"
 			subtitle={
 				handedOver
@@ -434,7 +436,7 @@ export function HandoverStep({ ctx }: { ctx: WizardCtx }) {
 						items={[
 							`An owner login is created for ${business.ownerEmail} with a temporary password shown once`,
 							"The stage changes to Handed over until the owner accepts",
-							`${hotels.length} ${hotels.length === 1 ? "hotel" : "hotels"}, ${logins.length} ${logins.length === 1 ? "login" : "logins"} and the settings go in the handover pack`,
+							`${hotels.length} ${ctx.venue.locations ? (hotels.length === 1 ? "location" : "locations") : hotels.length === 1 ? "hotel" : "hotels"}, ${logins.length} ${logins.length === 1 ? "login" : "logins"} and the settings go in the handover pack`,
 							"No email is sent yet: share the pack and the password with the owner yourself",
 							"The owner accepts the Terms and the daily debit authority themselves, by ticking two boxes at first sign-in",
 						]}
@@ -445,7 +447,7 @@ export function HandoverStep({ ctx }: { ctx: WizardCtx }) {
 						value={message}
 						onChange={setMessage}
 						rows={2}
-						placeholder={`Your hotels are ready. ${ctx.draft.assignedTo !== "Unassigned" ? ctx.draft.assignedTo : "We"} will call you tomorrow at 10am to walk you through it.`}
+						placeholder={`Your ${ctx.venue.locations ? "locations" : "hotels"} are ready. ${ctx.draft.assignedTo !== "Unassigned" ? ctx.draft.assignedTo : "We"} will call you tomorrow at 10am to walk you through it.`}
 					/>
 				</div>
 			</ConfirmModal>
@@ -598,7 +600,14 @@ function HandoverPackModal({
 					</h2>
 					<p className="mt-1 text-[13px] text-ink-2">
 						Your {hotels.length}{" "}
-						{hotels.length === 1 ? "hotel is" : "hotels are"} set up and ready.
+						{ctx.venue.locations
+							? hotels.length === 1
+								? "location is"
+								: "locations are"
+							: hotels.length === 1
+								? "hotel is"
+								: "hotels are"}{" "}
+						set up and ready.
 						Keep this pack private.
 					</p>
 					{message.trim() && (
@@ -645,7 +654,7 @@ function HandoverPackModal({
 					<ul className="mt-2 flex flex-col gap-1 text-[13px] text-ink-2">
 						{hotels.map((h) => (
 							<li key={h.id}>
-								• {h.name} · {h.rooms} rooms · {staffAt(h.id)} staff
+								• {h.name} · {roomsOrKind(h)} · {staffAt(h.id)} staff
 								{terminalsAt(h.id) ? ` · ${terminalsAt(h.id)} POS` : ""}
 								{numbers[h.id] ? ` · WhatsApp ${numbers[h.id]}` : ""}
 							</li>
@@ -679,8 +688,8 @@ function HandoverPackModal({
 						</li>
 						<li>Choose your own password.</li>
 						<li>
-							Review what Hospio360 set up and accept the handover. Your hotels go
-							live.
+							Review what Hospio360 set up and accept the handover. Your{" "}
+							{ctx.venue.locations ? "locations" : "hotels"} go live.
 						</li>
 						<li>
 							Managers and staff open their invite link, set a password and

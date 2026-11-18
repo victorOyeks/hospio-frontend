@@ -1,4 +1,5 @@
 import { StaffScreen } from "@/components/roles/manager/staff/screen";
+import { hasAccommodation } from "@hospio/api/venue";
 import { getActiveHotel, getUser } from "@hospio/api/dal";
 import { data } from "@hospio/api/data";
 import { lagosDay } from "@hospio/api/data/mappers/finance";
@@ -84,6 +85,7 @@ export default async function StaffPage({
 			requests={requests}
 			hotelName={hotel?.name ?? "This hotel"}
 			hotelId={hotel?.id}
+			accommodation={hasAccommodation(hotel)}
 			businessName={business?.name}
 			inviterName={user?.fullName}
 			clockedIn={[...clockedIn.keys()]}

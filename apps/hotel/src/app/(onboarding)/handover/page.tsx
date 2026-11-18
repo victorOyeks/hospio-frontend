@@ -3,6 +3,7 @@ import { getUser } from "@hospio/api/dal";
 import { ownerDevicePackages } from "@hospio/api/actions/device-packages";
 import { data } from "@hospio/api/data";
 import { loadMyLegal } from "@hospio/api/actions/legal";
+import { onboardingOutlets } from "@hospio/api/actions/onboarding";
 
 export const dynamic = "force-dynamic";
 
@@ -18,8 +19,20 @@ export default async function HandoverPage() {
 		ownerDevicePackages().catch(() => null),
 		loadMyLegal().catch(() => null),
 	]);
+	// A lounge, bar or restaurant is shown with its outlets, never as "0 rooms" (hospio-backend docs/plan-venue-type.md).
+	const outlets = Object.fromEntries(
+		await Promise.all(
+			hotels
+				.filter((h) => h.hasAccommodation === false)
+				.map(async (h) => {
+					const r = await onboardingOutlets(h.hotelId).catch(() => null);
+					return [h.hotelId, r?.ok ? r.data.map((o) => o.name) : []] as const;
+				}),
+		),
+	);
 	return (
 		<HandoverReview
+			outlets={outlets}
 			business={business}
 			hotels={hotels}
 			users={users}

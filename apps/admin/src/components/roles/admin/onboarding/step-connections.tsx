@@ -166,6 +166,7 @@ export function ConnectionsStep({ ctx }: { ctx: WizardCtx }) {
 	if (hotels.length === 0) {
 		return (
 			<StepFrame
+				venue={ctx.venue}
 				step="connections"
 				onBack={() => ctx.goTo(prevStep("connections"))}
 			>
@@ -187,6 +188,7 @@ export function ConnectionsStep({ ctx }: { ctx: WizardCtx }) {
 
 	return (
 		<StepFrame
+			venue={ctx.venue}
 			step="connections"
 			onBack={() => ctx.goTo(prevStep("connections"))}
 			onContinue={ctx.editable ? save : undefined}

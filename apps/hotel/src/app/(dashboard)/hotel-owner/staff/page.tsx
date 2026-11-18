@@ -29,7 +29,7 @@ export default async function Page({
 		<OwnerStaffScreen
 			result={result}
 			overall={overall}
-			hotels={hotels.map((h) => ({ hotelId: h.id, name: h.name }))}
+			hotels={hotels.map((h) => ({ hotelId: h.id, name: h.name, hasAccommodation: h.hasAccommodation }))}
 			businessName={business?.name ?? "Your business"}
 			ownerName={user?.fullName ?? business?.ownerName ?? "The owner"}
 		/>

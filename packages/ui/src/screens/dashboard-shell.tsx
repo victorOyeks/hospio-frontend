@@ -1,4 +1,7 @@
 import { SetupLinks } from "@hospio/ui/shared/field";
+import { NotUsedHere } from "@hospio/ui/shared/not-used-here";
+import { isStayOnlyPath } from "@hospio/ui/links";
+import { hasAccommodation, venueNoun } from "@hospio/api/venue";
 import { cookies, headers } from "next/headers";
 import { redirect } from "next/navigation";
 import type { PropsWithChildren } from "react";
@@ -163,6 +166,12 @@ export async function DashboardShell({ children }: PropsWithChildren) {
 	// The legal gate (hospio-backend docs/legal-acceptance.md) comes first: the PIN prompt waits until the terms are accepted.
 	const legalGate = !!legal?.canAccept && legal.pending.length > 0;
 
+	// A lounge, bar or restaurant (no accommodation, docs/plan-venue-type.md): pages about rooms and stays answer "Not used at a
+	// lounge" for the active location, even when opened from a bookmark.
+	const accommodation = APP !== "hotel" || hasAccommodation(activeHotel);
+	const visiblePath = APP === "hotel" ? ((await headers()).get("x-hospio-path") ?? "") : "";
+	const notUsedHere = !accommodation && !!visiblePath && isStayOnlyPath(role, visiblePath);
+
 	const badges = {
 		...(unpaidSales ? { unpaidSales } : {}),
 		...(inbox ? { inbox } : {}),
@@ -247,7 +256,11 @@ export async function DashboardShell({ children }: PropsWithChildren) {
 						<div className="flex flex-1 flex-col gap-5 px-5 py-6 lg:px-8">
 							{/* "Manage … in Hotel setup" links only where Hotel setup exists (manager, owner). */}
 							<SetupLinks allowed={role === "MANAGER" || role === "OWNER"}>
-								{children}
+								{notUsedHere ? (
+									<NotUsedHere place={venueNoun(activeHotel)} locationName={activeHotel?.name} />
+								) : (
+									children
+								)}
 							</SetupLinks>
 						</div>
 					</SidebarInset>

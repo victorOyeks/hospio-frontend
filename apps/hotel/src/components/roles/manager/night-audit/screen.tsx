@@ -191,6 +191,8 @@ export function NightAuditScreen({
 	const { run, pending } = useAction();
 	const tonight = audits[0] ?? null;
 	const open = tonight && tonight.status === "OPEN" ? tonight : null;
+	// A lounge, bar or restaurant (hospio-backend docs/plan-venue-type.md): no rooms, arrivals, departures or no-shows anywhere here.
+	const stays = tonight?.accommodation !== false;
 	const past = pastPage.content;
 	// The newest closed audit is on the first page of the past ones (or in tonight's rows).
 	const lastClosed =
@@ -213,7 +215,8 @@ export function NightAuditScreen({
 				? ""
 				: "";
 
-	const pastColumns: ColumnDef<NightAuditRow, unknown>[] = [
+	const STAY_COLUMNS = ["roomsOccupied", "inout", "noShows"];
+	const allPastColumns: ColumnDef<NightAuditRow, unknown>[] = [
 		{
 			header: "Day",
 			accessorKey: "date",
@@ -283,6 +286,12 @@ export function NightAuditScreen({
 			),
 		},
 	];
+	const pastColumns = stays
+		? allPastColumns
+		: allPastColumns.filter((c) => {
+			const key = "accessorKey" in c ? String(c.accessorKey) : c.id;
+			return !STAY_COLUMNS.includes(key ?? "");
+		});
 
 	const nums = reportNumbers(report?.report);
 
@@ -470,6 +479,8 @@ export function NightAuditScreen({
 									["Transfer", naira(today.byMethod.TRANSFER ?? 0)],
 									["Cash", naira(today.byMethod.CASH ?? 0)],
 									["Spent today", naira(today.expenses), true],
+									...(stays
+										? [
 									[
 										"Occupancy tonight",
 										today.occupancyPct != null
@@ -483,6 +494,8 @@ export function NightAuditScreen({
 										true,
 									],
 									["No-shows", String(tonight?.noShows ?? 0), true],
+										]
+										: []),
 								] as [string, string, boolean?][]
 							).map(([k, v, strong]) => (
 								<div
@@ -589,11 +602,15 @@ export function NightAuditScreen({
 								{ label: "Revenue", value: naira(today.revenue) },
 								{ label: "Spent", value: naira(today.expenses) },
 								{ label: "Cash in tills", value: naira(today.cashInTills) },
-								{
-									label: "Rooms occupied",
-									value: String(open.roomsOccupied),
-									strong: true,
-								},
+								...(stays
+									? [
+											{
+												label: "Rooms occupied",
+												value: String(open.roomsOccupied),
+												strong: true,
+											},
+										]
+									: []),
 							]}
 						/>
 						<MoneyField
@@ -601,7 +618,7 @@ export function NightAuditScreen({
 							value={cash}
 							onChange={setCash}
 						/>
-						{arrivalsOpen && (
+						{stays && arrivalsOpen && (
 							<ToggleField
 								label="Mark the arrivals still waiting as no-shows"
 								hint="Their rooms are released. Leave it off to keep them as arrivals."
@@ -654,13 +671,17 @@ export function NightAuditScreen({
 						<div className="grid grid-cols-3 gap-2">
 							{[
 								["Revenue", naira(report.revenue)],
-								[
-									"Rooms occupied",
-									`${report.roomsOccupied}${rooms(report)}${nums.occupancyPct != null ? ` · ${Math.round(nums.occupancyPct)}%` : pct(report)}`,
-								],
-								["No-shows", String(report.noShows)],
-								["Arrivals", String(report.arrivals)],
-								["Departures", String(report.departures)],
+								...(report.accommodation === false
+									? []
+									: [
+											[
+												"Rooms occupied",
+												`${report.roomsOccupied}${rooms(report)}${nums.occupancyPct != null ? ` · ${Math.round(nums.occupancyPct)}%` : pct(report)}`,
+											],
+											["No-shows", String(report.noShows)],
+											["Arrivals", String(report.arrivals)],
+											["Departures", String(report.departures)],
+										]),
 								[
 									"Cash variance",
 									report.variance == null
@@ -727,7 +748,7 @@ export function NightAuditScreen({
 								<TotalsList
 									rows={[
 										...nums.outletSales.map((o) => ({
-											label: `${o.name} · ${plural(o.orders, "order")} · ${naira(o.paidAtOutlet)} paid, ${naira(o.chargedToRooms)} on rooms`,
+											label: `${o.name} · ${plural(o.orders, "order")} · ${naira(o.paidAtOutlet)} paid${report.accommodation === false ? "" : `, ${naira(o.chargedToRooms)} on rooms`}`,
 											value: naira(o.sales),
 										})),
 										{

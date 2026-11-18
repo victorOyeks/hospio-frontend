@@ -13,13 +13,22 @@ import { HomeIcon } from "@hospio/ui/svgs/home";
 import { cn } from "@hospio/ui/utils";
 import { logout } from "@hospio/api/actions";
 import { saveForLater } from "./persist";
-import { STEP_META, stepHref } from "./steps";
+import { stepHref, stepMeta } from "./steps";
 
 /**
  * The wizard's frame (Figma 3164:16113): logo, the step bar with the four steps and "All set", and
  * "Save and finish later". The welcome checklist and the handover page share the frame without the bar.
  */
-export function OnboardingShell({ children }: PropsWithChildren) {
+export function OnboardingShell({
+	children,
+	kind,
+	accommodation,
+}: PropsWithChildren<{
+	/** The business's kind and whether its first location has rooms: the step titles follow them. */
+	kind?: string | null;
+	accommodation?: boolean;
+}>) {
+	const meta = stepMeta(kind, accommodation);
 	const pathname = usePathname();
 	const current = pathname.split("/")[2] ?? "";
 	const bar = pathname.startsWith("/onboarding/");
@@ -45,7 +54,7 @@ export function OnboardingShell({ children }: PropsWithChildren) {
 						{[...OWNER_ONBOARDING_STEPS, "done" as const].map((key, i) => {
 							const done = i < activeIndex;
 							const active = i === activeIndex;
-							const label = key === "done" ? "All set" : STEP_META[key].title;
+							const label = key === "done" ? "All set" : meta[key].title;
 							const reachable = done || active;
 							const inner = (
 								<span className="flex items-center gap-2">

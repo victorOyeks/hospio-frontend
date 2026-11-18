@@ -6,6 +6,7 @@ import type { AdminOnboardingStep } from "@hospio/api/types";
 import { TextareaField } from "@hospio/ui/shared/field";
 import { ProgressBar } from "@hospio/ui/shared/progress-bar";
 import { cn } from "@hospio/ui/utils";
+import { hasAccommodation } from "@hospio/api/venue";
 import { GuestMessagePlans } from "../guest-messages";
 import type { WizardCtx } from "./wizard";
 import {
@@ -34,7 +35,10 @@ export function goLiveChecks(ctx: WizardCtx): Check[] {
 		...users.filter((u) => u.role === "MANAGER").map((u) => u.userId),
 		...logins.filter((l) => l.role === "MANAGER").map((l) => l.userId),
 	]).size;
-	const withRooms = hotels.filter((h) => h.rooms > 0).length;
+	// Only places with accommodation need rooms (hospio-backend docs/plan-venue-type.md); a lounge, bar or restaurant goes live without.
+	const stays = hotels.filter((h) => hasAccommodation(h));
+	const withRooms = stays.filter((h) => h.rooms > 0).length;
+	const word = ctx.venue.locations ? "location" : "hotel";
 	const applied = new Set(data.template?.appliedTo ?? []);
 	const templated = hotels.filter((h) => applied.has(h.id)).length;
 	const numbers = data.connections?.whatsappByHotel ?? {};
@@ -82,23 +86,29 @@ export function goLiveChecks(ctx: WizardCtx): Check[] {
 		},
 		{
 			key: "hotels",
-			label: "At least one hotel",
+			label: `At least one ${word}`,
 			done: hotels.length > 0,
-			detail: `${hotels.length} ${hotels.length === 1 ? "hotel" : "hotels"}`,
+			detail: `${hotels.length} ${hotels.length === 1 ? word : `${word}s`}`,
 			step: "hotels",
 		},
-		{
-			key: "rooms",
-			label: "Every hotel has rooms",
-			done: hotels.length > 0 && withRooms === hotels.length,
-			detail: `${withRooms} of ${hotels.length} hotels · ${hotels.reduce((s, h) => s + h.rooms, 0)} rooms`,
-			step: "rooms",
-		},
+		...(stays.length > 0 || hotels.length === 0
+			? [
+					{
+						key: "rooms",
+						label: "Every hotel has rooms",
+						done: stays.length > 0 && withRooms === stays.length,
+						detail: `${withRooms} of ${stays.length} hotels · ${stays.reduce((s, h) => s + h.rooms, 0)} rooms`,
+						step: "rooms" as const,
+					},
+				]
+			: []),
 		{
 			key: "template",
-			label: "Hotel setup applied from a template",
+			label: ctx.venue.locations
+				? "Location setup applied from a template"
+				: "Hotel setup applied from a template",
 			done: hotels.length > 0 && templated === hotels.length,
-			detail: `${templated} of ${hotels.length} hotels`,
+			detail: `${templated} of ${hotels.length} ${word}s`,
 			step: "template",
 		},
 		{
@@ -110,9 +120,9 @@ export function goLiveChecks(ctx: WizardCtx): Check[] {
 		},
 		{
 			key: "whatsapp",
-			label: "WhatsApp number on every hotel",
+			label: `WhatsApp number on every ${word}`,
 			done: hotels.length > 0 && withWhatsapp === hotels.length,
-			detail: `${withWhatsapp} of ${hotels.length} hotels`,
+			detail: `${withWhatsapp} of ${hotels.length} ${word}s`,
 			step: "connections",
 		},
 	];
@@ -149,6 +159,7 @@ export function GoLiveStep({ ctx }: { ctx: WizardCtx }) {
 
 	return (
 		<StepFrame
+			venue={ctx.venue}
 			step="golive"
 			onBack={() => ctx.goTo(prevStep("golive"))}
 			onContinue={ctx.editable ? save : undefined}

@@ -39,6 +39,7 @@ import {
 	useFeeLock,
 } from "./business/fee-lock";
 import { can, HealthBar, ReadOnlyNote, StagePill } from "./shared";
+import { venueLabel } from "@hospio/api/venue";
 
 const STAGES = [
 	"ALL",
@@ -61,7 +62,7 @@ const stageLabel: Record<string, string> = {
 /** The page header's fee line only makes sense once platform-service reports MRR; until then show counts. */
 
 /**
- * Admin · Hotel businesses: one page at a time from tenant-service (`?stage=&q=&page=` in the URL), with the stage
+ * Admin · Businesses (hotels, lounges, bars, restaurants): one page at a time from tenant-service (`?stage=&q=&page=` in the URL), with the stage
  * counts, hotels and rooms over the search from the server, so every page and tab reads the same totals.
  */
 export function BusinessesScreen({
@@ -116,12 +117,19 @@ export function BusinessesScreen({
 		},
 		{
 			accessorKey: "hotels",
-			header: "Hotels · rooms",
-			cell: ({ row }) => (
-				<span>
-					{row.original.hotels} · {row.original.rooms}
-				</span>
-			),
+			header: "Locations · rooms",
+			cell: ({ row }) => {
+				// A lounge, bar or restaurant shows its kind, not "0 rooms" (hospio-backend docs/plan-venue-type.md).
+				const kinds = (row.original.venueTypes ?? []).filter((t) => t !== "HOTEL");
+				return (
+					<span>
+						{row.original.hotels} ·{" "}
+						{kinds.length > 0 && row.original.rooms === 0
+							? kinds.map((k) => venueLabel(k)).join(", ")
+							: row.original.rooms}
+					</span>
+				);
+			},
 		},
 		{ accessorKey: "accountManager", header: "Account manager" },
 		{
@@ -183,8 +191,8 @@ export function BusinessesScreen({
 	return (
 		<>
 			<PageHeader
-				title="Hotel businesses"
-				subtitle={`${counts.all ?? page.total} businesses · ${counts.hotels ?? 0} hotels · ${counts.rooms ?? 0} rooms${list.params.q ? ` matching “${list.params.q}”` : ""}`}
+				title="Businesses"
+				subtitle={`${counts.all ?? page.total} businesses · ${counts.hotels ?? 0} locations · ${counts.rooms ?? 0} rooms${list.params.q ? ` matching “${list.params.q}”` : ""}`}
 			>
 				<ExportButton />
 				{can.editBusiness(role) && (

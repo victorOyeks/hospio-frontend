@@ -5,6 +5,7 @@ import type { BusinessRow, HotelSummary } from "@hospio/api/data/types";
 import type { AdminRole } from "@hospio/api/demo/fixtures/platform-extra";
 import { DataTable, TwoLine } from "@hospio/ui/shared/data-table";
 import { HotelDrawer, type HotelRef } from "../hotels/drawer";
+import { roomsOrKind } from "../onboarding/shared";
 
 /**
  * Business · Hotels: a row opens the same hotel panel as Customers → Hotels (`?hotel=`), so the hotel's figures, POS keys,
@@ -55,7 +56,12 @@ export function HotelsTab({
 							/>
 						),
 					},
-					{ accessorKey: "rooms", header: "Rooms" },
+					{
+						accessorKey: "rooms",
+						header: "Rooms",
+						// A lounge, bar or restaurant shows its kind, not "0" (hospio-backend docs/plan-venue-type.md).
+						cell: ({ row }) => roomsOrKind(row.original),
+					},
 					{ accessorKey: "manager", header: "Manager" },
 					{ accessorKey: "timezone", header: "Time zone" },
 					{

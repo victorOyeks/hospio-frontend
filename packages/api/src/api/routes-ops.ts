@@ -193,6 +193,8 @@ export const NightAuditDay = z.object({
 	inHouse: num,
 	noShows: num,
 	rooms: num,
+	/** False at a lounge, bar or restaurant (hospio-backend docs/plan-venue-type.md): only the tills and open-tab checks. */
+	accommodation: z.boolean().nullable().optional(),
 	report: z.unknown().optional(),
 	deliveries: Deliveries,
 });

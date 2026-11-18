@@ -101,6 +101,8 @@ export function NightAuditScreen({
 		past.find((a) => a.id === reportId) ??
 		null;
 	const checks = open?.checklist ?? [];
+	// A lounge, bar or restaurant (hospio-backend docs/plan-venue-type.md): no rooms, arrivals, departures or no-shows here.
+	const stays = (audits[0] ?? report)?.accommodation !== false;
 	const done = checks.filter((c) => c.done).length;
 	const tillsDone = checks.find((c) => c.key === "tills")?.done ?? true;
 	const arrivalsOpen = checks.some((c) => c.key === "arrivals" && !c.done);
@@ -161,6 +163,8 @@ export function NightAuditScreen({
 							value={naira(today.revenue)}
 							icon={MoonIcon}
 						/>
+						{stays && (
+							<>
 						<KpiCard
 							label="Rooms occupied"
 							value={open.roomsOccupied}
@@ -183,10 +187,16 @@ export function NightAuditScreen({
 								) : undefined
 							}
 						/>
+							</>
+						)}
 					</div>
 					<SectionCard
 						title="Before the day closes"
-						subtitle="The service checks each line against the bookings, folios and tills"
+						subtitle={
+							stays
+								? "The service checks each line against the bookings, folios and tills"
+								: "The service checks the tills and the open tabs at the outlets"
+						}
 						count={checks.length - done}
 					>
 						{checks.length === 0 && (
@@ -244,8 +254,9 @@ export function NightAuditScreen({
 						)}
 						{tillsDone && done < checks.length && (
 							<Note tone="info" className="mt-3">
-								Anything else still open is listed in the report. Arrivals still
-								waiting can be marked as no-shows when you close.
+								Anything else still open is listed in the report.
+								{stays &&
+									" Arrivals still waiting can be marked as no-shows when you close."}
 							</Note>
 						)}
 					</SectionCard>
@@ -261,7 +272,7 @@ export function NightAuditScreen({
 						<tr className="border-y border-line bg-[#fafafa] text-[11px] font-semibold uppercase tracking-[0.04em] text-ink-3">
 							<th className="px-5 py-2">Day</th>
 							<th className="py-2 text-right">Revenue</th>
-							<th className="py-2 text-right">Rooms</th>
+							{stays && <th className="py-2 text-right">Rooms</th>}
 							<th className="py-2 text-right">Cash counted</th>
 							<th className="py-2 text-right">Variance</th>
 							<th className="py-2">Closed by</th>
@@ -295,7 +306,9 @@ export function NightAuditScreen({
 									{fmtDay(a.date)}
 								</td>
 								<td className="py-3 text-right">{naira(a.revenue)}</td>
-								<td className="py-3 text-right">{a.roomsOccupied}</td>
+								{stays && (
+									<td className="py-3 text-right">{a.roomsOccupied}</td>
+								)}
 								<td className="py-3 text-right">
 									{a.cashCounted != null ? naira(a.cashCounted) : "—"}
 								</td>
@@ -401,11 +414,15 @@ export function NightAuditScreen({
 									label: "Cash expected from sales",
 									value: naira(today.byMethod.CASH ?? 0),
 								},
-								{
-									label: `${plural(open.roomsOccupied, "room")} occupied`,
-									value: String(open.roomsOccupied),
-									strong: true,
-								},
+								...(stays
+									? [
+											{
+												label: `${plural(open.roomsOccupied, "room")} occupied`,
+												value: String(open.roomsOccupied),
+												strong: true,
+											},
+										]
+									: []),
 							]}
 						/>
 						<MoneyField
@@ -413,7 +430,7 @@ export function NightAuditScreen({
 							value={cash}
 							onChange={setCash}
 						/>
-						{arrivalsOpen && (
+						{stays && arrivalsOpen && (
 							<ToggleField
 								label="Mark the arrivals still waiting as no-shows"
 								hint="Their rooms are released. Leave it off to keep them as arrivals."
@@ -459,13 +476,17 @@ export function NightAuditScreen({
 								columns={2}
 								items={[
 									{ label: "Revenue", value: naira(report.revenue) },
-									{
-										label: "Rooms occupied",
-										value: `${report.roomsOccupied}${rooms(report)}${report.rooms ? ` · ${Math.round((report.roomsOccupied / report.rooms) * 100)}%` : ""}`,
-									},
-									{ label: "Arrivals", value: report.arrivals },
-									{ label: "Departures", value: report.departures },
-									{ label: "No-shows", value: report.noShows },
+									...(report.accommodation === false
+										? []
+										: [
+												{
+													label: "Rooms occupied",
+													value: `${report.roomsOccupied}${rooms(report)}${report.rooms ? ` · ${Math.round((report.roomsOccupied / report.rooms) * 100)}%` : ""}`,
+												},
+												{ label: "Arrivals", value: report.arrivals },
+												{ label: "Departures", value: report.departures },
+												{ label: "No-shows", value: report.noShows },
+											]),
 									{
 										label: "Cash counted",
 										value:

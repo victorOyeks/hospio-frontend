@@ -30,14 +30,19 @@ export function NavMain({
 	role,
 	badges = {},
 	supervisor = true,
+	accommodation = true,
 }: {
 	role: HotelRole;
+	/** False at a lounge, bar or restaurant: the `stay` links (Rooms, Bookings, Folios …) are left out. */
+	accommodation?: boolean;
 	/** False hides the supervisor-only links (Inspect) from a housekeeping attendant. */
 	supervisor?: boolean;
 	/** Counts for links that carry one (`NavLink.badge`); nothing is shown for 0 or a missing count. */
 	badges?: Partial<Record<NonNullable<NavLink["badge"]>, number>>;
 }) {
-	const items = linksByRole[role].filter((i) => (supervisor || !i.supervisorOnly) && (!i.roles || i.roles.includes(role)));
+	const items = linksByRole[role].filter(
+		(i) => (supervisor || !i.supervisorOnly) && (!i.roles || i.roles.includes(role)) && (accommodation || !i.stay),
+	);
 	const pathname = usePathname();
 	const active = activeUrl(pathname, items);
 	// Menus with groups (the admin portal) get a small heading per group; the others stay one flat list as before.

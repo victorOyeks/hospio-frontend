@@ -336,6 +336,8 @@ export function OwnerHotels({
 					icon={BuildingIcon}
 					hint={`${count("active")} active · ${count("paused")} paused · ${count("closed")} closed`}
 				/>
+				{hotels.some((h) => h.hasAccommodation !== false) && (
+					<>
 				<KpiCard
 					label="Total rooms"
 					value={rooms.toLocaleString()}
@@ -354,8 +356,10 @@ export function OwnerHotels({
 							: "—"
 					}
 					icon={PercentIcon}
-					hint={anyFigures ? "vs 72% last month" : "No stays yet"}
+					hint={anyFigures ? "Rooms occupied tonight, every branch" : "No stays yet"}
 				/>
+					</>
+				)}
 				<KpiCard
 					label="Revenue · month to date"
 					value={anyFigures ? nairaShort(revenue) : "—"}

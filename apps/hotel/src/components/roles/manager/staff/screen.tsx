@@ -81,6 +81,7 @@ export function StaffScreen({
 	requests,
 	hotelName,
 	hotelId,
+	accommodation = true,
 	businessName,
 	inviterName,
 	rotaSetup,
@@ -103,6 +104,8 @@ export function StaffScreen({
 	requests: ShiftRequestRow[];
 	hotelName: string;
 	hotelId?: string;
+	/** The active location has accommodation (hospio-backend docs/plan-venue-type.md). */
+	accommodation?: boolean;
 	businessName?: string;
 	inviterName?: string;
 	rotaSetup: RotaSetup;
@@ -574,6 +577,7 @@ export function StaffScreen({
 					hotelName={hotelName}
 					businessName={businessName}
 					inviterName={inviterName}
+					accommodation={accommodation}
 				/>
 			)}
 			<ChangeShiftModal

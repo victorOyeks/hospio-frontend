@@ -17,6 +17,11 @@ import {
 	type AdminOnboardingStep,
 } from "@hospio/api/types";
 import { btn } from "@hospio/ui/shared/ui";
+import {
+	hasAccommodation,
+	kindHasRooms,
+	venueType,
+} from "@hospio/api/venue";
 import { cn } from "@hospio/ui/utils";
 
 /** Shared pieces of the back-office wizard (J2–J18): step metadata, the step frame, saving, copying. */
@@ -66,6 +71,53 @@ export const STEP_META: Record<
 		subtitle: "Everyone's login, then hand the business to the owner",
 	},
 };
+
+/**
+ * What the wizard's wording follows (hospio-backend docs/plan-venue-type.md): `locations` when the business is not only hotels
+ * (the Hotels step reads "Locations"), `noRooms` when no location has accommodation (the Rooms step isn't needed).
+ */
+export type VenueCtx = { locations: boolean; noRooms: boolean };
+
+export function venueOf(
+	business: Pick<BusinessRow, "venueKind">,
+	hotels: Pick<HotelSummary, "venueType" | "hasAccommodation" | "rooms">[],
+): VenueCtx {
+	const kind = business.venueKind ?? "HOTEL";
+	const locations =
+		kind !== "HOTEL" || hotels.some((h) => venueType(h.venueType) !== "HOTEL");
+	const noRooms =
+		hotels.length > 0
+			? hotels.every((h) => !hasAccommodation(h))
+			: !kindHasRooms(kind);
+	return { locations, noRooms };
+}
+
+/** A step's name in the rail and its title, in the business's words. */
+export function stepLabel(step: AdminOnboardingStep, v?: VenueCtx): string {
+	if (v?.locations && step === "hotels") return "Locations";
+	if (v?.locations && step === "template") return "Location setup";
+	return STEP_META[step].label;
+}
+
+/** A step's one-line subtitle, in the business's words. */
+export function stepSubtitle(step: AdminOnboardingStep, v?: VenueCtx): string {
+	if (v?.locations && step === "hotels")
+		return "Each location (hotel, lounge, bar, restaurant) gets its own setup and staff";
+	if (v?.noRooms && step === "rooms")
+		return "No location here has rooms, so there is nothing to set up";
+	if (v?.locations && step === "rooms")
+		return "Room types and numbers for each location with rooms";
+	if (v?.locations && step === "template")
+		return "Start from a ready setup for each location; anything can be changed afterwards";
+	return STEP_META[step].subtitle;
+}
+
+/** "Lounge", "Restaurant" for a location without rooms; "24 rooms" for one with. */
+export function roomsOrKind(h: Pick<HotelSummary, "venueType" | "hasAccommodation" | "rooms">): string {
+	if (hasAccommodation(h)) return `${h.rooms} ${h.rooms === 1 ? "room" : "rooms"}`;
+	const t = venueType(h.venueType);
+	return t.charAt(0) + t.slice(1).toLowerCase();
+}
 
 export const TOTAL_STEPS = ADMIN_ONBOARDING_STEPS.length;
 
@@ -137,6 +189,7 @@ export function businessRequestFrom(
 		contractStartsOn: b.contractStartsOn ?? null,
 		contractNotes: b.contractNotes ?? null,
 		source: b.source ?? "BACK_OFFICE",
+		venueKind: b.venueKind ?? null,
 		...patch,
 	};
 }
@@ -242,8 +295,11 @@ export function StepFrame({
 	pending,
 	extra,
 	footerNote,
+	venue,
 }: {
 	step: AdminOnboardingStep;
+	/** The business's venue words (Locations, Location setup); hotels-only wording when left out. */
+	venue?: VenueCtx;
 	subtitle?: ReactNode;
 	children: ReactNode;
 	onBack?: () => void;
@@ -255,15 +311,14 @@ export function StepFrame({
 	extra?: ReactNode;
 	footerNote?: ReactNode;
 }) {
-	const meta = STEP_META[step];
 	return (
 		<div className="flex min-w-0 flex-1 flex-col gap-5">
 			<div>
 				<h2 className="text-xl font-bold leading-tight text-ink">
-					Step {stepIndex(step) + 1} of {TOTAL_STEPS} · {meta.label}
+					Step {stepIndex(step) + 1} of {TOTAL_STEPS} · {stepLabel(step, venue)}
 				</h2>
 				<p className="mt-1 text-[13px] text-ink-3">
-					{subtitle ?? meta.subtitle}
+					{subtitle ?? stepSubtitle(step, venue)}
 				</p>
 			</div>
 			<div className="flex flex-col gap-4">{children}</div>

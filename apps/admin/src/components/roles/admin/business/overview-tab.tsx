@@ -38,7 +38,7 @@ export function OverviewTab({
 		<>
 			<div className="grid grid-cols-2 gap-4 md:grid-cols-4">
 				<KpiCard
-					label="Hotels · rooms"
+					label="Locations · rooms"
 					value={`${business.hotels} · ${business.rooms}`}
 					icon={BuildingIcon}
 					hint={

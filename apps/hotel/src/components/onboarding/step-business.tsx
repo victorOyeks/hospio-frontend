@@ -9,6 +9,8 @@ import type { Business, Me } from "@hospio/api/api/schema";
 import type { OwnerOnboardingData } from "@hospio/api/types";
 import { FieldRow, SelectField, TextField } from "@hospio/ui/shared/field";
 import { naira } from "@hospio/ui/shared/format";
+import { cn } from "@hospio/ui/utils";
+import { BUSINESS_KIND_OPTIONS, businessKind } from "@hospio/api/venue";
 import { SideCard, StepCard, StepFooter, StepPage } from "./common";
 import { useFreshOnOpen, useSaveLater, useStepForm } from "./persist";
 import { stepHref } from "./steps";
@@ -60,6 +62,7 @@ export function BusinessStep({
 		address: saved?.address ?? business?.address ?? "",
 		city: saved?.city ?? business?.city ?? "",
 		timezone: saved?.timezone ?? business?.timezone ?? "Africa/Lagos",
+		venueKind: businessKind(saved?.venueKind ?? business?.venueKind),
 	});
 	const set = <K extends keyof typeof form>(k: K, v: string) =>
 		update({ [k]: v } as Partial<typeof form>);
@@ -93,6 +96,7 @@ export function BusinessStep({
 			timezone: form.timezone || null,
 			logoUrl: business?.logoUrl ?? null,
 			brandColour: business?.brandColour ?? null,
+			venueKind: form.venueKind,
 		};
 		const r = await updateMyBusiness(body);
 		if (!r.ok) return r;
@@ -106,6 +110,7 @@ export function BusinessStep({
 			address: body.address ?? undefined,
 			city: body.city ?? undefined,
 			timezone: body.timezone ?? undefined,
+			venueKind: body.venueKind,
 		});
 		if (step.ok) forget();
 		return step;
@@ -115,7 +120,11 @@ export function BusinessStep({
 		const e = check();
 		setErrors(e);
 		if (Object.keys(e).length) return;
-		run(save, "Business saved", () => router.push(stepHref("hotel")));
+		run(save, "Business saved", () => {
+			router.push(stepHref("hotel"));
+			// The step bar (in the layout) names the next steps for the kind just chosen.
+			router.refresh();
+		});
 	}
 
 	useSaveLater(async () => {
@@ -148,12 +157,20 @@ export function BusinessStep({
 						</div>
 						<div className="mt-1 flex flex-col gap-1 border-t border-line pt-2 text-[11px]">
 							<p className="flex justify-between">
-								<span>Room · 2 nights</span>
-								<span className="font-semibold text-ink">{naira(137000)}</span>
+								<span>
+									{form.venueKind === "HOTEL" || form.venueKind === "MIXED"
+										? "Room · 2 nights"
+										: "Table 4 · 6 items"}
+								</span>
+								<span className="font-semibold text-ink">
+									{naira(form.venueKind === "HOTEL" || form.venueKind === "MIXED" ? 137000 : 48500)}
+								</span>
 							</p>
 							<p className="flex justify-between">
 								<span>VAT (7.5%, included)</span>
-								<span className="font-semibold text-ink">{naira(9558)}</span>
+								<span className="font-semibold text-ink">
+									{naira(form.venueKind === "HOTEL" || form.venueKind === "MIXED" ? 9558 : 3384)}
+								</span>
 							</p>
 						</div>
 					</SideCard>
@@ -164,8 +181,8 @@ export function BusinessStep({
 						</p>
 						<p>Nothing here is shared publicly except your trading name.</p>
 						<p>
-							Currency and taxes are set per hotel, in Hotel setup → Taxes &
-							currency, once your first hotel exists.
+							Currency and taxes are set per location, in Hotel setup → Taxes &
+							currency, once your first location exists.
 						</p>
 					</SideCard>
 				</>
@@ -174,7 +191,7 @@ export function BusinessStep({
 			<StepCard
 				step="business"
 				title="Tell us about your business"
-				intro="This is the company that owns the hotels. Guests see your trading name; tax documents use the registered name."
+				intro="This is the company that owns your hotels, lounges, bars or restaurants. Guests see your trading name; tax documents use the registered name."
 			>
 				<form
 					className="flex flex-col gap-4"
@@ -183,6 +200,39 @@ export function BusinessStep({
 						submit();
 					}}
 				>
+					{/* hospio-backend docs/plan-venue-type.md: the kind sets what each new location starts as (rooms or not). */}
+					<fieldset className="flex flex-col gap-2">
+						<legend className="mb-2 text-[13px] font-medium text-ink">
+							What kind of business?
+						</legend>
+						<div
+							className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3"
+						>
+							{BUSINESS_KIND_OPTIONS.map((o) => {
+								const on = form.venueKind === o.value;
+								return (
+									<button
+										key={o.value}
+										type="button"
+										aria-pressed={on}
+										data-kind={o.value}
+										onClick={() => set("venueKind", o.value)}
+										className={cn(
+											"flex flex-col items-start rounded-control border px-3 py-2 text-left",
+											on
+												? "border-brand bg-brand-soft/40"
+												: "border-line hover:bg-subtle/60",
+										)}
+									>
+										<span className="text-[13px] font-semibold text-ink">
+											{o.label}
+										</span>
+										<span className="text-[11px] text-ink-3">{o.hint}</span>
+									</button>
+								);
+							})}
+						</div>
+					</fieldset>
 					<FieldRow>
 						<TextField
 							label="Trading name (what guests see)"

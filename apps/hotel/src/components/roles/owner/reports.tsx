@@ -47,7 +47,7 @@ import { SearchBox, Toolbar } from "@hospio/ui/shared/toolbar";
 import { btn } from "@hospio/ui/shared/ui";
 import { HotelFilter } from "./common";
 
-type Hotel = { hotelId: string; name: string };
+type Hotel = { hotelId: string; name: string; hasAccommodation?: boolean };
 /** The "All hotels" choice in a select (an empty value is not allowed there). */
 const ALL = "all";
 
@@ -163,12 +163,15 @@ export function OwnerReports({
 			s.status === "SCHEDULED" &&
 			(!q.hotel || !s.hotelId || s.hotelId === q.hotel),
 	);
+	// Occupancy and the guest list are about stays: left out when no location has rooms (hospio-backend docs/plan-venue-type.md).
+	const stays = hotels.length === 0 || hotels.some((h) => h.hasAccommodation !== false);
 	const list = REPORTS.filter(
 		(r) =>
-			!search ||
+			(stays || (r.kind !== "OCCUPANCY" && r.kind !== "GUESTS")) &&
+			(!search ||
 			`${r.name} ${r.description} ${r.area}`
 				.toLowerCase()
-				.includes(search.toLowerCase()),
+				.includes(search.toLowerCase())),
 	);
 	const open = REPORTS.find((r) => r.kind === q.report) ?? null;
 

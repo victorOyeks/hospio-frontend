@@ -21,7 +21,7 @@ import { cn } from "@hospio/ui/utils";
 import { SideCard, StepCard, StepPage } from "./common";
 import { useInviteAccepted } from "./invite-status";
 import { forgetAllSteps } from "./persist";
-import { stepHref } from "./steps";
+import { placeWord, stepHref } from "./steps";
 
 /** All set (Figma 3165:16555): what is in, what is still open, then POST /tenant/onboarding/mine/complete → the dashboard. */
 export function DoneStep({
@@ -29,12 +29,19 @@ export function DoneStep({
 	business,
 	firstName,
 	ownerId,
+	kind,
+	accommodation = true,
 }: {
 	draft: OwnerOnboardingData;
 	business: Business | null;
 	firstName: string;
 	ownerId?: string;
+	/** hospio-backend docs/plan-venue-type.md: a lounge, bar or restaurant lists its outlets, never "0 rooms". */
+	kind?: string | null;
+	accommodation?: boolean;
 }) {
+	const place = accommodation ? "hotel" : placeWord(kind);
+	const outlets = draft.rooms?.outlets ?? [];
 	const router = useRouter();
 	const accepted = useInviteAccepted(draft.manager?.userId);
 	const { run, pending } = useAction();
@@ -45,9 +52,9 @@ export function DoneStep({
 	).size;
 	const rooms =
 		hotelRow?.roomCount ??
-		draft.rooms?.roomTypes.reduce((s, t) => s + t.count, 0) ??
+		draft.rooms?.roomTypes?.reduce((s, t) => s + t.count, 0) ??
 		0;
-	const hotelName = draft.hotel?.name ?? "Your hotel";
+	const hotelName = draft.hotel?.name ?? `Your ${place}`;
 	const items: {
 		label: string;
 		detail: string;
@@ -68,14 +75,23 @@ export function DoneStep({
 			done: !!(draft.business || business?.name),
 			href: stepHref("business"),
 		},
-		{
-			label: "First hotel and rooms",
-			detail: draft.hotel
-				? `${hotelName}${rooms ? ` · ${plural(rooms, "room")} · ${plural(typeCount, "type")}` : " · rooms not added yet"}`
-				: "No hotel yet",
-			done: !!draft.hotel && rooms > 0,
-			href: draft.hotel ? stepHref("rooms") : stepHref("hotel"),
-		},
+		accommodation
+			? {
+					label: "First hotel and rooms",
+					detail: draft.hotel
+						? `${hotelName}${rooms ? ` · ${plural(rooms, "room")} · ${plural(typeCount, "type")}` : " · rooms not added yet"}`
+						: "No hotel yet",
+					done: !!draft.hotel && rooms > 0,
+					href: draft.hotel ? stepHref("rooms") : stepHref("hotel"),
+				}
+			: {
+					label: `First ${place} and outlets`,
+					detail: draft.hotel
+						? `${hotelName}${outlets.length ? ` · ${outlets.map((o) => o.name).join(", ")}` : " · outlets not added yet"}`
+						: `No ${place} yet`,
+					done: !!draft.hotel && outlets.length > 0,
+					href: draft.hotel ? stepHref("rooms") : stepHref("hotel"),
+				},
 		{
 			label: draft.manager
 				? accepted
@@ -84,7 +100,7 @@ export function DoneStep({
 				: "Invite a manager",
 			detail: draft.manager
 				? accepted
-					? `${draft.manager.email} can sign in and run the hotel`
+					? `${draft.manager.email} can sign in and run the ${place}`
 					: `Invite sent to ${draft.manager.email} · waiting for them to accept · the link works for 7 days`
 				: "Skipped · invite one from Users whenever you like",
 			// An invite is only done once it is accepted; this page checks every 10 seconds (DEF-028).
@@ -94,7 +110,7 @@ export function DoneStep({
 			action: draft.manager ? "See invite" : "Invite",
 		},
 		{
-			label: "Add your other hotels",
+			label: accommodation ? "Add your other hotels" : "Add your other locations",
 			detail: "Each one takes about 2 minutes from Hotels → Add new hotel",
 			done: false,
 		},
@@ -113,9 +129,9 @@ export function DoneStep({
 				<>
 					<SideCard title="What appears here next">
 						<p className="flex justify-between">
-							<span>Today at your hotels</span>
+							<span>Today at your {accommodation ? "hotels" : "locations"}</span>
 							<span className="font-semibold text-ink">
-								after first check-in
+								{accommodation ? "after first check-in" : "after the first sale"}
 							</span>
 						</p>
 						<p className="flex justify-between">
@@ -127,7 +143,7 @@ export function DoneStep({
 						<p className="flex justify-between">
 							<span>Branch comparison</span>
 							<span className="font-semibold text-ink">
-								when you add a 2nd hotel
+								when you add a 2nd {accommodation ? "hotel" : "location"}
 							</span>
 						</p>
 					</SideCard>
@@ -141,7 +157,7 @@ export function DoneStep({
 		>
 			<StepCard
 				title={`You're all set, ${firstName}`}
-				intro={`${business?.name ?? "Your business"} · ${draft.hotel ? "1 hotel" : "no hotel yet"}${rooms ? ` · ${plural(rooms, "room")}` : ""} · set up today`}
+				intro={`${business?.name ?? "Your business"} · ${draft.hotel ? `1 ${place}` : `no ${place} yet`}${accommodation ? (rooms ? ` · ${plural(rooms, "room")}` : "") : outlets.length ? ` · ${plural(outlets.length, "outlet")}` : ""} · set up today`}
 			>
 				<div className="flex items-center gap-4 rounded-xl bg-brand px-5 py-4 text-white">
 					<span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-white/15">
@@ -154,11 +170,14 @@ export function DoneStep({
 								: "Your business is ready"}
 						</p>
 						<p className="text-xs text-white/75">
-							{rooms
-								? `${plural(rooms, "room")}, ${plural(draft.rooms?.roomTypes.length ?? 0, "room type")} and prices are in. `
-								: ""}
-							Your numbers show here after the first bookings and the first
-							night audit.
+							{accommodation && rooms
+								? `${plural(rooms, "room")}, ${plural(draft.rooms?.roomTypes?.length ?? 0, "room type")} and prices are in. `
+								: !accommodation && outlets.length
+									? `${plural(outlets.length, "outlet")} ready: ${outlets.map((o) => o.name).join(", ")}. `
+									: ""}
+							{accommodation
+								? "Your numbers show here after the first bookings and the first night audit."
+								: "Your numbers show here after the first sales and the first night audit."}
 						</p>
 					</div>
 				</div>

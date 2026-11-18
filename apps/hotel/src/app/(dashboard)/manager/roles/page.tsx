@@ -1,5 +1,6 @@
 import { RolesScreen } from "@/components/roles/manager/roles";
 import { getActiveHotel } from "@hospio/api/dal";
+import { hasAccommodation } from "@hospio/api/venue";
 import { data } from "@hospio/api/data";
 import {
 	listQueryFrom,
@@ -29,6 +30,7 @@ export default async function RolesPage({
 			overall={overall}
 			hotelName={hotel?.name ?? "This hotel"}
 			hotelId={hotel?.id}
+			accommodation={hasAccommodation(hotel)}
 		/>
 	);
 }

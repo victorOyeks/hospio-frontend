@@ -37,8 +37,10 @@ import { TemplateStep } from "./step-template";
 import {
 	isAdminStep,
 	mergeDraft,
-	STEP_META,
+	stepLabel,
 	stepsOf,
+	type VenueCtx,
+	venueOf,
 	type WizardData,
 	type WizardHotel,
 } from "./shared";
@@ -72,6 +74,8 @@ export type WizardCtx = {
 		nextAction?: string,
 	) => Promise<OnboardingRow | null>;
 	goTo: (step: AdminOnboardingStep) => void;
+	/** Venue words (hospio-backend docs/plan-venue-type.md): "Locations" for a non-hotel business, no rooms where none. */
+	venue: VenueCtx;
 };
 
 function emptyDraft(b: BusinessRow): OnboardingRow {
@@ -248,6 +252,7 @@ export function OnboardingWizard({
 			admins,
 			saveStep,
 			goTo,
+			venue: venueOf(business, hotels),
 		}),
 		[
 			editable,
@@ -304,6 +309,7 @@ export function OnboardingWizard({
 
 			<div className="grid gap-5 lg:grid-cols-[260px_minmax(0,1fr)]">
 				<StepRail
+					venue={ctx.venue}
 					current={step}
 					completed={draft.completedSteps}
 					done={handedOver}
@@ -329,7 +335,9 @@ function StepRail({
 	completed,
 	done,
 	onPick,
+	venue,
 }: {
+	venue: VenueCtx;
 	current: AdminOnboardingStep;
 	completed: string[];
 	done: boolean;
@@ -372,7 +380,12 @@ function StepRail({
 										i + 1
 									)}
 								</span>
-								{STEP_META[s].label}
+								<span className="min-w-0 flex-1">{stepLabel(s, venue)}</span>
+								{s === "rooms" && venue.noRooms && (
+									<span className="text-[11px] font-medium text-ink-3">
+										Not needed
+									</span>
+								)}
 							</button>
 						</li>
 					);

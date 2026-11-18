@@ -69,6 +69,10 @@ export const ROLE_OPTIONS = [
 	{ value: "INVENTORY", label: "Store" },
 	{ value: "FINANCE", label: "Finance" },
 ];
+/** Front office is about rooms and stays: offered only where the location has accommodation (hospio-backend docs/plan-venue-type.md). */
+export function roleOptionsFor(accommodation: boolean) {
+	return accommodation ? ROLE_OPTIONS : ROLE_OPTIONS.filter((o) => o.value !== "FRONT_OFFICE");
+}
 export const SHIFT_OPTIONS = ["Morning", "Afternoon", "Night"];
 export const DEPARTMENTS = [
 	"Management",
@@ -478,6 +482,7 @@ export function StaffFormPanel({
 	hotelName,
 	businessName,
 	inviterName,
+	accommodation = true,
 }: {
 	open: boolean;
 	staff?: StaffRow | null;
@@ -486,6 +491,8 @@ export function StaffFormPanel({
 	hotelName?: string;
 	businessName?: string;
 	inviterName?: string;
+	/** False at a lounge, bar or restaurant: no Front office role to give. */
+	accommodation?: boolean;
 }) {
 	const router = useRouter();
 	const { run, pending: saving } = useAction();
@@ -667,7 +674,7 @@ export function StaffFormPanel({
 									label="Role"
 									value={form.role}
 									onChange={(v) => set("role", v)}
-									options={ROLE_OPTIONS}
+									options={roleOptionsFor(accommodation)}
 									required
 								/>
 								<SelectField

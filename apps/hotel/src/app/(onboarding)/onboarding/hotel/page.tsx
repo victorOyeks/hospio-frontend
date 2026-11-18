@@ -11,6 +11,8 @@ export default async function Page() {
 			business={load.business}
 			draft={load.draft}
 			user={load.user}
+			kind={load.kind}
+			accommodation={load.accommodation}
 		/>
 	);
 }
