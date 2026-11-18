@@ -319,6 +319,24 @@ export async function paymentStatus(
 	};
 }
 
+/**
+ * Cash at the front office, bar or kitchen goes into that desk's till, and payment-service refuses it while the till is closed.
+ * The payment step asks first so it can say "Open your till first" and open it in place. When the answer can't be read the
+ * step lets the desk carry on (payment-service still checks).
+ */
+export async function cashTill(
+	role?: string,
+): Promise<ActionResult<{ role: string; needed: boolean; open: boolean; message?: string | null }>> {
+	if (!live("payment")) return { ok: true, data: { role: role ?? "FRONT_OFFICE", needed: false, open: true } };
+	const { data, error } = await api("@get/payment/payments/cash-till", {
+		...(await withSession()),
+		query: role ? { role } : {},
+	});
+	if (error || !data)
+		return { ok: false, error: errorMessage(error, "Could not check the till") };
+	return { ok: true, data: data.data };
+}
+
 export type TerminalRole = "FRONT_OFFICE" | "BAR" | "KITCHEN" | "LAUNDRY";
 
 function refreshTerminals() {
