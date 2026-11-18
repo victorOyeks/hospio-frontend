@@ -65,7 +65,7 @@ export function ActionTile({
 	tone?: "default" | "brand";
 }) {
 	const cls = cn(
-		"flex h-16 flex-1 items-center gap-3 rounded-card border border-line px-5 text-[15px] font-semibold transition-colors",
+		"flex h-16 min-w-[180px] flex-1 items-center gap-3 rounded-card border border-line px-5 text-left text-[15px] font-semibold leading-tight transition-colors",
 		tone === "brand"
 			? "bg-brand text-white hover:bg-brand/90"
 			: "bg-card text-ink hover:bg-brand-soft/40",

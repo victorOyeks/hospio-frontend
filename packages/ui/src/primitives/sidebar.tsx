@@ -30,6 +30,8 @@ const SIDEBAR_COOKIE_MAX_AGE = 60 * 60 * 24 * 7;
 const SIDEBAR_WIDTH = "16rem";
 const SIDEBAR_WIDTH_MOBILE = "16rem";
 const SIDEBAR_WIDTH_ICON = "4rem";
+/** Narrower than this (tablets) the desktop sidebar starts collapsed to the icon rail. */
+const SIDEBAR_RAIL_BELOW = 1280;
 const SIDEBAR_KEYBOARD_SHORTCUT = "b";
 
 type SidebarContextProps = {
@@ -87,6 +89,17 @@ function SidebarProvider({
 		},
 		[setOpenProp, open],
 	);
+
+	// Tablets (768-1279px, portrait and landscape): the full 16rem menu left too little room and pages scrolled
+	// sideways, so below 1280px the sidebar starts as the icon rail. The header's menu button opens it in full.
+	React.useEffect(() => {
+		if (openProp !== undefined) return;
+		const mql = window.matchMedia(`(max-width: ${SIDEBAR_RAIL_BELOW - 1}px)`);
+		const apply = () => _setOpen(!mql.matches);
+		apply();
+		mql.addEventListener("change", apply);
+		return () => mql.removeEventListener("change", apply);
+	}, [openProp]);
 
 	// Helper to toggle the sidebar.
 	const toggleSidebar = React.useCallback(() => {

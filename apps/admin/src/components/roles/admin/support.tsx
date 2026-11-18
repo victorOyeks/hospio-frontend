@@ -174,7 +174,7 @@ export function SupportScreen({
 				</button>
 			</PageHeader>
 
-			<div className="grid gap-4 xl:grid-cols-[380px_1fr]">
+			<div className="grid grid-cols-1 gap-4 xl:grid-cols-[380px_minmax(0,1fr)]">
 				<SectionCard
 					title="System alerts"
 					count={alerts.length}

@@ -326,7 +326,7 @@ export function BarTodayScreen({
 					setup → Restaurants & tables.
 				</Note>
 			)}
-			<div className="flex gap-3">
+			<div className="flex flex-wrap gap-3">
 				<ActionTile
 					icon={PlusIcon}
 					label={several ? `New sale at ${outletName}` : "New sale"}

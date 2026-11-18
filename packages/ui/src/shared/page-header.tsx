@@ -22,7 +22,7 @@ export function PageHeader({
 				</h1>
 				{subtitle && <p className="text-sm text-ink-2">{subtitle}</p>}
 			</div>
-			{children && <div className="flex items-center gap-[10px]">{children}</div>}
+			{children && <div className="flex flex-wrap items-center gap-[10px]">{children}</div>}
 		</div>
 	);
 }
