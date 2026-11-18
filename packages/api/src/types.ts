@@ -125,6 +125,7 @@ export type AdminOnboardingData = {
 	fee?: {
 		feeModel: string;
 		feeValue: number;
+		feeAddendumRef?: string;
 		currency?: string;
 		contractStartsOn?: string;
 		contractNotes?: string;

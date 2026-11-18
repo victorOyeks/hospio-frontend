@@ -77,10 +77,23 @@ export async function saveFeeRule(input: {
 	value: number;
 	startsOn: string;
 	endsOn?: string;
+	/** Fee lock: the signed addendum's reference, required for a rate other than the platform default. */
+	feeAddendumRef?: string | null;
 }): Promise<ActionResult<FeeRuleRow>> {
 	if (!live("platform")) {
 		await demoDelay(400);
-		return { ok: true, data: { id: `rule-${Date.now()}`, ...input } };
+		return {
+			ok: true,
+			data: {
+				id: `rule-${Date.now()}`,
+				businessId: input.businessId,
+				model: input.model,
+				value: input.value,
+				startsOn: input.startsOn,
+				endsOn: input.endsOn,
+				addendumRef: input.feeAddendumRef ?? undefined,
+			},
+		};
 	}
 	const { data, error } = await api("@post/platform/admin/fees/rules", {
 		...(await withSession()),
@@ -102,7 +115,21 @@ export async function saveFeeRule(input: {
 			value: Number(r.value),
 			startsOn: r.startsOn ?? undefined,
 			endsOn: r.endsOn ?? undefined,
+			addendumRef: r.addendumRef ?? undefined,
 		},
+	};
+}
+
+/**
+ * Fee lock: the platform default share of daily sales (settings fees.revenuePct) that every business pays unless a signed addendum
+ * says otherwise; 1.5 when settings can't be read.
+ */
+export async function loadPlatformFeePct(): Promise<ActionResult<number>> {
+	const settings = await adminData.settings.get();
+	const pct = Number(settings.fees?.revenuePct);
+	return {
+		ok: true,
+		data: Number.isFinite(pct) && pct >= 0 && settings.fees?.revenuePct != null ? pct : 1.5,
 	};
 }
 

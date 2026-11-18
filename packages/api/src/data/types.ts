@@ -1426,6 +1426,8 @@ export type BusinessRow = {
 	feeModel: string;
 	feeModelKey?: string;
 	feeValue: number;
+	/** Fee lock: the signed addendum behind a rate other than the platform default. */
+	feeAddendumRef?: string;
 	mrr: number;
 	since: string;
 	lastActive?: string;

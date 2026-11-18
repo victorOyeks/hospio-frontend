@@ -1172,6 +1172,7 @@ export const adminData = {
 				value: n(r.value),
 				startsOn: s(r.startsOn),
 				endsOn: s(r.endsOn),
+				addendumRef: s(r.addendumRef),
 			}));
 		},
 	},

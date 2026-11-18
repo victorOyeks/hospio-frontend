@@ -19,7 +19,6 @@ import {
 	checkCity,
 	checkEmail,
 	checkName,
-	checkPercent,
 	checkPhone,
 	checkRegistration,
 	only,
@@ -32,6 +31,12 @@ import {
 	referrerOptions,
 	useReferrers,
 } from "../business/referred-by";
+import {
+	FeeLockField,
+	feeLockValue,
+	showFeeLockError,
+	useFeeLock,
+} from "../business/fee-lock";
 import type { WizardCtx } from "./wizard";
 import {
 	nextStep,
@@ -449,21 +454,22 @@ const FEE_MODEL = "PERCENT_OF_SALES" as const;
 export function FeeStep({ ctx }: { ctx: WizardCtx }) {
 	const { business, data } = ctx;
 	const saved = data.fee;
-	// The rate saved for this business (on the daily-sales model), else the usual 1.5 %.
-	const savedValue =
-		saved?.feeModel === FEE_MODEL && saved.feeValue != null
-			? saved.feeValue
-			: business.feeModelKey === FEE_MODEL && business.feeValue
-				? business.feeValue
-				: 1.5;
-	const [pct, setPct] = useState(String(savedValue));
+	// The rate saved for this business (on the daily-sales model): the platform default unless a signed addendum says otherwise.
+	const fromBusiness = business.feeModelKey === FEE_MODEL && !!business.feeValue;
+	const lock = useFeeLock(
+		fromBusiness
+			? business.feeValue
+			: saved?.feeModel === FEE_MODEL
+				? saved.feeValue
+				: null,
+		fromBusiness ? business.feeAddendumRef : saved?.feeAddendumRef,
+	);
 	const [contractStartsOn, setStartsOn] = useState(
 		saved?.contractStartsOn ?? business.contractStartsOn ?? "",
 	);
 	const [contractNotes, setNotes] = useState(
 		saved?.contractNotes ?? business.contractNotes ?? "",
 	);
-	const [error, setError] = useState<string | undefined>();
 	const { pending, busy } = useWizardSave();
 	// Referred by changes through platform-service at once (with a reason), never through the draft or the business PUT.
 	const referrers = useReferrers();
@@ -488,26 +494,29 @@ export function FeeStep({ ctx }: { ctx: WizardCtx }) {
 
 	const save = () =>
 		busy(async () => {
-			const problem = checkPercent(pct);
-			setError(problem);
-			if (problem) return;
-			const feeValue = Number(pct.trim().replace(",", "."));
+			const fee = feeLockValue(lock);
+			if (!fee) return;
+			const { feeValue, feeAddendumRef } = fee;
 			const patch = {
 				feeModel: FEE_MODEL,
 				feeValue,
+				feeAddendumRef,
 				contractStartsOn: contractStartsOn || null,
 				contractNotes: contractNotes.trim(),
 			};
 			const b = await saveFields<"fee">(
 				ctx,
 				patch,
-				(m) => (/share|fee|percent/i.test(m) ? "fee" : null),
-				(e) => setError(e.fee),
+				(m) => (/share|fee|percent|addendum/i.test(m) ? "fee" : null),
+				(e) => {
+					if (e.fee) showFeeLockError(lock, e.fee);
+				},
 			);
 			if (!b) return;
 			const row = await ctx.saveStep("fee", {
 				feeModel: FEE_MODEL,
 				feeValue,
+				feeAddendumRef: feeAddendumRef ?? undefined,
 				currency: business.currency ?? "NGN",
 				contractStartsOn: patch.contractStartsOn ?? undefined,
 				contractNotes: patch.contractNotes || undefined,
@@ -527,18 +536,7 @@ export function FeeStep({ ctx }: { ctx: WizardCtx }) {
 				title="Hospio360 fee"
 				subtitle={`${feeModelLabels.PERCENT_OF_SALES}: a share of each day's sales, debited each morning from the hotel's Moniepoint or OPay account. A statement for each day is emailed to the owner.`}
 			>
-				<TextField
-					label="Share of daily sales (%)"
-					value={pct}
-					onChange={(v) => {
-						setPct(v);
-						setError(undefined);
-					}}
-					placeholder="1.5"
-					required
-					hint="1.5 % unless agreed otherwise · 0 to 100, up to two decimals"
-					error={error}
-				/>
+				<FeeLockField lock={lock} disabled={!ctx.editable} />
 			</StepCard>
 			<StepCard title="Contract">
 				<FieldRow>

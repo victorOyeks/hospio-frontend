@@ -213,6 +213,7 @@ const demoBusinessFrom = (
 	marketerId: input.marketerId ?? null,
 	feeModel: input.feeModel ?? null,
 	feeValue: input.feeValue ?? null,
+	feeAddendumRef: input.feeAddendumRef ?? null,
 	currency: input.currency ?? "NGN",
 	country: input.country ?? "NG",
 	timezone: input.timezone ?? "Africa/Lagos",
