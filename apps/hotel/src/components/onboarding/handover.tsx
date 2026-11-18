@@ -20,7 +20,7 @@ import { btn } from "@hospio/ui/shared/ui";
 import { cn } from "@hospio/ui/utils";
 
 const FEE: Record<string, (v: number) => string> = {
-	PERCENT_OF_SALES: (v) => `${v}% of each day's sales, debited daily from your POS provider account`,
+	PERCENT_OF_SALES: (v) => `${v}% of each day's sales, billed on one monthly invoice`,
 	PERCENT_OF_PAYMENTS: (v) => `${v}% of guest payments`,
 	PERCENT_OF_BOOKINGS: (v) => `${v}% of bookings`,
 	PER_ROOM_NIGHT: (v) => `₦${v.toLocaleString("en-NG")} per room-night`,

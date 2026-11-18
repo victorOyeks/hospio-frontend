@@ -4,7 +4,7 @@ import { LegalIndex } from "@/components/legal";
 export const metadata: Metadata = {
 	title: "Legal",
 	description:
-		"Hospio360 terms of service, privacy policy, data processing terms, fees and daily debit authorisation, device, support, referral partner and staff terms. Hospio360 is a product of Oyeks Global Limited.",
+		"Hospio360 terms of service, privacy policy, data processing terms, fees and monthly invoice, device, support, referral partner and staff terms. Hospio360 is a product of Oyeks Global Limited.",
 	alternates: { canonical: "/legal" },
 };
 

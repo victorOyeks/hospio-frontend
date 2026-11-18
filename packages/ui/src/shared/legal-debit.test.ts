@@ -23,25 +23,25 @@ const doc = (key: string, ratePct?: number | null): LegalDoc => ({
 const html = (node: ReactNode) => renderToStaticMarkup(createElement(Fragment, null, node));
 const text = (markup: string) => markup.replace(/<[^>]+>/g, "").replace(/&#x27;|&apos;/g, "'");
 
-describe("the owner's debit box states the business's rate", () => {
+describe("the owner's monthly invoice box states the business's rate", () => {
 	test("an addendum rate from the server is the rate in the box", () => {
 		expect(text(html(createElement(DebitLabel, { doc: doc("DEBIT", 1.2) })))).toContain(
-			"to debit 1.2% of my business's daily sales from my business account each day at 06:00.",
+			"I agree to pay Hospio360's monthly invoice — 1.2% of my business's daily sales — within 7 days of issue.",
 		);
 	});
 
 	test("the platform default when the server gives none (sign-up shows the public default)", () => {
-		expect(text(html(createElement(DebitLabel, {})))).toContain("to debit 1.5% of my business's daily sales");
-		expect(text(html(createElement(DebitLabel, { ratePct: 2 })))).toContain("to debit 2% of my business's daily sales");
+		expect(text(html(createElement(DebitLabel, {})))).toContain("monthly invoice — 1.5% of my business's daily sales — within 7 days");
+		expect(text(html(createElement(DebitLabel, { ratePct: 2 })))).toContain("monthly invoice — 2% of my business's daily sales");
 		expect(formatRatePct(1.25)).toBe("1.25%");
 		expect(formatRatePct(null)).toBe("1.5%");
 	});
 
 	test("the boxes of a new-version or first-sign-in modal carry the rate, and the acceptance sends it", () => {
 		const pending = [doc("TERMS"), doc("PRIVACY"), doc("DPA"), doc("DEBIT", 1.2)];
-		const debitBox = boxesFor(pending).find((b) => b.id === "DEBIT");
-		expect(debitBox).toBeDefined();
-		expect(text(html(debitBox?.label))).toContain("debit 1.2% of my business's daily sales");
+		const invoiceBox = boxesFor(pending).find((b) => b.id === "DEBIT");
+		expect(invoiceBox).toBeDefined();
+		expect(text(html(invoiceBox?.label))).toContain("monthly invoice — 1.2% of my business's daily sales");
 		expect(pending.map(acceptItem)).toEqual([
 			{ key: "TERMS", version: "TERMS-2026-11" },
 			{ key: "PRIVACY", version: "PRIVACY-2026-11" },

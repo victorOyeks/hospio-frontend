@@ -2,9 +2,9 @@
   {
     "slug": "terms",
     "title": "Terms of Service",
-    "version": "TOS-2026-11",
+    "version": "TOS-2026-11B",
     "effectiveDate": "2026-11-18",
-    "summary": "The agreement between your business and Oyeks Global Limited for using Hospio360: what we provide, the 1.5% daily platform fee, your responsibilities, data, liability and how either side can end it.",
+    "summary": "The agreement between your business and Oyeks Global Limited for using Hospio360: what we provide, the 1.5% platform fee billed on one monthly invoice, your responsibilities, data, liability and how either side can end it.",
     "sections": [
       {
         "heading": "About this document",
@@ -17,19 +17,20 @@
         "heading": "1. Definitions and interpretation",
         "paragraphs": [
           "1.1 In these Terms the following words have these meanings:",
-          "(a) **Agreement** means these Terms together with the Privacy Policy, the Data Processing Terms, the Fees and daily debit authorisation, the Support & Services terms, the Devices & equipment terms (where you take devices or a data plan), any Order Form and any signed addendum.",
+          "(a) **Agreement** means these Terms together with the Privacy Policy, the Data Processing Terms, the Fees and monthly invoice terms, the Support & Services terms, the Devices & equipment terms (where you take devices or a data plan), any Order Form and any signed addendum.",
           "(b) **Authorised User** means a person you (or we, at your request) give a Hospio360 login, such as the owner, managers, front office, housekeeping, kitchen, bar, inventory and finance staff.",
-          "(c) **Business Account** means the business account your venue connects to Hospio360 for payments (currently a Moniepoint or OPay business account), from which the daily Platform Fee is debited.",
+          "(c) **Business Account** means the business account your Venue connects to Hospio360 for taking guest payments (currently a Moniepoint or OPay business account). It is used only for guest payments; our fees are billed on the Monthly Invoice.",
           "(d) **Business Day** means a day other than a Saturday, Sunday or public holiday in Nigeria.",
           "(e) **Customer Data** means all information entered into or created in the Platform by or for your business, including Guest Data and staff records.",
           "(f) **Daily Sales** has the meaning in clause 5.3.",
           "(g) **Device Fee** means any amount payable for devices or a data plan under the Devices & equipment terms.",
           "(h) **Effective Date** means the date you accept these Terms (or the start date in a signed Order Form).",
           "(i) **Guest Data** means personal data about your guests and customers held in the Platform.",
-          "(j) **Platform** means Hospio360, the cloud hospitality management software provided by Oyeks Global, including its web apps, tablet apps, owner and staff screens and related online services.",
-          "(k) **Platform Fee** means the fee described in clause 5.",
-          "(l) **Services** means access to and use of the Platform, the included support, and any other service we agree to provide to you.",
-          "(m) **Venue** means each hotel, lounge, bar, restaurant or other venue of your business that is set up in Hospio360.",
+          "(j) **Monthly Invoice** means the invoice for your business described in clause 5.4.",
+          "(k) **Platform** means Hospio360, the cloud hospitality management software provided by Oyeks Global, including its web apps, tablet apps, owner and staff screens and related online services.",
+          "(l) **Platform Fee** means the fee described in clause 5.",
+          "(m) **Services** means access to and use of the Platform, the included support, and any other service we agree to provide to you.",
+          "(n) **Venue** means each hotel, lounge, bar, restaurant or other venue of your business that is set up in Hospio360.",
           "1.2 Headings are for convenience only. \"Including\" means \"including without limitation\". A reference to a law includes that law as amended or replaced. Times are Lagos time (West Africa Time)."
         ]
       },
@@ -38,7 +39,7 @@
         "paragraphs": [
           "2.1 From the Effective Date and for as long as the Agreement continues, we give your business a non-exclusive, non-transferable right for its Authorised Users to use the Platform to run your Venues.",
           "2.2 Depending on the modules switched on for you, the Platform includes: reservations and front desk, guest folios and billing, restaurant, bar and kitchen orders, housekeeping and laundry, maintenance, inventory and stores, staff management, payments and point-of-sale (POS) integration, reports, an owner view, and guest messaging by email and WhatsApp. We may improve, change or replace features over time, but we will not materially reduce the core functions of the Platform without telling you first.",
-          "2.3 Some features depend on third-party services, such as POS and payment providers (Moniepoint, OPay), payment links (Paystack) and messaging providers. Their availability is outside our control, and their own terms apply to your account with them.",
+          "2.3 Some features depend on third-party services, such as POS and payment providers (Moniepoint, OPay), payment links (Paystack, which also takes payment of your Monthly Invoice) and messaging providers. Their availability is outside our control, and their own terms apply to your account with them.",
           "2.4 If we set up your business for you, we set up your business, Venues and first logins and hand them over to your owner login. You are responsible for checking the set-up when it is handed over."
         ]
       },
@@ -57,31 +58,33 @@
           "4.1 You must:",
           "(a) give accurate business, Venue, owner and contact details, and keep them up to date;",
           "(b) provide and maintain the devices, internet connection and POS accounts needed to use the Platform (unless we supply them under the Devices & equipment terms);",
-          "(c) keep your Business Account open, funded and connected for the daily debit described in clause 5;",
-          "(d) comply with all laws that apply to your business, including tax, consumer protection, licensing and data protection laws, and tell guests about any service charge you choose to apply (clause 5.9);",
+          "(c) pay each Monthly Invoice in full by its due date (clause 5);",
+          "(d) comply with all laws that apply to your business, including tax, consumer protection, licensing and data protection laws, and tell guests about any service charge you choose to apply (clause 5.11);",
           "(e) make sure you have a lawful basis, and have given any notices needed, to put Guest Data and staff data into the Platform; and",
-          "(f) check the reports and statements the Platform produces and tell us promptly about any error."
+          "(f) check the reports, statements and invoices the Platform produces and tell us promptly about any error."
         ]
       },
       {
         "heading": "5. Fees and payment",
         "paragraphs": [
           "5.1 The Platform Fee is **1.5% of each Venue's Daily Sales**. It is the same rate for every Hospio360 customer. A different rate applies only if it is agreed in a written addendum signed by both parties; the addendum reference is recorded against your business. There is no cap.",
-          "5.2 The Platform Fee is worked out for each Lagos calendar day (00:00 to 24:00). Shortly after midnight the Platform calculates the previous day's fee and sends a daily statement to the owner's email. The same figures are shown in the Platform on the owner's **Hospio fees** screen.",
-          "5.3 **Daily Sales** means what each Venue sold that day, excluding VAT, as recorded in the Platform: folio charges (less discounts and voids); restaurant, bar and kitchen amounts paid at the counter; laundry paid directly; and deposits kept on a cancellation or no-show. Anything charged to a room counts once, on the folio. Any guest service charge under clause 5.9 is not part of Daily Sales.",
-          "5.4 You authorise us to debit the Platform Fee (and any Device Fee due by that route) automatically from your Business Account at or around **06:00** each day. You give this authority by ticking the daily debit box when you accept these Terms (see the Fees and daily debit authorisation). There are no invoices or payment links for the Platform Fee.",
-          "5.5 If a debit fails or only part is collected: (a) the unpaid amount is carried over and added to the next day's debit; (b) a part payment pays the Platform Fee first and then any Device Fee; and (c) if any amount stays unpaid for more than **3 consecutive days**, we may pause card payments pushed from the Platform to the Venue's POS terminals until the arrears are paid. Recording payments by hand in the Platform never stops. Continued non-payment is dealt with under clause 7.",
-          "5.6 Where automatic debit is not yet switched on for your Business Account (for example while the provider's debit service is being set up), the Platform still produces daily statements. Fees for that period are not collected, unless we agree otherwise with you in writing.",
-          "5.7 Other charges apply only where you choose them in the Platform or in writing, and are payable as stated there, including: guest message charges (emails, SMS and WhatsApp messages your Venues send to guests, priced per message and invoiced monthly); device instalments and data plans (under the Devices & equipment terms); and paid services under the Support & Services terms.",
-          "5.8 We may change the Platform Fee rate or other prices by giving you at least **30 days'** notice by email and in the Platform. If you do not accept the change, you may end the Agreement by notice before the change takes effect, without any early termination charge.",
-          "5.9 **Guest service charge.** The owner may choose, for each Venue, to pass the Platform Fee on to guests as a line on folios, counter orders and receipts shown as \"Service charge (1.5%)\". The choice applies to new charges only from the moment it is made, and does not apply to deposits kept on a no-show. The Device Fee is never passed on to guests. You alone decide whether to apply the service charge and are responsible for telling guests about it and for its legal and tax treatment. It does not change your obligation to pay the Platform Fee.",
-          "5.10 You may query any daily amount within **7 days** of the statement by contacting Hospio360 support. We will investigate and, if an amount was wrongly calculated or debited, correct it by a credit against later fees or by a refund within **10 Business Days** of agreeing the correction."
+          "5.2 The Platform Fee is worked out for each Lagos calendar day (00:00 to 24:00). Shortly after midnight the Platform calculates the previous day's fee and shows it, with the running total for the month, on the owner's **Hospio fees** screen. The fee is billed on the Monthly Invoice; **we never debit your Business Account or any other account**.",
+          "5.3 **Daily Sales** means what each Venue sold that day, excluding VAT, as recorded in the Platform, whatever the payment method (cash, card, transfer or room charge): folio charges (less discounts and voids); restaurant, bar and kitchen amounts paid at the counter; laundry paid directly; and deposits kept on a cancellation or no-show. Anything charged to a room counts once, on the folio. Any guest service charge under clause 5.11 is not part of Daily Sales.",
+          "5.4 **Monthly Invoice.** On the **1st** of each month at **07:00** we issue one invoice to your business for the previous calendar month (numbered, for example, HIN-202611-0001), send it to the owner's email and show it in the Platform. It has these sections: (a) **Platform fee**: for each Venue, its Daily Sales total × the rate = the fee, with a day-by-day breakdown the owner can view and download; (b) **Guest messages**: the per-message charges for guest emails, SMS and WhatsApp messages sent in the month; (c) **Devices & internet**: device instalments and Data Plan charges scheduled in the month, and any from-transactions device amount under the Devices & equipment terms; and (d) any credits and adjustments.",
+          "5.5 If a Monthly Invoice totals less than **₦1,000**, it is not payable that month and the amount is carried forward to the next Monthly Invoice.",
+          "5.6 Each Monthly Invoice is **due 7 days after it is issued** (the 8th of the month), with a **grace period of 3 days** after the due date (to the 11th). You pay it with the **Pay now** link on the invoice, which opens Hospio360's Paystack payment page for the full outstanding amount (card, bank transfer or USSD); invoices cannot be part-paid online. We may also accept a bank transfer by agreement and record it. A receipt is sent by email with a receipt PDF. Notices and reminders are sent by email to the owner and in the Platform, as set out in the Fees and monthly invoice terms.",
+          "5.7 If a Monthly Invoice is still unpaid at the end of its grace period, from **06:00 on the 12th** your business is restricted until it is paid. Everyone can still sign in. While restricted: (a) **paused**: card and transfer payments pushed to POS terminals, recording card and transfer payments, new bar and kitchen sales and tabs, and new bookings and walk-ins; (b) **still allowed**: viewing everything, checking guests out, recording **cash** payments on existing bills and tabs so guests can leave, reports and exports, and paying the invoice. The restriction lifts automatically within minutes of payment being confirmed, or when we record an offline payment or grant an extension. Continued non-payment is dealt with under clause 7.3.",
+          "5.8 We may, at our discretion, grant a one-time extension of a due date, issue a credit note or adjustment, or void a Monthly Invoice and issue a corrected one.",
+          "5.9 Other charges apply only where you choose them in the Platform or in writing, and are payable as stated there, including: guest message charges (emails, SMS and WhatsApp messages your Venues send to guests, priced per message); device instalments, from-transactions device amounts and Data Plans (under the Devices & equipment terms), all billed on the Monthly Invoice; and paid services under the Support & Services terms, charged as quoted.",
+          "5.10 We may change the Platform Fee rate or other prices by giving you at least **30 days'** notice by email and in the Platform. If you do not accept the change, you may end the Agreement by notice before the change takes effect, without any early termination charge.",
+          "5.11 **Guest service charge.** The owner may choose, for each Venue, to pass the Platform Fee on to guests as a line on folios, counter orders and receipts shown as \"Service charge (1.5%)\". The choice applies to new charges only from the moment it is made, and does not apply to deposits kept on a no-show. The Device Fee is never passed on to guests. You alone decide whether to apply the service charge and are responsible for telling guests about it and for its legal and tax treatment. It does not change your obligation to pay the Platform Fee.",
+          "5.12 You may query any line of a Monthly Invoice within **7 days** of its issue by contacting Hospio360 support. We will investigate and, if an amount was wrongly calculated or charged, correct it by a credit note on your next Monthly Invoice or by a refund within **10 Business Days** of agreeing the correction."
         ]
       },
       {
         "heading": "6. Taxes",
         "paragraphs": [
-          "6.1 Fees are stated without value added tax (VAT) and other applicable taxes, which are added where the law requires. Each party is responsible for its own income taxes. If the law requires you to deduct withholding tax, you must give us the tax credit note promptly."
+          "6.1 Fees are stated exclusive of value added tax (VAT) and other applicable taxes. We do not currently add VAT to our fees; if VAT becomes chargeable on them, we will add it at the applicable rate and show it on the Monthly Invoice. Each party is responsible for its own income taxes. If the law requires you to deduct withholding tax, you must give us the tax credit note promptly."
         ]
       },
       {
@@ -89,7 +92,7 @@
         "paragraphs": [
           "7.1 The Agreement starts on the Effective Date and continues for an initial term of **12 months**, and then renews automatically for further periods of 12 months unless either party gives at least **30 days'** notice before the end of the current term.",
           "7.2 Either party may end the Agreement by notice if the other party: (a) commits a material breach that is not remedied within **14 days** of a notice describing it; or (b) becomes insolvent, enters liquidation or receivership, or makes an arrangement with its creditors.",
-          "7.3 We may suspend all or part of the Services, after giving reasonable notice where practicable, if: (a) any amount is unpaid for more than 14 days; (b) you withdraw the daily debit authorisation without agreeing another payment method with us; or (c) suspension is reasonably necessary to protect the Platform, other customers or data. We will restore the Services promptly once the cause is resolved.",
+          "7.3 If a Monthly Invoice is unpaid after its grace period, the restriction in clause 5.7 (and in the Fees and monthly invoice terms) applies. If it is still unpaid **30 days** after its due date, we may suspend the Services in full after giving you **7 days' notice**. We may also suspend all or part of the Services, after giving reasonable notice where practicable, if suspension is reasonably necessary to protect the Platform, other customers or data. We will restore the Services promptly once the cause is resolved.",
           "7.4 When the Agreement ends: (a) your right to use the Platform ends; (b) all amounts due become payable at once; (c) for **30 days** afterwards (the **export window**) you may ask us for an export of your Customer Data in a commonly used format (such as CSV or spreadsheet files), which we provide free of charge once; (d) after the export window, we delete or anonymise Customer Data within **60 days**, except information we must keep by law (for example records of fees and payments) and copies in backups that are overwritten in the normal cycle; and (e) devices and outstanding device balances are dealt with under the Devices & equipment terms.",
           "7.5 Clauses that by their nature should survive the end of the Agreement (including fees owed, confidentiality, data protection, limitation of liability, indemnities and disputes) survive."
         ]
@@ -165,7 +168,7 @@
       {
         "heading": "17. Notices",
         "paragraphs": [
-          "17.1 Notices under the Agreement must be in writing and sent by email: to us at **hello@oyeksglobal.com**, and to you at the owner's email address on your Hospio360 account. Notices may also be delivered by hand or courier to our registered office in Lagos, Nigeria. An email notice is treated as received on the next Business Day after it is sent, unless the sender receives a delivery failure message. Day-to-day messages (such as daily statements and reminders) may be sent through the Platform, by email or by WhatsApp."
+          "17.1 Notices under the Agreement must be in writing and sent by email: to us at **hello@oyeksglobal.com**, and to you at the owner's email address on your Hospio360 account. Notices may also be delivered by hand or courier to our registered office in Lagos, Nigeria. An email notice is treated as received on the next Business Day after it is sent, unless the sender receives a delivery failure message. Day-to-day messages may be sent through the Platform, by email or by WhatsApp; Monthly Invoices, receipts and billing reminders are sent by email to the owner and in the Platform only."
         ]
       },
       {
@@ -198,7 +201,7 @@
       {
         "heading": "21. Order of precedence",
         "paragraphs": [
-          "21.1 If documents in the Agreement conflict, this order applies (highest first): (a) a signed addendum, for the specific point it changes; (b) any signed Order Form; (c) the Data Processing Terms, for personal data; (d) the Devices & equipment terms, for devices and data plans; (e) these Terms and the Fees and daily debit authorisation; (f) the Support & Services terms."
+          "21.1 If documents in the Agreement conflict, this order applies (highest first): (a) a signed addendum, for the specific point it changes; (b) any signed Order Form; (c) the Data Processing Terms, for personal data; (d) the Devices & equipment terms, for devices and data plans; (e) these Terms and the Fees and monthly invoice terms; (f) the Support & Services terms."
         ]
       },
       {
@@ -259,9 +262,9 @@
           "**Brevo (Sendinblue SAS)** · Service: Sending email: booking confirmations, receipts, folios, statements, invites, password resets · Data involved: Recipient name and email address, message content",
           "**Infobip Ltd** · Service: Sending WhatsApp messages (and SMS sign-in codes where Termii is not used) · Data involved: Recipient name and phone number, message content",
           "**Termii** · Service: SMS phone verification (sign-in) codes only · Data involved: Phone number, the one-time code",
-          "**Moniepoint** · Service: POS terminals, card and transfer payments, daily fee debit (where used) · Data involved: Payment amounts and references, terminal IDs, merchant account details",
-          "**OPay** · Service: POS terminals, card and transfer payments, daily fee debit (where used) · Data involved: Payment amounts and references, terminal IDs, merchant account details",
-          "**Paystack** · Service: Payment links for device and guest-message invoices · Data involved: Payer name, email, amount, invoice reference",
+          "**Moniepoint** · Service: POS terminals, card and transfer payments · Data involved: Payment amounts and references, terminal IDs, merchant account details",
+          "**OPay** · Service: POS terminals, card and transfer payments · Data involved: Payment amounts and references, terminal IDs, merchant account details",
+          "**Paystack** · Service: Payment links for Hospio360 invoice payments · Data involved: Payer name, email, amount, invoice reference",
           "5.2 We may also share data: with the venue that is the controller of it; with our professional advisers; with regulators, law enforcement or courts where the law requires; and with a buyer of all or part of our business, under confidentiality."
         ]
       },
@@ -457,9 +460,9 @@
           "**Brevo (Sendinblue SAS)** · Service: Sending email: booking confirmations, receipts, folios, statements, invites, password resets · Data involved: Recipient name and email address, message content · Location: European Union (France)",
           "**Infobip Ltd** · Service: Sending WhatsApp messages (and SMS sign-in codes where Termii is not used) · Data involved: Recipient name and phone number, message content · Location: Outside Nigeria (Infobip's processing region)",
           "**Termii** · Service: SMS phone verification (sign-in) codes only · Data involved: Phone number, the one-time code · Location: Nigeria",
-          "**Moniepoint** · Service: POS terminals, card and transfer payments, daily fee debit (where used) · Data involved: Payment amounts and references, terminal IDs, merchant account details · Location: Nigeria",
-          "**OPay** · Service: POS terminals, card and transfer payments, daily fee debit (where used) · Data involved: Payment amounts and references, terminal IDs, merchant account details · Location: Nigeria",
-          "**Paystack** · Service: Payment links for device and guest-message invoices · Data involved: Payer name, email, amount, invoice reference · Location: Nigeria"
+          "**Moniepoint** · Service: POS terminals, card and transfer payments · Data involved: Payment amounts and references, terminal IDs, merchant account details · Location: Nigeria",
+          "**OPay** · Service: POS terminals, card and transfer payments · Data involved: Payment amounts and references, terminal IDs, merchant account details · Location: Nigeria",
+          "**Paystack** · Service: Payment links for Hospio360 invoice payments · Data involved: Payer name, email, amount, invoice reference · Location: Nigeria"
         ]
       },
       {
@@ -472,15 +475,15 @@
   },
   {
     "slug": "fees",
-    "title": "Fees and daily debit authorisation",
-    "version": "FEES-2026-11",
+    "title": "Fees and monthly invoice",
+    "version": "FEES-2026-11B",
     "effectiveDate": "2026-11-18",
-    "summary": "Hospio360 costs 1.5% of each venue's daily sales, the same for every business, debited from your business account at 06:00 each day. No subscription, no invoices.",
+    "summary": "Hospio360 costs 1.5% of each venue's daily sales, the same for every business, billed on one monthly invoice issued on the 1st and paid within 7 days through a Paystack link. No subscription and no debits.",
     "sections": [
       {
         "heading": "About this document",
         "paragraphs": [
-          "This page explains the Hospio360 platform fee and the daily debit authority you give when you tick the second box at sign-up or first sign-in: \"I authorise Hospio360 (a product of Oyeks Global Limited) to debit 1.5% of my business's daily sales from my business account each day at 06:00.\" It forms part of the Hospio360 Terms of Service (clause 5)."
+          "This page explains the Hospio360 platform fee and the monthly invoice you agree to pay when you tick the second box at sign-up or first sign-in: \"I agree to pay Hospio360's monthly invoice — 1.5% of my business's daily sales — within 7 days of issue.\" It forms part of the Hospio360 Terms of Service (clause 5)."
         ]
       },
       {
@@ -493,55 +496,84 @@
       {
         "heading": "2. What counts as daily sales",
         "paragraphs": [
-          "2.1 Daily sales are what each venue sold in the Lagos calendar day (00:00 to 24:00), excluding VAT, as recorded in Hospio360: folio charges (less discounts and voids); restaurant, bar and kitchen amounts paid at the counter; laundry paid directly; and deposits kept on a cancellation or no-show. Anything charged to a room counts once, on the folio. A guest service charge (below) is not part of daily sales."
+          "2.1 Daily sales are what each venue sold in the Lagos calendar day (00:00 to 24:00), excluding VAT, as recorded in Hospio360, whatever the payment method (cash, card, transfer or room charge): folio charges (less discounts and voids); restaurant, bar and kitchen amounts paid at the counter; laundry paid directly; and deposits kept on a cancellation or no-show. Anything charged to a room counts once, on the folio. A guest service charge (section 8) is not part of daily sales.",
+          "2.2 Shortly after midnight Hospio360 works out the previous day's fee for each venue and shows it, with the running total for the month, on the owner's **Hospio fees** screen. The fee is billed on the monthly invoice. **Hospio360 never debits your business account or any other account.**"
         ]
       },
       {
-        "heading": "3. Your business account",
+        "heading": "3. The monthly invoice",
         "paragraphs": [
-          "3.1 Your **business account** is the business account your venue connects to Hospio360 for payments, currently a Moniepoint or OPay business account. The daily fee is debited from that account."
+          "3.1 Your business gets **one invoice a month**, issued on the **1st at 07:00** (Lagos time) for the previous calendar month and numbered like **HIN-202611-0001**. It is emailed to the owner and shown in Hospio360.",
+          "3.2 The invoice has these sections:",
+          "(a) **Platform fee**: one line per location (venue): its sales total for the month × your rate = the fee. The owner can view and download the day-by-day breakdown.",
+          "(b) **Guest messages**: the per-message charges for the guest emails, SMS and WhatsApp messages your venues sent in the month (these used to be invoiced separately).",
+          "(c) **Devices & internet**: device instalments and the data plan scheduled in the month and, for a device package paid from transactions, the device rate (normally **2.5%**) of daily sales until the device balance reaches ₦0 (see the Devices & equipment terms).",
+          "(d) **Credits and adjustments**: any credit note, correction or amount carried forward.",
+          "3.3 If an invoice totals less than **₦1,000**, it is not payable that month: the amount is carried forward to the next month's invoice.",
+          "3.4 Fees are stated exclusive of VAT. Hospio360 does not currently add VAT. If VAT becomes chargeable on our fees, we will add it at the applicable rate and show it on the invoice."
         ]
       },
       {
-        "heading": "4. The daily debit",
+        "heading": "4. Due date, reminders and grace period",
         "paragraphs": [
-          "4.1 Shortly after midnight Hospio360 works out the previous day's fee and sends a daily statement to the owner's email. The same figures are on the owner's **Hospio fees** screen.",
-          "4.2 At or around **06:00** each day the fee is debited automatically from your business account. There are no invoices or payment links for the platform fee.",
-          "4.3 If you take a device package paid from transactions, the device amount is added to the same daily debit until the device balance reaches ₦0 (see the Devices & equipment terms). A part debit pays the platform fee first, then the device amount.",
-          "4.4 Until automatic debit is switched on for your business account, statements are still produced but the fee for that period is not collected, unless we agree otherwise with you in writing."
+          "4.1 Each invoice is **due 7 days after it is issued** (the **8th**). There is a **grace period of 3 days** after the due date (to the **11th**).",
+          "4.2 Billing notices are sent by email to the owner and in the app (the bell and a banner for the owner and managers). We do not send billing notices by SMS or WhatsApp. You receive:",
+          "(a) on issue (the 1st): the invoice, with a **Pay now** link;",
+          "(b) reminders on the 3 mornings up to the due date (the **6th, 7th and 8th**);",
+          "(c) overdue reminders on the **9th and 10th**; and",
+          "(d) a final warning on the **11th** stating exactly what will pause and when.",
+          "4.3 Reminders stop as soon as the invoice is paid."
         ]
       },
       {
-        "heading": "5. If a debit fails",
+        "heading": "5. If an invoice is not paid",
         "paragraphs": [
-          "5.1 An unpaid amount is carried over and added to the next day's debit.",
-          "5.2 If an amount stays unpaid for more than **3 consecutive days**, card payments pushed from Hospio360 to your venue's POS terminals may be paused until it is paid. Recording payments by hand never stops."
+          "5.1 If an invoice is still unpaid at the end of the grace period, your business is restricted from **06:00 on the 12th** until it is paid. Everyone can still sign in.",
+          "5.2 **Paused** while restricted:",
+          "(a) card and transfer payments pushed to POS terminals, and recording card or transfer payments;",
+          "(b) new bar and kitchen sales and new tabs; and",
+          "(c) new bookings and walk-ins.",
+          "5.3 **Still allowed** while restricted:",
+          "(a) viewing everything;",
+          "(b) checking guests out;",
+          "(c) recording **cash** payments on existing bills and tabs, so guests can leave;",
+          "(d) reports and exports; and",
+          "(e) paying the invoice.",
+          "5.4 The restriction lifts automatically within minutes of payment being confirmed, or when Hospio360 records an offline payment or grants an extension.",
+          "5.5 If an invoice is still unpaid **30 days** after its due date, Oyeks Global may suspend the Services in full after giving **7 days'** notice (Terms of Service clause 7.3)."
         ]
       },
       {
-        "heading": "6. Queries and corrections",
+        "heading": "6. Paying",
         "paragraphs": [
-          "6.1 You may query any daily amount within **7 days** of the statement by contacting Hospio360 support (in the app or at hello@oyeksglobal.com). We reply within **5 Business Days**. If an amount was wrongly calculated or debited, we correct it by a credit against later fees or a refund within **10 Business Days** of agreeing the correction. This does not affect your rights under your provider's own dispute process."
+          "6.1 Tap **Pay now** on the invoice (in the email or in the app). It opens Hospio360's Paystack payment link for the **full outstanding amount**, payable by card, bank transfer or USSD. Invoices cannot be part-paid online.",
+          "6.2 When payment is confirmed you get a receipt by email with a receipt PDF, and the invoice shows as paid in the app.",
+          "6.3 By agreement with Hospio360 you may pay by bank transfer instead; we record the payment against the invoice once it is received."
         ]
       },
       {
-        "heading": "7. Passing the fee to guests (optional)",
+        "heading": "7. Queries, corrections and extensions",
         "paragraphs": [
-          "7.1 The owner may choose, for each venue, to show the fee to guests as \"Service charge (1.5%)\" on folios, counter orders and receipts. It applies to new charges from the moment it is switched on, never to kept no-show deposits, and never includes device amounts. You decide whether to use it and are responsible for telling guests about it and for its tax treatment."
+          "7.1 You may query any invoice line within **7 days** of the invoice being issued, by contacting Hospio360 support (in the app or at hello@oyeksglobal.com). We reply within **5 Business Days**. If an amount was wrongly calculated or charged, we correct it by a credit note on your next invoice or a refund within **10 Business Days** of agreeing the correction.",
+          "7.2 Hospio360 may also grant a one-time extension of a due date, issue a credit note or adjustment, or void an invoice and issue a corrected one."
         ]
       },
       {
-        "heading": "8. Changing or withdrawing the authority",
+        "heading": "8. Passing the fee to guests (optional)",
         "paragraphs": [
-          "8.1 Tell us at least **5 Business Days** before you close or change your business account, and authorise the new account in Hospio360.",
-          "8.2 You may withdraw the debit authority by writing to hello@oyeksglobal.com; it takes effect **3 Business Days** after we receive it and does not cancel amounts already due. If no other payment method is agreed in writing, we may suspend the Services under the Terms of Service (clause 7.3).",
-          "8.3 We may change the fee only with at least **30 days'** notice. The new version is shown at your next sign-in, and if you do not accept it you may end the Agreement before it takes effect."
+          "8.1 The owner may choose, for each venue, to show the fee to guests as \"Service charge (1.5%)\" on folios, counter orders and receipts. It applies to new charges from the moment it is switched on, never to kept no-show deposits, and never includes device amounts. You decide whether to use it and are responsible for telling guests about it and for its tax treatment."
+        ]
+      },
+      {
+        "heading": "9. Changes",
+        "paragraphs": [
+          "9.1 We may change the fee, the invoice timetable or these terms only with at least **30 days'** notice. The new version is shown at your next sign-in, and if you do not accept it you may end the Agreement before it takes effect."
         ]
       },
       {
         "heading": "How this is accepted",
         "paragraphs": [
-          "You give this authority by ticking the daily debit box in Hospio360; the acceptance is recorded (who, version, date and time, IP address, device and how). Where a payment provider needs its own signed mandate form, we will send it to you."
+          "You accept these terms by ticking the monthly invoice box in Hospio360 (\"I agree to pay Hospio360's monthly invoice — 1.5% of my business's daily sales — within 7 days of issue.\", showing your business's rate); the acceptance is recorded (who, version, date and time, IP address, device and how)."
         ]
       }
     ]
@@ -549,9 +581,9 @@
   {
     "slug": "devices",
     "title": "Devices & equipment terms",
-    "version": "DEV-2026-11",
+    "version": "DEV-2026-11B",
     "effectiveDate": "2026-11-18",
-    "summary": "The terms for tablets, routers, printers and data plans that Oyeks Global supplies with Hospio360: payment options, ownership until paid, warranty, care and what happens if you leave early.",
+    "summary": "The terms for tablets, routers, printers and data plans that Oyeks Global supplies with Hospio360: payment options on your monthly invoice, ownership until paid, warranty, care and what happens if you leave early.",
     "sections": [
       {
         "heading": "About this document",
@@ -571,28 +603,28 @@
         "heading": "2. Payment options",
         "paragraphs": [
           "2.1 You choose one payment option for each Device Schedule:",
-          "(a) **From transactions**: a percentage of each day's Daily Sales of the Venue (the rate shown in the Device Schedule, normally **2.5%**) is added to the daily debit from your Business Account as a device line, together with the Platform Fee, until the Device balance reaches ₦0. There is no daily cap other than the remaining balance. The rate is fixed once collection starts. The Hospio fees screen shows the balance and an estimated finish date based on the last 30 days' sales; this estimate is not a promise.",
-          "(b) **Monthly instalments**: the Device total is divided into **1 to 6** equal monthly instalments, invoiced monthly and debited automatically from your Business Account on the due date. If the debit fails, you may pay by the Paystack link sent with the invoice, or by bank transfer recorded by us.",
+          "(a) **From transactions**: a percentage of each day's Daily Sales of the Venue (the rate shown in the Device Schedule, normally **2.5%**) is worked out daily and added to the Devices & internet section of your Monthly Invoice, until the Device balance reaches ₦0. There is no cap other than the remaining balance. The rate is fixed once collection starts. The Hospio fees screen shows the balance and an estimated finish date based on the last 30 days' sales; this estimate is not a promise.",
+          "(b) **Monthly instalments**: the Device total is divided into **1 to 6** equal monthly instalments, each billed on the Monthly Invoice for the month in which it is scheduled.",
           "(c) **One-time payment**: the Device total is paid in full at installation.",
           "(d) **Own devices**: you use your own devices. Nothing is supplied or charged under these terms except any Data Plan you choose.",
-          "2.2 If a daily debit only partly succeeds, it pays the Platform Fee first and then the device amount.",
+          "2.2 Device amounts and Data Plan charges are billed only on your Monthly Invoice and paid with it (through the **Pay now** Paystack link, or by bank transfer where agreed), as set out in the Fees and monthly invoice terms. There are no separate device invoices and no automatic debits.",
           "2.3 The Device Fee is never added to guests' bills as a service charge.",
-          "2.4 Prices exclude VAT, which is added where the law requires."
+          "2.4 Prices exclude VAT. We do not currently add VAT; if VAT becomes chargeable, it is added at the applicable rate and shown on the Monthly Invoice."
         ]
       },
       {
         "heading": "3. Data Plan",
         "paragraphs": [
-          "3.1 The Data Plan is a recurring service, not a purchase: it is invoiced monthly at the price in the Device Schedule (debited automatically as in clause 2.1(b)) for as long as you use it, and is never \"paid off\".",
-          "3.2 You may stop the Data Plan by telling Hospio360 support at least **7 days** before the next monthly invoice date, and may restart it later at the then-current price. Stopping the Data Plan does not affect the Devices or your use of Hospio360.",
+          "3.1 The Data Plan is a recurring service, not a purchase: it is billed on the Monthly Invoice for each month at the price in the Device Schedule for as long as you use it, and is never \"paid off\".",
+          "3.2 You may stop the Data Plan by telling Hospio360 support at least **7 days** before the start of the next month, and may restart it later at the then-current price. Stopping the Data Plan does not affect the Devices or your use of Hospio360.",
           "3.3 Data allowances, speeds and coverage depend on the mobile network operator. We do not guarantee network coverage or speed at the Venue."
         ]
       },
       {
         "heading": "4. Late payment",
         "paragraphs": [
-          "4.1 For monthly invoices (instalments or Data Plan): a reminder is sent 3 days after the due date; at 7 days your account may be flagged at risk; at 14 days card payments pushed from Hospio360 to the Venue's POS terminals may be paused until the overdue amount is paid. Recording payments by hand never stops. Payment lifts the pause.",
-          "4.2 For the from-transactions option, unpaid amounts are carried over as described in the Terms of Service (clause 5.5)."
+          "4.1 Device amounts and Data Plan charges are part of the Monthly Invoice, so its due date (7 days after issue), grace period, reminders and restriction apply to them as set out in the Terms of Service (clause 5) and the Fees and monthly invoice terms. Payment of the invoice lifts any restriction.",
+          "4.2 Clause 8 also applies if device amounts on a Monthly Invoice stay unpaid."
         ]
       },
       {
@@ -653,7 +685,7 @@
   {
     "slug": "support",
     "title": "Support & services",
-    "version": "SUP-2026-11",
+    "version": "SUP-2026-11B",
     "effectiveDate": "2026-11-18",
     "summary": "The support included with Hospio360, our response and availability targets, planned maintenance, and services that are charged separately.",
     "sections": [
@@ -702,7 +734,7 @@
         "heading": "4. Availability",
         "paragraphs": [
           "4.1 We target availability of the Platform of **99.5%** in each calendar month, measured as the share of minutes in the month in which the Platform's main web application can be signed into and used, excluding the items in clause 4.3.",
-          "4.2 If availability falls below the target in a month, you may ask for a service credit of **5%** of that month's Platform Fee for each full **1%** below the target, up to **25%** of that month's Platform Fee, by asking within 30 days after the month ends. Service credits are applied against later Platform Fees and are your only financial remedy for missing the target.",
+          "4.2 If availability falls below the target in a month, you may ask for a service credit of **5%** of that month's Platform Fee for each full **1%** below the target, up to **25%** of that month's Platform Fee, by asking within 30 days after the month ends. Service credits are applied as a credit on a later Monthly Invoice and are your only financial remedy for missing the target.",
           "4.3 The following are excluded from the availability calculation:",
           "(a) planned maintenance notified under clause 5;",
           "(b) faults in your devices, internet connection, power or local network;",
@@ -715,7 +747,7 @@
         "heading": "5. Planned maintenance",
         "paragraphs": [
           "5.1 We give at least **48 hours'** notice (in the Platform or by email) of planned maintenance that is expected to make the Platform unavailable, and schedule it where possible between 00:00 and 05:00 Lagos time. Urgent security maintenance may be carried out with shorter notice.",
-          "5.2 The daily fee calculation (just after midnight) and the 06:00 debit are scheduled jobs; if maintenance or an outage delays them, they run when the Platform is back and the amounts are not duplicated."
+          "5.2 The daily fee calculation (just after midnight), the Monthly Invoice (issued on the 1st at 07:00), its reminders and any restriction for an unpaid invoice (from 06:00 on the 12th) are scheduled jobs; if maintenance or an outage delays them, they run when the Platform is back and amounts are not duplicated."
         ]
       },
       {
@@ -735,9 +767,9 @@
   {
     "slug": "referral-partners",
     "title": "Referral partner terms",
-    "version": "RPA-2026-11",
+    "version": "RPA-2026-11B",
     "effectiveDate": "2026-11-18",
-    "summary": "How Hospio360 referral partners (marketers) earn 20% of the platform fee collected from the businesses they refer for 12 months, and how statements and payments work.",
+    "summary": "How Hospio360 referral partners (marketers) earn 20% of the platform fee paid on the monthly invoices of the businesses they refer, for 12 months, and how statements and payments work.",
     "sections": [
       {
         "heading": "About this document",
@@ -750,9 +782,9 @@
         "paragraphs": [
           "1.1 In this Agreement:",
           "(a) **Referred Business** means a hotel or hospitality business that is attributed to the Partner under clause 3.",
-          "(b) **Platform Fee** means the daily Hospio360 platform fee (1.5% of a business's daily sales) that Oyeks Global debits from the Referred Business's business account.",
-          "(c) **Collected Platform Fee** means the Platform Fee that Oyeks Global has actually collected from a Referred Business, **excluding** the charges listed in clause 4.3.",
-          "(d) **Commission Window** means, for each Referred Business, the **12 months** starting on the date of the first Platform Fee collected from that business.",
+          "(b) **Platform Fee** means the Hospio360 platform fee (1.5% of a business's daily sales, or the rate in its signed addendum) billed in the Platform fee section of the Referred Business's monthly Hospio360 invoice.",
+          "(c) **Collected Platform Fee** means the Platform Fee portion of monthly invoice payments that Oyeks Global has actually received from a Referred Business, **excluding** the charges listed in clause 4.3. Where an invoice is part-paid, the Platform Fee portion is worked out pro rata (the payment received × the Platform Fee's share of the invoice total).",
+          "(d) **Commission Window** means, for each Referred Business, the **12 months** starting on the first sale day on the first monthly invoice that the business pays.",
           "(e) **Partner Portal** means the Hospio360 partner portal where the Partner accepts this Agreement, gets its referral link and code, sees its Referred Businesses and Statements, raises queries and keeps its bank details.",
           "(f) **Statement** means the monthly commission statement described in clause 5.2."
         ]
@@ -762,7 +794,7 @@
         "paragraphs": [
           "2.1 Oyeks Global appoints the Partner, on a **non-exclusive** basis, to introduce prospective customers for Hospio360 in Nigeria (or the territory stated in a signed Partner Schedule). Oyeks Global may appoint other partners and sell directly in any area.",
           "2.2 The Partner is an **independent contractor**, not an employee, agent or legal representative of Oyeks Global. The Partner has no authority to sign contracts, accept payments, quote prices or terms other than published ones, or make promises for Oyeks Global, and must not present itself as able to do so. The Partner bears its own costs, taxes and statutory obligations.",
-          "2.3 The Partner must accept this Agreement in the Partner Portal **before** sharing its referral link or code. Oyeks Global records the version accepted (this is version **RPA-2026-11**), the date and time, the IP address and device used, and that record is evidence of the Partner's agreement to these terms, in addition to any signature on a Partner Schedule."
+          "2.3 The Partner must accept this Agreement in the Partner Portal **before** sharing its referral link or code. Oyeks Global records the version accepted (this is version **RPA-2026-11B**), the date and time, the IP address and device used, and that record is evidence of the Partner's agreement to these terms, in addition to any signature on a Partner Schedule."
         ]
       },
       {
@@ -776,12 +808,12 @@
       {
         "heading": "4. Commission",
         "paragraphs": [
-          "4.1 For each Referred Business, the Partner earns a commission of **20%** of the Collected Platform Fee for each day inside that business's Commission Window.",
-          "4.2 Commission is earned only on Platform Fees **actually collected**. Nothing is earned on fees that are billed or due but not collected. If a day's Platform Fee is carried over and collected later, the commission on it is earned when it is collected and appears on the Statement for the month of collection. **A fee for a day inside the Commission Window that is collected after the Commission Window has ended still earns commission.**",
-          "4.3 No commission is earned on: device or equipment charges (including any device share or instalment), data plans, message charges (SMS, WhatsApp or email), VAT, or any other pass-through or third-party costs, even when Oyeks Global collects them together with the Platform Fee.",
+          "4.1 For each Referred Business, the Partner earns a commission of **20%** of the Collected Platform Fee for each sale day inside that business's Commission Window.",
+          "4.2 Commission is earned only on Platform Fees **actually received**. Nothing is earned on invoices that are issued or due but not paid. Commission on an invoice payment is earned when Oyeks Global receives it and appears on the Statement for the month of receipt; a part payment earns commission pro rata. **A fee for a day inside the Commission Window that is paid after the Commission Window has ended still earns commission.**",
+          "4.3 No commission is earned on: device or equipment charges (including any device share or instalment), data plans, guest message charges (SMS, WhatsApp or email), VAT, or any other pass-through or third-party costs, even when they are on the same monthly invoice as the Platform Fee.",
           "4.4 There is **no** activation, sign-up or other bonus. The commission in clause 4.1 is the Partner's only payment under this Agreement.",
           "4.5 Commission on a Referred Business stops for fee days after the end of its 12-month Commission Window, or earlier if the business stops using Hospio360, its attribution changes under clause 3.3, or this Agreement ends under clause 8.",
-          "4.6 **Clawback.** If a Collected Platform Fee is later reversed or refunded, the commission on it is deducted as a negative line on the Partner's next Statement. If the deductions are more than the commission on that Statement, the balance is carried forward and deducted from later Statements, and if this Agreement ends with a balance owing, Oyeks Global may ask the Partner to repay it within **30 days**.",
+          "4.6 **Clawback.** If a Collected Platform Fee is later reduced by a credit note, refunded, or its invoice is voided, the commission on it is deducted as a negative line on the Partner's next Statement. If the deductions are more than the commission on that Statement, the balance is carried forward and deducted from later Statements, and if this Agreement ends with a balance owing, Oyeks Global may ask the Partner to repay it within **30 days**.",
           "4.7 No commission is payable on fees from a business that is not a Referred Business, on businesses referred after this Agreement ends, or where the referral involved a breach of clause 6.",
           "4.8 Oyeks Global may change the commission terms by publishing a new version of this Agreement in the Partner Portal with **30 days'** notice. A new version applies only once the Partner accepts it (it is shown at the Partner's next sign-in), and does not change the terms for Referred Businesses whose Commission Window started before the change."
         ]
@@ -795,7 +827,7 @@
           "5.4 Once a Statement is approved by Oyeks Global's finance team, the net commission is paid by **manual bank transfer** to the Partner's verified bank account by the **15th** day of the month the Statement is issued. Oyeks Global records the payment reference and emails the Partner when payment is made. If a query is still open, Oyeks Global may hold the queried lines and pay them with the next payment after the query is resolved.",
           "5.5 The Partner must keep its bank name, account number and account name up to date in the Partner Portal. The account name must match the Partner. Any change of bank details is re-checked by Oyeks Global before a payment is made to the new account, and Oyeks Global is not responsible for a payment made to the details the Partner provided.",
           "5.6 The **minimum payout is ₦5,000**. If the net commission due is less than ₦5,000, it rolls over to the next Statement and is paid once the total due reaches the minimum.",
-          "5.7 **Final Statement.** When this Agreement ends, any carried-over balance (after any clawback) is included on the Partner's final Statement and paid with it, **regardless of the ₦5,000 minimum**. Commission on fee days up to the end date that are collected afterwards is paid on a later Statement, likewise regardless of the minimum."
+          "5.7 **Final Statement.** When this Agreement ends, any carried-over balance (after any clawback) is included on the Partner's final Statement and paid with it, **regardless of the ₦5,000 minimum**. Commission on fee days up to the end date that are paid afterwards is paid on a later Statement, likewise regardless of the minimum."
         ]
       },
       {
@@ -821,7 +853,7 @@
         "paragraphs": [
           "8.1 This Agreement starts when the Partner accepts it in the Partner Portal (or, if earlier, signs a Partner Schedule) and continues until ended by either party on **30 days'** written notice.",
           "8.2 Oyeks Global may end it immediately by written notice if the Partner breaches clause 6 or 7, acts dishonestly, or brings Oyeks Global or Hospio360 into disrepute.",
-          "8.3 When this Agreement ends, for any reason: (a) commission stops on Platform Fees for days after the end date, while fees for days up to the end date (inside the Commission Window) still earn commission when they are collected, even after the end; (b) for an ending under clause 8.2, Oyeks Global may withhold commission related to the breach; (c) the final Statement is paid under clause 5.7; and (d) the Partner must stop presenting itself as a Hospio360 partner and return or delete Oyeks Global materials and confidential information."
+          "8.3 When this Agreement ends, for any reason: (a) commission stops on Platform Fees for days after the end date, while fees for days up to the end date (inside the Commission Window) still earn commission when they are paid, even after the end; (b) for an ending under clause 8.2, Oyeks Global may withhold commission related to the breach; (c) the final Statement is paid under clause 5.7; and (d) the Partner must stop presenting itself as a Hospio360 partner and return or delete Oyeks Global materials and confidential information."
         ]
       },
       {
@@ -851,7 +883,7 @@
       {
         "heading": "How this is accepted",
         "paragraphs": [
-          "Accepted online in the Hospio360 Partner Portal (version RPA-2026-11); the acceptance is recorded. A partner who wants a signed copy may also sign the Partner Schedule."
+          "Accepted online in the Hospio360 Partner Portal (version RPA-2026-11B); the acceptance is recorded. A partner who wants a signed copy may also sign the Partner Schedule."
         ]
       }
     ]
