@@ -286,8 +286,13 @@ export const fnbData = {
 			]);
 			const mine = ofDesk(role, all);
 			const picked = jar?.get(outletCookie(role))?.value;
+			// A waiter or cashier starts where guests sit (a bar or restaurant floor) rather than at the kitchen's own outlet.
+			const floor = role === "WAITER" || role === "CASHIER";
 			return (
 				mine.find((o) => o.id === picked) ??
+				(floor
+					? mine.find((o) => o.status === "OPEN" && o.kind !== "KITCHEN")
+					: undefined) ??
 				mine.find((o) => o.status === "OPEN") ??
 				mine[0] ??
 				null

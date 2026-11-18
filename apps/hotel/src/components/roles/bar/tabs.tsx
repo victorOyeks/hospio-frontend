@@ -316,8 +316,13 @@ export function BarTabsScreen({
 					icon={ReceiptIcon}
 				/>
 				<KpiCard
-					label="Unpaid"
-					value={naira(unpaid.reduce((s, o) => s + o.total, 0))}
+					label={cashier ? "Still to pay" : "Unpaid"}
+					value={naira(
+						unpaid.reduce(
+							(s, o) => s + o.total - (cashier ? (o.paidAmount ?? 0) : 0),
+							0,
+						),
+					)}
 					icon={ReceiptIcon}
 				/>
 				<KpiCard
@@ -769,6 +774,7 @@ export function BarTabsScreen({
 											put(a);
 											void setOpen(a.id);
 										}
+										setMessage(null);
 										setSub(null);
 									},
 								);
