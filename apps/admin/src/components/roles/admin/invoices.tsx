@@ -307,14 +307,18 @@ function InvoicePanel({ id, onClose, money: canMoney, onChanged }: { id: string 
 									{invoice.extendedUntil ? "Extended once" : "Extend"}
 								</button>
 							)}
-							{invoice.status !== "PAID" && (
+							{/* A paid invoice takes a credit note (the overpayment becomes a credit on the next invoice); a carried-forward one is adjusted on the invoice it went into. */}
+							{(open || invoice.status === "PAID") && (
 								<button type="button" className={btn.secondary} onClick={() => setAction("adjust")}>
-									Credit note / adjustment
+									{invoice.status === "PAID" ? "Credit note" : "Credit note / adjustment"}
 								</button>
 							)}
-							<button type="button" className={btn.dangerSoft} onClick={() => setAction("void")}>
-								Void
-							</button>
+							{/* Only an invoice with no payment on it is voided; otherwise a credit note. */}
+							{(open || invoice.status === "CARRIED_FORWARD") && !(invoice.paidAmount > 0) && (
+								<button type="button" className={btn.dangerSoft} onClick={() => setAction("void")}>
+									Void
+								</button>
+							)}
 						</div>
 					)}
 					<InvoiceBody
