@@ -49,6 +49,8 @@ export const PEOPLE_ROLES: HotelRole[] = [
 	"MAINTENANCE",
 	"KITCHEN",
 	"BAR",
+	"WAITER",
+	"CASHIER",
 	"FINANCE",
 	"INVENTORY",
 ];

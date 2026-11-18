@@ -1242,7 +1242,7 @@ export type SaleFilters = {
 	from?: string;
 	to?: string;
 	outletId?: string;
-	desk?: "BAR" | "KITCHEN";
+	desk?: "BAR" | "KITCHEN" | "WAITER" | "CASHIER";
 	status?: string;
 	method?: string;
 	attendant?: string;
@@ -1663,6 +1663,14 @@ export type OutletSettingsRow = {
 	accommodation: boolean;
 	tabs: boolean;
 	tabLimit: number;
+	/** A tab open longer than this many hours is flagged to the manager. */
+	tabMaxHours: number;
+	/** A tab needs the guest's name or a table. */
+	tabNameRequired: boolean;
+	/** Waiters may take payment for their own tabs (off: the cashier does). */
+	waitersTakePayment: boolean;
+	/** Waiters may take cash; it goes into the cashier's open till. */
+	waiterCash: boolean;
 	vatPct: number;
 	serviceChargePct: number;
 	pricesIncludeTax: boolean;

@@ -5,6 +5,11 @@ export const whatsNewWeek = "Week of 15 November 2026";
 
 export const whatsNew: WhatsNewItem[] = [
 	{
+		title: "Waiters and cashiers",
+		body: "Two new roles for restaurants, bars and lounges (hotels can use them too). A waiter opens tabs at their tables, sends orders to the bar and kitchen and marks them served; they see only their own tabs. A cashier takes payment for any open tab or sale, keeps the cashier till and prints receipts. Add them in Staff → Add staff. Hotel setup → “Restaurant & bar” decides whether waiters may take payment themselves.",
+		audience: ["MANAGER", "OWNER"],
+	},
+	{
 		title: "One monthly invoice",
 		body: "Nothing is debited from your account any more. On the 1st Hospio360 sends one invoice for the month before: the platform fee for each location, guest messages and devices & internet. Pay it within 7 days under “Billing & invoices” with “Pay now”, and download the invoice and receipts there. If it is still unpaid after the 11th, card/transfer POS payments, new sales and new bookings pause until it is paid; check-out and cash on existing bills keep working. Hospio fees still shows this month so far.",
 		audience: ["OWNER", "MANAGER"],

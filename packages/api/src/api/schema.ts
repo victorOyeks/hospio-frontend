@@ -1401,6 +1401,8 @@ export const schema = createSchema({
 		input: z.object({
 			templateId: z.string().nullable().optional(),
 			settings: JsonObject.nullable().optional(),
+			/** "VENUE": the built-in lounge / bar / restaurant template (hospio-backend docs/plan-venue-type.md, phase 3). */
+			builtIn: z.string().nullable().optional(),
 		}),
 		output: envelope(z.unknown()),
 	},

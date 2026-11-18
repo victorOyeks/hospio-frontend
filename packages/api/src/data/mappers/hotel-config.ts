@@ -143,6 +143,20 @@ export const SETUP_CATALOGUE: SectionDef[] = [
 				default: "Africa/Lagos",
 			},
 			{
+				key: "openingTime",
+				label: "Opens at",
+				type: "time",
+				default: "",
+				help: "When you start serving",
+			},
+			{
+				key: "closingTime",
+				label: "Closes at",
+				type: "time",
+				default: "",
+				help: "After midnight is fine (02:00)",
+			},
+			{
 				key: "receiptFooter",
 				label: "Receipt footer",
 				type: "text",
@@ -290,7 +304,7 @@ export const SETUP_CATALOGUE: SectionDef[] = [
 		key: "outlets",
 		api: "OUTLETS",
 		title: "Restaurant & bar",
-		description: "Tabs and room charging",
+		description: "Tabs, room charging and who takes payment",
 		icon: "chef",
 		fields: [
 			{
@@ -305,6 +319,34 @@ export const SETUP_CATALOGUE: SectionDef[] = [
 				label: "Tab limit before payment",
 				type: "money",
 				default: 50000,
+			},
+			{
+				key: "tabMaxHours",
+				label: "Flag a tab open longer than (hours)",
+				type: "number",
+				help: "The manager's dashboard lists tabs left open past this",
+				default: 4,
+			},
+			{
+				key: "tabNameRequired",
+				label: "A tab needs a name or a table",
+				type: "toggle",
+				help: "On: a tab can't be opened without the guest's name or a table",
+				default: false,
+			},
+			{
+				key: "waitersTakePayment",
+				label: "Waiters take payment",
+				type: "toggle",
+				help: "Off: waiters take orders and serve, the cashier (or the bar) takes the money. On: a waiter can take payment for their own tabs",
+				default: false,
+			},
+			{
+				key: "waiterCash",
+				label: "Waiters can take cash",
+				type: "toggle",
+				help: "Only with “Waiters take payment” on. The cash goes into the cashier's till, which must be open. Off: waiters take card and transfer only",
+				default: false,
 			},
 		],
 	},
@@ -702,12 +744,22 @@ export function toSetupSections(
 			fields,
 		};
 	});
-	return hasAccommodation(hotel) ? sections : withoutStays(sections);
+	return hasAccommodation(hotel) ? withoutVenueOnly(sections) : withoutStays(sections);
 }
 
 /** Sections that are only about rooms and stays, left out at a lounge, bar or restaurant (hospio-backend docs/plan-venue-type.md). */
 const STAY_SECTIONS = new Set(["rooms", "housekeeping"]);
 /** Fields about rooms and stays inside sections that stay. Hidden fields are never sent, so their stored values are kept. */
+/** Fields only a lounge, bar or restaurant sets (a hotel's desk never closes): left out where there are rooms. */
+const VENUE_FIELDS: Record<string, string[]> = { basics: ["openingTime", "closingTime"] };
+
+export function withoutVenueOnly(sections: HotelSetupSection[]): HotelSetupSection[] {
+	return sections.map((x) => {
+		const drop = VENUE_FIELDS[x.key];
+		return drop ? { ...x, fields: x.fields.filter((f) => !drop.includes(f.key)) } : x;
+	});
+}
+
 const STAY_FIELDS: Record<string, string[]> = {
 	basics: ["checkInTime", "checkOutTime"],
 	outlets: ["roomCharge"],
@@ -724,7 +776,12 @@ export function withoutStays(sections: HotelSetupSection[]): HotelSetupSection[]
 			return {
 				...x,
 				title: x.key === "basics" ? "Location basics" : x.title,
-				description: x.key === "outlets" ? "Tabs and tab limits" : x.description,
+				description:
+					x.key === "outlets"
+						? "Tabs, tab limits and who takes payment"
+						: x.key === "basics"
+							? "Your opening hours and what prints at the foot of receipts"
+							: x.description,
 				fields: x.fields.filter((f) => !drop.includes(f.key)),
 			};
 		});

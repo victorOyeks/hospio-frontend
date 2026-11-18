@@ -16,6 +16,8 @@ export type HelpAudience =
 	| "BAR"
 	| "INVENTORY"
 	| "FINANCE"
+	| "WAITER"
+	| "CASHIER"
 	| "PLATFORM"
 	| "MARKETER";
 

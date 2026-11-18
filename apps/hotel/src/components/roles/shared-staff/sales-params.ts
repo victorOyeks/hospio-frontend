@@ -14,7 +14,7 @@ const day = (v: string | string[] | undefined) => {
 
 export async function salesFilters(
 	searchParams: SalesSearchParams,
-	desk?: "BAR" | "KITCHEN",
+	desk?: "BAR" | "KITCHEN" | "WAITER" | "CASHIER",
 ): Promise<SaleFilters> {
 	const p = await searchParams;
 	const mine = one(p.mine);

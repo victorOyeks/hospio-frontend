@@ -820,7 +820,7 @@ export async function saveHappyHour(
  * `data.outlets.forRole` / `data.outlets.desk` read it; kept for a year. Picking an outlet turns "All outlets" off.
  */
 export async function chooseOutlet(
-	desk: "KITCHEN" | "BAR",
+	desk: "KITCHEN" | "BAR" | "WAITER" | "CASHIER",
 	outletId: string,
 ): Promise<ActionResult<null>> {
 	const jar = await cookies();

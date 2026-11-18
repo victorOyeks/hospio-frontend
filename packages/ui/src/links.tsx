@@ -229,6 +229,31 @@ export const barLinks: NavLink[] = [
 	{ title: "Notifications", url: "/dashboard/notifications", icon: BellIcon },
 ];
 
+/** A waiter (hospio-backend docs/plan-venue-type.md, phase 3): the tabs they opened and what they sold. */
+export const waiterLinks: NavLink[] = [
+	{ title: "My tabs", url: "/dashboard", icon: ReceiptIcon },
+	{ title: "My sales", url: "/dashboard/sales", icon: CoinsIcon },
+	{ title: "My shifts", url: "/dashboard/shifts", icon: CalendarDaysIcon },
+	{ title: "Inbox", url: "/dashboard/inbox", icon: InboxIcon, badge: "inbox" },
+	{ title: "Notifications", url: "/dashboard/notifications", icon: BellIcon },
+];
+
+/** A cashier: every open tab and sale to collect, the till and the receipts. */
+export const cashierLinks: NavLink[] = [
+	{ title: "To pay", url: "/dashboard", icon: ReceiptIcon },
+	{
+		title: "Sales",
+		url: "/dashboard/sales",
+		icon: CoinsIcon,
+		badge: "unpaidSales",
+	},
+	{ title: "My payments", url: "/dashboard/payments", icon: CreditCardIcon },
+	{ title: "Till", url: "/dashboard/till", icon: WalletIcon },
+	{ title: "My shifts", url: "/dashboard/shifts", icon: CalendarDaysIcon },
+	{ title: "Inbox", url: "/dashboard/inbox", icon: InboxIcon, badge: "inbox" },
+	{ title: "Notifications", url: "/dashboard/notifications", icon: BellIcon },
+];
+
 export const inventoryLinks: NavLink[] = [
 	{ title: "Stores & stock", url: "/dashboard", icon: PackageIcon },
 	{ title: "Requests", url: "/dashboard/requests", icon: ClipboardListIcon },
@@ -310,6 +335,8 @@ export const linksByRole: Record<HotelRole, NavLink[]> = {
 	BAR: barLinks,
 	INVENTORY: inventoryLinks,
 	FINANCE: financeLinks,
+	WAITER: waiterLinks,
+	CASHIER: cashierLinks,
 	SUPER_ADMIN: adminLinks,
 	SUPPORT: adminLinks,
 	FINANCE_ADMIN: adminLinks,

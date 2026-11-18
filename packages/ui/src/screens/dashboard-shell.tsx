@@ -114,7 +114,7 @@ export async function DashboardShell({ children }: PropsWithChildren) {
 		pinPromptAsked(),
 		data.notifications.unreadCount().catch(() => 0),
 		// The bar and kitchen see how many sales still owe money next to Sales.
-		role === "BAR" || role === "KITCHEN"
+		role === "BAR" || role === "KITCHEN" || role === "CASHIER"
 			? data.outlets.unpaidSales(role, seesAllOutlets(session, role)).catch(() => null)
 			: Promise.resolve(null),
 		// Every hotel role: unread staff messages next to Inbox (the owner's Messaging).
@@ -133,7 +133,8 @@ export async function DashboardShell({ children }: PropsWithChildren) {
 			? data.hotels.brand().catch(() => null)
 			: Promise.resolve(null),
 		// The bar and kitchen: their outlets for "Serving at" (shown only when there are several of their kind).
-		APP === "hotel" && (role === "BAR" || role === "KITCHEN")
+		// A waiter picks the outlet they serve at too (any outlet of the location); a cashier collects for all of them.
+		APP === "hotel" && (role === "BAR" || role === "KITCHEN" || role === "WAITER")
 			? data.outlets
 					.desk(role, seesAllOutlets(session, role))
 					.catch(() => null)
@@ -230,7 +231,7 @@ export async function DashboardShell({ children }: PropsWithChildren) {
 						outletSwitch={
 							desk &&
 							desk.outlets.length > 1 &&
-							(role === "BAR" || role === "KITCHEN")
+							(role === "BAR" || role === "KITCHEN" || role === "WAITER")
 								? {
 										desk: role,
 										outlets: desk.outlets.map((o) => ({
