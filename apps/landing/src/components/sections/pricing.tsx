@@ -97,12 +97,13 @@ export function Pricing() {
 				<IconTile icon={MegaphoneIcon} tone="brand" size="lg" />
 				<div className="flex flex-1 flex-col gap-[6px]">
 					<h3 className="text-[22px] font-bold text-ink">
-						Know hotel owners? Become a Hospio360 partner.
+						Know owners of hotels, lounges, bars or restaurants? Become a
+						Hospio360 partner.
 					</h3>
 					<p className="text-[15px] leading-[1.5] text-ink-2">
-						Earn 20% of Hospio360’s share from every hotel you bring on, for 24
-						months — paid monthly on what Hospio360 actually receives (5% WHT
-						applies).
+						Earn 20% of Hospio360’s fee from every business you bring on, for
+						12 months — paid monthly on what Hospio360 actually receives (5%
+						WHT applies).
 					</p>
 				</div>
 				<a
