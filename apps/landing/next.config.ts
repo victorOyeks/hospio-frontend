@@ -14,6 +14,13 @@ const nextConfig: NextConfig = {
 		// Types are checked separately (bun run typecheck); the build does not stop on them.
 		ignoreBuildErrors: true,
 	},
+	// The legal documents moved under /legal; old links keep working.
+	async redirects() {
+		return [
+			{ source: "/terms", destination: "/legal/terms", permanent: true },
+			{ source: "/privacy", destination: "/legal/privacy", permanent: true },
+		];
+	},
 };
 
 export default nextConfig;

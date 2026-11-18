@@ -1,0 +1,204 @@
+"use client";
+
+import { useRouter } from "next/navigation";
+import { type ReactNode, useState } from "react";
+import { acceptLegal } from "@hospio/api/actions/legal";
+import type { LegalDoc } from "@hospio/api/api/routes-legal";
+import { Button } from "@hospio/ui/primitives/button";
+import { Checkbox } from "@hospio/ui/primitives/checkbox";
+
+/**
+ * The tick boxes for the legal documents (hospio-backend docs/legal-acceptance.md). One box for the Terms, Privacy Policy and Data
+ * Processing Terms, one for the daily debit authority, one for each other document (Staff terms, Referral partner terms, Devices).
+ */
+
+export const LEGAL_SITE = "https://hospio360.com";
+
+/** The landing site's page for a document (fallback when the server's link is missing). */
+export const legalUrl = (slug: string) => `${LEGAL_SITE}/legal/${slug}`;
+
+const OWNER_GROUP = ["TERMS", "PRIVACY", "DPA"];
+
+export type LegalBox = { id: string; docs: LegalDoc[]; label: ReactNode };
+
+function DocLink({ doc, children }: { doc: Pick<LegalDoc, "url" | "slug" | "title">; children?: ReactNode }) {
+	return (
+		<a
+			href={doc.url || legalUrl(doc.slug)}
+			target="_blank"
+			rel="noopener noreferrer"
+			className="font-medium text-primary underline underline-offset-2"
+			onClick={(e) => e.stopPropagation()}
+		>
+			{children ?? doc.title}
+		</a>
+	);
+}
+
+/** The owner's first box, with each document a link (the three always named; their links follow the server's versions when known). */
+export function OwnerTermsLabel({ docs }: { docs: Pick<LegalDoc, "key" | "url" | "slug" | "title">[] }) {
+	const by = (key: string, slug: string, title: string) => docs.find((d) => d.key === key) ?? { key, url: legalUrl(slug), slug, title };
+	return (
+		<>
+			I agree to the <DocLink doc={by("TERMS", "terms", "Terms of Service")} />,{" "}
+			<DocLink doc={by("PRIVACY", "privacy", "Privacy Policy")} /> and{" "}
+			<DocLink doc={by("DPA", "data-processing", "Data Processing Terms")} /> on behalf of my business.
+		</>
+	);
+}
+
+export function DebitLabel({ doc }: { doc?: Pick<LegalDoc, "url" | "slug" | "title"> }) {
+	return (
+		<>
+			I authorise Hospio360 (a product of Oyeks Global Limited) to debit 1.5% of my business&apos;s daily sales from my business account
+			each day at 06:00.{" "}
+			<DocLink doc={doc ?? { url: legalUrl("fees"), slug: "fees", title: "Fees" }}>How the fee works</DocLink>
+		</>
+	);
+}
+
+/** Groups pending documents into the boxes to tick. */
+export function boxesFor(docs: LegalDoc[]): LegalBox[] {
+	const boxes: LegalBox[] = [];
+	const owner = docs.filter((d) => OWNER_GROUP.includes(d.key));
+	if (owner.length) boxes.push({ id: "owner", docs: owner, label: <OwnerTermsLabel docs={owner} /> });
+	for (const d of docs) {
+		if (OWNER_GROUP.includes(d.key)) continue;
+		if (d.key === "DEBIT") boxes.push({ id: d.key, docs: [d], label: <DebitLabel doc={d} /> });
+		else
+			boxes.push({
+				id: d.key,
+				docs: [d],
+				label: (
+					<>
+						I agree to the <DocLink doc={d} />.
+					</>
+				),
+			});
+	}
+	return boxes;
+}
+
+export function TickBox({
+	id,
+	checked,
+	onChange,
+	children,
+	disabled,
+}: {
+	id: string;
+	checked: boolean;
+	onChange: (v: boolean) => void;
+	children: ReactNode;
+	disabled?: boolean;
+}) {
+	return (
+		<div className="flex items-start gap-3 rounded-lg border border-border bg-card p-3">
+			<Checkbox
+				id={`legal-${id}`}
+				checked={checked}
+				disabled={disabled}
+				onCheckedChange={(v) => onChange(v === true)}
+				className="mt-0.5"
+				aria-describedby={`legal-${id}-label`}
+			/>
+			<label htmlFor={`legal-${id}`} id={`legal-${id}-label`} className="text-sm leading-relaxed text-foreground">
+				{children}
+			</label>
+		</div>
+	);
+}
+
+/**
+ * Shown over every screen while the signed-in person has documents to accept: the first time (owners who signed up before the
+ * boxes existed, staff, marketers) or after a new version took effect. It can't be closed; the only ways out are accepting or signing out.
+ */
+export function LegalGate({
+	pending,
+	firstTime,
+	marketer,
+	signOut,
+}: {
+	pending: LegalDoc[];
+	/** Nothing accepted yet: "Before you continue" rather than "We've updated our terms". */
+	firstTime: boolean;
+	marketer?: boolean;
+	signOut: () => Promise<void> | void;
+}) {
+	const router = useRouter();
+	const boxes = boxesFor(pending);
+	const [ticked, setTicked] = useState<Record<string, boolean>>({});
+	const [saving, setSaving] = useState(false);
+	const [error, setError] = useState<string | null>(null);
+	const all = boxes.every((b) => ticked[b.id]);
+
+	async function accept() {
+		setSaving(true);
+		setError(null);
+		const result = await acceptLegal({
+			documents: pending.map((d) => ({ key: d.key, version: d.version })),
+			method: marketer && firstTime ? "PORTAL" : undefined,
+		});
+		setSaving(false);
+		if (!result.ok) {
+			setError(result.error);
+			return;
+		}
+		router.refresh();
+	}
+
+	return (
+		<div
+			role="dialog"
+			aria-modal="true"
+			aria-labelledby="legal-gate-title"
+			className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 p-4"
+			data-testid="legal-gate"
+		>
+			<div className="w-full max-w-lg rounded-xl bg-background p-6 shadow-xl">
+				<h2 id="legal-gate-title" className="text-lg font-semibold text-foreground">
+					{firstTime ? "Before you continue" : "We've updated our terms"}
+				</h2>
+				<p className="mt-1 text-sm text-muted-foreground">
+					{firstTime
+						? "Please read and accept the terms below to use Hospio360. Each link opens the document in a new tab."
+						: "A new version takes effect. Please read it and accept it to carry on. Each link opens the document in a new tab."}
+				</p>
+				{!firstTime && (
+					<ul className="mt-3 space-y-1 text-sm">
+						{pending.map((d) => (
+							<li key={d.key} className="text-foreground">
+								<span className="font-medium">{d.title}</span> · {d.version}
+								{d.summary ? <span className="text-muted-foreground"> · {d.summary}</span> : null}
+							</li>
+						))}
+					</ul>
+				)}
+				<div className="mt-4 space-y-3">
+					{boxes.map((b) => (
+						<TickBox key={b.id} id={b.id} checked={!!ticked[b.id]} onChange={(v) => setTicked((t) => ({ ...t, [b.id]: v }))}>
+							{b.label}
+						</TickBox>
+					))}
+				</div>
+				{error && (
+					<p role="alert" className="mt-3 text-sm text-destructive">
+						{error}
+					</p>
+				)}
+				<div className="mt-5 flex flex-wrap items-center justify-between gap-3">
+					<Button type="button" variant="ghost" onClick={() => void signOut()} disabled={saving}>
+						Sign out
+					</Button>
+					<Button type="button" onClick={accept} disabled={!all || saving}>
+						{saving ? "Saving…" : "Accept and continue"}
+					</Button>
+				</div>
+				<p className="mt-3 text-xs text-muted-foreground">
+					Hospio360 is a product of Oyeks Global Limited (RC 10001123), Lagos, Nigeria · hello@oyeksglobal.com. We keep a record of your
+					acceptance: the version, the date and time, your IP address and browser.
+				</p>
+			</div>
+		</div>
+	);
+}

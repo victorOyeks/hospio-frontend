@@ -4,6 +4,9 @@ import { Loader2Icon } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { acceptHandover } from "@hospio/api/actions/onboarding";
+import { acceptLegal } from "@hospio/api/actions/legal";
+import type { LegalDoc } from "@hospio/api/api/routes-legal";
+import { boxesFor, TickBox } from "@hospio/ui/shared/legal";
 import { useAction } from "@hospio/api/actions/use-action";
 import type { Business } from "@hospio/api/api/schema";
 import type { OwnerHotelRow, PortalUserRow } from "@hospio/api/data/types";
@@ -30,6 +33,7 @@ export function HandoverReview({
 	firstName,
 	setupCount,
 	devices = [],
+	legal = [],
 }: {
 	business: Business | null;
 	hotels: OwnerHotelRow[];
@@ -38,9 +42,14 @@ export function HandoverReview({
 	setupCount: number;
 	/** Devices & internet Hospio360 supplies, one package per hotel. */
 	devices?: DevicePackageView[];
+	/** The legal documents the owner still has to accept: the two boxes (they tick them; the admin never does). */
+	legal?: LegalDoc[];
 }) {
 	const router = useRouter();
 	const [agreed, setAgreed] = useState(false);
+	const legalBoxes = boxesFor(legal);
+	const [ticked, setTicked] = useState<Record<string, boolean>>({});
+	const legalDone = legalBoxes.every((b) => ticked[b.id]);
 	const { run, pending } = useAction();
 	const rooms = hotels.reduce((s, h) => s + h.rooms, 0);
 	const people = users.filter((u) => u.role !== "OWNER");
@@ -162,6 +171,15 @@ export function HandoverReview({
 						I've checked the setup and I accept the handover{supplied ? ", including the devices and how they are paid for" : ""}
 					</label>
 				</div>
+				{legalBoxes.length > 0 && (
+					<div className="flex flex-col gap-2" data-testid="handover-legal">
+						{legalBoxes.map((b) => (
+							<TickBox key={b.id} id={b.id} checked={!!ticked[b.id]} onChange={(v) => setTicked((t) => ({ ...t, [b.id]: v }))}>
+								{b.label}
+							</TickBox>
+						))}
+					</div>
+				)}
 				{supplied && (
 					<p className="text-xs text-ink-2">
 						The devices remain Hospio360's until they are paid off. If you leave before then, you pay what is left or
@@ -175,10 +193,20 @@ export function HandoverReview({
 				</p>
 				<Button
 					className={cn(btn.primary, btn.large, "w-full")}
-					disabled={!agreed || pending}
+					disabled={!agreed || !legalDone || pending}
 					onClick={() =>
 						run(
-							() => acceptHandover(),
+							async () => {
+								// The owner's own acceptance first (who, version, when, IP, browser; method HANDOVER), then the handover.
+								if (legal.length) {
+									const r = await acceptLegal({
+										documents: legal.map((d) => ({ key: d.key, version: d.version })),
+										method: "HANDOVER",
+									});
+									if (!r.ok) return r;
+								}
+								return acceptHandover();
+							},
 							"Welcome to your dashboard",
 							() => router.replace("/dashboard"),
 						)

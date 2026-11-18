@@ -31,6 +31,12 @@ import type {
 } from "@hospio/api/data/admin-types";
 import { feeModelLabels } from "@hospio/api/data/mappers/tenant";
 import type { BusinessRow } from "@hospio/api/data/types";
+import {
+	FeeLockField,
+	feeLockValue,
+	showFeeLockError,
+	useFeeLock,
+} from "./business/fee-lock";
 import type { AdminRole } from "@hospio/api/demo/fixtures/platform-extra";
 import { DataTable, TwoLine } from "@hospio/ui/shared/data-table";
 import { withDeliveries } from "@hospio/ui/shared/deliveries-store";
@@ -720,7 +726,9 @@ function FeeModelModal({
 	const [rules, setRules] = useState<FeeRuleRow[] | null>(null);
 	// One fee model (a share of daily sales, debited daily): a rule only sets the rate.
 	const model = "PERCENT_OF_SALES";
-	const [value, setValue] = useState("1.5");
+	// Fee lock: the platform default unless a signed addendum says otherwise.
+	const lock = useFeeLock(null, null);
+	const { reset } = lock;
 	const [from, setFrom] = useState(`${thisMonth()}-01`);
 	useEffect(() => {
 		if (initial) setBizId(initial);
@@ -731,10 +739,14 @@ function FeeModelModal({
 		loadFeeRules(bizId).then((r) => {
 			if (!r.ok) return;
 			setRules(r.data);
-			const current = r.data[r.data.length - 1];
+			// Newest first (GET /fees/rules is ordered by startsOn, latest first).
+			const current = r.data[0];
 			const b = businesses.find((x) => x.id === bizId);
 			const onSales = (current?.model ?? b?.feeModelKey) === model;
-			setValue(onSales ? String(current?.value ?? b?.feeValue ?? "1.5") : "1.5");
+			reset(
+				onSales ? (current?.value ?? b?.feeValue ?? null) : null,
+				onSales ? (current?.addendumRef ?? b?.feeAddendumRef) : null,
+			);
 		});
 	}, [open, bizId, businesses]);
 	return (
@@ -757,23 +769,29 @@ function FeeModelModal({
 					<button
 						type="button"
 						className={btn.primary}
-						disabled={pending || !bizId || !value || !from}
-						onClick={() =>
+						disabled={pending || !bizId || !from}
+						onClick={() => {
+							const fee = feeLockValue(lock);
+							if (!fee) return;
 							run(
-								() =>
-									saveFeeRule({
+								async () => {
+									const saved = await saveFeeRule({
 										businessId: bizId,
 										model,
-										value: Number(value),
+										value: fee.feeValue,
 										startsOn: from,
-									}),
+										feeAddendumRef: fee.feeAddendumRef,
+									});
+									if (!saved.ok) showFeeLockError(lock, saved.error);
+									return saved;
+								},
 								"Fee rate saved",
 								() => {
 									onOpenChange(false);
 									onSaved();
 								},
-							)
-						}
+							);
+						}}
 					>
 						Save rate
 					</button>
@@ -808,6 +826,7 @@ function FeeModelModal({
 											: `${r.value}%`}{" "}
 										· from {r.startsOn ? fmtLongDate(r.startsOn) : "—"}
 										{r.endsOn ? ` to ${fmtLongDate(r.endsOn)}` : ""}
+										{r.addendumRef ? ` · addendum ${r.addendumRef}` : ""}
 									</span>
 								</li>
 							))}
@@ -818,13 +837,7 @@ function FeeModelModal({
 						No fee rule yet. The business is not charged until one starts.
 					</Note>
 				)}
-				<TextField
-					label="Share of daily sales (%)"
-					value={value}
-					onChange={setValue}
-					placeholder="1.5"
-					hint="1.5 % unless agreed otherwise"
-				/>
+				<FeeLockField lock={lock} />
 				<TextField
 					label="Applies from"
 					type="date"

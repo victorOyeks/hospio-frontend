@@ -18,7 +18,6 @@ import {
 	checkCity,
 	checkEmail,
 	checkName,
-	checkPercent,
 	checkPhone,
 	only,
 } from "@hospio/ui/shared/validate";
@@ -33,6 +32,12 @@ import type { PageResult } from "@hospio/api/data/paging";
 import type { AdminRole } from "@hospio/api/demo/fixtures/platform-extra";
 import { useListParams } from "@hospio/ui/shared/list-params";
 import { cn } from "@hospio/ui/utils";
+import {
+	FeeLockField,
+	feeLockValue,
+	showFeeLockError,
+	useFeeLock,
+} from "./business/fee-lock";
 import { can, HealthBar, ReadOnlyNote, StagePill } from "./shared";
 
 const STAGES = [
@@ -275,7 +280,8 @@ export function NewBusinessPanel({
 	const [phone, setPhone] = useState("");
 	const [city, setCity] = useState("");
 	// One fee model: a % of each day's sales, debited daily from the hotel's POS provider account. Only the rate varies.
-	const [pct, setPct] = useState("1.5");
+	// Fee lock: the platform default unless a signed addendum says otherwise.
+	const lock = useFeeLock(null, null);
 	const [marketer, setMarketer] = useState("");
 	const [manager, setManager] = useState("");
 	const [errors, setErrors] = useState<NewBusinessErrors>({});
@@ -295,7 +301,6 @@ export function NewBusinessPanel({
 			phone: checkPhone(phone, false),
 			name: checkName(name, "the business name"),
 			city: checkCity(city),
-			fee: checkPercent(pct),
 		});
 	// A field fixed after a failed try loses its message as soon as it is right.
 	const edit =
@@ -308,7 +313,8 @@ export function NewBusinessPanel({
 	const create = async () => {
 		const found = validate();
 		setErrors(found);
-		if (Object.keys(found).length) return;
+		const fee = feeLockValue(lock);
+		if (Object.keys(found).length || !fee) return;
 		setPending(true);
 		try {
 			const result = await createBusiness({
@@ -318,14 +324,16 @@ export function NewBusinessPanel({
 				ownerEmail: email.trim().toLowerCase(),
 				ownerPhone: phone.trim() || null,
 				feeModel: "PERCENT_OF_SALES",
-				feeValue: Number(pct.trim().replace(",", ".")),
+				feeValue: fee.feeValue,
+				feeAddendumRef: fee.feeAddendumRef,
 				marketerId: marketer || null,
 				source: "BACK_OFFICE",
 			});
 			if (!result.ok) {
 				// The server's sentence goes under the field it is about (a duplicate email, phone or name).
 				const field = fieldOfError(result.error);
-				if (field) setErrors({ [field]: result.error });
+				if (field === "fee") showFeeLockError(lock, result.error);
+				else if (field) setErrors({ [field]: result.error });
 				else toast.error(result.error, { duration: 8000 });
 				return;
 			}
@@ -446,15 +454,7 @@ export function NewBusinessPanel({
 						{feeModelLabels.PERCENT_OF_SALES}: a share of each day's sales, debited each morning from the hotel's Moniepoint or OPay
 						account.
 					</p>
-					<TextField
-						label="Share of daily sales (%)"
-						value={pct}
-						onChange={edit(setPct, "fee")}
-						placeholder="1.5"
-						required
-						error={errors.fee}
-						hint="1.5 % unless agreed otherwise · 0 to 100, up to two decimals"
-					/>
+					<FeeLockField lock={lock} />
 				</PanelSection>
 				<PanelSection title="Referred by">
 					<SelectField
@@ -488,6 +488,6 @@ function fieldOfError(message: string): keyof NewBusinessErrors | null {
 	if (/owner's full name/i.test(message)) return "owner";
 	if (/business called|business name/i.test(message)) return "name";
 	if (/city/i.test(message)) return "city";
-	if (/share|fee/i.test(message)) return "fee";
+	if (/share|fee|addendum/i.test(message)) return "fee";
 	return null;
 }

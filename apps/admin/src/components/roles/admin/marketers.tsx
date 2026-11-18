@@ -591,6 +591,7 @@ export function MarketersScreen({
 						"The referral link stops working today",
 						`${naira(confirm?.m.due ?? 0)} on statements made is still paid`,
 						"What their businesses already earned stays on their statements",
+						"Everything not paid yet, carried-over amounts included, goes on a final statement paid whatever the amount (no ₦5,000 minimum)",
 					]}
 				/>
 			</ConfirmModal>

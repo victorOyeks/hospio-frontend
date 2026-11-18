@@ -7,13 +7,13 @@ import { updateBusiness } from "@hospio/api/actions/tenant";
 import { useAction } from "@hospio/api/actions/use-action";
 import type { BusinessRequest } from "@hospio/api/api/schema";
 import type { AdminChangeRow } from "@hospio/api/data/admin-types";
-import { feeModelLabels } from "@hospio/api/data/mappers/tenant";
 import type { BusinessRow } from "@hospio/api/data/types";
 import { Note } from "@hospio/ui/shared/detail-list";
 import { FieldRow, TextareaField, TextField } from "@hospio/ui/shared/field";
 import { PanelSection, SidePanel } from "@hospio/ui/shared/side-panel";
 import { btn } from "@hospio/ui/shared/ui";
 import { businessRequestFrom, refreshBusiness } from "../onboarding/shared";
+import { FeeLockField, feeLockValue, showFeeLockError, useFeeLock } from "./fee-lock";
 
 /** Edit business and Edit as Hospio360: the same form, the second with a required reason that is logged as a change. */
 
@@ -64,6 +64,7 @@ const FIELD_LABELS: Partial<Record<keyof BusinessRequest, string>> = {
 	ownerPhone: "Owner phone",
 	feeModel: "Fee model",
 	feeValue: "Fee",
+	feeAddendumRef: "Fee addendum",
 	contractStartsOn: "Agreement start",
 	contractNotes: "Contract notes",
 };
@@ -121,23 +122,25 @@ function EditBusinessForm({
 	);
 	const [ownerEmail, setOwnerEmail] = useState(business.ownerEmail ?? "");
 	const [ownerPhone, setOwnerPhone] = useState(business.ownerPhone ?? "");
-	// One fee model (a % of daily sales, debited daily): only the rate is edited.
-	const [pct, setPct] = useState(
+	// One fee model (a % of daily sales, debited daily), fixed at the platform default unless a signed addendum says otherwise.
+	const lock = useFeeLock(
 		business.feeModelKey === "PERCENT_OF_SALES" && business.feeValue
-			? String(business.feeValue)
-			: "1.5",
+			? business.feeValue
+			: null,
+		business.feeAddendumRef,
 	);
 	const [contractStartsOn, setStartsOn] = useState(
 		business.contractStartsOn ?? "",
 	);
 	const [contractNotes, setNotes] = useState(business.contractNotes ?? "");
-	const feeValue = Number(pct.replace(",", "."));
 	const emailOk = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(ownerEmail.trim());
 	const reasonOk = !asHms || reason.trim().length >= 8;
 	const valid =
 		name.trim().length > 1 && ownerName.trim().length > 1 && emailOk && reasonOk;
 
 	const save = () => {
+		const fee = feeLockValue(lock);
+		if (!fee) return;
 		const patch: Partial<BusinessRequest> = {
 			name: name.trim(),
 			legalName: legalName.trim() || null,
@@ -151,14 +154,21 @@ function EditBusinessForm({
 			ownerEmail: ownerEmail.trim().toLowerCase(),
 			ownerPhone: ownerPhone.trim() || null,
 			feeModel: "PERCENT_OF_SALES",
-			feeValue: Number.isFinite(feeValue) && feeValue > 0 ? feeValue : null,
+			feeValue: fee.feeValue,
+			feeAddendumRef: fee.feeAddendumRef,
 			contractStartsOn: contractStartsOn || null,
 			contractNotes: contractNotes.trim() || null,
 		};
 		const body = businessRequestFrom(business, patch);
 		if (!asHms) {
-			run(() => updateBusiness(business.id, body), "Business saved", (b) =>
-				onSaved(refreshBusiness(business, b)),
+			run(
+				async () => {
+					const saved = await updateBusiness(business.id, body);
+					if (!saved.ok) showFeeLockError(lock, saved.error);
+					return saved;
+				},
+				"Business saved",
+				(b) => onSaved(refreshBusiness(business, b)),
 			);
 			return;
 		}
@@ -168,7 +178,10 @@ function EditBusinessForm({
 				if (diff.keys.length === 0)
 					return { ok: false as const, error: "Nothing has changed yet" };
 				const saved = await updateBusiness(business.id, body);
-				if (!saved.ok) return saved;
+				if (!saved.ok) {
+					showFeeLockError(lock, saved.error);
+					return saved;
+				}
 				const change = await recordChange({
 					businessId: business.id,
 					area: "BUSINESS",
@@ -296,13 +309,7 @@ function EditBusinessForm({
 				</FieldRow>
 			</PanelSection>
 			<PanelSection title="Fee & contract">
-				<TextField
-					label="Share of daily sales (%)"
-					value={pct}
-					onChange={setPct}
-					placeholder="1.5"
-					hint={`${feeModelLabels.PERCENT_OF_SALES} from the hotel's Moniepoint or OPay account`}
-				/>
+				<FeeLockField lock={lock} />
 				<FieldRow>
 					<TextField
 						label="Agreement starts on"
