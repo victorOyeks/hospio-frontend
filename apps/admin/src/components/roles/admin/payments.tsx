@@ -106,7 +106,7 @@ export function PaymentsScreen({
 	payments: Paged<AdminPaymentRow>;
 	summary: PaymentSummaryData | null;
 	businesses: BusinessRow[];
-	/** Every hotel's POS keys and fee debit, loaded only on the POS & fee collection tab. */
+	/** Every hotel's POS keys and fee state, loaded only on the POS & fee collection tab. */
 	hotels?: HotelDirectoryRow[] | null;
 }) {
 	const [tab, setTab] = useFilterParam("tab");

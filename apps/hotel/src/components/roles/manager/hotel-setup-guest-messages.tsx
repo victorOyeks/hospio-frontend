@@ -1,26 +1,25 @@
 "use client";
 
 import {
-	CreditCardIcon,
+	FileTextIcon,
 	MailIcon,
 	MessageCircleIcon,
 	ReceiptIcon,
 } from "lucide-react";
-import { useRouter, useSearchParams } from "next/navigation";
-import { useCallback, useEffect, useRef, useState } from "react";
+import Link from "next/link";
+import { useSearchParams } from "next/navigation";
+import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
 import {
 	type CommInvoiceRow,
 	type CommLineRow,
 	type CommMessageRow,
 	type CommPlanView,
-	confirmGuestMessagePayment,
 	getGuestMessagePlan,
 	guestMessageInvoice,
 	guestMessageInvoiceMessages,
 	guestMessageInvoices,
 	type Paged,
-	payGuestMessageInvoice,
 	setGuestMessages,
 	thisMonthMessages,
 } from "@hospio/api/actions/message-billing";
@@ -38,11 +37,11 @@ import { cn } from "@hospio/ui/utils";
 
 /**
  * Hotel setup → Guest messages (hospio-backend docs/guest-message-billing.md): booking emails and WhatsApp to guests
- * as a paid service. The owner or manager switches it on, sees the prices and this month's usage, and pays the monthly
- * invoices through Paystack. An invoice unpaid ten days after issue pauses guest messages until it is paid.
+ * as a paid service. The owner or manager switches it on, sees the prices and this month's usage and each month's MSG-
+ * invoice. Each one is billed on the business's Hospio360 monthly invoice (docs/plan-monthly-invoices.md) and paid there,
+ * under Billing & invoices; there is no separate payment here.
  */
 export function GuestMessagesSection({ isOwner }: { isOwner: boolean }) {
-	const router = useRouter();
 	const params = useSearchParams();
 	const [plan, setPlan] = useState<CommPlanView | null>(null);
 	const [invoices, setInvoices] = useState<Paged<CommInvoiceRow> | null>(null);
@@ -51,7 +50,6 @@ export function GuestMessagesSection({ isOwner }: { isOwner: boolean }) {
 	const [confirmOff, setConfirmOff] = useState(false);
 	const [open, setOpen] = useState<string | null>(params.get("invoice"));
 	const [usageOpen, setUsageOpen] = useState(false);
-	const confirmed = useRef(false);
 
 	const load = useCallback(async () => {
 		const [p, i] = await Promise.all([
@@ -67,22 +65,6 @@ export function GuestMessagesSection({ isOwner }: { isOwner: boolean }) {
 	useEffect(() => {
 		void load();
 	}, [load]);
-
-	// Back from Paystack (?reference=… or ?trxref=…): confirm the payment, then show the invoice paid.
-	useEffect(() => {
-		const reference = params.get("reference") ?? params.get("trxref");
-		if (!reference || confirmed.current) return;
-		confirmed.current = true;
-		void confirmGuestMessagePayment(reference).then((r) => {
-			if (r.ok) toast.success(`Invoice ${r.data.number} paid · thank you`);
-			else toast.error(r.error);
-			const invoice = params.get("invoice");
-			router.replace(
-				`/dashboard/hotel-setup/guest-messages${invoice ? `?invoice=${invoice}` : ""}`,
-			);
-			void load();
-		});
-	}, [params, router, load]);
 
 	async function toggle(on: boolean) {
 		setBusy(true);
@@ -118,7 +100,7 @@ export function GuestMessagesSection({ isOwner }: { isOwner: boolean }) {
 					Booking confirmations, receipts and other guest messages are not
 					being sent.{" "}
 					{unpaid.length > 0
-						? "Pay the unpaid invoice below and they start again on their own."
+						? "Pay the Hospio360 invoice under Billing & invoices and they start again on their own."
 						: "Contact Hospio360 support to lift the hold."}
 				</Note>
 			)}
@@ -207,8 +189,8 @@ export function GuestMessagesSection({ isOwner }: { isOwner: boolean }) {
 				title="Invoices"
 				subtitle={
 					unpaid.length
-						? `${naira(plan.outstanding)} to pay · ${unpaid.length} open invoice${unpaid.length === 1 ? "" : "s"}`
-						: "Issued on the 1st for the month before · due 10 days later"
+						? `${naira(plan.outstanding)} not paid yet · billed on your Hospio360 monthly invoice`
+						: "Made on the 1st for the month before · billed on your Hospio360 monthly invoice"
 				}
 				flush
 			>
@@ -250,9 +232,7 @@ export function GuestMessagesSection({ isOwner }: { isOwner: boolean }) {
 											<InvoiceStatus status={i.status} />
 										</td>
 										<td className={cn(cell, "text-right")}>
-											<span className="text-[13px] font-semibold text-brand">
-												{i.status === "PAID" ? "View" : "View & pay"}
-											</span>
+											<span className="text-[13px] font-semibold text-brand">View</span>
 										</td>
 									</tr>
 								))}
@@ -262,11 +242,7 @@ export function GuestMessagesSection({ isOwner }: { isOwner: boolean }) {
 				)}
 			</SectionCard>
 
-			<InvoicePanel
-				id={open}
-				onClose={() => setOpen(null)}
-				onlinePayment={plan.onlinePayment}
-			/>
+			<InvoicePanel id={open} onClose={() => setOpen(null)} />
 			<MessagesPanel open={usageOpen} onClose={() => setUsageOpen(false)} />
 			<ConfirmModal
 				open={confirmOff}
@@ -279,7 +255,7 @@ export function GuestMessagesSection({ isOwner }: { isOwner: boolean }) {
 			/>
 			{!isOwner && (
 				<p className="text-xs text-ink-3">
-					The owner sees and can pay these invoices too.
+					The owner sees these too and pays them on the Hospio360 monthly invoice.
 				</p>
 			)}
 		</div>
@@ -326,22 +302,27 @@ export function InvoiceStatus({ status }: { status: string }) {
 const channelName = (c: string | null) =>
 	c === "SMS" ? "SMS" : c === "WHATSAPP" ? "WhatsApp" : "Email";
 
-function InvoicePanel({
-	id,
-	onClose,
-	onlinePayment,
-}: {
-	id: string | null;
-	onClose: () => void;
-	onlinePayment: boolean;
-}) {
+/** Where an open MSG- invoice is paid: on the Hospio360 monthly invoice, linked once it has been issued. */
+function OnMonthlyInvoice({ invoice }: { invoice: CommInvoiceRow }) {
+	if (invoice.monthlyInvoiceNumber)
+		return (
+			<Link
+				href={`/dashboard/billing${invoice.monthlyInvoiceId ? `?invoice=${encodeURIComponent(invoice.monthlyInvoiceId)}` : ""}`}
+				className={cn(btn.primary, "inline-flex items-center gap-1")}
+			>
+				<FileTextIcon className="size-4" /> On Hospio360 invoice {invoice.monthlyInvoiceNumber}
+			</Link>
+		);
+	return <span className="text-[13px] text-ink-3">Billed on your monthly invoice</span>;
+}
+
+function InvoicePanel({ id, onClose }: { id: string | null; onClose: () => void }) {
 	const [inv, setInv] = useState<{
 		invoice: CommInvoiceRow;
 		lines: CommLineRow[];
 	} | null>(null);
 	const [messages, setMessages] = useState<Paged<CommMessageRow> | null>(null);
 	const [page, setPage] = useState(0);
-	const [paying, setPaying] = useState(false);
 
 	useEffect(() => {
 		setInv(null);
@@ -359,18 +340,6 @@ function InvoicePanel({
 			(r) => r.ok && setMessages(r.data),
 		);
 	}, [id, page]);
-
-	async function pay() {
-		if (!id) return;
-		setPaying(true);
-		const back = `${window.location.origin}/dashboard/hotel-setup/guest-messages?invoice=${id}`;
-		const r = await payGuestMessageInvoice(id, back);
-		if (!r.ok) {
-			setPaying(false);
-			return toast.error(r.error);
-		}
-		window.location.assign(r.data.authorizationUrl);
-	}
 
 	const i = inv?.invoice;
 	const payable = i && (i.status === "DUE" || i.status === "OVERDUE");
@@ -390,9 +359,9 @@ function InvoicePanel({
 				i?.status === "PAID"
 					? `Paid ${i.paidAt ? fmtWhen(i.paidAt) : ""}${i.paidByName ? ` by ${i.paidByName}` : ""}`
 					: i?.status === "OVERDUE"
-						? `Overdue since ${fmtLongDate(i.dueOn)} · guest messages are paused until it is paid`
+						? `Overdue since ${fmtLongDate(i.dueOn)}`
 						: i
-							? `Due ${fmtLongDate(i.dueOn)} · guest messages pause if it is not paid by then`
+							? "Paid with the Hospio360 monthly invoice it is billed on"
 							: undefined
 			}
 			footer={
@@ -400,16 +369,7 @@ function InvoicePanel({
 					<Button variant="outline" className={btn.secondary} onClick={onClose}>
 						Close
 					</Button>
-					{payable && (
-						<Button
-							className={btn.primary}
-							disabled={paying || !onlinePayment}
-							onClick={() => void pay()}
-						>
-							<CreditCardIcon className="mr-1 size-4" />{" "}
-							{paying ? "Opening Paystack…" : `Pay ${naira(i.totalAmount)}`}
-						</Button>
-					)}
+					{payable && <OnMonthlyInvoice invoice={i} />}
 				</>
 			}
 		>
@@ -423,10 +383,11 @@ function InvoicePanel({
 							Issued {fmtLongDate(i.issuedAt)}
 						</span>
 					</div>
-					{payable && !onlinePayment && (
+					{payable && (
 						<Note tone="info">
-							Online payment isn't set up yet. Pay by transfer and Hospio360
-							will mark this invoice paid.
+							{i.monthlyInvoiceNumber
+								? `Billed on Hospio360 invoice ${i.monthlyInvoiceNumber}. The owner pays it under Billing & invoices.`
+								: "Billed on your Hospio360 monthly invoice, issued on the 1st. The owner pays it under Billing & invoices."}
 						</Note>
 					)}
 					<PanelSection title="Summary">

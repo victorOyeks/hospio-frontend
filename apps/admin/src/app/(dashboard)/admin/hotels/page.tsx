@@ -5,7 +5,7 @@ import { adminRole } from "../role";
 
 export const dynamic = "force-dynamic";
 
-/** Admin · every hotel across businesses; money roles then see each hotel's POS keys, fee debit and latest daily fee. */
+/** Admin · every hotel across businesses; money roles then see each hotel's POS keys, fee state and latest daily fee. */
 export default async function HotelsPage() {
 	const role = adminRole(await getActiveRole());
 	// The fee columns (one call per hotel) are filled in from the browser so the list shows at once.

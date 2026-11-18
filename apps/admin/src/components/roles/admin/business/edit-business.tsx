@@ -122,7 +122,7 @@ function EditBusinessForm({
 	);
 	const [ownerEmail, setOwnerEmail] = useState(business.ownerEmail ?? "");
 	const [ownerPhone, setOwnerPhone] = useState(business.ownerPhone ?? "");
-	// One fee model (a % of daily sales, debited daily), fixed at the platform default unless a signed addendum says otherwise.
+	// One fee model (a % of daily sales, billed on the monthly invoice), fixed at the platform default unless a signed addendum says otherwise.
 	const lock = useFeeLock(
 		business.feeModelKey === "PERCENT_OF_SALES" && business.feeValue
 			? business.feeValue

@@ -438,7 +438,7 @@ export function HandoverStep({ ctx }: { ctx: WizardCtx }) {
 							"The stage changes to Handed over until the owner accepts",
 							`${hotels.length} ${ctx.venue.locations ? (hotels.length === 1 ? "location" : "locations") : hotels.length === 1 ? "hotel" : "hotels"}, ${logins.length} ${logins.length === 1 ? "login" : "logins"} and the settings go in the handover pack`,
 							"No email is sent yet: share the pack and the password with the owner yourself",
-							"The owner accepts the Terms and the daily debit authority themselves, by ticking two boxes at first sign-in",
+							"The owner accepts the Terms and the monthly invoice agreement themselves, by ticking two boxes at first sign-in",
 						]}
 					/>
 					<LinksSharedFields value={shared} onChange={setShared} />

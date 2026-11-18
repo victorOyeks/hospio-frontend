@@ -1,6 +1,7 @@
 "use client";
 
-import { BanknoteIcon, ReceiptIcon, WalletIcon } from "lucide-react";
+import { BanknoteIcon, FileTextIcon, ReceiptIcon } from "lucide-react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Suspense, useState } from "react";
 import type { DailyFeeRow } from "@hospio/api/actions/daily-fees";
@@ -22,18 +23,18 @@ import { cell, tableHead, tableRow } from "@hospio/ui/shared/ui";
 
 /**
  * Hospio fees for the owner (every hotel) and the manager (their hotel, read-only): what each hotel sold each day (VAT
- * excluded), Hospio360's fee on it and how it was collected. The statement for each day is emailed after midnight; the fee is
- * debited at 6am from the hotel's POS provider account (Moniepoint or OPay) once automatic debit is on, so there is nothing to
- * pay here. Until then the days show as "Statement only". `?month=YYYY-MM` shows one month; without it, the last 30 days.
+ * excluded) and Hospio360's fee on it. Nothing is taken from any account: the month's fees go on the Hospio360 monthly
+ * invoice issued on the 1st (hospio-backend docs/plan-monthly-invoices.md), paid under Billing & invoices. `?month=YYYY-MM`
+ * shows one month; without it, this month so far.
  */
 
 /** How a devices package is paid for, in the owner's words. */
 function devicePayLabel(p: DevicePackageView) {
 	switch (p.paymentOption) {
 		case "TRANSACTION":
-			return `Paid from sales: ${p.deviceRate ?? 2.5}% of each day's sales, with the Hospio fee`;
+			return `Paid from sales: ${p.deviceRate ?? 2.5}% of each day's sales, on the monthly invoice`;
 		case "MONTHLY":
-			return `Paid monthly: ${p.months} × ${naira(p.monthlyInstalment ?? 0)}`;
+			return `Paid monthly on the invoice: ${p.months} × ${naira(p.monthlyInstalment ?? 0)}`;
 		case "ONE_TIME":
 			return "Paid in full at installation";
 		default:
@@ -48,7 +49,8 @@ function deviceStatus(s: string) {
 	return <StatusPill tone="grey">{s}</StatusPill>;
 }
 
-const providerName = (p?: string | null) => (p === "OPAY" ? "OPay" : p === "MONIEPOINT" ? "Moniepoint" : p ? p : null);
+/** The month a day's fee is billed in: "November 2026". */
+const monthOf = (d: string) => new Date(`${d.slice(0, 7)}-01T12:00:00`).toLocaleDateString("en-GB", { month: "long", year: "numeric" });
 
 /** The last 12 months, newest first, for the picker. */
 function recentMonths() {
@@ -67,26 +69,21 @@ function recentMonths() {
 const day = (d: string, long = false) =>
 	new Date(`${d}T12:00:00`).toLocaleDateString("en-GB", long ? { weekday: "long", day: "numeric", month: "long", year: "numeric" } : { weekday: "short", day: "numeric", month: "short" });
 
+/** ACCRUED: waiting for the month's invoice; INVOICED: on an invoice not paid yet; PAID: the invoice is paid. */
 function status(s: string) {
 	switch (s) {
+		case "ACCRUED":
+			return <StatusPill tone="brand">For this month's invoice</StatusPill>;
+		case "INVOICED":
+			return <StatusPill tone="warning">On invoice, unpaid</StatusPill>;
 		case "PAID":
-			return <StatusPill tone="success">Debited</StatusPill>;
+			return <StatusPill tone="success">Paid</StatusPill>;
 		case "SHADOW":
 			return <StatusPill tone="info">Statement only</StatusPill>;
 		case "NO_FEE":
 			return <StatusPill tone="grey">No fee</StatusPill>;
-		case "SCHEDULED":
-			return <StatusPill tone="brand">Debit at 6am</StatusPill>;
-		case "PENDING":
-			return <StatusPill tone="warning">Being debited</StatusPill>;
-		case "PART_PAID":
-			return <StatusPill tone="warning">Part debited</StatusPill>;
-		case "UNPAID":
-			return <StatusPill tone="danger">Not debited</StatusPill>;
-		case "CARRIED":
-			return <StatusPill tone="grey">Moved to the next day</StatusPill>;
 		default:
-			return <StatusPill tone="grey">{s}</StatusPill>;
+			return <StatusPill tone="grey">{s.charAt(0) + s.slice(1).toLowerCase().replace(/_/g, " ")}</StatusPill>;
 	}
 }
 
@@ -149,11 +146,11 @@ export function HospioFees({
 	const router = useRouter();
 	const [open, setOpen] = useState<DailyFeeRow | null>(null);
 	const months = recentMonths();
-	const period = month ? (months.find((m) => m.value === month)?.label ?? month) : "Last 30 days";
+	const period = month ? (months.find((m) => m.value === month)?.label ?? month) : "This month so far";
+	const billedIn = month ? (months.find((m) => m.value === month)?.label ?? month) : months[0].label;
 	const sales = days.reduce((s, d) => s + d.sales, 0);
 	const fees = days.reduce((s, d) => s + d.fee, 0);
-	const collected = days.reduce((s, d) => s + (d.collected ?? 0), 0);
-	const shadow = days.some((d) => d.status === "SHADOW");
+	const deviceShare = days.reduce((s, d) => s + (d.deviceFee ?? 0), 0);
 	const hotels = new Set(days.map((d) => d.hotelId)).size;
 	const anyDevice = days.some((d) => (d.deviceFee ?? 0) > 0 || (d.deviceCarriedIn ?? 0) > 0);
 	const supplied = devices.filter((p) => p.paymentOption !== "OWN_DEVICES" || p.dataPlanMonthly > 0);
@@ -161,7 +158,7 @@ export function HospioFees({
 		<>
 			<PageHeader
 				title="Hospio fees"
-				subtitle={`${period} · what ${audience === "manager" ? "the hotel" : "each hotel"} sold (VAT excluded), Hospio360's fee on it and how it was taken`}
+				subtitle={`${period} · what ${audience === "manager" ? "the hotel" : "each hotel"} sold (VAT excluded) and Hospio360's fee on it, billed monthly`}
 			>
 					<select
 						value={month ?? ""}
@@ -169,7 +166,7 @@ export function HospioFees({
 						className="h-10 rounded-control border border-line bg-card px-3 text-[13px]"
 						aria-label="Period"
 					>
-						<option value="">Last 30 days</option>
+						<option value="">This month so far</option>
 						{months.map((m) => (
 							<option key={m.value} value={m.value}>
 								{m.label}
@@ -178,27 +175,27 @@ export function HospioFees({
 					</select>
 			</PageHeader>
 			{error && <Note tone="danger">{error}</Note>}
-			{!shadow && (
-				<p className="text-[13px] text-ink-3">
-					Nothing to pay here: each day's fee is taken automatically at 6am from {audience === "manager" ? "the hotel's" : "your"} POS provider account
-					(Moniepoint or OPay), and each day's statement is emailed{audience === "manager" ? " to the owner" : ""}.
-				</p>
-			)}
-			{shadow && (
-				<Note tone="info">
-					Automatic debit isn't on yet: each day's statement is emailed{audience === "manager" ? " to the owner" : ""}, and nothing is taken from{" "}
-					{audience === "manager" ? "the hotel's" : "your"} account. Once Hospio360 switches it on, the day's fee is debited at 6am from the POS provider
-					account. There is nothing to pay here.
-				</Note>
-			)}
+			<Note tone="info">
+				Billed monthly: nothing is taken from {audience === "manager" ? "the hotel's" : "your"} account. These fees are added to{" "}
+				{audience === "manager" ? "the business's" : "your"} {billedIn} invoice, issued on the 1st and due 7 days later
+				{audience === "manager" ? "; the owner pays it" : ""}.{" "}
+				<Link href="/dashboard/billing" className="font-medium text-primary underline underline-offset-2">
+					Billing &amp; invoices
+				</Link>
+			</Note>
 			<div className="grid grid-cols-1 gap-4 md:grid-cols-3">
 				<KpiCard label="Sales" value={naira(sales)} icon={BanknoteIcon} hint="VAT excluded" />
 				<KpiCard label="Hospio fees" value={naira(fees)} icon={ReceiptIcon} hint={days[0] ? `${days[0].rate} % of sales` : undefined} />
-				<KpiCard label="Debited" value={naira(collected)} icon={WalletIcon} />
+				<KpiCard
+					label={deviceShare > 0 ? "Devices from sales" : "Invoice"}
+					value={deviceShare > 0 ? naira(deviceShare) : billedIn}
+					icon={FileTextIcon}
+					hint={deviceShare > 0 ? "On the same monthly invoice" : "Issued on the 1st"}
+				/>
 			</div>
 			{supplied.length > 0 && (
 				<Suspense fallback={null}>
-					<OwnerDeviceInvoices canPay />
+					<OwnerDeviceInvoices />
 				</Suspense>
 			)}
 			{supplied.length > 0 && (
@@ -250,9 +247,9 @@ export function HospioFees({
 					</ul>
 				</SectionCard>
 			)}
-			<SectionCard title="Days" subtitle="Open a day for what was sold and how the fee was taken" flush>
+			<SectionCard title="Days" subtitle="Open a day for what was sold and the fee on it" flush>
 				{days.length === 0 ? (
-					<EmptyState title="No days yet" hint="The first day appears after midnight, with its statement in your email." className="m-5" />
+					<EmptyState title="No days yet" hint="Each day appears after midnight, with its statement in the owner's email." className="m-5" />
 				) : (
 					<div className="overflow-x-auto">
 						<table className="w-full text-left">
@@ -263,8 +260,6 @@ export function HospioFees({
 									<th className={cell}>Sales</th>
 									<th className={cell}>Fee</th>
 									{anyDevice && <th className={cell}>Devices</th>}
-									<th className={cell}>Debited</th>
-									<th className={cell}>From</th>
 									<th className={cell}>Status</th>
 								</tr>
 							</thead>
@@ -276,17 +271,6 @@ export function HospioFees({
 										<td className={cell}>{naira(d.sales)}</td>
 										<td className={cell}>{naira(d.fee)}</td>
 										{anyDevice && <td className={cell}>{(d.deviceFee ?? 0) > 0 ? naira(d.deviceFee ?? 0) : "—"}</td>}
-										<td className={cell}>{naira(d.collected ?? 0)}</td>
-										<td className={cell}>
-											{providerName(d.provider) ? (
-												<span className="flex flex-col">
-													<span>{providerName(d.provider)}</span>
-													{d.debitedAt && <span className="text-[11px] text-ink-3">{fmtWhen(d.debitedAt)}</span>}
-												</span>
-											) : (
-												<span className="text-ink-3">—</span>
-											)}
-										</td>
 										<td className={cell}>{status(d.status)}</td>
 									</tr>
 								))}
@@ -318,32 +302,28 @@ export function HospioFees({
 							columns={2}
 							items={[
 								{ label: `Fee at ${open.rate} %`, value: naira(open.fee) },
-								{ label: "From earlier days", value: naira(open.carriedIn ?? 0) },
+								...((open.carriedIn ?? 0) > 0 ? [{ label: "From earlier days", value: naira(open.carriedIn ?? 0) }] : []),
 								...((open.deviceFee ?? 0) > 0 || (open.deviceCarriedIn ?? 0) > 0
 									? [
 											{ label: `Devices at ${open.deviceRate ?? 0} %`, value: naira(open.deviceFee ?? 0) },
 											{ label: "Devices from earlier days", value: naira(open.deviceCarriedIn ?? 0) },
-											{ label: "Paid to devices", value: naira(open.devicePaid ?? 0) },
 										]
 									: []),
-								{ label: "Debited", value: naira(open.collected ?? 0) },
 								{ label: "Status", value: status(open.status) },
-								{ label: "Due that day", value: naira(open.due) },
+								{ label: "Billed on", value: `${monthOf(open.date)} invoice` },
 								{ label: "Statement emailed", value: open.statementSentAt ? fmtWhen(open.statementSentAt) : "—" },
-								{ label: "Debited at", value: open.debitedAt ? fmtWhen(open.debitedAt) : "—" },
-								{ label: "Debited from", value: providerName(open.provider) ? `${providerName(open.provider)} account` : "—" },
-								{ label: "Debit reference", value: open.debitRef ?? "—" },
-								{ label: "Attempts", value: open.attempts ? String(open.attempts) : "—" },
 							]}
 						/>
-						{(open.status === "UNPAID" || open.status === "PART_PAID") && (
-							<Note tone="warning">
-								{open.status === "PART_PAID" ? "Only part of the fee could be debited." : "The debit didn't go through."}
-								{open.lastError ? ` ${providerName(open.provider) ?? "The provider"} said: ${open.lastError}.` : ""} It is tried again at 9am,
-								1pm and 6pm, and what is still owed moves to the next day's fee. POS payments pause after 3 unpaid days.
-							</Note>
-						)}
-						{open.status === "CARRIED" && <Note tone="info">This fee wasn't debited on the day and was added to the next day's fee.</Note>}
+						<Note tone="info">
+							{open.status === "PAID"
+								? `Paid with the ${monthOf(open.date)} invoice.`
+								: open.status === "INVOICED"
+									? `On the ${monthOf(open.date)} invoice, not paid yet.`
+									: `Added to the ${monthOf(open.date)} invoice, issued on the 1st.`}{" "}
+							<Link href="/dashboard/billing" className="font-medium text-primary underline underline-offset-2">
+								Billing &amp; invoices
+							</Link>
+						</Note>
 					</div>
 				</Modal>
 			)}

@@ -5,7 +5,7 @@ import { monthRange } from "../../hotel-owner/hospio-fees/month";
 
 export const dynamic = "force-dynamic";
 
-/** Manager · Hospio fees: the hotel's daily sales and Hospio360's fee, read-only (debited automatically, nothing to pay). */
+/** Manager · Hospio fees: the hotel's daily sales and Hospio360's fee, read-only (billed on the owner's monthly invoice, nothing to pay here). */
 export default async function Page({ searchParams }: { searchParams: Promise<{ month?: string }> }) {
 	const { month, from, to } = monthRange((await searchParams).month);
 	const [r, d] = await Promise.all([hotelDailyFees(from, to), hotelDevices()]);

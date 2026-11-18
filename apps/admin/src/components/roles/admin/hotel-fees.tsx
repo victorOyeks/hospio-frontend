@@ -1,6 +1,6 @@
 "use client";
 
-import { CreditCardIcon, KeyRoundIcon, PlayIcon, RefreshCwIcon } from "lucide-react";
+import { KeyRoundIcon, PlayIcon, RefreshCwIcon } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
 import {
@@ -14,14 +14,11 @@ import {
 	redoFeeDay,
 	removeAdminPosConfig,
 	runFeeDay,
-	runFeeDebit,
 	saveAdminPosConfig,
-	setFeeCollection,
 } from "@hospio/api/actions/daily-fees";
 import type { AdminRole } from "@hospio/api/demo/fixtures/platform-extra";
-import { Switch } from "@hospio/ui/primitives/switch";
 import { DetailList, Note } from "@hospio/ui/shared/detail-list";
-import { SelectField, TextField } from "@hospio/ui/shared/field";
+import { TextField } from "@hospio/ui/shared/field";
 import { fmtWhen, naira } from "@hospio/ui/shared/format";
 import { Modal } from "@hospio/ui/shared/modal";
 import { SectionCard } from "@hospio/ui/shared/section-card";
@@ -29,9 +26,10 @@ import { StatusPill } from "@hospio/ui/shared/status-pill";
 import { btn, cell, tableHead, tableRow } from "@hospio/ui/shared/ui";
 
 /**
- * A hotel's POS provider keys and Hospio's daily fee (hospio-backend docs/plan-daily-fees.md, docs/pos-providers.md): the keys
- * are entered here by a super admin and shown masked; the debit switch turns on only when the provider's debit is configured on
- * the server and the hotel's keys are in; the daily fees list shows each day's sales, fee and debit.
+ * A hotel's POS provider keys and Hospio's daily fee (hospio-backend docs/plan-daily-fees.md, docs/pos-providers.md,
+ * docs/plan-monthly-invoices.md): the keys are entered here by a super admin and shown masked, and are only for taking guest
+ * payments. Nothing is debited: each day's fee is billed on the business's monthly invoice; the daily fees list shows each
+ * day's sales, fee and where it is billed.
  */
 
 const FIELDS: Record<string, { key: string; label: string; multiline?: boolean; hint?: string }[]> = {
@@ -50,26 +48,21 @@ const FIELDS: Record<string, { key: string; label: string; multiline?: boolean; 
 
 const providerLabel = (p?: string | null) => (p === "OPAY" ? "OPay" : p === "MONIEPOINT" ? "Moniepoint" : "Not set");
 
+/** ACCRUED: waiting for the month's invoice; INVOICED: on an invoice not paid yet; PAID: the invoice is paid. */
 export function feeStatus(status: string) {
 	switch (status) {
+		case "ACCRUED":
+			return <StatusPill tone="brand">Waiting for the invoice</StatusPill>;
+		case "INVOICED":
+			return <StatusPill tone="warning">On invoice, unpaid</StatusPill>;
 		case "PAID":
-			return <StatusPill tone="success">Debited</StatusPill>;
+			return <StatusPill tone="success">Paid</StatusPill>;
 		case "SHADOW":
 			return <StatusPill tone="info">Statement only</StatusPill>;
 		case "NO_FEE":
 			return <StatusPill tone="grey">No fee</StatusPill>;
-		case "SCHEDULED":
-			return <StatusPill tone="brand">Debit at 6am</StatusPill>;
-		case "PENDING":
-			return <StatusPill tone="warning">Waiting on provider</StatusPill>;
-		case "PART_PAID":
-			return <StatusPill tone="warning">Part debited</StatusPill>;
-		case "UNPAID":
-			return <StatusPill tone="danger">Not debited</StatusPill>;
-		case "CARRIED":
-			return <StatusPill tone="grey">Carried to next day</StatusPill>;
 		default:
-			return <StatusPill tone="grey">{status}</StatusPill>;
+			return <StatusPill tone="grey">{status.charAt(0) + status.slice(1).toLowerCase().replace(/_/g, " ")}</StatusPill>;
 	}
 }
 
@@ -94,21 +87,6 @@ export function HotelFeesPanel({ businessId, hotelId, role }: { businessId: stri
 		void load();
 	}, [load]);
 
-	const toggleDebit = async (on: boolean) => {
-		const r = await setFeeCollection(businessId, hotelId, collection?.provider ?? pos?.providers[0]?.provider ?? null, on);
-		if (r.ok) {
-			setCollection(r.data);
-			toast.success(on ? "Debit switched on: the fee is debited at 6am daily" : "Debit off: statements only");
-		} else toast.error(r.error);
-	};
-	const chooseProvider = async (p: string) => {
-		const r = await setFeeCollection(businessId, hotelId, p, false);
-		if (r.ok) setCollection(r.data);
-		else toast.error(r.error);
-	};
-
-	const state = collection?.providers.find((x) => x.provider === (collection?.provider ?? pos?.providers[0]?.provider));
-	const canSwitchOn = !!state && state.debitConfigured && state.hotelKeys;
 
 	return (
 		<>
@@ -116,7 +94,7 @@ export function HotelFeesPanel({ businessId, hotelId, role }: { businessId: stri
 			{superAdmin && (
 				<SectionCard
 					title="POS providers"
-					subtitle="The hotel's own Moniepoint and OPay keys. Each card payment goes through its terminal's provider; the daily fee is debited from the provider chosen below"
+					subtitle="The hotel's own Moniepoint and OPay keys, only for taking guest payments. Each card payment goes through its terminal's provider"
 				>
 					{!pos ? (
 						<p className="text-[13px] text-ink-3">Loading…</p>
@@ -182,83 +160,39 @@ export function HotelFeesPanel({ businessId, hotelId, role }: { businessId: stri
 			)}
 
 			<SectionCard
-				title="Hospio fee collection"
-				subtitle="1.5 % of each day's sales (the business's fee rule), worked out at 00:05 and debited at 6am"
+				title="Hospio fee"
+				subtitle="% of each day's sales (the business's fee rule), worked out at 00:05 and billed on the business's monthly invoice"
 				headerRight={
 					superAdmin ? (
-						<div className="flex gap-2">
-							<button
-								type="button"
-								className={`${btn.secondary} ${btn.small}`}
-								onClick={async () => {
-									const y = new Date(Date.now() - 864e5).toISOString().slice(0, 10);
-									const r = await runFeeDay(y);
-									if (r.ok) {
-										toast.success(`${r.data.date}: ${r.data.worked} worked out, ${r.data.statements} statements${r.data.notes.length ? ` · ${r.data.notes.join("; ")}` : ""}`);
-										void load();
-									} else toast.error(r.error);
-								}}
-							>
-								<PlayIcon className="mr-1 inline size-4" /> Work out yesterday
-							</button>
-							<button
-								type="button"
-								className={`${btn.secondary} ${btn.small}`}
-								onClick={async () => {
-									const r = await runFeeDebit();
-									if (r.ok) {
-										toast.success(`Debit run: ${r.data.tried} tried, ${r.data.paid} paid, ${r.data.pending} pending, ${r.data.unpaid} unpaid`);
-										void load();
-									} else toast.error(r.error);
-								}}
-							>
-								<CreditCardIcon className="mr-1 inline size-4" /> Run debit now
-							</button>
-						</div>
+						<button
+							type="button"
+							className={`${btn.secondary} ${btn.small}`}
+							onClick={async () => {
+								const y = new Date(Date.now() - 864e5).toISOString().slice(0, 10);
+								const r = await runFeeDay(y);
+								if (r.ok) {
+									toast.success(`${r.data.date}: ${r.data.worked} worked out, ${r.data.statements} statements${r.data.notes.length ? ` · ${r.data.notes.join("; ")}` : ""}`);
+									void load();
+								} else toast.error(r.error);
+							}}
+						>
+							<PlayIcon className="mr-1 inline size-4" /> Work out yesterday
+						</button>
 					) : undefined
 				}
 			>
 				{!collection ? (
 					<p className="text-[13px] text-ink-3">Loading…</p>
 				) : (
-					<div className="flex flex-col gap-4">
-						<div className="grid gap-4 md:grid-cols-2">
-							<SelectField
-								label="Debit from"
-								value={collection.provider ?? ""}
-								onChange={(v) => void chooseProvider(v)}
-								disabled={!superAdmin || collection.debitEnabled}
-								options={[
-									{ value: "MONIEPOINT", label: "Moniepoint" },
-									{ value: "OPAY", label: "OPay" },
-								]}
-								hint={collection.debitEnabled ? "Switch the debit off to change the provider" : undefined}
-							/>
-							<div className="flex flex-col gap-2">
-								<span className="text-[13px] font-medium text-ink">Automatic debit</span>
-								<div className="flex items-center gap-3">
-									<Switch
-										checked={collection.debitEnabled}
-										disabled={!superAdmin || (!collection.debitEnabled && !canSwitchOn)}
-										onCheckedChange={(v) => void toggleDebit(v)}
-									/>
-									<span className="text-[13px] text-ink-2">
-										{collection.debitEnabled ? "On: debited daily at 6am" : "Off: statements only (shadow mode)"}
-									</span>
-								</div>
-							</div>
-						</div>
-						<div className="flex flex-wrap gap-2">
-							{collection.providers.map((p) => (
-								<span key={p.provider} className="rounded-lg border border-line px-3 py-2 text-[12px] text-ink-2">
-									<b className="text-ink">{providerLabel(p.provider)}</b> · debit {p.debitConfigured ? "configured" : "not configured"} · hotel keys{" "}
-									{p.hotelKeys ? "in" : "missing"}
-									{p.reason ? ` · ${p.reason}` : ""}
-								</span>
-							))}
-						</div>
+					<div className="flex flex-col gap-3">
+						<p className="text-[13px] text-ink-2">
+							Nothing is taken from the hotel's accounts. Each month's fees go on the business's Hospio360 invoice, issued on the 1st and due 7
+							days later (Fees &amp; billing → Invoices).
+						</p>
 						{collection.posPaused && (
-							<Note tone="danger">POS push is paused: the fee has been unpaid for 3 days. It resumes when a debit goes through.</Note>
+							<Note tone="danger">
+								POS payments are paused for an unpaid Hospio360 invoice. They resume within a minute of it being paid, extended or voided.
+							</Note>
 						)}
 						{collection.changedAt && (
 							<p className="text-[12px] text-ink-3">
@@ -308,7 +242,7 @@ export function HotelFeesPanel({ businessId, hotelId, role }: { businessId: stri
 					day={open}
 					onClose={() => setOpen(null)}
 					onRedo={
-						superAdmin && (open.status === "SHADOW" || open.status === "NO_FEE")
+						superAdmin && ["SHADOW", "NO_FEE", "ACCRUED"].includes(open.status)
 							? async () => {
 									const r = await redoFeeDay(open.id);
 									if (r.ok) {
@@ -335,8 +269,8 @@ export function FeeTable({ days, onOpen, showHotel = false }: { days: DailyFeeRo
 						{showHotel && <th className={cell}>Hotel</th>}
 						<th className={cell}>Sales</th>
 						<th className={cell}>Fee</th>
-						<th className={cell}>Due</th>
-						<th className={cell}>Debited</th>
+						<th className={cell}>Devices</th>
+						<th className={cell}>Paid</th>
 						<th className={cell}>Status</th>
 					</tr>
 				</thead>
@@ -347,7 +281,7 @@ export function FeeTable({ days, onOpen, showHotel = false }: { days: DailyFeeRo
 							{showHotel && <td className={cell}>{d.hotelName ?? "—"}</td>}
 							<td className={cell}>{naira(d.sales)}</td>
 							<td className={cell}>{naira(d.fee)}</td>
-							<td className={cell}>{naira(d.due)}</td>
+							<td className={cell}>{(d.deviceFee ?? 0) > 0 ? naira(d.deviceFee ?? 0) : "—"}</td>
 							<td className={cell}>
 								{naira(d.collected ?? 0)}
 								{(d.refunded ?? 0) > 0 && <span className="block text-xs text-danger">{naira(d.refunded)} refunded</span>}
@@ -388,7 +322,7 @@ export function FeeDayModal({
 			open
 			onOpenChange={(o) => !o && onClose()}
 			title={`${day.hotelName ?? "Hotel"} · ${new Date(`${day.date}T12:00:00`).toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long", year: "numeric" })}`}
-			subtitle="What was sold that day (VAT excluded), the fee and the debit"
+			subtitle="What was sold that day (VAT excluded) and the fee, billed on the monthly invoice"
 		>
 			<div className="flex flex-col gap-4">
 				<table className="w-full text-left text-[13px]">
@@ -411,17 +345,14 @@ export function FeeDayModal({
 					columns={2}
 					items={[
 						{ label: `Fee at ${day.rate} %`, value: naira(day.fee) },
-						{ label: "Carried from earlier days", value: naira(day.carriedIn ?? 0) },
-						{ label: "Due", value: naira(day.due) },
-						{ label: "Debited", value: naira(day.collected ?? 0) },
+						...((day.carriedIn ?? 0) > 0 ? [{ label: "Carried from earlier days", value: naira(day.carriedIn ?? 0) }] : []),
+						...((day.deviceFee ?? 0) > 0 ? [{ label: `Devices at ${day.deviceRate ?? 0} %`, value: naira(day.deviceFee ?? 0) }] : []),
+						{ label: "Paid", value: naira(day.collected ?? 0) },
 						...((day.refunded ?? 0) > 0 ? [{ label: "Refunded", value: <span className="text-danger">{naira(day.refunded)}</span> }] : []),
 						{ label: "Status", value: feeStatus(day.status) },
-						{ label: "Debit from", value: providerLabel(day.provider) },
-						{ label: "Reference", value: day.debitRef ?? "—" },
 						{ label: "Statement sent", value: day.statementSentAt ? fmtWhen(day.statementSentAt) : "—" },
 					]}
 				/>
-				{day.lastError && <Note tone="warning">{day.lastError}</Note>}
 				{day.refundNote && <Note tone="info">Refund: {day.refundNote}</Note>}
 				{onRefund && refundable > 0 && !refunding && (
 					<button type="button" className={btn.secondary} onClick={() => setRefunding(true)}>
@@ -438,7 +369,7 @@ export function FeeDayModal({
 							hint={`Up to ${naira(refundable)} of the platform fee collected that day`}
 							required
 						/>
-						<TextField label="Reason" value={reason} onChange={setReason} placeholder="Debited twice; refunded to the hotel" required />
+						<TextField label="Reason" value={reason} onChange={setReason} placeholder="Charged twice; refunded to the hotel" required />
 						<Note tone="info">The referring marketer's commission on the refunded amount comes off their next statement.</Note>
 						<div className="flex justify-end gap-2">
 							<button type="button" className={btn.secondary} onClick={() => setRefunding(false)}>

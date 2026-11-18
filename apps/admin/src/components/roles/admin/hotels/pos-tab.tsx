@@ -9,11 +9,11 @@ import { DataTable, TwoLine } from "@hospio/ui/shared/data-table";
 import { Note } from "@hospio/ui/shared/detail-list";
 import { FilterSelect, SearchBox, Toolbar } from "@hospio/ui/shared/toolbar";
 import { HotelDrawer } from "./drawer";
-import { DebitCell, FEE_FILTERS, feeFilterMatches, KeysCell, LastFeeCell, Pending, useHotelFees } from "./status";
+import { FeeStateCell, FEE_FILTERS, feeFilterMatches, KeysCell, LastFeeCell, Pending, useHotelFees } from "./status";
 
 /**
- * Payments & POS → POS & fee collection: every hotel's POS keys, fee debit switch and pause in one table. A row opens the
- * hotel panel on its POS & Hospio fees tab, where the keys and the switch are changed.
+ * Payments & POS → POS & fee collection: every hotel's POS keys (for guest payments), fee state and any pause for an unpaid
+ * invoice in one table. A row opens the hotel panel on its POS & Hospio fees tab, where the keys are changed.
  */
 export function PosCollectionTab({ role, hotels: base }: { role: AdminRole; hotels: HotelDirectoryRow[] }) {
 	const { rows: hotels, loading, error } = useHotelFees(base, true);
@@ -29,19 +29,7 @@ export function PosCollectionTab({ role, hotels: base }: { role: AdminRole; hote
 			cell: ({ row }) => <TwoLine primary={row.original.name} secondary={`${row.original.businessName}${row.original.city ? ` · ${row.original.city}` : ""}`} />,
 		},
 		{ id: "keys", header: "POS keys", cell: ({ row }) => (loading ? <Pending /> : <KeysCell c={row.original.collection} />) },
-		{ id: "debit", header: "Hospio fee", cell: ({ row }) => (loading ? <Pending /> : <DebitCell c={row.original.collection} />) },
-		{
-			id: "debitReady",
-			header: "Provider debit",
-			cell: ({ row }) =>
-				loading ? (
-					<Pending />
-				) : row.original.collection ? (
-					<span className="text-[13px] text-ink-2">{row.original.collection.debitConfigured ? "Set up on the server" : "Not set up"}</span>
-				) : (
-					<span className="text-ink-3">—</span>
-				),
-		},
+		{ id: "fee", header: "Hospio fee", cell: ({ row }) => (loading ? <Pending /> : <FeeStateCell c={row.original.collection} />) },
 		{ id: "lastFee", header: "Last daily fee", cell: ({ row }) => (loading ? <Pending /> : <LastFeeCell f={row.original.lastFee} />) },
 	];
 	return (

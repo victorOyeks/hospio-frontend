@@ -158,12 +158,12 @@ export function SettingsScreen({
 				<div className="grid gap-4 xl:grid-cols-2">
 					<SectionCard
 						title="Default fee"
-						subtitle="A share of daily sales, debited daily · applied to new businesses"
+						subtitle="A share of daily sales, billed monthly · applied to new businesses"
 						bodyClassName="gap-4 pt-2"
 					>
 						<p className="text-[13px] text-ink-2">
-							One fee model: a share of each day's sales, debited each morning from the hotel's Moniepoint or OPay account. New
-							businesses start at this rate; each one's rate can be changed in Fees &amp; billing.
+							One fee model: a share of each day's sales, billed on one Hospio360 invoice each month (issued on the 1st, due 7 days
+							later). Nothing is debited. New businesses start at this rate; each one's rate can be changed in Fees &amp; billing.
 						</p>
 						<TextField
 							label="Default share of daily sales (%)"

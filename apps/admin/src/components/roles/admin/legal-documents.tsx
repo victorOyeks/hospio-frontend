@@ -20,7 +20,7 @@ const KEYS: { value: string; label: string }[] = [
 	{ value: "TERMS", label: "Terms of Service" },
 	{ value: "PRIVACY", label: "Privacy Policy" },
 	{ value: "DPA", label: "Data Processing Terms" },
-	{ value: "DEBIT", label: "Fees and daily debit authorisation" },
+	{ value: "DEBIT", label: "Fees and monthly invoice" },
 	{ value: "DEVICES", label: "Devices & equipment terms" },
 	{ value: "SUPPORT", label: "Support & services" },
 	{ value: "RPA", label: "Referral partner terms" },

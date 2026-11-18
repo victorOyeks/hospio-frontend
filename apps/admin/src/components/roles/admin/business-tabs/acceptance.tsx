@@ -66,7 +66,7 @@ export function AcceptanceTab({
 				businessId={businessId}
 				businessName={businessName}
 				active="acceptance"
-				subtitle="Terms, privacy, data processing, the daily debit, staff and device terms: who accepted which version, when and how"
+				subtitle="Terms, privacy, data processing, the monthly invoice agreement (older records: daily debit authority), staff and device terms: who accepted which version, when and how"
 			>
 				<button type="button" className={btn.secondary} onClick={() => setSharing(true)}>
 					Record links shared
@@ -78,8 +78,8 @@ export function AcceptanceTab({
 			{error && <Note tone="danger">{error}</Note>}
 			<Note tone={ownerDone ? "success" : "warning"}>
 				{ownerDone
-					? "The owner has accepted the Terms, Privacy Policy, Data Processing Terms and the daily debit authority."
-					: "The owner hasn't accepted all of the Terms, Privacy Policy, Data Processing Terms and the daily debit authority yet: they are asked at their next sign-in."}
+					? "The owner has accepted the Terms, Privacy Policy, Data Processing Terms and the monthly invoice agreement."
+					: "The owner hasn't accepted all of the Terms, Privacy Policy, Data Processing Terms and the monthly invoice agreement yet: they are asked at their next sign-in."}
 				{shared ? ` Links shared by ${shared.recordedByName ?? "Hospio360"} (${CHANNEL_LABELS[shared.channel ?? ""] ?? shared.channel}, ${shared.sharedOn}).` : ""}
 			</Note>
 			<SectionCard title="Records" subtitle="Newest first. Records are never changed or removed." flush>

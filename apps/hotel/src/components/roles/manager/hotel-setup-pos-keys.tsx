@@ -10,7 +10,8 @@ import { StatusPill } from "@hospio/ui/shared/status-pill";
 
 /**
  * Hotel setup → POS: the hotel's Moniepoint or OPay keys, as Hospio360 entered them (hospio-backend docs/pos-providers.md).
- * Read only and masked: to change a key, the hotel asks Hospio360 support.
+ * Read only and masked: to change a key, the hotel asks Hospio360 support. The keys are only for taking guests' card and
+ * transfer payments; Hospio360's own fees are billed on the monthly invoice, never taken from this account.
  */
 
 const LABELS: Record<string, string> = {
@@ -43,8 +44,8 @@ export function PosKeysCard() {
 				<div className="flex flex-col gap-3">
 					{pos.posPaused && (
 						<Note tone="danger">
-							Card payments to your POS are paused: Hospio360's daily fee has been unpaid for 3 days. Cash and transfers still work. It resumes as
-							soon as a debit goes through.
+							POS payments are paused until the Hospio360 invoice is paid. Cash still works. They resume within a minute of the owner paying it
+							under Billing &amp; invoices.
 						</Note>
 					)}
 					{pos.providers.map((p) => (
@@ -60,7 +61,10 @@ export function PosKeysCard() {
 							/>
 						</div>
 					))}
-					<p className="text-[12px] text-ink-3">Each card payment goes through the provider of the terminal it's sent to.</p>
+					<p className="text-[12px] text-ink-3">
+						These keys are only for taking guest payments: each card payment goes through the provider of the terminal it's sent to. Hospio360
+						never takes its fees from this account.
+					</p>
 				</div>
 			)}
 		</SectionCard>
