@@ -390,6 +390,7 @@ export const toStatementRow = (r: MarketerStatement): MarketerStatementRow => ({
 	bankAccountName: s(r.bankAccountName),
 	bankChecked: !!r.bankChecked,
 	createdAt: s(r.createdAt),
+	finalStatement: !!r.finalStatement,
 });
 export const toStatementLine = (l: StatementLine): StatementLineItem => ({
 	id: l.id,

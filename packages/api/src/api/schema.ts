@@ -1145,12 +1145,24 @@ export const schema = createSchema({
 		}),
 		output: envelope(AuthResponse),
 	},
+	/**
+	 * Within 60 s of the last code nothing is sent: sent=false with the waiting code's expiresAt and retryInSeconds.
+	 * ifNone: send only when no code is still valid (the "Check your phone" page on open).
+	 */
 	"@post/identity/auth/phone/send-code": {
 		input: z
-			.object({ channel: z.enum(["SMS", "WHATSAPP"]).optional() })
+			.object({
+				channel: z.enum(["SMS", "WHATSAPP"]).optional(),
+				ifNone: z.boolean().optional(),
+			})
 			.optional(),
 		output: envelope(
-			z.object({ expiresAt: z.string(), deliveries: Deliveries }),
+			z.object({
+				expiresAt: z.string().nullable(),
+				deliveries: Deliveries,
+				sent: z.boolean().optional(),
+				retryInSeconds: z.number().optional(),
+			}),
 		),
 	},
 	"@post/identity/auth/phone/verify": {
