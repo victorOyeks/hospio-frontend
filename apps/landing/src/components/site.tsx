@@ -18,8 +18,8 @@ export const SIGN_IN_URL = `${HOTEL_APP_URL}/auth`;
 export const CONTACT_EMAIL =
 	process.env.NEXT_PUBLIC_CONTACT_EMAIL ?? "hello@oyeksglobal.com";
 
-/** Oyeks Global Ltd's registered office (footer, legal pages, notices clause of the Terms). */
-export const REGISTERED_OFFICE = "9 Remi Omoniyi Crescent, Ikorodu, Lagos State, Nigeria";
+/** Where Oyeks Global Ltd is (footer, legal pages, notices clause of the Terms). */
+export const REGISTERED_OFFICE = "Lagos, Nigeria";
 export const DEMO_MAILTO = `mailto:${CONTACT_EMAIL}?subject=${encodeURIComponent("Hospio360 demo request")}&body=${encodeURIComponent("Hotel name:\nCity:\nNumber of rooms:\nBest phone number:\n")}`;
 /** The public site's own address (canonical links, Open Graph, robots). */
 export const SITE_URL = (

@@ -35,15 +35,15 @@ those, only check that the modal appears, then sign out.
 
 1. **Do:** open https://hospio360.com/legal. **Expect:** 8 documents with version and "effective 18 November 2026"; footer has
    a Legal column (Legal, Terms of Service, Privacy Policy, Fees).
-2. **Do:** open Terms of Service. **Expect:** title, version TOS-2026-11, contents, sections, "Oyeks Global Limited (RC 10001123),
-   registered office 9 Remi Omoniyi Crescent, Ikorodu, Lagos State, Nigeria · hello@oyeksglobal.com"; no "[ ]" placeholders.
+2. **Do:** open Terms of Service. **Expect:** title, version TOS-2026-11, contents, sections, "Oyeks Global Ltd (RC 10001123),
+   Lagos, Nigeria · hello@oyeksglobal.com"; no "[ ]" placeholders.
    https://hospio360.com/terms goes to /legal/terms.
-3. **Do:** Terms → 17. Notices. **Expect:** "…by hand or courier to our registered office at 9 Remi Omoniyi Crescent, Ikorodu, Lagos
-   State, Nigeria." (no "full address on request"). The version stays TOS-2026-11 and nobody is asked to accept again (an address
+3. **Do:** Terms → 17. Notices. **Expect:** "…by hand or courier to our registered office in Lagos, Nigeria." (no street address, no "full
+   address on request"). The version stays TOS-2026-11 and nobody is asked to accept again (an address
    is not a material change; the text lives on this site, the version in the platform).
 4. **Do:** Terms → 5.6 and Fees → 4.4. **Expect:** fees for days before automatic debit is switched on are not collected unless
    agreed in writing.
-5. **Do:** the footer of any page. **Expect:** "9 Remi Omoniyi Crescent, Ikorodu, Lagos State, Nigeria" and **hello@oyeksglobal.com**
+5. **Do:** the footer of any page. **Expect:** "Lagos, Nigeria" (no street address) and **hello@oyeksglobal.com**
    (also the Contact, Support, demo and pricing links).
 
 ## 2 · Self sign-up
