@@ -124,6 +124,7 @@ export function OwnerDashboard({
 		info: "bg-info-soft text-info",
 	};
 	const last7 = daily.slice(-7);
+	const activeVenue = venues.find((v) => v.hotelId === activeId)?.today ?? null;
 
 	return (
 		<>
@@ -181,6 +182,14 @@ export function OwnerDashboard({
 						value={`${occupancy}%`}
 						icon={BedDoubleIcon}
 						hint={`${occupied} of ${rooms} rooms`}
+					/>
+				) : activeVenue ? (
+					// The same figure as the venue section below (sales opened today, tabs included).
+					<KpiCard
+						label="Sales today"
+						value={nairaShort(activeVenue.today.sold)}
+						icon={TrendingUpIcon}
+						hint={`${plural(activeVenue.today.sales, "sale")} at ${dailyScope}`}
 					/>
 				) : (
 					<KpiCard
