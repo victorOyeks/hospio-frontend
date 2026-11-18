@@ -171,7 +171,7 @@ const footerColumns: {
 	{
 		title: "Company",
 		links: [
-			{ href: "/#partners", label: "Partner program" },
+			{ href: "/partners/apply", label: "Partner program" },
 			{ href: `mailto:${CONTACT_EMAIL}`, label: "Contact" },
 			{
 				href: `mailto:${CONTACT_EMAIL}?subject=${encodeURIComponent("Support")}`,

@@ -14,6 +14,7 @@ import { feeRoutes } from "./routes-fees";
 import { paymentRoutes } from "./routes-payments";
 import { profileRoutes } from "./routes-profile";
 import { venueRoutes } from "./routes-venue";
+import { partnerRoutes } from "./routes-partner";
 import { pagedOf, pageParams } from "./paged";
 
 /**
@@ -1157,6 +1158,7 @@ export const schema = createSchema({
 	...deviceRoutes,
 	...profileRoutes,
 	...venueRoutes,
+	...partnerRoutes,
 	// identity
 	"@post/identity/auth/refresh": {
 		input: z.object({ refreshToken: z.string() }),

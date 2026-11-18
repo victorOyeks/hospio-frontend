@@ -20,6 +20,7 @@ import {
 	updateMarketer,
 } from "@hospio/api/actions/platform-admin";
 import { markMarketerBankChecked } from "@hospio/api/actions/marketer-admin";
+import { approvePartnerApplication } from "@hospio/api/actions/partner-applications";
 import { useAction } from "@hospio/api/actions/use-action";
 import type {
 	CommissionLine,
@@ -31,6 +32,11 @@ import type {
 	ReferralItem,
 	ReferralStage,
 } from "@hospio/api/data/admin-types";
+import type {
+	PartnerApplicationRow,
+	PartnerReviewDefaults,
+} from "@hospio/api/data/partner-application-types";
+import type { PageResult } from "@hospio/api/data/paging";
 import type { AdminRole } from "@hospio/api/demo/fixtures/platform-extra";
 import { DataTable, TwoLine } from "@hospio/ui/shared/data-table";
 import { withDeliveries } from "@hospio/ui/shared/deliveries-store";
@@ -74,6 +80,10 @@ import {
 	StatementPill,
 } from "../marketer/statement-detail";
 import { MarketerStatementsTab } from "./marketer-statements";
+import {
+	PartnerApplicationFilters,
+	PartnerApplicationsTab,
+} from "./partner-applications";
 
 const statusTone = {
 	PENDING: "warning",
@@ -102,6 +112,9 @@ export function MarketersScreen({
 	commissions,
 	statements,
 	referrals,
+	applications,
+	openedApplication,
+	partnerDefaults,
 	inviterName,
 }: {
 	role: AdminRole;
@@ -110,6 +123,10 @@ export function MarketersScreen({
 	/** The statements tab (money roles), filtered by `?smonth=&sstatus=`. */
 	statements: LoadResult<MarketerStatementList>;
 	referrals: Paged<ReferralItem>;
+	/** "Apply to be a partner" from the landing site (`?tab=applications&astatus=&aq=&app=`). */
+	applications: PageResult<PartnerApplicationRow>;
+	openedApplication: PartnerApplicationRow | null;
+	partnerDefaults: PartnerReviewDefaults;
 	inviterName: string;
 }) {
 	const [marketers, setMarketers] = useState(initial);
@@ -121,6 +138,14 @@ export function MarketersScreen({
 	const [, setPage] = usePageParam();
 	const [open, setOpen] = useQueryState("open");
 	const [isNew, setNew] = useQueryState("new");
+	const [appId, setAppId] = useQueryState("app");
+	const [approving, setApproving] = useState<PartnerApplicationRow | null>(
+		null,
+	);
+	const waiting =
+		applications.data.counts?.pendingTotal ??
+		applications.data.counts?.PENDING ??
+		0;
 	const [search, setSearch] = useState("");
 	const [confirm, setConfirm] = useState<{
 		kind: "approve" | "end" | "reactivate";
@@ -411,6 +436,8 @@ export function MarketersScreen({
 									]
 								: []),
 							{ key: "referrals", label: "Referrals", count: referrals.total },
+							// The count is the applications waiting for a decision.
+							{ key: "applications", label: "Applications", count: waiting },
 						]}
 						value={active}
 						onChange={(k) => {
@@ -464,9 +491,22 @@ export function MarketersScreen({
 								options={monthOptions(14)}
 							/>
 						</>
+					) : active === "applications" ? (
+						<PartnerApplicationFilters />
 					) : undefined
 				}
 			/>
+			{active === "applications" && (
+				<PartnerApplicationsTab
+					result={applications}
+					opened={openedApplication}
+					defaults={partnerDefaults}
+					openId={appId}
+					onOpen={(id) => void setAppId(id)}
+					onApprove={setApproving}
+					onChanged={refresh}
+				/>
+			)}
 			{active === "marketers" && (
 				<DataTable
 					columns={columns}
@@ -606,11 +646,18 @@ export function MarketersScreen({
 				}}
 			/>
 			<InviteMarketerPanel
-				open={isNew === "1"}
+				open={isNew === "1" || approving !== null}
+				application={approving}
+				defaults={partnerDefaults}
 				inviterName={inviterName}
-				onOpenChange={(o) => void setNew(o ? "1" : null)}
+				onOpenChange={(o) => {
+					if (approving) {
+						if (!o) setApproving(null);
+					} else void setNew(o ? "1" : null);
+				}}
 				onCreated={(m) => {
 					setMarketers((all) => [m, ...all]);
+					if (approving) void setAppId(null);
 					refresh();
 				}}
 			/>
@@ -1172,32 +1219,62 @@ function ShareModal({
 	);
 }
 
+/**
+ * The invite form. With `application` it opens prefilled from a partner application and Send invite approves that
+ * application (the same invite, then the application is linked to the marketer it made); the share and months start
+ * at the standard terms from Settings · Fees and only a money role changes them there.
+ */
 function InviteMarketerPanel({
 	open,
+	application,
+	defaults,
 	inviterName,
 	onOpenChange,
 	onCreated,
 }: {
 	open: boolean;
+	application?: PartnerApplicationRow | null;
+	defaults: PartnerReviewDefaults;
 	inviterName: string;
 	onOpenChange: (o: boolean) => void;
 	onCreated: (m: MarketerProfileRow) => void;
 }) {
 	const { run, pending } = useAction();
+	const standardShare = String(defaults.sharePct);
+	const standardMonths = String(defaults.months);
 	const [name, setName] = useState("");
 	const [email, setEmail] = useState("");
 	const [phone, setPhone] = useState("");
-	const [share, setShare] = useState("20");
-	const [months, setMonths] = useState("24");
+	const [share, setShare] = useState(standardShare);
+	const [months, setMonths] = useState(standardMonths);
 	const [created, setCreated] = useState<MarketerInvitedData | null>(null);
 	const reset = () => {
 		setName("");
 		setEmail("");
 		setPhone("");
-		setShare("20");
-		setMonths("24");
+		setShare(standardShare);
+		setMonths(standardMonths);
 		setCreated(null);
 	};
+	// Opened from an application: start from what the applicant wrote and the standard terms.
+	const applicationId = application?.id;
+	// Prefilled once per application (by id), not on every edit.
+	// eslint-disable-next-line react-hooks/exhaustive-deps
+	useEffect(() => {
+		if (!application) return;
+		setName(application.fullName);
+		setEmail(application.email);
+		setPhone(application.phone);
+		setShare(standardShare);
+		setMonths(standardMonths);
+		setCreated(null);
+	}, [applicationId]);
+	const termsLocked = Boolean(application) && !defaults.canChangeTerms;
+	const options = (standard: string, others: string[], unit: string) =>
+		[standard, ...others.filter((o) => o !== standard)].map((v) => ({
+			value: v,
+			label: `${v}${unit}${v === standard ? " · standard" : ""}`,
+		}));
 	return (
 		<SidePanel
 			open={open}
@@ -1205,8 +1282,16 @@ function InviteMarketerPanel({
 				if (!o) reset();
 				onOpenChange(o);
 			}}
-			title="Invite a marketer"
-			subtitle="They get a marketer login; their status turns active at the first sign-in"
+			title={
+				application
+					? `Approve ${application.fullName}'s application`
+					: "Invite a marketer"
+			}
+			subtitle={
+				application
+					? "Check the details, then send the invite: they get a marketer login and the application is marked approved"
+					: "They get a marketer login; their status turns active at the first sign-in"
+			}
 			icon={UserPlusIcon}
 			width="md"
 			footer={
@@ -1238,16 +1323,26 @@ function InviteMarketerPanel({
 								run(
 									() =>
 										withDeliveries(
-											inviteMarketer({
-												fullName: name,
-												email,
-												phone: phone || undefined,
-												sharePct: Number(share),
-												months: Number(months),
-											}),
+											application
+												? approvePartnerApplication(application, {
+														fullName: name,
+														email,
+														phone: phone || undefined,
+														sharePct: Number(share),
+														months: Number(months),
+													})
+												: inviteMarketer({
+														fullName: name,
+														email,
+														phone: phone || undefined,
+														sharePct: Number(share),
+														months: Number(months),
+													}),
 											`Invite for ${name}`,
 										),
-									`${name} invited`,
+									application
+										? `Application approved · ${name} invited`
+										: `${name} invited`,
 									(d) => {
 										setCreated(d);
 										onCreated(d.profile);
@@ -1255,7 +1350,7 @@ function InviteMarketerPanel({
 								)
 							}
 						>
-							Send invite
+							{application ? "Approve and send invite" : "Send invite"}
 						</button>
 					</>
 				)
@@ -1313,21 +1408,15 @@ function InviteMarketerPanel({
 								label="Share of the platform fee"
 								value={share}
 								onChange={setShare}
-								options={[
-									{ value: "20", label: "20% · standard" },
-									{ value: "15", label: "15%" },
-									{ value: "10", label: "10%" },
-								]}
+								disabled={termsLocked}
+								options={options(standardShare, ["20", "15", "10"], "%")}
 							/>
 							<SelectField
 								label="For how long"
 								value={months}
 								onChange={setMonths}
-								options={[
-									{ value: "24", label: "24 months · standard" },
-									{ value: "12", label: "12 months" },
-									{ value: "6", label: "6 months" },
-								]}
+								disabled={termsLocked}
+								options={options(standardMonths, ["12", "6"], " months")}
 							/>
 						</FieldRow>
 						<Note tone="info">
@@ -1335,6 +1424,12 @@ function InviteMarketerPanel({
 							for {plural(Number(months) || 0, "month")} from its first collected
 							fee. A statement on the 5th, paid by the 15th; 5% WHT is deducted.
 						</Note>
+						{termsLocked && (
+							<p className="text-xs text-ink-3">
+								The standard terms apply. Only a super admin or finance admin
+								can approve with a different share or term.
+							</p>
+						)}
 					</PanelSection>
 				</div>
 			)}
