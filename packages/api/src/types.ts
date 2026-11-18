@@ -153,12 +153,7 @@ export type AdminOnboardingData = {
 			}
 		>;
 	};
-	/** `outlets`: the outlets Hospio360 added for each location without rooms, by hotel id (venue type, phase 3). */
-	template?: {
-		templateId?: string;
-		appliedTo: string[];
-		outlets?: Record<string, { outletId: string; name: string; kind: string }[]>;
-	};
+	template?: { templateId?: string; appliedTo: string[] };
 	people?: { logins: OnboardingLogin[] };
 	connections?: {
 		terminals: {

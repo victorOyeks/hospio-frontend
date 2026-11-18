@@ -553,7 +553,6 @@ export function BarTabsScreen({
 										{tracked(l) &&
 											!cashier &&
 											l.status !== "CANCELLED" &&
-											l.status !== "SERVED" &&
 											(canServe(l) && l.id ? (
 												<button
 													type="button"
