@@ -10,6 +10,9 @@ import Link from "next/link";
 import { PartnerApplyForm } from "@/components/partner-apply-form";
 import { CheckItem, IconTile } from "@/components/sections/shared";
 import { container, SiteFooter, SiteHeader } from "@/components/site";
+import { VideoEmbed } from "@/components/video-embed";
+import { VideoJsonLd } from "@/components/video-json-ld";
+import { VIDEOS } from "@/config/videos";
 import { cn } from "@hospio/ui/utils";
 
 const description =
@@ -68,18 +71,22 @@ export default function PartnerApplyPage() {
 						"flex flex-col gap-8 py-10 md:gap-12 md:py-16",
 					)}
 				>
-					<div className="flex max-w-[760px] flex-col gap-4">
-						<p className="text-[13px] font-bold uppercase tracking-[0.1em] text-brand">
-							Partner program
-						</p>
-						<h1 className="text-[32px] font-bold leading-[1.1] tracking-[-0.02em] text-ink md:text-[48px]">
-							Apply to be a Hospio360 partner
-						</h1>
-						<p className="text-[17px] leading-[1.55] text-ink-2 md:text-[18px]">
-							Know owners of hotels, lounges, bars or restaurants? Introduce
-							them to Hospio360 and earn a share of our fee from every business
-							you bring on.
-						</p>
+					{/* The same two columns as the form and the offer below, so the video sits above "What you earn". */}
+					<div className="grid items-center gap-6 lg:grid-cols-[minmax(0,1fr)_400px] lg:gap-8">
+						<div className="flex min-w-0 max-w-[760px] flex-col gap-4">
+							<p className="text-[13px] font-bold uppercase tracking-[0.1em] text-brand">
+								Partner program
+							</p>
+							<h1 className="text-[32px] font-bold leading-[1.1] tracking-[-0.02em] text-ink md:text-[48px]">
+								Apply to be a Hospio360 partner
+							</h1>
+							<p className="text-[17px] leading-[1.55] text-ink-2 md:text-[18px]">
+								Know owners of hotels, lounges, bars or restaurants? Introduce
+								them to Hospio360 and earn a share of our fee from every business
+								you bring on.
+							</p>
+						</div>
+						<VideoEmbed video={VIDEOS.partner} />
 					</div>
 
 					<div className="grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_400px] lg:gap-8">
@@ -129,6 +136,7 @@ export default function PartnerApplyPage() {
 				</div>
 			</main>
 			<SiteFooter />
+			<VideoJsonLd videos={[VIDEOS.partner]} />
 		</>
 	);
 }
