@@ -1,5 +1,6 @@
 import type { LucideIcon } from "lucide-react";
 import {
+	ScaleIcon,
 	ActivityIcon,
 	BarChart3Icon,
 	BedDoubleIcon,
@@ -275,6 +276,7 @@ export const adminLinks: NavLink[] = [
 		roles: ["SUPER_ADMIN"],
 	},
 	{ title: "Settings", url: "/dashboard/settings", icon: SettingsIcon, group: "Platform" },
+	{ title: "Legal documents", url: "/dashboard/legal", icon: ScaleIcon, group: "Platform" },
 	{ title: "Admin team", url: "/dashboard/team", icon: UsersIcon, group: "Platform" },
 ];
 

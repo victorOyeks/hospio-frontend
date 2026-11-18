@@ -9,6 +9,7 @@ import { mlRoutes } from "./routes-ml";
 import { opsRoutes } from "./routes-ops";
 import { ownerRoutes } from "./routes-owner";
 import { devicePackageRoutes } from "./routes-device-packages";
+import { legalRoutes } from "./routes-legal";
 import { feeRoutes } from "./routes-fees";
 import { paymentRoutes } from "./routes-payments";
 import { profileRoutes } from "./routes-profile";
@@ -309,6 +310,8 @@ export const Business = z
 		marketerId: z.string().nullable().optional(),
 		feeModel: z.string().nullable().optional(),
 		feeValue: z.number().nullable().optional(),
+		/** Fee lock: the signed addendum behind a rate other than the platform default; null at the default. */
+		feeAddendumRef: z.string().nullable().optional(),
 		currency: z.string(),
 		country: z.string().nullable().optional(),
 		timezone: z.string(),
@@ -353,6 +356,7 @@ export const BusinessSummary = z.object({
 	marketerId: z.string().nullable(),
 	feeModel: z.string().nullable(),
 	feeValue: z.number().nullable(),
+	feeAddendumRef: z.string().nullable().optional(),
 	createdAt: z.string(),
 	lastActiveAt: z.string().nullable().optional(),
 });
@@ -383,6 +387,8 @@ export const BusinessRequest = z.object({
 	ownerPhone: z.string().nullable().optional(),
 	feeModel: z.string().nullable().optional(),
 	feeValue: z.number().nullable().optional(),
+	/** Fee lock: required by the server when feeValue is not the platform default (max 120). */
+	feeAddendumRef: z.string().max(120).nullable().optional(),
 	currency: z.string().nullable().optional(),
 	country: z.string().nullable().optional(),
 	timezone: z.string().nullable().optional(),
@@ -1118,6 +1124,7 @@ export const schema = createSchema({
 	...ownerRoutes,
 	...feeRoutes,
 	...devicePackageRoutes,
+	...legalRoutes,
 	...mlRoutes,
 	...adminRoutes,
 	...opsRoutes,
@@ -1142,15 +1149,30 @@ export const schema = createSchema({
 			businessName: z.string(),
 			city: z.string().nullable().optional(),
 			referralCode: z.string().nullable().optional(),
+			/** The two required boxes (hospio-backend docs/legal-acceptance.md); identity refuses a sign-up without them. */
+			acceptTerms: z.boolean(),
+			acceptDebit: z.boolean(),
 		}),
 		output: envelope(AuthResponse),
 	},
+	/**
+	 * Within 60 s of the last code nothing is sent: sent=false with the waiting code's expiresAt and retryInSeconds.
+	 * ifNone: send only when no code is still valid (the "Check your phone" page on open).
+	 */
 	"@post/identity/auth/phone/send-code": {
 		input: z
-			.object({ channel: z.enum(["SMS", "WHATSAPP"]).optional() })
+			.object({
+				channel: z.enum(["SMS", "WHATSAPP"]).optional(),
+				ifNone: z.boolean().optional(),
+			})
 			.optional(),
 		output: envelope(
-			z.object({ expiresAt: z.string(), deliveries: Deliveries }),
+			z.object({
+				expiresAt: z.string().nullable(),
+				deliveries: Deliveries,
+				sent: z.boolean().optional(),
+				retryInSeconds: z.number().optional(),
+			}),
 		),
 	},
 	"@post/identity/auth/phone/verify": {

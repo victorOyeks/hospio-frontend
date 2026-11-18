@@ -20,6 +20,7 @@ import {
 	FormMessage,
 } from "@hospio/ui/primitives/form";
 import { Input } from "@hospio/ui/primitives/input";
+import { DebitLabel, OwnerTermsLabel, TickBox } from "@hospio/ui/shared/legal";
 
 const letters = (v: string) => v.replace(/[^\p{L}]/gu, "").length;
 const realPhone = (v: string) => {
@@ -68,6 +69,9 @@ const schema = z.object({
 		.trim()
 		.max(20, "A referral code is at most 20 characters")
 		.optional(),
+	// The two required boxes (hospio-backend docs/legal-acceptance.md).
+	acceptTerms: z.boolean().refine((v) => v, "Tick this box to agree to the Terms, Privacy Policy and Data Processing Terms"),
+	acceptDebit: z.boolean().refine((v) => v, "Tick this box to authorise the daily 1.5% debit"),
 });
 
 /** The referral code's check (GET /platform/public/referral-codes/{code}): who referred them, or why it doesn't work. */
@@ -100,6 +104,8 @@ export function SignUpForm({ referralCode = "" }: { referralCode?: string }) {
 			businessName: "",
 			city: "",
 			referralCode,
+			acceptTerms: false,
+			acceptDebit: false,
 		},
 	});
 
@@ -357,6 +363,31 @@ export function SignUpForm({ referralCode = "" }: { referralCode?: string }) {
 					)}
 				/>
 
+				<FormField
+					control={form.control}
+					name="acceptTerms"
+					render={({ field }) => (
+						<FormItem className="gap-[6px]">
+							<TickBox id="terms" checked={field.value} onChange={field.onChange}>
+								<OwnerTermsLabel docs={[]} />
+							</TickBox>
+							<FormMessage />
+						</FormItem>
+					)}
+				/>
+				<FormField
+					control={form.control}
+					name="acceptDebit"
+					render={({ field }) => (
+						<FormItem className="gap-[6px]">
+							<TickBox id="debit" checked={field.value} onChange={field.onChange}>
+								<DebitLabel />
+							</TickBox>
+							<FormMessage />
+						</FormItem>
+					)}
+				/>
+
 				<Button
 					type="submit"
 					disabled={pending}
@@ -368,9 +399,6 @@ export function SignUpForm({ referralCode = "" }: { referralCode?: string }) {
 						"Create account"
 					)}
 				</Button>
-				<p className="text-center text-xs text-ink-3">
-					By continuing you agree to the Terms and Privacy Policy.
-				</p>
 				<p className="text-center text-[13px] text-ink-2">
 					Already have an account?{" "}
 					<Link

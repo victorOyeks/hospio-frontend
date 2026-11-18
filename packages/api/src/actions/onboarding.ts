@@ -1,6 +1,7 @@
 "use server";
 
-import { clientAgentHeaders } from "@hospio/api/client-agent";
+import { clientAgentHeaders, clientMetaHeaders } from "@hospio/api/client-agent";
+import { loadLegalDocuments } from "@hospio/api/actions/legal";
 import { askForPin } from "@hospio/api/device";
 import { revalidatePath } from "next/cache";
 import { cookies } from "next/headers";
@@ -71,9 +72,23 @@ export type SignUpInput = {
 	city?: string;
 	/** The marketer's code from the sign-up link (?ref=); identity refuses an unknown or inactive one. */
 	referralCode?: string;
+	/** The two required boxes: Terms, Privacy Policy and Data Processing Terms; the 1.5% daily debit authority. */
+	acceptTerms: boolean;
+	acceptDebit: boolean;
 };
 
 /** POST /identity/auth/sign-up: the owner account and business are created and the owner is signed in. */
+async function recordSignUpAcceptance(token: string) {
+	const docs = await loadLegalDocuments();
+	const owner = docs.filter((d) => ["TERMS", "PRIVACY", "DPA", "DEBIT"].includes(d.key));
+	if (!owner.length) return;
+	await api("@post/platform/legal/accept", {
+		auth: { type: "Bearer", token },
+		headers: await clientMetaHeaders(),
+		body: { documents: owner.map((d) => ({ key: d.key, version: d.version })), method: "SELF_SIGN_UP" },
+	});
+}
+
 export async function signUp(
 	input: SignUpInput,
 ): Promise<ActionResult<{ roles: string[]; deliveries?: Delivery[] | null }>> {
@@ -110,6 +125,9 @@ export async function signUp(
 			),
 		};
 	await settleSession(data.data.accessToken, data.data.refreshToken);
+	// The two boxes become the owner's acceptance records (method SELF_SIGN_UP, with IP and browser). If this fails the owner is
+	// simply asked again at their first sign-in to the dashboard (the legal gate), so sign-up never fails on it.
+	await recordSignUpAcceptance(data.data.accessToken).catch(() => undefined);
 	return {
 		ok: true,
 		data: { roles: data.data.roles, deliveries: data.data.deliveries },
@@ -156,12 +174,19 @@ export async function checkReferralCode(code: string): Promise<
 
 /**
  * POST /identity/auth/phone/send-code: a 6-digit code by SMS, or on WhatsApp with "WHATSAPP" (an SMS while the WhatsApp
- * code template isn't approved). Staging also accepts 123456.
+ * code template isn't approved). Staging also accepts 123456. No new code within 60 s of the last one (`sent: false`,
+ * the waiting code's `expiresAt`, `retryInSeconds`); `ifNone` sends only when no code is still valid.
  */
 export async function sendPhoneCode(
 	channel: "SMS" | "WHATSAPP" = "SMS",
+	options: { ifNone?: boolean } = {},
 ): Promise<
-	ActionResult<{ expiresAt: string; deliveries?: Delivery[] | null }>
+	ActionResult<{
+		expiresAt: string | null;
+		deliveries?: Delivery[] | null;
+		sent: boolean;
+		retryInSeconds: number;
+	}>
 > {
 	const { auth } = await withSession();
 	if (!auth) return { ok: false, error: "Sign in again" };
@@ -169,19 +194,33 @@ export async function sendPhoneCode(
 		await demoDelay(400);
 		return {
 			ok: true,
-			data: { expiresAt: new Date(Date.now() + 10 * 60_000).toISOString() },
+			data: {
+				expiresAt: new Date(Date.now() + 10 * 60_000).toISOString(),
+				sent: true,
+				retryInSeconds: 60,
+			},
 		};
 	}
 	const { data, error } = await api("@post/identity/auth/phone/send-code", {
 		auth,
-		body: { channel },
+		body: options.ifNone ? { channel, ifNone: true } : { channel },
 	});
 	if (error || !data)
 		return {
 			ok: false,
 			error: errorMessage(error, "The code could not be sent"),
 		};
-	return { ok: true, data: data.data };
+	const d = data.data;
+	return {
+		ok: true,
+		data: {
+			expiresAt: d.expiresAt,
+			deliveries: d.deliveries,
+			// An older API always sent and had no cooldown fields.
+			sent: d.sent ?? true,
+			retryInSeconds: d.retryInSeconds ?? 0,
+		},
+	};
 }
 
 /** GET /messaging/channels: whether a code can go on WhatsApp right now ("Send on WhatsApp instead"). */

@@ -83,6 +83,11 @@ export const DevicePackage = z.object({
 	dataPlanRenewedThrough: str,
 	dataPlanRenewedByName: str,
 	dataPlanRenewedAt: str,
+	/** The owner's tick for the device terms (hospio-backend docs/legal-acceptance.md), or the signed schedule's reference instead. */
+	termsAcceptedAt: str,
+	termsAcceptedName: str,
+	termsVersion: str,
+	signedScheduleRef: str,
 });
 
 export const DataPlanRenewal = z.object({
@@ -167,7 +172,7 @@ export const devicePackageRoutes = {
 	},
 	"@post/platform/admin/device-packages/:id/install": {
 		params: idParams,
-		input: z.object({ installedOn: z.string().nullable() }),
+		input: z.object({ installedOn: z.string().nullable(), signedScheduleRef: z.string().max(120).nullable().optional() }),
 		output: envelope(DevicePackage),
 	},
 	"@post/platform/admin/device-packages/:id/payments": {

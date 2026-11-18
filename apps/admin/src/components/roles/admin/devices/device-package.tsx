@@ -333,6 +333,7 @@ function PackageSummary({
 }) {
 	const [installing, setInstalling] = useState(false);
 	const [installOn, setInstallOn] = useState(today());
+	const [scheduleRef, setScheduleRef] = useState("");
 	const [paying, setPaying] = useState(false);
 	const [amount, setAmount] = useState<number | "">("");
 	const [reference, setReference] = useState("");
@@ -493,8 +494,12 @@ function PackageSummary({
 						<button
 							type="button"
 							className={btn.primary}
-							disabled={busy || !installOn}
-							onClick={() => void run(() => installDevicePackage(p.id, installOn), "Devices marked installed").then((ok) => ok && setInstalling(false))}
+							disabled={busy || !installOn || (!p.termsAcceptedAt && !scheduleRef.trim())}
+							onClick={() =>
+								void run(() => installDevicePackage(p.id, installOn, p.termsAcceptedAt ? null : scheduleRef), "Devices marked installed").then(
+									(ok) => ok && setInstalling(false),
+								)
+							}
 						>
 							Mark installed
 						</button>
@@ -502,6 +507,20 @@ function PackageSummary({
 				}
 			>
 				<TextField label="Installed on" type="date" value={installOn} onChange={setInstallOn} />
+				{p.termsAcceptedAt ? (
+					<p className="mt-3 text-xs text-ink-2">
+						Device terms accepted by {p.termsAcceptedName ?? "the owner"} ({p.termsVersion}) on{" "}
+						{new Date(p.termsAcceptedAt).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}.
+					</p>
+				) : (
+					<div className="mt-3 space-y-2">
+						<p className="text-xs text-warning">
+							The owner hasn&apos;t accepted the device terms in the app yet (Hospio fees → Devices). Ask them to, or enter the
+							reference of the signed device schedule.
+						</p>
+						<TextField label="Signed device schedule reference" value={scheduleRef} onChange={setScheduleRef} />
+					</div>
+				)}
 			</Modal>
 			<Modal
 				open={paying}

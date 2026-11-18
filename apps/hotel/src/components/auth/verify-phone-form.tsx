@@ -18,7 +18,21 @@ import {
 } from "@hospio/ui/primitives/input-otp";
 import { cn } from "@hospio/ui/utils";
 
-const RESEND_SECONDS = 45;
+/** The server's cooldown between codes (hospio.auth.phone-code-cooldown-seconds) when an older API doesn't say. */
+const RESEND_SECONDS = 60;
+
+/** 75 → "1:15" */
+function clock(seconds: number) {
+	return `${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2, "0")}`;
+}
+
+/** "2026-11-18T13:50:08Z" → "14:50" (the phone's time zone) */
+function timeOf(iso: string) {
+	return new Date(iso).toLocaleTimeString([], {
+		hour: "2-digit",
+		minute: "2-digit",
+	});
+}
 
 /** "+234 803 555 0192" → "+234 803 ••• 0192" */
 function maskPhone(phone: string) {
@@ -27,24 +41,31 @@ function maskPhone(phone: string) {
 	return `${digits.slice(0, -7)} ${digits.slice(-7, -4).replace(/\d/g, "•")} ${digits.slice(-4)}`;
 }
 
-/** Check your phone (Figma 3163:16180): the code is sent on open, six boxes, resend with a cool-down. A self-serve owner must confirm before the wizard opens. */
+/**
+ * Check your phone (Figma 3163:16180): six boxes, resend with a cool-down. On open a code is sent only when none is still
+ * valid (sign-up already sent one, or the page is opened again): the server keeps the code and the 60 s cooldown, so
+ * reopening the page never sends another. A self-serve owner must confirm before the wizard opens.
+ */
 export function VerifyPhoneForm({
 	phone,
 	staging,
 	next = "/onboarding",
-	alreadySent = false,
 }: {
 	phone: string;
 	staging: boolean;
 	next?: string;
-	/** True when sign-up has just sent a code: sending again would replace it. */
-	alreadySent?: boolean;
 }) {
 	const router = useRouter();
 	const [code, setCode] = useState("");
 	const [error, setError] = useState<string | null>(null);
-	const [left, setLeft] = useState(RESEND_SECONDS);
+	const [left, setLeft] = useState(0);
 	const [sending, setSending] = useState(false);
+	/** Whether the first look (send only when no code is valid) has answered. */
+	const [ready, setReady] = useState(false);
+	/** When the waiting code stops working; null when none is valid. */
+	const [expiresAt, setExpiresAt] = useState<string | null>(null);
+	/** True when this visit found a code sent earlier instead of sending one. */
+	const [earlier, setEarlier] = useState(false);
 	const [pending, startTransition] = useTransition();
 	const sent = useRef(false);
 	const otpRef = useRef<HTMLInputElement>(null);
@@ -56,30 +77,44 @@ export function VerifyPhoneForm({
 		void codeChannels().then((c) => setWhatsapp(c.whatsappCodes));
 	}, []);
 
-	const send = useCallback(async (channel: "SMS" | "WHATSAPP" = "SMS") => {
-		setSending(true);
-		setVia(channel);
-		const result = await withDeliveries(
-			sendPhoneCode(channel),
-			channel === "WHATSAPP"
-				? "Your phone code on WhatsApp"
-				: "Your phone code",
-		);
-		setSending(false);
-		if (!result.ok) {
-			toast.error(result.error);
-			return;
-		}
-		setError(null);
-		setCode("");
-		setLeft(RESEND_SECONDS);
-	}, []);
+	const send = useCallback(
+		async (channel: "SMS" | "WHATSAPP" = "SMS", ifNone = false) => {
+			setSending(true);
+			const result = await withDeliveries(
+				sendPhoneCode(channel, { ifNone }),
+				channel === "WHATSAPP"
+					? "Your phone code on WhatsApp"
+					: "Your phone code",
+			);
+			setSending(false);
+			setReady(true);
+			if (!result.ok) {
+				toast.error(result.error);
+				return;
+			}
+			const r = result.data;
+			setExpiresAt(r.expiresAt);
+			setLeft(r.sent ? r.retryInSeconds || RESEND_SECONDS : r.retryInSeconds);
+			setEarlier(!r.sent);
+			if (r.sent) {
+				setVia(channel);
+				setError(null);
+				setCode("");
+			} else if (!ifNone) {
+				toast.info(
+					`A code was sent less than a minute ago. You can ask again in ${clock(r.retryInSeconds)}.`,
+				);
+			}
+		},
+		[],
+	);
 
+	// On open: send only when no code is still valid (never on top of sign-up's code or on a second visit).
 	useEffect(() => {
 		if (sent.current) return;
 		sent.current = true;
-		if (!alreadySent) void send();
-	}, [send, alreadySent]);
+		void send("SMS", true);
+	}, [send]);
 
 	useEffect(() => {
 		if (left <= 0) return;
@@ -121,9 +156,11 @@ export function VerifyPhoneForm({
 			<div>
 				<h1 className="text-[28px] font-bold text-ink">Check your phone</h1>
 				<p className="mt-2 text-sm text-ink-3">
-					{phone
-						? `We sent a 6-digit code to ${maskPhone(phone)}.`
-						: "We sent a 6-digit code to your phone."}
+					{!ready
+						? "Getting your code…"
+						: expiresAt
+							? `${earlier ? "We already sent" : "We sent"} a 6-digit code to ${phone ? maskPhone(phone) : "your phone"}. It works until ${timeOf(expiresAt)}.`
+							: "Your last code can't be used any more. Ask for a new one below."}
 				</p>
 			</div>
 
@@ -172,10 +209,10 @@ export function VerifyPhoneForm({
 
 			<p className="text-center text-xs text-ink-3">
 				Didn't get it?{" "}
-				{left > 0 ? (
+				{!ready ? null : left > 0 ? (
 					<span>
-						Resend in 0:{String(left).padStart(2, "0")}
-						{via === "WHATSAPP" ? " · sent on WhatsApp" : ""}
+						Send again in {clock(left)}
+						{via === "WHATSAPP" && !earlier ? " · sent on WhatsApp" : ""}
 					</span>
 				) : (
 					<>
@@ -185,7 +222,7 @@ export function VerifyPhoneForm({
 							disabled={sending}
 							className="font-semibold text-brand hover:underline disabled:opacity-60"
 						>
-							{sending ? "Sending…" : "Send the code again"}
+							{sending ? "Sending…" : "Send again"}
 						</button>
 						{whatsapp && (
 							<>

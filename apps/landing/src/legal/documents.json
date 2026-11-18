@@ -1,0 +1,921 @@
+[
+  {
+    "slug": "terms",
+    "title": "Terms of Service",
+    "version": "TOS-2026-11",
+    "effectiveDate": "2026-11-18",
+    "summary": "The agreement between your business and Oyeks Global Limited for using Hospio360: what we provide, the 1.5% daily platform fee, your responsibilities, data, liability and how either side can end it.",
+    "sections": [
+      {
+        "heading": "About this document",
+        "paragraphs": [
+          "These Terms of Service (the **Terms**) are an agreement between **Oyeks Global Limited**, a company registered in Nigeria (RC 10001123), Lagos, Nigeria (**Oyeks Global**, **we**, **us**), which provides Hospio360, and the business that uses Hospio360 (**you**, **your business**).",
+          "You accept these Terms on behalf of your business by ticking the acceptance box when you sign up for Hospio360, or when you first sign in to an account that Hospio360 set up for you. The person who ticks the box confirms that they are authorised to bind the business. Where a signed Order Form or addendum has been agreed, it forms part of the Agreement."
+        ]
+      },
+      {
+        "heading": "1. Definitions and interpretation",
+        "paragraphs": [
+          "1.1 In these Terms the following words have these meanings:",
+          "(a) **Agreement** means these Terms together with the Privacy Policy, the Data Processing Terms, the Fees and daily debit authorisation, the Support & Services terms, the Devices & equipment terms (where you take devices or a data plan), any Order Form and any signed addendum.",
+          "(b) **Authorised User** means a person you (or we, at your request) give a Hospio360 login, such as the owner, managers, front office, housekeeping, kitchen, bar, inventory and finance staff.",
+          "(c) **Business Account** means the business account your venue connects to Hospio360 for payments (currently a Moniepoint or OPay business account), from which the daily Platform Fee is debited.",
+          "(d) **Business Day** means a day other than a Saturday, Sunday or public holiday in Nigeria.",
+          "(e) **Customer Data** means all information entered into or created in the Platform by or for your business, including Guest Data and staff records.",
+          "(f) **Daily Sales** has the meaning in clause 5.3.",
+          "(g) **Device Fee** means any amount payable for devices or a data plan under the Devices & equipment terms.",
+          "(h) **Effective Date** means the date you accept these Terms (or the start date in a signed Order Form).",
+          "(i) **Guest Data** means personal data about your guests and customers held in the Platform.",
+          "(j) **Platform** means Hospio360, the cloud hospitality management software provided by Oyeks Global, including its web apps, tablet apps, owner and staff screens and related online services.",
+          "(k) **Platform Fee** means the fee described in clause 5.",
+          "(l) **Services** means access to and use of the Platform, the included support, and any other service we agree to provide to you.",
+          "(m) **Venue** means each hotel, lounge, bar, restaurant or other venue of your business that is set up in Hospio360.",
+          "1.2 Headings are for convenience only. \"Including\" means \"including without limitation\". A reference to a law includes that law as amended or replaced. Times are Lagos time (West Africa Time)."
+        ]
+      },
+      {
+        "heading": "2. The Services",
+        "paragraphs": [
+          "2.1 From the Effective Date and for as long as the Agreement continues, we give your business a non-exclusive, non-transferable right for its Authorised Users to use the Platform to run your Venues.",
+          "2.2 Depending on the modules switched on for you, the Platform includes: reservations and front desk, guest folios and billing, restaurant, bar and kitchen orders, housekeeping and laundry, maintenance, inventory and stores, staff management, payments and point-of-sale (POS) integration, reports, an owner view, and guest messaging by email and WhatsApp. We may improve, change or replace features over time, but we will not materially reduce the core functions of the Platform without telling you first.",
+          "2.3 Some features depend on third-party services, such as POS and payment providers (Moniepoint, OPay), payment links (Paystack) and messaging providers. Their availability is outside our control, and their own terms apply to your account with them.",
+          "2.4 If we set up your business for you, we set up your business, Venues and first logins and hand them over to your owner login. You are responsible for checking the set-up when it is handed over."
+        ]
+      },
+      {
+        "heading": "3. Accounts and Authorised Users",
+        "paragraphs": [
+          "3.1 You decide who your Authorised Users are and what each can do (their role and Venue). You are responsible for what your Authorised Users do in the Platform as if you had done it yourself.",
+          "3.2 You must make sure each Authorised User keeps their password and PIN secret and uses only their own login. Each staff user accepts the Hospio360 Staff Terms of Use when they first sign in. A PIN is only a quick way to switch user on a shared device; it does not replace the user's own password.",
+          "3.3 You must promptly remove or pause the access of anyone who leaves or should no longer have access, and tell us without delay if you suspect that a login has been misused.",
+          "3.4 We may suspend a login that we reasonably believe is being misused or is a security risk, and will tell you as soon as practicable."
+        ]
+      },
+      {
+        "heading": "4. Your obligations",
+        "paragraphs": [
+          "4.1 You must:",
+          "(a) give accurate business, Venue, owner and contact details, and keep them up to date;",
+          "(b) provide and maintain the devices, internet connection and POS accounts needed to use the Platform (unless we supply them under the Devices & equipment terms);",
+          "(c) keep your Business Account open, funded and connected for the daily debit described in clause 5;",
+          "(d) comply with all laws that apply to your business, including tax, consumer protection, licensing and data protection laws, and tell guests about any service charge you choose to apply (clause 5.9);",
+          "(e) make sure you have a lawful basis, and have given any notices needed, to put Guest Data and staff data into the Platform; and",
+          "(f) check the reports and statements the Platform produces and tell us promptly about any error."
+        ]
+      },
+      {
+        "heading": "5. Fees and payment",
+        "paragraphs": [
+          "5.1 The Platform Fee is **1.5% of each Venue's Daily Sales**. It is the same rate for every Hospio360 customer. A different rate applies only if it is agreed in a written addendum signed by both parties; the addendum reference is recorded against your business. There is no cap.",
+          "5.2 The Platform Fee is worked out for each Lagos calendar day (00:00 to 24:00). Shortly after midnight the Platform calculates the previous day's fee and sends a daily statement to the owner's email. The same figures are shown in the Platform on the owner's **Hospio fees** screen.",
+          "5.3 **Daily Sales** means what each Venue sold that day, excluding VAT, as recorded in the Platform: folio charges (less discounts and voids); restaurant, bar and kitchen amounts paid at the counter; laundry paid directly; and deposits kept on a cancellation or no-show. Anything charged to a room counts once, on the folio. Any guest service charge under clause 5.9 is not part of Daily Sales.",
+          "5.4 You authorise us to debit the Platform Fee (and any Device Fee due by that route) automatically from your Business Account at or around **06:00** each day. You give this authority by ticking the daily debit box when you accept these Terms (see the Fees and daily debit authorisation). There are no invoices or payment links for the Platform Fee.",
+          "5.5 If a debit fails or only part is collected: (a) the unpaid amount is carried over and added to the next day's debit; (b) a part payment pays the Platform Fee first and then any Device Fee; and (c) if any amount stays unpaid for more than **3 consecutive days**, we may pause card payments pushed from the Platform to the Venue's POS terminals until the arrears are paid. Recording payments by hand in the Platform never stops. Continued non-payment is dealt with under clause 7.",
+          "5.6 Where automatic debit is not yet switched on for your Business Account (for example while the provider's debit service is being set up), the Platform still produces daily statements. Fees for that period are not collected, unless we agree otherwise with you in writing.",
+          "5.7 Other charges apply only where you choose them in the Platform or in writing, and are payable as stated there, including: guest message charges (emails, SMS and WhatsApp messages your Venues send to guests, priced per message and invoiced monthly); device instalments and data plans (under the Devices & equipment terms); and paid services under the Support & Services terms.",
+          "5.8 We may change the Platform Fee rate or other prices by giving you at least **30 days'** notice by email and in the Platform. If you do not accept the change, you may end the Agreement by notice before the change takes effect, without any early termination charge.",
+          "5.9 **Guest service charge.** The owner may choose, for each Venue, to pass the Platform Fee on to guests as a line on folios, counter orders and receipts shown as \"Service charge (1.5%)\". The choice applies to new charges only from the moment it is made, and does not apply to deposits kept on a no-show. The Device Fee is never passed on to guests. You alone decide whether to apply the service charge and are responsible for telling guests about it and for its legal and tax treatment. It does not change your obligation to pay the Platform Fee.",
+          "5.10 You may query any daily amount within **7 days** of the statement by contacting Hospio360 support. We will investigate and, if an amount was wrongly calculated or debited, correct it by a credit against later fees or by a refund within **10 Business Days** of agreeing the correction."
+        ]
+      },
+      {
+        "heading": "6. Taxes",
+        "paragraphs": [
+          "6.1 Fees are stated without value added tax (VAT) and other applicable taxes, which are added where the law requires. Each party is responsible for its own income taxes. If the law requires you to deduct withholding tax, you must give us the tax credit note promptly."
+        ]
+      },
+      {
+        "heading": "7. Term, suspension and termination",
+        "paragraphs": [
+          "7.1 The Agreement starts on the Effective Date and continues for an initial term of **12 months**, and then renews automatically for further periods of 12 months unless either party gives at least **30 days'** notice before the end of the current term.",
+          "7.2 Either party may end the Agreement by notice if the other party: (a) commits a material breach that is not remedied within **14 days** of a notice describing it; or (b) becomes insolvent, enters liquidation or receivership, or makes an arrangement with its creditors.",
+          "7.3 We may suspend all or part of the Services, after giving reasonable notice where practicable, if: (a) any amount is unpaid for more than 14 days; (b) you withdraw the daily debit authorisation without agreeing another payment method with us; or (c) suspension is reasonably necessary to protect the Platform, other customers or data. We will restore the Services promptly once the cause is resolved.",
+          "7.4 When the Agreement ends: (a) your right to use the Platform ends; (b) all amounts due become payable at once; (c) for **30 days** afterwards (the **export window**) you may ask us for an export of your Customer Data in a commonly used format (such as CSV or spreadsheet files), which we provide free of charge once; (d) after the export window, we delete or anonymise Customer Data within **60 days**, except information we must keep by law (for example records of fees and payments) and copies in backups that are overwritten in the normal cycle; and (e) devices and outstanding device balances are dealt with under the Devices & equipment terms.",
+          "7.5 Clauses that by their nature should survive the end of the Agreement (including fees owed, confidentiality, data protection, limitation of liability, indemnities and disputes) survive."
+        ]
+      },
+      {
+        "heading": "8. Acceptable use",
+        "paragraphs": [
+          "8.1 You must not, and must make sure your Authorised Users do not:",
+          "(a) use the Platform for any unlawful purpose, including fraud, money laundering, or sending unlawful or unsolicited marketing messages;",
+          "(b) record false sales, payments or guest details, or try to avoid the Platform Fee by recording sales outside the Platform while using it to run the Venue;",
+          "(c) try to gain unauthorised access to the Platform, other customers' data or our systems, or test, probe or disrupt their security;",
+          "(d) copy, modify, reverse engineer, resell or sublicense the Platform, or use it to build a competing product; or",
+          "(e) upload malicious code or overload the Platform."
+        ]
+      },
+      {
+        "heading": "9. Intellectual property",
+        "paragraphs": [
+          "9.1 Oyeks Global (or its licensors) owns all intellectual property rights in the Platform, the Hospio360 name and logo, its software, designs and documentation. Nothing in the Agreement transfers those rights to you.",
+          "9.2 Your business owns its Customer Data. You give us a licence to use Customer Data only to provide, secure, support and improve the Services and as set out in the Data Processing Terms. We may use aggregated, anonymised statistics that do not identify your business, a Venue or any individual to run and improve the Platform.",
+          "9.3 If you give us feedback or suggestions, we may use them freely without any obligation to you."
+        ]
+      },
+      {
+        "heading": "10. Confidentiality",
+        "paragraphs": [
+          "10.1 Each party will keep the other's confidential information (including prices, sales and financial figures, guest and staff information, and non-public information about the Platform) confidential, use it only for the Agreement, and share it only with its own staff, contractors and advisers who need it and are bound by confidentiality. This does not apply to information that is public, already lawfully known to the receiving party, or that the law requires to be disclosed. These duties continue for **3 years** after the Agreement ends (and for as long as information remains a trade secret or personal data). If the parties sign a separate non-disclosure agreement, it also applies."
+        ]
+      },
+      {
+        "heading": "11. Data protection",
+        "paragraphs": [
+          "11.1 For Guest Data and staff data in the Platform, your business is the data controller and Oyeks Global is the data processor. The Data Processing Terms apply and form part of the Agreement. We process personal data about your owners and contacts as a controller in line with our Privacy Policy. Both parties will comply with the Nigeria Data Protection Act 2023 and guidance from the Nigeria Data Protection Commission (NDPC)."
+        ]
+      },
+      {
+        "heading": "12. Availability and support",
+        "paragraphs": [
+          "12.1 We will use reasonable efforts to make the Platform available in line with the targets, and provide the included support, in the Support & Services terms. Paid services are charged as set out there or as quoted."
+        ]
+      },
+      {
+        "heading": "13. Warranties and disclaimers",
+        "paragraphs": [
+          "13.1 Each party confirms that it has the authority to enter into the Agreement.",
+          "13.2 We will provide the Services with reasonable skill and care. If the Services do not meet this promise, your remedy is for us to correct the problem within a reasonable time or, if we cannot, for you to end the affected Services and receive a refund of fees paid for the period after they end.",
+          "13.3 Except as expressly stated in the Agreement, the Platform is provided \"as is\". We do not promise that it will be uninterrupted or error-free, or that it will meet requirements we have not agreed in writing. The Platform is a management tool: you remain responsible for your business decisions, your accounts and tax returns, and for checking reports before relying on them."
+        ]
+      },
+      {
+        "heading": "14. Limitation of liability",
+        "paragraphs": [
+          "14.1 Nothing in the Agreement limits liability for death or personal injury caused by negligence, for fraud, or for anything that cannot be limited by law.",
+          "14.2 Neither party is liable to the other for any loss of profit, revenue, business, goodwill or anticipated savings, or for any indirect or consequential loss, however arising.",
+          "14.3 Subject to clauses 14.1 and 14.2, each party's total liability under or in connection with the Agreement in any 12-month period is limited to the total fees paid and payable by your business under the Agreement in the **12 months** before the event giving rise to the claim. This cap does not apply to your obligation to pay fees, or to either party's liability under clause 15.",
+          "14.4 We are not responsible for losses caused by: you or your Authorised Users (including errors and breaches); your devices, internet or power; third-party providers you use (such as your bank, Moniepoint or OPay); or records deleted by your users (although we may help restore them as a paid service where a backup still holds them)."
+        ]
+      },
+      {
+        "heading": "15. Indemnities",
+        "paragraphs": [
+          "15.1 You will indemnify us against claims by third parties (including guests and regulators) arising from your unlawful use of the Platform, your breach of clause 8, or Customer Data you put into the Platform without a lawful basis.",
+          "15.2 We will indemnify you against claims by third parties that your authorised use of the Platform infringes their intellectual property rights. This does not apply to claims caused by Customer Data or by changes or combinations not made by us.",
+          "15.3 The party claiming under an indemnity must tell the other promptly of the claim, let it control the defence and settlement, and give reasonable help (at the other party's cost)."
+        ]
+      },
+      {
+        "heading": "16. Force majeure",
+        "paragraphs": [
+          "16.1 Neither party is liable for delay or failure caused by events beyond its reasonable control, including natural disasters, fire, flood, epidemic, war, civil unrest, government action, general internet, power or telecommunications failure, or failure of a bank, payment network or our cloud hosting provider. The affected party must tell the other and take reasonable steps to limit the effect. If the event continues for more than **30 days**, either party may end the affected Services by notice. This clause does not excuse payment of fees already due."
+        ]
+      },
+      {
+        "heading": "17. Notices",
+        "paragraphs": [
+          "17.1 Notices under the Agreement must be in writing and sent by email: to us at **hello@oyeksglobal.com**, and to you at the owner's email address on your Hospio360 account. Notices may also be delivered by hand or courier to our registered office in Lagos, Nigeria (full address on request). An email notice is treated as received on the next Business Day after it is sent, unless the sender receives a delivery failure message. Day-to-day messages (such as daily statements and reminders) may be sent through the Platform, by email or by WhatsApp."
+        ]
+      },
+      {
+        "heading": "18. Online acceptance, records and new versions",
+        "paragraphs": [
+          "18.1 Each document that forms part of the Agreement has a version and an effective date shown on it. When you (or one of your users) accept a document by ticking a box, we keep a record of who accepted (user, name and role), which document and version, the date and time, the IP address and device or browser used, how it was accepted (for example at sign-up, first sign-in or re-acceptance) and the business and Venue. The record cannot be changed afterwards and is evidence of acceptance. You can see your business's records in the Platform.",
+          "18.2 We may publish a new version of a document. The new version is shown to the affected users at their next sign-in, and they must accept it before continuing. For material changes, we give at least **30 days'** notice of the new version and its effective date before it takes effect. If you do not accept a material change, you may end the Agreement by notice before it takes effect. A change required by law or for security may take effect sooner."
+        ]
+      },
+      {
+        "heading": "19. General",
+        "paragraphs": [
+          "19.1 **Assignment.** You may not assign or transfer the Agreement without our written consent (not to be unreasonably withheld). We may assign it to an affiliate or to a buyer of all or part of our business, with notice to you.",
+          "19.2 **Subcontracting.** We may use subcontractors and service providers, and remain responsible for their performance of our obligations.",
+          "19.3 **Entire agreement.** The Agreement is the entire agreement between the parties about its subject and replaces earlier discussions. Each party confirms that it has not relied on any statement not set out in it.",
+          "19.4 **Changes.** The Agreement can be changed by a written addendum signed by both parties, or by a new version accepted under clause 18.",
+          "19.5 **Waiver and severance.** A failure or delay in exercising a right is not a waiver. If any provision is found invalid, the rest of the Agreement remains in force.",
+          "19.6 **Relationship.** The parties are independent contractors. Nothing creates a partnership, joint venture or agency.",
+          "19.7 **Third parties.** Only the parties may enforce the Agreement."
+        ]
+      },
+      {
+        "heading": "20. Governing law and disputes",
+        "paragraphs": [
+          "20.1 The Agreement is governed by the laws of the Federal Republic of Nigeria.",
+          "20.2 The parties will first try to resolve any dispute by negotiation between senior representatives within **14 days** of a written notice of dispute. If it is not resolved, either party may refer it to mediation under the Arbitration and Mediation Act 2023. If it is not resolved within **30 days** of the referral to mediation, it will be finally resolved by arbitration under the Arbitration and Mediation Act 2023 by a sole arbitrator agreed by the parties (or, failing agreement, appointed in accordance with that Act). The seat of arbitration is **Lagos, Nigeria** and the language is English.",
+          "20.3 Nothing in this clause stops a party from applying to a Nigerian court for urgent interim relief, to recover undisputed debts, or to enforce an award. If for any reason a dispute cannot be arbitrated, the courts of Lagos State, Nigeria have jurisdiction."
+        ]
+      },
+      {
+        "heading": "21. Order of precedence",
+        "paragraphs": [
+          "21.1 If documents in the Agreement conflict, this order applies (highest first): (a) a signed addendum, for the specific point it changes; (b) any signed Order Form; (c) the Data Processing Terms, for personal data; (d) the Devices & equipment terms, for devices and data plans; (e) these Terms and the Fees and daily debit authorisation; (f) the Support & Services terms."
+        ]
+      },
+      {
+        "heading": "How this is accepted",
+        "paragraphs": [
+          "These Terms are accepted online by ticking the acceptance box in Hospio360 on behalf of your business; the acceptance is recorded as described in clause 18. No signature is needed. Where a business prefers a signed copy, it is signed together with an Order Form."
+        ]
+      }
+    ]
+  },
+  {
+    "slug": "privacy",
+    "title": "Privacy Policy",
+    "version": "PRIV-2026-11",
+    "effectiveDate": "2026-11-18",
+    "summary": "How Oyeks Global Limited collects, uses, shares and protects personal data in Hospio360, and the rights you have under the Nigeria Data Protection Act 2023.",
+    "sections": [
+      {
+        "heading": "1. Who we are",
+        "paragraphs": [
+          "1.1 Hospio360 is a cloud hospitality management platform provided by **Oyeks Global Limited** (RC 10001123), Lagos, Nigeria (**Oyeks Global**, **we**, **us**). This policy explains how we handle personal data in line with the Nigeria Data Protection Act 2023 (**NDPA**) and guidance from the Nigeria Data Protection Commission (**NDPC**).",
+          "1.2 For anything about privacy or data protection, including to reach the person responsible for data protection at Oyeks Global, email **hello@oyeksglobal.com** (subject: \"Data protection\")."
+        ]
+      },
+      {
+        "heading": "2. Two different roles",
+        "paragraphs": [
+          "2.1 **When you stay at, eat at or work for a hotel, lounge, bar or restaurant that uses Hospio360**, that business decides what information it collects about you and why. It is the **data controller**, and we process the data on its behalf as its **data processor**, under a written agreement. For questions about your stay, booking or employment records, or to exercise your rights over them, please contact that business first; we will help it respond.",
+          "2.2 **When you are our customer, a business contact, a referral partner, or a visitor to our website**, we are the data controller for the personal data we collect about you."
+        ]
+      },
+      {
+        "heading": "3. What we collect",
+        "paragraphs": [
+          "3.1 **For venues (as processor)**, Hospio360 may hold: guests' names, phone numbers, email addresses, addresses, nationality and identification document type and number where the venue records them; booking, stay, order, folio and laundry details; messages between guests and the venue; and payment references (amounts, method and transaction references). **We do not store card numbers**: card payments are taken on the payment provider's POS terminal. For venue staff: name, contact details, role, the venue they work at, shifts and attendance, sign-in records, acceptance of the staff terms, and an activity log of actions taken in the platform.",
+          "3.2 **For our own customers and partners (as controller)**: name, job title, business name and registration details, phone, email, business address, the business account details used for fee collection, billing and payment history, support requests, records of the terms accepted online (who, which version, when, IP address and device), and, for referral partners, bank details for commission payments and the referrals they submit.",
+          "3.3 **For website and app visitors**: technical data such as IP address, device and browser type, pages visited, and sign-in and security logs; and anything you send us by email or through the app."
+        ]
+      },
+      {
+        "heading": "4. Why we use it and our lawful bases",
+        "paragraphs": [
+          "**Providing Hospio360 to venues and processing their data on their instructions** · Lawful basis under the NDPA (section 25): Contract with the venue; the venue determines its own lawful basis for its guests and staff",
+          "**Setting up and managing customer accounts, calculating and collecting fees, paying referral commissions** · Lawful basis under the NDPA (section 25): Performance of a contract",
+          "**Recording acceptance of our terms (who, version, when, IP address, device)** · Lawful basis under the NDPA (section 25): Performance of a contract; legitimate interests (proof of agreement)",
+          "**Sending service messages (statements, sign-in codes, invites, receipts on a venue's behalf)** · Lawful basis under the NDPA (section 25): Performance of a contract; legitimate interests",
+          "**Keeping the platform secure, preventing fraud, keeping activity logs** · Lawful basis under the NDPA (section 25): Legitimate interests; legal obligation",
+          "**Keeping financial and tax records** · Lawful basis under the NDPA (section 25): Legal obligation",
+          "**Improving the platform using aggregated statistics that do not identify individuals** · Lawful basis under the NDPA (section 25): Legitimate interests",
+          "**Marketing Hospio360 to businesses** · Lawful basis under the NDPA (section 25): Consent, or legitimate interests where allowed; you can opt out at any time"
+        ]
+      },
+      {
+        "heading": "5. Who we share it with",
+        "paragraphs": [
+          "5.1 **We never sell personal data.** We share personal data only with service providers that help us run Hospio360, and only the data each needs for its service. They are bound by contract to protect it and use it only for that service.",
+          "**Our cloud hosting provider** · Service: Hosting of the Platform, its databases and backups · Data involved: All Customer Data (stored and processed)",
+          "**Brevo (Sendinblue SAS)** · Service: Sending email: booking confirmations, receipts, folios, statements, invites, password resets · Data involved: Recipient name and email address, message content",
+          "**Infobip Ltd** · Service: Sending WhatsApp messages (and SMS sign-in codes where Termii is not used) · Data involved: Recipient name and phone number, message content",
+          "**Termii** · Service: SMS phone verification (sign-in) codes only · Data involved: Phone number, the one-time code",
+          "**Moniepoint** · Service: POS terminals, card and transfer payments, daily fee debit (where used) · Data involved: Payment amounts and references, terminal IDs, merchant account details",
+          "**OPay** · Service: POS terminals, card and transfer payments, daily fee debit (where used) · Data involved: Payment amounts and references, terminal IDs, merchant account details",
+          "**Paystack** · Service: Payment links for device and guest-message invoices · Data involved: Payer name, email, amount, invoice reference",
+          "5.2 We may also share data: with the venue that is the controller of it; with our professional advisers; with regulators, law enforcement or courts where the law requires; and with a buyer of all or part of our business, under confidentiality."
+        ]
+      },
+      {
+        "heading": "6. International transfers",
+        "paragraphs": [
+          "6.1 Some of our providers process data outside Nigeria (for example our email provider in the European Union). We transfer personal data outside Nigeria only as allowed by the NDPA, relying on adequacy or appropriate safeguards such as contractual protections."
+        ]
+      },
+      {
+        "heading": "7. How long we keep it",
+        "paragraphs": [
+          "7.1 Venue data is kept for as long as the venue uses Hospio360 and then returned or deleted as agreed with the venue (normally within **90 days** after the end of the contract, with backups overwritten in their normal cycle). Some items are deleted automatically sooner: in-app notifications after 30 days, chat conversations 30 days after the last message, and activity logs after six months.",
+          "7.2 Our own customer, billing, acceptance and commission records are kept for **6 years** after the relationship ends, to meet tax and accounting law and to show what was agreed. Marketing contacts are kept until you opt out or for **2 years** without contact."
+        ]
+      },
+      {
+        "heading": "8. How we protect it",
+        "paragraphs": [
+          "8.1 We use access controls that separate each business's and each venue's data, individual logins with passwords and lockable PINs for shared devices, encryption in transit (HTTPS/TLS), encryption of stored credentials, activity logs, backups, and restricted staff access. No system is perfectly secure, but we work to protect your data and will notify the relevant business, the NDPC and, where required, you, if a breach affects your data."
+        ]
+      },
+      {
+        "heading": "9. Your rights",
+        "paragraphs": [
+          "9.1 Under the NDPA you have the right to: be informed; access your personal data; have it corrected; have it deleted; restrict processing; object to processing (including direct marketing); data portability; withdraw consent at any time where we rely on consent; and not be subject to decisions based solely on automated processing that significantly affect you.",
+          "9.2 To exercise your rights over data a venue holds about you, contact the venue. For data we control, or if you need help, email **hello@oyeksglobal.com**. We will respond within **30 days**. If you are not satisfied, you may complain to the Nigeria Data Protection Commission."
+        ]
+      },
+      {
+        "heading": "10. Children",
+        "paragraphs": [
+          "10.1 Hospio360 is not intended for use by children. Venues may record minors as part of a family booking; they are responsible for doing so lawfully. We do not knowingly collect children's data for our own purposes."
+        ]
+      },
+      {
+        "heading": "11. Cookies",
+        "paragraphs": [
+          "11.1 Our apps use cookies and similar storage that are necessary to keep you signed in and secure. Our website does not currently use analytics or advertising cookies; if that changes, we will update this policy and ask for your consent where required. You can control cookies in your browser."
+        ]
+      },
+      {
+        "heading": "12. Changes and contact",
+        "paragraphs": [
+          "12.1 We may update this policy. We publish each new version with its version number and effective date, and for significant changes we tell our customers and ask them to accept the new version at their next sign-in. Contact: Oyeks Global Limited, Lagos, Nigeria · hello@oyeksglobal.com · oyeksglobal.com."
+        ]
+      },
+      {
+        "heading": "How this is accepted",
+        "paragraphs": [
+          "Business customers accept this Privacy Policy online, together with the Terms of Service and the Data Processing Terms, by ticking the acceptance box in Hospio360."
+        ]
+      }
+    ]
+  },
+  {
+    "slug": "data-processing",
+    "title": "Data Processing Terms",
+    "version": "DPA-2026-11",
+    "effectiveDate": "2026-11-18",
+    "summary": "How Oyeks Global processes your guests' and staff's personal data on your behalf, as your data processor under the Nigeria Data Protection Act 2023.",
+    "sections": [
+      {
+        "heading": "About this document",
+        "paragraphs": [
+          "These Data Processing Terms (the **DPA**) are between the business that uses Hospio360 (**you**, the **controller**) and **Oyeks Global Limited**, RC 10001123, Lagos, Nigeria (**Oyeks Global**, **we**, the **processor**). They form part of the Agreement made under the Hospio360 Terms of Service, and you accept them on behalf of your business by ticking the acceptance box in Hospio360."
+        ]
+      },
+      {
+        "heading": "1. Definitions",
+        "paragraphs": [
+          "1.1 **Data Protection Law** means the Nigeria Data Protection Act 2023 (**NDPA**), regulations and guidance issued by the Nigeria Data Protection Commission (**NDPC**), and any other data protection law that applies to the processing.",
+          "1.2 **Personal Data**, **processing**, **data subject**, **controller**, **processor** and **personal data breach** have the meanings in Data Protection Law. **Customer Personal Data** means Personal Data in the Customer Data that we process for you under the Agreement.",
+          "1.3 **Sub-processor** means a third party we engage that processes Customer Personal Data. Other capitalised words have the meanings in the Terms of Service."
+        ]
+      },
+      {
+        "heading": "2. Roles and scope",
+        "paragraphs": [
+          "2.1 You are the controller of Customer Personal Data and we are your processor. We are a controller only for personal data we collect for our own purposes (for example your owner's and contacts' details for fees and account management, and Platform security logs), as described in our Privacy Policy.",
+          "2.2 The details of the processing are in Schedule 1 (description of processing), Schedule 2 (security measures) and Schedule 3 (sub-processors)."
+        ]
+      },
+      {
+        "heading": "3. Your obligations",
+        "paragraphs": [
+          "3.1 You are responsible for having a lawful basis for the Customer Personal Data you put into the Platform, for giving data subjects (guests and staff) the information required by Data Protection Law, for the accuracy of the data, and for deciding what is collected (for example whether guest identity documents are recorded).",
+          "3.2 You are responsible for your own registration, filing and audit obligations with the NDPC as a data controller, where they apply to your business."
+        ]
+      },
+      {
+        "heading": "4. Processing on instructions",
+        "paragraphs": [
+          "4.1 We process Customer Personal Data only on your documented instructions, which are: to provide the Services under the Agreement; as you direct through your use and settings of the Platform; and as otherwise agreed in writing. We may also process it where Nigerian law requires, in which case we will tell you first unless the law forbids it.",
+          "4.2 We will tell you if we believe an instruction breaches Data Protection Law.",
+          "4.3 We do not sell Customer Personal Data, and do not use it for our own marketing or to build profiles of guests."
+        ]
+      },
+      {
+        "heading": "5. Confidentiality of personnel",
+        "paragraphs": [
+          "5.1 We make sure our staff and contractors who can access Customer Personal Data are bound by confidentiality, are trained in their data protection duties, and have access only as needed for their role (for example onboarding, support, or when you ask us to act in your account).",
+          "5.2 Actions taken by our staff inside your account are recorded in the Platform's activity log."
+        ]
+      },
+      {
+        "heading": "6. Security",
+        "paragraphs": [
+          "6.1 We implement and maintain appropriate technical and organisational measures to protect Customer Personal Data against accidental or unlawful destruction, loss, alteration, unauthorised disclosure or access, including the measures in Schedule 2. We may update these measures, provided the overall level of protection is not reduced."
+        ]
+      },
+      {
+        "heading": "7. Sub-processors",
+        "paragraphs": [
+          "7.1 You give general authorisation for us to use the Sub-processors listed in Schedule 3.",
+          "7.2 We will give you at least **30 days'** notice (by email or in the Platform) before adding or replacing a Sub-processor. You may object on reasonable data protection grounds within that period. If we cannot resolve the objection, you may end the affected Services without penalty.",
+          "7.3 We impose data protection obligations on each Sub-processor that are no less protective than those in this DPA, so far as relevant to its service, and give each only the data it needs. We remain responsible to you for our Sub-processors.",
+          "7.4 Payment and POS providers you choose (such as Moniepoint or OPay), with whom you have your own contract, act under their own terms with you for the payments they process."
+        ]
+      },
+      {
+        "heading": "8. International transfers",
+        "paragraphs": [
+          "8.1 Some Sub-processors process data outside Nigeria (see Schedule 3). We transfer Customer Personal Data outside Nigeria only where permitted by Part VIII of the NDPA, for example where the recipient country or organisation provides an adequate level of protection, or on the basis of appropriate safeguards such as binding contractual terms, and we provide information about the safeguards on request."
+        ]
+      },
+      {
+        "heading": "9. Data subject requests",
+        "paragraphs": [
+          "9.1 If we receive a request from a data subject about Customer Personal Data (for example access, correction, deletion or objection), we pass it to you without undue delay and do not respond ourselves except to confirm that it was passed on.",
+          "9.2 Taking into account the nature of the processing, we give you reasonable help to respond to such requests, including through the Platform's own functions (finding, correcting and deleting records, and its reports). Help that needs significant manual work may be charged as set out in the Support & Services terms."
+        ]
+      },
+      {
+        "heading": "10. Personal data breaches",
+        "paragraphs": [
+          "10.1 We will notify you without undue delay, and in any case within **72 hours**, after becoming aware of a personal data breach affecting Customer Personal Data. The notice will describe, as far as then known, the nature of the breach, the categories and approximate number of data subjects and records affected, the likely consequences, and the measures taken or proposed. Further information will follow as it becomes available.",
+          "10.2 We will take reasonable steps to contain and remedy the breach, and help you meet your own obligations to notify the NDPC and data subjects. As controller, you decide whether and how to notify them."
+        ]
+      },
+      {
+        "heading": "11. Assistance and audits",
+        "paragraphs": [
+          "11.1 We give you reasonable help with data protection impact assessments and consultations with the NDPC that relate to the Services.",
+          "11.2 We make available the information reasonably needed to show compliance with this DPA. Not more than once in any 12 months (or after a personal data breach, or where the NDPC requires it), you may audit compliance, on at least **30 days'** written notice, during business hours, at your own cost and under confidentiality. An audit may be carried out by an independent auditor reasonably acceptable to us, and must not give access to other customers' data. We may meet an audit request first by providing written answers, policies or third-party reports."
+        ]
+      },
+      {
+        "heading": "12. Return and deletion",
+        "paragraphs": [
+          "12.1 When the Agreement ends, we will, at your choice during the export window in the Terms of Service (clause 7.4), provide an export of Customer Personal Data and then delete it within **60 days** of the end of the export window, unless Nigerian law requires it to be kept. Copies in backups are deleted as the backups are overwritten in their normal cycle, and are protected in the meantime.",
+          "12.2 While the Agreement continues, some data is deleted automatically: in-app notifications after 30 days, staff and guest chat conversations 30 days after the last message, and the activity log after six months (or the period set in the Platform). Business records such as bookings, folios and payments are kept for as long as the Agreement continues unless you delete them."
+        ]
+      },
+      {
+        "heading": "13. Liability and term",
+        "paragraphs": [
+          "13.1 Each party's liability under this DPA is subject to the limitations and exclusions in the Terms of Service (clause 14).",
+          "13.2 This DPA lasts as long as we process Customer Personal Data under the Agreement. If this DPA conflicts with the Terms of Service on personal data matters, this DPA prevails."
+        ]
+      },
+      {
+        "heading": "Schedule 1 — Description of processing",
+        "paragraphs": [
+          "**Subject matter and duration** · Description: Providing the Hospio360 Platform and related services to your business for as long as the Agreement continues and the export window after it.",
+          "**Nature and purpose** · Description: Hosting, storing, organising, displaying, calculating, transmitting (emails, WhatsApp messages, payment requests to POS terminals) and deleting data so that you can run your Venues: reservations, check-in, folios and billing, restaurant and bar orders, housekeeping, laundry, maintenance, inventory, staff management, payments, reports and guest messages; supporting you; securing the Platform.",
+          "**Categories of data subjects** · Description: (a) Guests and customers of your Venues (including corporate guests and walk-in restaurant and bar customers); (b) your owners, managers and staff who use the Platform; (c) your suppliers' contact persons (inventory and purchase orders); (d) contact persons of corporate accounts.",
+          "**Categories of personal data** · Description: Identity: name, title, gender where recorded, nationality, identification document type and number where the Venue records them. Contact: phone number, email, address. Stay and service: booking dates, room, number of guests, special requests, orders, folio charges, laundry and maintenance requests, messages exchanged with the Venue. Payment references: amounts, payment method, POS terminal and transaction references, invoice references. **Card numbers are not stored in the Platform**: card payments are taken on the provider's POS terminal. Staff: name, contact details, role, Venue, shifts and attendance, sign-in records, activity log entries, acceptance records, and payroll-related records where you use those features.",
+          "**Special categories** · Description: Not intended. Do not record health, religious or other sensitive data in free-text fields unless you have a lawful basis to do so.",
+          "**Frequency** · Description: Continuous for as long as the Agreement continues."
+        ]
+      },
+      {
+        "heading": "Schedule 2 — Security measures",
+        "paragraphs": [
+          "– **Access control by business and Venue.** Every user belongs to a business and is given roles at specific Venues; the Platform checks the business and Venue on each request, and the database separates each business's data (row-level security).",
+          "– **Authentication.** Individual logins with passwords and phone verification codes; optional quick-switch PINs on shared devices that are tied to the device's Venue, lock after repeated wrong attempts, and are never set by a manager for someone else; sessions expire and can be revoked; pausing or removing a user ends their sessions.",
+          "– **Encryption in transit.** All traffic between users' devices and the Platform, and between the Platform and its providers, uses HTTPS/TLS.",
+          "– **Encryption of secrets.** POS provider keys and integration credentials are stored encrypted (AES-256-GCM) and shown masked.",
+          "– **Audit logs.** Significant actions (including changes made by our staff and changes to settings and integrations) are recorded in an activity log visible to your business and to our administrators; secret values are never logged.",
+          "– **Backups.** Databases are backed up regularly by our cloud hosting provider and backups are kept for a limited period, protected with access controls.",
+          "– **Least privilege for staff.** Our staff access your data only for onboarding, support or security, under role-based permissions.",
+          "– **Data minimisation with providers.** Each provider receives only the data needed for its service (for example an email provider receives the recipient's address and the message).",
+          "– **Retention.** Automatic deletion of notifications, chats and old activity log entries (clause 12.2).",
+          "– **Incident response.** A documented process to investigate, contain and notify personal data breaches (clause 10)."
+        ]
+      },
+      {
+        "heading": "Schedule 3 — Sub-processors",
+        "paragraphs": [
+          "As at the effective date of this version. We give notice of changes under clause 7.2.",
+          "**Our cloud hosting provider** · Service: Hosting of the Platform, its databases and backups · Data involved: All Customer Data (stored and processed) · Location: Cloud data centre (details on request)",
+          "**Brevo (Sendinblue SAS)** · Service: Sending email: booking confirmations, receipts, folios, statements, invites, password resets · Data involved: Recipient name and email address, message content · Location: European Union (France)",
+          "**Infobip Ltd** · Service: Sending WhatsApp messages (and SMS sign-in codes where Termii is not used) · Data involved: Recipient name and phone number, message content · Location: Outside Nigeria (Infobip's processing region)",
+          "**Termii** · Service: SMS phone verification (sign-in) codes only · Data involved: Phone number, the one-time code · Location: Nigeria",
+          "**Moniepoint** · Service: POS terminals, card and transfer payments, daily fee debit (where used) · Data involved: Payment amounts and references, terminal IDs, merchant account details · Location: Nigeria",
+          "**OPay** · Service: POS terminals, card and transfer payments, daily fee debit (where used) · Data involved: Payment amounts and references, terminal IDs, merchant account details · Location: Nigeria",
+          "**Paystack** · Service: Payment links for device and guest-message invoices · Data involved: Payer name, email, amount, invoice reference · Location: Nigeria"
+        ]
+      },
+      {
+        "heading": "How this is accepted",
+        "paragraphs": [
+          "These Data Processing Terms are accepted online by ticking the acceptance box in Hospio360 on behalf of your business, together with the Terms of Service and the Privacy Policy. The acceptance is recorded (who, version, date and time, IP address, device and how). A signed copy can be provided on request."
+        ]
+      }
+    ]
+  },
+  {
+    "slug": "fees",
+    "title": "Fees and daily debit authorisation",
+    "version": "FEES-2026-11",
+    "effectiveDate": "2026-11-18",
+    "summary": "Hospio360 costs 1.5% of each venue's daily sales, the same for every business, debited from your business account at 06:00 each day. No subscription, no invoices.",
+    "sections": [
+      {
+        "heading": "About this document",
+        "paragraphs": [
+          "This page explains the Hospio360 platform fee and the daily debit authority you give when you tick the second box at sign-up or first sign-in: \"I authorise Hospio360 (a product of Oyeks Global Limited) to debit 1.5% of my business's daily sales from my business account each day at 06:00.\" It forms part of the Hospio360 Terms of Service (clause 5)."
+        ]
+      },
+      {
+        "heading": "1. One fee for everyone",
+        "paragraphs": [
+          "1.1 The platform fee is **1.5% of each venue's daily sales**, excluding VAT. It is the same for every Hospio360 customer: hotels, lounges, bars and restaurants. There is no subscription, set-up fee or cap.",
+          "1.2 A different rate applies only if it is agreed in a written addendum signed by your business and Oyeks Global Limited. The addendum's reference is recorded against your business, and no one in Hospio360 can change your rate without it."
+        ]
+      },
+      {
+        "heading": "2. What counts as daily sales",
+        "paragraphs": [
+          "2.1 Daily sales are what each venue sold in the Lagos calendar day (00:00 to 24:00), excluding VAT, as recorded in Hospio360: folio charges (less discounts and voids); restaurant, bar and kitchen amounts paid at the counter; laundry paid directly; and deposits kept on a cancellation or no-show. Anything charged to a room counts once, on the folio. A guest service charge (below) is not part of daily sales."
+        ]
+      },
+      {
+        "heading": "3. Your business account",
+        "paragraphs": [
+          "3.1 Your **business account** is the business account your venue connects to Hospio360 for payments, currently a Moniepoint or OPay business account. The daily fee is debited from that account."
+        ]
+      },
+      {
+        "heading": "4. The daily debit",
+        "paragraphs": [
+          "4.1 Shortly after midnight Hospio360 works out the previous day's fee and sends a daily statement to the owner's email. The same figures are on the owner's **Hospio fees** screen.",
+          "4.2 At or around **06:00** each day the fee is debited automatically from your business account. There are no invoices or payment links for the platform fee.",
+          "4.3 If you take a device package paid from transactions, the device amount is added to the same daily debit until the device balance reaches ₦0 (see the Devices & equipment terms). A part debit pays the platform fee first, then the device amount.",
+          "4.4 Until automatic debit is switched on for your business account, statements are still produced but the fee for that period is not collected, unless we agree otherwise with you in writing."
+        ]
+      },
+      {
+        "heading": "5. If a debit fails",
+        "paragraphs": [
+          "5.1 An unpaid amount is carried over and added to the next day's debit.",
+          "5.2 If an amount stays unpaid for more than **3 consecutive days**, card payments pushed from Hospio360 to your venue's POS terminals may be paused until it is paid. Recording payments by hand never stops."
+        ]
+      },
+      {
+        "heading": "6. Queries and corrections",
+        "paragraphs": [
+          "6.1 You may query any daily amount within **7 days** of the statement by contacting Hospio360 support (in the app or at hello@oyeksglobal.com). We reply within **5 Business Days**. If an amount was wrongly calculated or debited, we correct it by a credit against later fees or a refund within **10 Business Days** of agreeing the correction. This does not affect your rights under your provider's own dispute process."
+        ]
+      },
+      {
+        "heading": "7. Passing the fee to guests (optional)",
+        "paragraphs": [
+          "7.1 The owner may choose, for each venue, to show the fee to guests as \"Service charge (1.5%)\" on folios, counter orders and receipts. It applies to new charges from the moment it is switched on, never to kept no-show deposits, and never includes device amounts. You decide whether to use it and are responsible for telling guests about it and for its tax treatment."
+        ]
+      },
+      {
+        "heading": "8. Changing or withdrawing the authority",
+        "paragraphs": [
+          "8.1 Tell us at least **5 Business Days** before you close or change your business account, and authorise the new account in Hospio360.",
+          "8.2 You may withdraw the debit authority by writing to hello@oyeksglobal.com; it takes effect **3 Business Days** after we receive it and does not cancel amounts already due. If no other payment method is agreed in writing, we may suspend the Services under the Terms of Service (clause 7.3).",
+          "8.3 We may change the fee only with at least **30 days'** notice. The new version is shown at your next sign-in, and if you do not accept it you may end the Agreement before it takes effect."
+        ]
+      },
+      {
+        "heading": "How this is accepted",
+        "paragraphs": [
+          "You give this authority by ticking the daily debit box in Hospio360; the acceptance is recorded (who, version, date and time, IP address, device and how). Where a payment provider needs its own signed mandate form, we will send it to you."
+        ]
+      }
+    ]
+  },
+  {
+    "slug": "devices",
+    "title": "Devices & equipment terms",
+    "version": "DEV-2026-11",
+    "effectiveDate": "2026-11-18",
+    "summary": "The terms for tablets, routers, printers and data plans that Oyeks Global supplies with Hospio360: payment options, ownership until paid, warranty, care and what happens if you leave early.",
+    "sections": [
+      {
+        "heading": "About this document",
+        "paragraphs": [
+          "These terms apply between **Oyeks Global Limited**, RC 10001123, Lagos, Nigeria (**Oyeks Global**, **we**) and the business that uses Hospio360 (**you**) whenever we supply devices or a data plan to one of your venues. The owner accepts them in Hospio360 by ticking the device terms box when approving a device package, before it is installed. The package shown in the app (items, prices, payment option and data plan) is the **Device Schedule** for that venue. Words defined in the Hospio360 Terms of Service have the same meaning here."
+        ]
+      },
+      {
+        "heading": "1. Supply",
+        "paragraphs": [
+          "1.1 We supply the devices listed in the Device Schedule (for example tablets, a router or modem, receipt printers and accessories) (the **Devices**) and, if chosen, a monthly mobile data plan (the **Data Plan**), and deliver and set them up at the Venue on or around the agreed date.",
+          "1.2 Devices come from our device catalogue at the prices shown in the Device Schedule. They are new (unless the Device Schedule says otherwise) and come from reputable suppliers and manufacturers. We are a reseller of the Devices, not their manufacturer.",
+          "1.3 At delivery, you (or your representative) must check the Devices against the Device Schedule and confirm delivery. Any shortage or visible damage must be noted at delivery or reported within **2 Business Days**, after which the Devices are treated as accepted in good condition."
+        ]
+      },
+      {
+        "heading": "2. Payment options",
+        "paragraphs": [
+          "2.1 You choose one payment option for each Device Schedule:",
+          "(a) **From transactions**: a percentage of each day's Daily Sales of the Venue (the rate shown in the Device Schedule, normally **2.5%**) is added to the daily debit from your Business Account as a device line, together with the Platform Fee, until the Device balance reaches ₦0. There is no daily cap other than the remaining balance. The rate is fixed once collection starts. The Hospio fees screen shows the balance and an estimated finish date based on the last 30 days' sales; this estimate is not a promise.",
+          "(b) **Monthly instalments**: the Device total is divided into **1 to 6** equal monthly instalments, invoiced monthly and debited automatically from your Business Account on the due date. If the debit fails, you may pay by the Paystack link sent with the invoice, or by bank transfer recorded by us.",
+          "(c) **One-time payment**: the Device total is paid in full at installation.",
+          "(d) **Own devices**: you use your own devices. Nothing is supplied or charged under these terms except any Data Plan you choose.",
+          "2.2 If a daily debit only partly succeeds, it pays the Platform Fee first and then the device amount.",
+          "2.3 The Device Fee is never added to guests' bills as a service charge.",
+          "2.4 Prices exclude VAT, which is added where the law requires."
+        ]
+      },
+      {
+        "heading": "3. Data Plan",
+        "paragraphs": [
+          "3.1 The Data Plan is a recurring service, not a purchase: it is invoiced monthly at the price in the Device Schedule (debited automatically as in clause 2.1(b)) for as long as you use it, and is never \"paid off\".",
+          "3.2 You may stop the Data Plan by telling Hospio360 support at least **7 days** before the next monthly invoice date, and may restart it later at the then-current price. Stopping the Data Plan does not affect the Devices or your Hospio360 subscription.",
+          "3.3 Data allowances, speeds and coverage depend on the mobile network operator. We do not guarantee network coverage or speed at the Venue."
+        ]
+      },
+      {
+        "heading": "4. Late payment",
+        "paragraphs": [
+          "4.1 For monthly invoices (instalments or Data Plan): a reminder is sent 3 days after the due date; at 7 days your account may be flagged at risk; at 14 days card payments pushed from Hospio360 to the Venue's POS terminals may be paused until the overdue amount is paid. Recording payments by hand never stops. Payment lifts the pause.",
+          "4.2 For the from-transactions option, unpaid amounts are carried over as described in the Terms of Service (clause 5.5)."
+        ]
+      },
+      {
+        "heading": "5. Ownership and risk",
+        "paragraphs": [
+          "5.1 **Risk** of loss, theft or damage to the Devices passes to you on delivery to the Venue.",
+          "5.2 **Ownership** of the Devices stays with Oyeks Global until the Device total for those Devices has been paid in full. Ownership then passes to you automatically, and we will confirm this in writing on request. Under the one-time option, ownership passes on payment in full.",
+          "5.3 Until ownership passes, you must not sell, lend, pledge or part with the Devices, or remove them from the Venue without our written consent, and must keep any Oyeks Global or Hospio360 labels in place."
+        ]
+      },
+      {
+        "heading": "6. Warranty and repairs",
+        "paragraphs": [
+          "6.1 The Devices come with the manufacturer's or supplier's warranty for the period shown in the Device Schedule. We pass the benefit of that warranty to you to the extent we can.",
+          "6.2 **We do not ourselves warrant the Devices and are not liable to repair or replace them.** Warranty claims are made to the supplier or manufacturer under its warranty terms. On request, we will reasonably help you make a claim (for example by providing proof of purchase and the supplier's contact details, or by passing the claim on), but the outcome is the supplier's or manufacturer's decision.",
+          "6.3 Warranties usually do not cover damage from misuse, drops, liquid, power surges, unauthorised repair, theft or normal wear. Repairs and replacements outside warranty are at your cost. We may supply a replacement device at its catalogue price as a new purchase.",
+          "6.4 You remain liable to pay the full Device total even if a Device is lost, stolen, damaged or under repair."
+        ]
+      },
+      {
+        "heading": "7. Looking after the Devices",
+        "paragraphs": [
+          "7.1 You must use the Devices with reasonable care, in line with the manufacturer's instructions, keep them in a safe place, use suitable power protection (such as surge protectors), and not install software that could harm security. You are responsible for the SIM cards and data use on the Devices.",
+          "7.2 We recommend that you insure the Devices against loss, theft and damage. We do not insure them for you.",
+          "7.3 Where Devices are set up as shared devices for Hospio360, you must keep the Platform's device sign-in and PIN rules in place (see the Staff Terms of Use)."
+        ]
+      },
+      {
+        "heading": "8. Default, early exit and recovery",
+        "paragraphs": [
+          "8.1 If you do not pay a device amount when due and do not put this right within **14 days** of a written notice, or if your Hospio360 Agreement ends before the Devices are fully paid, you must, at our choice and within 14 days: (a) pay the full remaining Device balance; or (b) return the Devices not yet paid for, in good condition (normal wear excepted), to the address we give you in writing, or make them available for collection.",
+          "8.2 Amounts already paid for returned Devices are not refunded, except that we will credit any amount by which payments already made exceed a reasonable charge for use and any repair needed (or the early-exit charge stated in the Device Schedule, if one is stated).",
+          "8.3 If you neither pay nor return the Devices, you authorise us and our representatives to enter the Venue during business hours, on **2 Business Days'** notice, to recover Devices we still own, and we may recover the unpaid balance and reasonable recovery costs as a debt.",
+          "8.4 The Data Plan ends when your Hospio360 Agreement ends; Data Plan charges for months already started are not refunded."
+        ]
+      },
+      {
+        "heading": "9. Liability",
+        "paragraphs": [
+          "9.1 Neither party is liable to the other for indirect or consequential loss, or for loss of profit, revenue, business or data, arising from the Devices or the Data Plan (including downtime while a Device is faulty or under repair).",
+          "9.2 Our total liability under these terms is limited to the amount you paid for the Device or Data Plan concerned. Nothing limits liability that cannot be limited by law. In all other respects clause 14 of the Terms of Service applies."
+        ]
+      },
+      {
+        "heading": "10. General",
+        "paragraphs": [
+          "10.1 These terms form part of the Hospio360 Agreement and are governed by Nigerian law, with disputes resolved under clause 20 of the Terms of Service (seat: Lagos, Nigeria). For devices and data plans, these terms prevail over the Terms of Service if they conflict. Each acceptance in the app is recorded (who, version, date and time, IP address, device and the device package concerned)."
+        ]
+      },
+      {
+        "heading": "How this is accepted",
+        "paragraphs": [
+          "Accepted online by the owner ticking the device terms box when approving a device package in Hospio360. A signed Device Schedule and delivery note may also be kept as a record of the items delivered."
+        ]
+      }
+    ]
+  },
+  {
+    "slug": "support",
+    "title": "Support & services",
+    "version": "SUP-2026-11",
+    "effectiveDate": "2026-11-18",
+    "summary": "The support included with Hospio360, our response and availability targets, planned maintenance, and services that are charged separately.",
+    "sections": [
+      {
+        "heading": "About this document",
+        "paragraphs": [
+          "These terms form part of the Agreement made under the Hospio360 Terms of Service. Words defined there have the same meaning here."
+        ]
+      },
+      {
+        "heading": "1. Included support",
+        "paragraphs": [
+          "1.1 The following are included in the Platform Fee at no extra charge:",
+          "(a) **Help channels**: support requests in the app and by email to **hello@oyeksglobal.com**.",
+          "(b) **Support hours**: Monday to Saturday, 08:00 to 20:00 Lagos time, excluding public holidays. Severity 1 issues are handled during support hours.",
+          "(c) **Bug fixes**: correction of faults in the Platform, released as part of normal updates or as an urgent fix where needed.",
+          "(d) **Updates**: new versions and improvements to the Platform as they are released, at no extra cost.",
+          "(e) **Onboarding**: where we onboard your business, setting up the business, Venues, rooms, first users and connections, and the handover to the owner.",
+          "(f) **Training at onboarding**: up to **2** remote or on-site sessions (on-site within Lagos) for the owner, managers and key staff, plus in-app help screens."
+        ]
+      },
+      {
+        "heading": "2. Response targets",
+        "paragraphs": [
+          "2.1 We aim to respond to support requests within the following times during support hours. Response means a person has acknowledged the request and started work on it; it is not a promise to resolve within that time. We keep you updated until the issue is resolved or a workaround is in place.",
+          "**1 - Critical** · Meaning: The Platform is unavailable, or a core function (check-in, folios, taking payments) cannot be used at a Venue, with no workaround. · First response: 1 hour · Update interval: Every 2 hours",
+          "**2 - High** · Meaning: A major function is impaired, or a workaround is available but difficult. · First response: 4 hours · Update interval: Daily",
+          "**3 - Normal** · Meaning: A minor fault, or a question about how to use the Platform. · First response: 1 Business Day · Update interval: As needed",
+          "**4 - Request** · Meaning: A suggestion, report request or change of set-up. · First response: 3 Business Days · Update interval: As needed"
+        ]
+      },
+      {
+        "heading": "3. Paid services",
+        "paragraphs": [
+          "3.1 The following are not included. We quote the price in writing before the work starts, and the work goes ahead only if you accept the quote:",
+          "(a) on-site visits outside onboarding (travel outside Lagos at cost);",
+          "(b) restoring records deleted by your users from a backup (only where a backup still holds them);",
+          "(c) custom reports or data exports beyond the standard exports;",
+          "(d) custom integrations with other systems;",
+          "(e) extra training sessions (remote or on-site); and",
+          "(f) re-configuring a Venue after handover (rooms, rates, menus) beyond normal support.",
+          "3.2 Restoring data is only possible while a backup still holds it, and may restore other records to their state at the time of the backup. We will explain the effect before restoring."
+        ]
+      },
+      {
+        "heading": "4. Availability",
+        "paragraphs": [
+          "4.1 We target availability of the Platform of **99.5%** in each calendar month, measured as the share of minutes in the month in which the Platform's main web application can be signed into and used, excluding the items in clause 4.3.",
+          "4.2 If availability falls below the target in a month, you may ask for a service credit of **5%** of that month's Platform Fee for each full **1%** below the target, up to **25%** of that month's Platform Fee, by asking within 30 days after the month ends. Service credits are applied against later Platform Fees and are your only financial remedy for missing the target.",
+          "4.3 The following are excluded from the availability calculation:",
+          "(a) planned maintenance notified under clause 5;",
+          "(b) faults in your devices, internet connection, power or local network;",
+          "(c) failures of third-party services outside our control, including Moniepoint, OPay, Paystack, Brevo, Infobip, Termii, mobile networks and banks (for example, a POS payment that fails because the provider is down);",
+          "(d) suspension under the Terms of Service, or problems caused by your breach or misuse; and",
+          "(e) force majeure events."
+        ]
+      },
+      {
+        "heading": "5. Planned maintenance",
+        "paragraphs": [
+          "5.1 We give at least **48 hours'** notice (in the Platform or by email) of planned maintenance that is expected to make the Platform unavailable, and schedule it where possible between 00:00 and 05:00 Lagos time. Urgent security maintenance may be carried out with shorter notice.",
+          "5.2 The daily fee calculation (just after midnight) and the 06:00 debit are scheduled jobs; if maintenance or an outage delays them, they run when the Platform is back and the amounts are not duplicated."
+        ]
+      },
+      {
+        "heading": "6. Your part",
+        "paragraphs": [
+          "6.1 You may name up to **3** contact people who may raise support requests. Please give clear details of each issue (Venue, user, time, screenshots), and give us reasonable access (including, where needed, permission for our staff to act in your account, which is recorded in the activity log)."
+        ]
+      },
+      {
+        "heading": "How this is accepted",
+        "paragraphs": [
+          "These Support & Services terms form part of the Agreement you accept online with the Terms of Service."
+        ]
+      }
+    ]
+  },
+  {
+    "slug": "referral-partners",
+    "title": "Referral partner terms",
+    "version": "RPA-2026-11",
+    "effectiveDate": "2026-11-18",
+    "summary": "How Hospio360 referral partners (marketers) earn 20% of the platform fee collected from the businesses they refer for 12 months, and how statements and payments work.",
+    "sections": [
+      {
+        "heading": "About this document",
+        "paragraphs": [
+          "This Agreement is between **Oyeks Global Limited**, RC 10001123, Lagos, Nigeria (**Oyeks Global**) and the person or business that accepts it in the Hospio360 Partner Portal (the **Partner**)."
+        ]
+      },
+      {
+        "heading": "1. Definitions",
+        "paragraphs": [
+          "1.1 In this Agreement:",
+          "(a) **Referred Business** means a hotel or hospitality business that is attributed to the Partner under clause 3.",
+          "(b) **Platform Fee** means the daily Hospio360 platform fee (1.5% of a business's daily sales) that Oyeks Global debits from the Referred Business's business account.",
+          "(c) **Collected Platform Fee** means the Platform Fee that Oyeks Global has actually collected from a Referred Business, **excluding** the charges listed in clause 4.3.",
+          "(d) **Commission Window** means, for each Referred Business, the **12 months** starting on the date of the first Platform Fee collected from that business.",
+          "(e) **Partner Portal** means the Hospio360 partner portal where the Partner accepts this Agreement, gets its referral link and code, sees its Referred Businesses and Statements, raises queries and keeps its bank details.",
+          "(f) **Statement** means the monthly commission statement described in clause 5.2."
+        ]
+      },
+      {
+        "heading": "2. Appointment and acceptance",
+        "paragraphs": [
+          "2.1 Oyeks Global appoints the Partner, on a **non-exclusive** basis, to introduce prospective customers for Hospio360 in Nigeria (or the territory stated in a signed Partner Schedule). Oyeks Global may appoint other partners and sell directly in any area.",
+          "2.2 The Partner is an **independent contractor**, not an employee, agent or legal representative of Oyeks Global. The Partner has no authority to sign contracts, accept payments, quote prices or terms other than published ones, or make promises for Oyeks Global, and must not present itself as able to do so. The Partner bears its own costs, taxes and statutory obligations.",
+          "2.3 The Partner must accept this Agreement in the Partner Portal **before** sharing its referral link or code. Oyeks Global records the version accepted (this is version **RPA-2026-11**), the date and time, the IP address and device used, and that record is evidence of the Partner's agreement to these terms, in addition to any signature on a Partner Schedule."
+        ]
+      },
+      {
+        "heading": "3. Attribution of referrals",
+        "paragraphs": [
+          "3.1 A business is attributed to the Partner (and becomes a Referred Business) when: (a) it signs up for Hospio360 using the Partner's referral link or referral code; or (b) Oyeks Global records the Partner as the referring partner when it onboards the business. A business that was already a Hospio360 customer before it used the Partner's link or code is not a Referred Business.",
+          "3.2 Each business has **one** referring partner at a time. Oyeks Global's records decide attribution, acting reasonably and in good faith.",
+          "3.3 If Oyeks Global changes the attribution of a business (for example to correct an error, or because the business moves to another partner), this Agreement ends for that business from the date of the change: commission on Platform Fees for days before that date is unaffected, and nothing is earned on fees for days after it. A change of partner does not restart or extend the business's Commission Window."
+        ]
+      },
+      {
+        "heading": "4. Commission",
+        "paragraphs": [
+          "4.1 For each Referred Business, the Partner earns a commission of **20%** of the Collected Platform Fee for each day inside that business's Commission Window.",
+          "4.2 Commission is earned only on Platform Fees **actually collected**. Nothing is earned on fees that are billed or due but not collected. If a day's Platform Fee is carried over and collected later, the commission on it is earned when it is collected and appears on the Statement for the month of collection. **A fee for a day inside the Commission Window that is collected after the Commission Window has ended still earns commission.**",
+          "4.3 No commission is earned on: device or equipment charges (including any device share or instalment), data plans, message charges (SMS, WhatsApp or email), VAT, or any other pass-through or third-party costs, even when Oyeks Global collects them together with the Platform Fee.",
+          "4.4 There is **no** activation, sign-up or other bonus. The commission in clause 4.1 is the Partner's only payment under this Agreement.",
+          "4.5 Commission on a Referred Business stops for fee days after the end of its 12-month Commission Window, or earlier if the business stops using Hospio360, its attribution changes under clause 3.3, or this Agreement ends under clause 8.",
+          "4.6 **Clawback.** If a Collected Platform Fee is later reversed or refunded, the commission on it is deducted as a negative line on the Partner's next Statement. If the deductions are more than the commission on that Statement, the balance is carried forward and deducted from later Statements, and if this Agreement ends with a balance owing, Oyeks Global may ask the Partner to repay it within **30 days**.",
+          "4.7 No commission is payable on fees from a business that is not a Referred Business, on businesses referred after this Agreement ends, or where the referral involved a breach of clause 6.",
+          "4.8 Oyeks Global may change the commission terms by publishing a new version of this Agreement in the Partner Portal with **30 days'** notice. A new version applies only once the Partner accepts it (it is shown at the Partner's next sign-in), and does not change the terms for Referred Businesses whose Commission Window started before the change."
+        ]
+      },
+      {
+        "heading": "5. Withholding tax, statements and payment",
+        "paragraphs": [
+          "5.1 **Withholding tax** of **5%** is deducted from the gross commission and paid to the tax authority (if the law changes the rate, the new rate applies). The amount paid to the Partner is the **net commission = gross commission − withholding tax**. Oyeks Global provides withholding tax credit notes or receipts on request.",
+          "5.2 By the **5th** day of each month, Oyeks Global issues a Statement in the Partner Portal for the previous month, showing: a line for each Referred Business (Collected Platform Fee and commission); any clawback lines under clause 4.6; gross commission; withholding tax; net commission; and any amount carried over from earlier Statements.",
+          "5.3 The Partner has **7 days** from the date a Statement is issued to raise a query about it in the Partner Portal. After that the Statement is treated as accepted. Oyeks Global will review queries in good faith and make any correction on the next Statement.",
+          "5.4 Once a Statement is approved by Oyeks Global's finance team, the net commission is paid by **manual bank transfer** to the Partner's verified bank account by the **15th** day of the month the Statement is issued. Oyeks Global records the payment reference and emails the Partner when payment is made. If a query is still open, Oyeks Global may hold the queried lines and pay them with the next payment after the query is resolved.",
+          "5.5 The Partner must keep its bank name, account number and account name up to date in the Partner Portal. The account name must match the Partner. Any change of bank details is re-checked by Oyeks Global before a payment is made to the new account, and Oyeks Global is not responsible for a payment made to the details the Partner provided.",
+          "5.6 The **minimum payout is ₦5,000**. If the net commission due is less than ₦5,000, it rolls over to the next Statement and is paid once the total due reaches the minimum.",
+          "5.7 **Final Statement.** When this Agreement ends, any carried-over balance (after any clawback) is included on the Partner's final Statement and paid with it, **regardless of the ₦5,000 minimum**. Where commission continues after the end under clause 8.3(a), each later Statement is likewise paid regardless of the minimum."
+        ]
+      },
+      {
+        "heading": "6. Conduct",
+        "paragraphs": [
+          "6.1 The Partner must:",
+          "(a) describe Hospio360 honestly and accurately, using only information and materials approved by Oyeks Global, and not misrepresent its features, prices (including the Platform Fee and device packages), or contract terms;",
+          "(b) not offer prospects any discount, cash, gift or inducement on Oyeks Global's behalf, and not accept payments from prospects for Oyeks Global;",
+          "(c) comply with all applicable laws, including anti-bribery, consumer protection and advertising law;",
+          "(d) comply with the Nigeria Data Protection Act 2023 when collecting and sharing prospects' personal data: collect only what is needed for the referral, tell the prospect that their details will be passed to Oyeks Global to contact them about Hospio360, and keep the data secure;",
+          "(e) not send unsolicited bulk messages (spam) in Oyeks Global's or Hospio360's name; and",
+          "(f) use the Hospio360 name and logo only as approved, and stop using them when this Agreement ends."
+        ]
+      },
+      {
+        "heading": "7. Confidentiality",
+        "paragraphs": [
+          "7.1 The Partner must keep confidential all non-public information about Oyeks Global, Hospio360, its prices and plans, and its customers (including Referred Businesses' sales and fee figures shown in the Partner Portal), use it only for this Agreement, and not disclose it, during this Agreement and for **3 years** after it ends."
+        ]
+      },
+      {
+        "heading": "8. Term and termination",
+        "paragraphs": [
+          "8.1 This Agreement starts when the Partner accepts it in the Partner Portal (or, if earlier, signs a Partner Schedule) and continues until ended by either party on **30 days'** written notice.",
+          "8.2 Oyeks Global may end it immediately by written notice if the Partner breaches clause 6 or 7, acts dishonestly, or brings Oyeks Global or Hospio360 into disrepute.",
+          "8.3 When this Agreement ends: (a) for an ending under clause 8.1, commission continues on Referred Businesses attributed to the Partner before the end until the end of their Commission Windows, and Statements and payments continue under clause 5; (b) for an ending under clause 8.2, commission stops on fees for days after the end, and Oyeks Global may withhold commission related to the breach; (c) the final Statement is paid under clause 5.7; and (d) the Partner must stop presenting itself as a Hospio360 partner and return or delete Oyeks Global materials and confidential information."
+        ]
+      },
+      {
+        "heading": "9. Non-solicitation",
+        "paragraphs": [
+          "9.1 During this Agreement and for **12 months** after it ends, the Partner must not: (a) encourage a Referred Business or other Hospio360 customer to stop using Hospio360 in favour of a competing product; or (b) solicit any Oyeks Global employee to leave its employment. General advertising not targeted at them is not a breach."
+        ]
+      },
+      {
+        "heading": "10. Liability",
+        "paragraphs": [
+          "10.1 Oyeks Global's total liability to the Partner is limited to the commission payable in the **12 months** before the claim. Neither party is liable for indirect or consequential loss. The Partner will indemnify Oyeks Global against third-party claims arising from the Partner's misrepresentation or breach of clause 6."
+        ]
+      },
+      {
+        "heading": "11. Governing law and disputes",
+        "paragraphs": [
+          "11.1 This Agreement is governed by the laws of the Federal Republic of Nigeria. Disputes will be resolved by negotiation, then mediation, then arbitration under the Arbitration and Mediation Act 2023 by a sole arbitrator, seated in **Lagos, Nigeria**, in English. Either party may seek urgent relief from a Nigerian court, and the courts of Lagos State have jurisdiction if a dispute cannot be arbitrated."
+        ]
+      },
+      {
+        "heading": "12. General",
+        "paragraphs": [
+          "12.1 The Partner may not assign this Agreement. This Agreement (with any signed Partner Schedule) is the entire agreement between the parties on its subject and can only be changed in writing signed by both, or by a new version accepted by the Partner in the Partner Portal under clause 4.8. Notices to Oyeks Global go to **hello@oyeksglobal.com**."
+        ]
+      },
+      {
+        "heading": "How this is accepted",
+        "paragraphs": [
+          "Accepted online in the Hospio360 Partner Portal (version RPA-2026-11); the acceptance is recorded. A partner who wants a signed copy may also sign the Partner Schedule."
+        ]
+      }
+    ]
+  },
+  {
+    "slug": "staff-terms",
+    "title": "Staff terms of use",
+    "version": "STAFF-2026-11",
+    "effectiveDate": "2026-11-18",
+    "summary": "The rules for every staff member who uses Hospio360: keep your login and PIN private, record things accurately, protect guest information.",
+    "sections": [
+      {
+        "heading": "About this document",
+        "paragraphs": [
+          "You have been given a Hospio360 login by the business you work for (your **employer**) to do your work at its venue. Hospio360 is provided to your employer by Oyeks Global Limited. You accept these terms by ticking the box when you first sign in, before you use Hospio360."
+        ]
+      },
+      {
+        "heading": "1. Your account",
+        "paragraphs": [
+          "1.1 Your login is personal. Do not share your password or PIN with anyone, including colleagues and managers, and do not let anyone else work under your name. Everything done with your login is recorded as done by you.",
+          "1.2 Choose a strong password and a PIN that is not easy to guess (not your birthday or 1234). Hospio360 staff and your managers will **never** ask you for your password or PIN.",
+          "1.3 On a shared device, always switch to your own name with your PIN before working, and lock the device or switch user when you step away. After 5 wrong PINs your PIN is locked for a while and your managers are told.",
+          "1.4 Tell your manager straight away if you think someone knows your password or PIN, or if a device is lost or stolen."
+        ]
+      },
+      {
+        "heading": "2. Using Hospio360 properly",
+        "paragraphs": [
+          "2.1 Use Hospio360 only for your work, and only within the role and venue you were given. Record sales, payments, stock, orders and guest details accurately and at the time they happen.",
+          "2.2 Do not: record false or misleading entries; take or record payments outside the system to hide them; delete or change records to cover mistakes or wrongdoing; try to access areas, venues or data you have not been given; copy, photograph or download data except as your job requires; or try to break or get around the system's security."
+        ]
+      },
+      {
+        "heading": "3. Guest confidentiality",
+        "paragraphs": [
+          "3.1 Guest information (names, phone numbers, ID details, rooms, stays, bills and messages) is confidential and protected by the Nigeria Data Protection Act 2023. Use it only to serve the guest. Never share it with anyone outside work, post it on social media, or use it to contact guests for personal reasons. This applies during and after your employment."
+        ]
+      },
+      {
+        "heading": "4. Monitoring and records",
+        "paragraphs": [
+          "4.1 Hospio360 keeps records of sign-ins and of actions taken (an activity log), including who created, changed or voided a booking, charge, payment or stock entry, and when. It also records when you accepted these terms (version, date and time, IP address and device). Your employer and, when helping your employer, Hospio360 support staff, can see these records. They may be used to investigate errors, losses or misconduct."
+        ]
+      },
+      {
+        "heading": "5. Consequences",
+        "paragraphs": [
+          "5.1 Breaking these terms may lead to your access being paused or removed, and to action by your employer under its own staff rules, which may include dismissal. Fraud or theft may be reported to the police."
+        ]
+      },
+      {
+        "heading": "6. Your own data and new versions",
+        "paragraphs": [
+          "6.1 Your employer controls the personal data held about you in Hospio360. See the Hospio360 Privacy Policy and ask your employer if you have questions about your data.",
+          "6.2 If these terms change, the new version is shown to you when you next sign in, and you accept it before continuing."
+        ]
+      },
+      {
+        "heading": "How this is accepted",
+        "paragraphs": [
+          "Accepted by ticking \"I agree to the Staff terms of use\" when you first sign in to Hospio360. Your acceptance is recorded; no signature is needed."
+        ]
+      }
+    ]
+  }
+]

@@ -9,11 +9,14 @@ import { SectionCard } from "@hospio/ui/shared/section-card";
 import { HealthBar } from "../shared";
 import { ReferredByValue } from "./referred-by";
 
-/** "% of daily sales · 1.5%" or "Per room night · ₦500": the fee as one line. */
+/** "% of daily sales · 1.5%" or "Per room night · ₦500": the fee as one line, with its signed addendum when it has one. */
 export function feeLineOf(business: BusinessRow) {
-	return business.feeValue
+	const line = business.feeValue
 		? `${business.feeModel} · ${business.feeModel.includes("%") ? `${business.feeValue}%` : naira(business.feeValue)}`
 		: business.feeModel;
+	return business.feeAddendumRef
+		? `${line} · addendum ${business.feeAddendumRef}`
+		: line;
 }
 
 /** Business · Overview: the headline numbers, the account and the registered business. */
@@ -58,7 +61,11 @@ export function OverviewTab({
 							: "—"
 					}
 					icon={CoinsIcon}
-					hint={business.feeModel}
+					hint={
+						business.feeAddendumRef
+							? `${business.feeModel} · addendum ${business.feeAddendumRef}`
+							: business.feeModel
+					}
 				/>
 				<KpiCard
 					label="Monthly fee"

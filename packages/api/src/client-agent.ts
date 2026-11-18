@@ -15,3 +15,19 @@ export async function clientAgentHeaders(): Promise<Record<string, string>> {
 		return {};
 	}
 }
+
+/**
+ * The browser's user agent and address, for the calls that record a legal acceptance (hospio-backend docs/legal-acceptance.md):
+ * `X-Client-Agent` as above and `X-Client-IP` from the proxy's `X-Forwarded-For` (first hop) or `X-Real-IP`.
+ */
+export async function clientMetaHeaders(): Promise<Record<string, string>> {
+	const out = await clientAgentHeaders();
+	try {
+		const h = await headers();
+		const ip = h.get("x-forwarded-for")?.split(",")[0]?.trim() || h.get("x-real-ip")?.trim();
+		if (ip && /^[0-9a-fA-F:.]{2,64}$/.test(ip)) out["X-Client-IP"] = ip;
+	} catch {
+		// outside a request: nothing to forward
+	}
+	return out;
+}
