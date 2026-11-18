@@ -54,14 +54,15 @@ export function Header({
 	const subtitle = `${roleLabels[role]}${hotelCount > 0 ? ` · ${hotelCount} ${hotelCount === 1 ? "branch" : "branches"}` : ""}`;
 
 	return (
-		<header className="flex items-center justify-between gap-4 px-8 pt-6">
-			<div className="flex items-center gap-3">
-				<SidebarTrigger className="md:hidden" />
+		<header className="flex items-center justify-between gap-3 px-5 pt-6 lg:px-8">
+			<div className="flex min-w-0 flex-1 items-center gap-3">
+				{/* Phones open the menu drawer; tablets (icon rail below 1280px) open the full menu. */}
+				<SidebarTrigger className="shrink-0 xl:hidden" />
 				{/* The admin portal's staff get a working search (⌘K); the hotel app keeps its box as it is. */}
 				{APP === "admin" && PLATFORM_ROLES.includes(role) ? (
 					<AdminSearch role={role} />
 				) : (
-					<label className="hidden h-[42px] w-[380px] items-center gap-[10px] rounded-xl border border-line bg-card pl-[14px] pr-[10px] md:flex">
+					<label className="hidden h-[42px] w-full min-w-0 max-w-[380px] items-center gap-[10px] rounded-xl border border-line bg-card pl-[14px] pr-[10px] md:flex">
 						<SearchIcon className="size-[18px] text-ink-3" />
 						<input
 							type="search"
@@ -73,7 +74,7 @@ export function Header({
 				)}
 			</div>
 
-			<div className="flex items-center gap-3">
+			<div className="flex shrink-0 items-center gap-3">
 				{device && <LockButton deviceName={device.name} />}
 				<Link href="/dashboard/help" className={iconButton} aria-label="Help">
 					<CircleHelpIcon className="size-5" />

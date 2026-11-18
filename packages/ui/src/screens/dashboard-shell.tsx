@@ -244,7 +244,7 @@ export async function DashboardShell({ children }: PropsWithChildren) {
 						/>
 						{device && <IdleLock minutes={device.autoLockMinutes} />}
 						{pinPrompt && !legalGate && <PinPrompt onDevice={!!device} />}
-						<div className="flex flex-1 flex-col gap-5 px-8 py-6">
+						<div className="flex flex-1 flex-col gap-5 px-5 py-6 lg:px-8">
 							{/* "Manage … in Hotel setup" links only where Hotel setup exists (manager, owner). */}
 							<SetupLinks allowed={role === "MANAGER" || role === "OWNER"}>
 								{children}
