@@ -1423,7 +1423,9 @@ function CheckOutPanel({
 						company
 							? `Charges go on ${b.organizationName ?? "the company"}'s account`
 							: "The folio closes paid in full",
-						"Thank-you message goes to the guest",
+						b.guestEmail
+							? `A thank-you email goes to ${b.guestEmail}`
+							: "No thank-you message: the guest has no email (the stay summary has no WhatsApp template)",
 					]}
 				/>
 			</div>

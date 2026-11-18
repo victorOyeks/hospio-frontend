@@ -736,7 +736,9 @@ function CheckOutPanel({
 							: due > 0 && settle === "later"
 								? "Folio closes with a balance and shows on the dashboard"
 								: "Folio closes paid in full",
-						"Thank-you message goes to the guest",
+						b.guestEmail
+							? `A thank-you email goes to ${b.guestEmail}`
+							: "No thank-you message: the guest has no email (the stay summary has no WhatsApp template)",
 					]}
 				/>
 			</div>

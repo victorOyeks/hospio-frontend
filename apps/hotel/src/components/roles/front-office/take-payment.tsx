@@ -29,11 +29,9 @@ import { useHotelActions } from "@hospio/api/actions/hotel-scope";
 import {
 	cashTill,
 	paymentStatus,
-	resendReceipt,
 	verifyPayment,
 } from "@hospio/api/actions/payment";
 import { openTill } from "@hospio/api/actions/finance";
-import { emailReceipt } from "@hospio/api/actions/ml";
 import { withDeliveries } from "@hospio/ui/shared/deliveries-store";
 import type {
 	FolioSummary,
@@ -170,7 +168,7 @@ export function usePaymentSteps(
 	}: PaymentStepsOptions,
 	autoStart = true,
 ) {
-	const { recordPayment } = useHotelActions();
+	const { recordPayment, emailReceipt, resendReceipt } = useHotelActions();
 	const [tgt, setTgt] = useState<PaymentTarget | null>(target ?? null);
 	const [step, setStep] = useState<Step>(
 		autoStart ? (target ? "method" : "who") : "idle",
