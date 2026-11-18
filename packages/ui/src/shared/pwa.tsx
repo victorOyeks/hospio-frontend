@@ -2,6 +2,7 @@
 
 import { DownloadIcon, ShareIcon, SquarePlusIcon, XIcon } from "lucide-react";
 import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import { APP_NAME } from "@hospio/api/app";
 import { useInstallPrompt } from "@hospio/ui/hooks/use-install-prompt";
 import { DropdownMenuItem } from "@hospio/ui/primitives/dropdown-menu";
@@ -20,7 +21,11 @@ const DISMISSED = "hospio.install-banner.dismissed";
 export function ServiceWorker() {
 	useEffect(() => {
 		if (process.env.NODE_ENV !== "production") return;
-		if (window.location.protocol !== "https:" || !("serviceWorker" in navigator)) return;
+		if (
+			window.location.protocol !== "https:" ||
+			!("serviceWorker" in navigator)
+		)
+			return;
 		navigator.serviceWorker
 			.register(`/sw.js?v=${encodeURIComponent(BUILD)}`, { scope: "/" })
 			.catch(() => {
@@ -30,7 +35,13 @@ export function ServiceWorker() {
 	return null;
 }
 
-function IosTip({ open, onOpenChange }: { open: boolean; onOpenChange: (open: boolean) => void }) {
+function IosTip({
+	open,
+	onOpenChange,
+}: {
+	open: boolean;
+	onOpenChange: (open: boolean) => void;
+}) {
 	return (
 		<Modal
 			open={open}
@@ -40,7 +51,11 @@ function IosTip({ open, onOpenChange }: { open: boolean; onOpenChange: (open: bo
 			title={`Install ${APP_NAME}`}
 			subtitle="Add it to your Home Screen to open it like an app."
 			footer={
-				<button type="button" className={btn.primary} onClick={() => onOpenChange(false)}>
+				<button
+					type="button"
+					className={btn.primary}
+					onClick={() => onOpenChange(false)}
+				>
 					Got it
 				</button>
 			}
@@ -51,7 +66,8 @@ function IosTip({ open, onOpenChange }: { open: boolean; onOpenChange: (open: bo
 						<ShareIcon className="size-4" />
 					</span>
 					<span>
-						Tap <b>Share</b> (the square with an arrow, in Safari's toolbar or Chrome's address bar).
+						Tap <b>Share</b> (the square with an arrow, in Safari's toolbar or
+						Chrome's address bar).
 					</span>
 				</li>
 				<li className="flex items-center gap-3">
@@ -130,47 +146,52 @@ export function InstallBanner() {
 		}
 	};
 
-	if (!show || (!canPrompt && !showIosTip)) return <IosTip open={tip} onOpenChange={setTip} />;
+	if (!show || (!canPrompt && !showIosTip))
+		return <IosTip open={tip} onOpenChange={setTip} />;
+	// Portalled to <body>: the dashboard shell's containers would otherwise anchor "fixed" to themselves, not the screen.
 	return (
 		<>
-			<section
-				aria-label={`Install ${APP_NAME}`}
-				data-install-banner
-				className={cn(
-					"fixed inset-x-3 bottom-3 z-50 mx-auto flex max-w-[520px] items-center gap-3 rounded-xl border border-brand/20 bg-card px-4 py-3 shadow-lg",
-					"pb-[max(12px,env(safe-area-inset-bottom))]",
-				)}
-			>
-				<span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-brand text-white">
-					<DownloadIcon className="size-5" />
-				</span>
-				<div className="min-w-0 flex-1 text-[13px]">
-					<p className="font-semibold text-ink">Install {APP_NAME}</p>
-					<p className="text-ink-2">
-						{canPrompt
-							? "Open it from your home screen like an app, full screen."
-							: "Tap Share, then Add to Home Screen."}
-					</p>
-				</div>
-				<button
-					type="button"
-					className={cn(btn.primary, "shrink-0")}
-					onClick={async () => {
-						if (!canPrompt) return setTip(true);
-						if (await install()) dismiss();
-					}}
+			{createPortal(
+				<section
+					aria-label={`Install ${APP_NAME}`}
+					data-install-banner
+					className={cn(
+						"fixed inset-x-3 bottom-3 z-50 mx-auto flex max-w-[520px] items-center gap-3 rounded-xl border border-brand/20 bg-card px-4 py-3 shadow-lg",
+						"pb-[max(12px,env(safe-area-inset-bottom))]",
+					)}
 				>
-					{canPrompt ? "Install" : "How"}
-				</button>
-				<button
-					type="button"
-					onClick={dismiss}
-					aria-label="Dismiss"
-					className="flex size-8 shrink-0 items-center justify-center rounded-lg text-ink-3 hover:bg-subtle hover:text-ink"
-				>
-					<XIcon className="size-[18px]" />
-				</button>
-			</section>
+					<span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-brand text-white">
+						<DownloadIcon className="size-5" />
+					</span>
+					<div className="min-w-0 flex-1 text-[13px]">
+						<p className="font-semibold text-ink">Install {APP_NAME}</p>
+						<p className="text-ink-2">
+							{canPrompt
+								? "Open it from your home screen like an app, full screen."
+								: "Tap Share, then Add to Home Screen."}
+						</p>
+					</div>
+					<button
+						type="button"
+						className={cn(btn.primary, "shrink-0")}
+						onClick={async () => {
+							if (!canPrompt) return setTip(true);
+							if (await install()) dismiss();
+						}}
+					>
+						{canPrompt ? "Install" : "How"}
+					</button>
+					<button
+						type="button"
+						onClick={dismiss}
+						aria-label="Dismiss"
+						className="flex size-8 shrink-0 items-center justify-center rounded-lg text-ink-3 hover:bg-subtle hover:text-ink"
+					>
+						<XIcon className="size-[18px]" />
+					</button>
+				</section>,
+				document.body,
+			)}
 			<IosTip open={tip} onOpenChange={setTip} />
 		</>
 	);
