@@ -86,3 +86,28 @@ export async function testIntegration(provider: string): Promise<ActionResult<{ 
 		return { ok: false, error: "The test answer could not be read" };
 	}
 }
+
+/**
+ * Brevo card → Send a test email (Super admin): messaging-service sends one short email to `to` and records it like any delivery,
+ * so Brevo's delivery report shows in Connection checks → Email. Test addresses are refused; at most one a minute.
+ */
+export async function sendTestEmail(to: string): Promise<ActionResult<{ ok: boolean; message: string }>> {
+	if (!live("platform")) {
+		await demoDelay(500);
+		return { ok: true, data: { ok: true, message: "Demo: nothing was sent" } };
+	}
+	try {
+		const { data, error } = await api("@post/platform/admin/integrations/brevo/send-test", {
+			...(await withSession()),
+			body: { to },
+		});
+		return error || !data
+			? { ok: false, error: errorMessage(error, "The test email could not be sent") }
+			: {
+					ok: true,
+					data: { ok: data.data.ok, message: data.data.message ?? (data.data.ok ? "Sent" : "It wasn't sent") },
+				};
+	} catch {
+		return { ok: false, error: "The answer could not be read. Check Connection checks → Email before trying again." };
+	}
+}

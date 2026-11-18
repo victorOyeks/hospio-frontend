@@ -5,6 +5,7 @@ import {
 	FlaskConicalIcon,
 	Loader2Icon,
 	LockIcon,
+	MailIcon,
 	PlugZapIcon,
 	RefreshCwIcon,
 	XCircleIcon,
@@ -14,6 +15,7 @@ import { toast } from "sonner";
 import {
 	runConnectionChecks,
 	saveIntegration,
+	sendTestEmail,
 	testIntegration,
 } from "@hospio/api/actions/integrations";
 import type {
@@ -249,6 +251,7 @@ function ProviderCard({ initial }: { initial: IntegrationCard }) {
 					{test.ok ? <CheckCircle2Icon className="size-4" /> : <XCircleIcon className="size-4" />} {test.message}
 				</p>
 			)}
+			{card.provider === "BREVO" && <SendTestEmail />}
 			<div className="flex flex-wrap items-center justify-end gap-2 border-t border-line pt-4">
 				{dirty && <span className="mr-auto text-xs text-ink-3">Unsaved changes</span>}
 				{card.testable && (
@@ -280,6 +283,84 @@ function ProviderCard({ initial }: { initial: IntegrationCard }) {
 				</button>
 			</div>
 		</SectionCard>
+	);
+}
+
+/** Reserved test domains never receive mail; the server refuses them too (docs/email.md, "Test addresses are never sent"). */
+const TEST_DOMAIN = /@(?:[^@\s]+\.)?(?:[^@\s.]+\.(?:test|example|invalid|localhost|local)|example\.(?:com|org|net)|localhost)\.?$/i;
+
+/**
+ * Brevo card → Send a test email: one short real email ("Hospio360 test email — delivery tracking check"), recorded like any
+ * delivery, so Brevo's delivered/opened report shows in Connection checks → Email a minute later. At most one a minute.
+ */
+function SendTestEmail() {
+	const [to, setTo] = useState("");
+	const [sending, setSending] = useState(false);
+	const [result, setResult] = useState<{ ok: boolean; message: string } | null>(null);
+	const value = to.trim();
+	const error =
+		value === ""
+			? undefined
+			: !/^[^@\s]+@[^@\s]+\.[^@\s.]{2,}$/.test(value)
+				? "An address like name@yourdomain.com"
+				: TEST_DOMAIN.test(value)
+					? "A test address (.test, .example, example.com…) can never receive email"
+					: undefined;
+	const send = async () => {
+		setSending(true);
+		setResult(null);
+		try {
+			const r = await sendTestEmail(value);
+			const answer = r.ok ? r.data : { ok: false, message: r.error };
+			setResult(answer);
+			if (answer.ok) setTo("");
+		} catch {
+			setResult({ ok: false, message: "The test email could not be sent. Try again in a minute." });
+		} finally {
+			setSending(false);
+		}
+	};
+	return (
+		<div className="flex flex-col gap-3 rounded-[10px] border border-line px-3 py-3">
+			<div>
+				<p className="text-[13px] font-semibold text-ink">Send a test email</p>
+				<p className="text-xs text-ink-3">
+					Sends one short email to a real inbox you can open, recorded like any other. Its delivery shows in Connection
+					checks → Email about a minute later. One a minute at most.
+				</p>
+			</div>
+			<div className="flex flex-wrap items-end gap-2">
+				<TextField
+					className="min-w-[220px] flex-1"
+					label="Send to"
+					type="email"
+					value={to}
+					onChange={setTo}
+					placeholder="name@yourdomain.com"
+					error={error}
+				/>
+				<button
+					type="button"
+					className={cn(btn.secondary, "flex items-center gap-2")}
+					onClick={send}
+					disabled={sending || value === "" || !!error}
+				>
+					{sending ? <Loader2Icon className="size-4 animate-spin" /> : <MailIcon className="size-4" />}
+					{sending ? "Sending…" : "Send a test email"}
+				</button>
+			</div>
+			{result && (
+				<p
+					className={cn(
+						"flex items-center gap-2 rounded-[10px] px-3 py-[10px] text-xs font-medium",
+						result.ok ? "bg-success-soft text-success" : "bg-danger-soft text-danger",
+					)}
+				>
+					{result.ok ? <CheckCircle2Icon className="size-4 shrink-0" /> : <XCircleIcon className="size-4 shrink-0" />}{" "}
+					{result.message}
+				</p>
+			)}
+		</div>
 	);
 }
 
