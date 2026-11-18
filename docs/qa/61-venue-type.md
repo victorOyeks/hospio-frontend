@@ -98,3 +98,5 @@ numbers, so use a number that isn't anyone's (the code screen then says it was h
 - A lounge charging to a room through the API: `POST /fnb/orders/{id}/charge-to-room` → 400 "Charging to a room is switched off here …".
 - A lounge that adds a room type and rooms in Hotel setup: room menus and charge-to-room come back (within a minute).
 - Front office user at a lounge (if one exists): the home page says "Not used at a lounge".
+- Owner wizard Continue saves once: steps 1-3 never show "This business already has a hotel called …" after a successful save, and
+  step 3 makes each outlet once (Hotel setup → Restaurants & tables lists no duplicates). Before this fix one click ran the save twice.

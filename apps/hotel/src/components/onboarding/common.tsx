@@ -117,7 +117,12 @@ export function StepFooter({
 					type="submit"
 					className={cn(btn.primary, "flex items-center gap-2")}
 					disabled={pending || disabled}
-					onClick={onContinue}
+					// The button submits its form (Enter in a field still works), but the step's own handler runs once: without
+					// preventDefault the click ran onContinue and the form's onSubmit ran it again (two outlets, "already has a hotel called").
+					onClick={(e) => {
+						e.preventDefault();
+						onContinue();
+					}}
 				>
 					{pending ? (
 						<Loader2Icon className="size-4 animate-spin" />
