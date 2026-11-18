@@ -4,11 +4,11 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { EyeIcon, EyeOffIcon, Loader2Icon } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState, useTransition } from "react";
+import { useCallback, useEffect, useState, useTransition } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
-import { signUp } from "@hospio/api/actions/onboarding";
+import { checkReferralCode, signUp } from "@hospio/api/actions/onboarding";
 import { withDeliveries } from "@hospio/ui/shared/deliveries-store";
 import { Button } from "@hospio/ui/primitives/button";
 import {
@@ -63,17 +63,33 @@ const schema = z.object({
 		.min(1, "Enter your city")
 		.max(80, "Keep the city under 80 characters")
 		.refine((v) => letters(v) >= 2 && !/\d/.test(v), "Enter a real city name"),
+	referralCode: z
+		.string()
+		.trim()
+		.max(20, "A referral code is at most 20 characters")
+		.optional(),
 });
+
+/** The referral code's check (GET /platform/public/referral-codes/{code}): who referred them, or why it doesn't work. */
+type CodeCheck =
+	| { state: "idle" }
+	| { state: "checking" }
+	| { state: "valid"; name?: string }
+	| { state: "invalid"; message: string };
 
 const input =
 	"h-auto rounded-control border-line px-[14px] py-3 text-sm focus-visible:border-brand focus-visible:ring-0";
 const label = "text-[13px] font-medium text-ink-2";
 
-/** Create your hotel account (Figma 3163:16114): the owner's details and the business they own. */
-export function SignUpForm() {
+/**
+ * Create your hotel account (Figma 3163:16114): the owner's details and the business they own, and the referral code of
+ * the marketer who sent them (prefilled from `?ref=`, optional).
+ */
+export function SignUpForm({ referralCode = "" }: { referralCode?: string }) {
 	const router = useRouter();
 	const [show, setShow] = useState(false);
 	const [pending, startTransition] = useTransition();
+	const [codeCheck, setCodeCheck] = useState<CodeCheck>({ state: "idle" });
 	const form = useForm({
 		resolver: zodResolver(schema),
 		defaultValues: {
@@ -83,8 +99,31 @@ export function SignUpForm() {
 			password: "",
 			businessName: "",
 			city: "",
+			referralCode,
 		},
 	});
+
+	const check = useCallback(async (value: string) => {
+		const code = value.trim().toUpperCase();
+		if (!code) {
+			setCodeCheck({ state: "idle" });
+			return;
+		}
+		setCodeCheck({ state: "checking" });
+		const r = await checkReferralCode(code);
+		if (!r.ok) setCodeCheck({ state: "idle" });
+		else if (r.data.valid)
+			setCodeCheck({ state: "valid", name: r.data.referrerFirstName });
+		else
+			setCodeCheck({
+				state: "invalid",
+				message: r.data.message ?? "That referral code isn't recognised",
+			});
+	}, []);
+	// A code from the link is checked as the page opens.
+	useEffect(() => {
+		if (referralCode) void check(referralCode);
+	}, [referralCode, check]);
 
 	function onSubmit(values: z.infer<typeof schema>) {
 		startTransition(async () => {
@@ -92,12 +131,15 @@ export function SignUpForm() {
 				signUp({
 					...values,
 					city: values.city,
+					referralCode: values.referralCode?.trim().toUpperCase() || undefined,
 				}),
 				`Phone code for ${values.fullName.trim()}`,
 			);
 			if (!result.ok) {
 				// A taken address comes back as "Someone already signs in with …": that belongs under the email.
-				const field = /phone/i.test(result.error)
+				const field = /referral code/i.test(result.error)
+					? "referralCode"
+					: /phone/i.test(result.error)
 					? "phone"
 					: /full name/i.test(result.error)
 						? "fullName"
@@ -264,6 +306,56 @@ export function SignUpForm() {
 						)}
 					/>
 				</div>
+
+				<FormField
+					control={form.control}
+					name="referralCode"
+					render={({ field }) => (
+						<FormItem className="gap-[6px]">
+							<FormLabel className={label}>
+								Referral code{" "}
+								<span className="font-normal text-ink-3">(optional)</span>
+							</FormLabel>
+							<FormControl>
+								<Input
+									{...field}
+									value={field.value ?? ""}
+									onChange={(e) => {
+										field.onChange(e.target.value.toUpperCase());
+										setCodeCheck({ state: "idle" });
+									}}
+									onBlur={() => {
+										field.onBlur();
+										void check(field.value ?? "");
+									}}
+									autoComplete="off"
+									placeholder="HM-XXXX"
+									maxLength={20}
+									className={`${input} uppercase`}
+								/>
+							</FormControl>
+							{codeCheck.state === "checking" && (
+								<p className="text-xs text-ink-3">Checking the code…</p>
+							)}
+							{codeCheck.state === "valid" && (
+								<p className="text-xs font-medium text-success">
+									{codeCheck.name
+										? `Referred by ${codeCheck.name}`
+										: "Referral code recognised"}
+								</p>
+							)}
+							{codeCheck.state === "invalid" && (
+								<p className="text-xs text-danger">{codeCheck.message}</p>
+							)}
+							{codeCheck.state === "idle" && (
+								<p className="text-xs text-ink-3">
+									From the person who told you about Hospio360
+								</p>
+							)}
+							<FormMessage />
+						</FormItem>
+					)}
+				/>
 
 				<Button
 					type="submit"
