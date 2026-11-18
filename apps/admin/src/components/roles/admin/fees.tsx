@@ -74,6 +74,7 @@ import {
 } from "./live";
 import { DevicesTab } from "./devices/devices-admin";
 import { DailyFeesTab } from "./fees-daily";
+import { InvoicesTab } from "./invoices";
 import { GuestMessageBilling } from "./guest-messages";
 import { can, ReadOnlyNote, StagePill } from "./shared";
 
@@ -128,6 +129,7 @@ export function FeesScreen({
 	// One page, four jobs: each has its own tab in the URL (`?view=`) so Back and shared links land on it. Daily fees and
 	// guest-message billing are read by the money roles only (the services refuse Support).
 	const views = [
+		{ key: "invoices", label: "Invoices" },
 		...(money ? [{ key: "daily", label: "Daily fees" }] : []),
 		{ key: "rules", label: "Fee rules" },
 		{ key: "statements", label: "Statements", count: openStatements.length || undefined },
@@ -135,7 +137,7 @@ export function FeesScreen({
 		{ key: "devices", label: "Devices" },
 	];
 	const [viewParam, setView] = useQueryState("view", parseAsString.withOptions({ history: "push", scroll: false }));
-	const defaultView = money ? "daily" : "statements";
+	const defaultView = "invoices";
 	const view = views.some((v) => v.key === viewParam) ? (viewParam as string) : defaultView;
 	const active = tab || "ALL";
 	const due = openStatements.reduce((a, s) => a + s.outstanding, 0);
@@ -221,7 +223,7 @@ export function FeesScreen({
 		<>
 			<PageHeader
 				title="Fees & billing"
-				subtitle="What hotels pay Hospio360: the daily fee, each business's fee rule, monthly statements and guest-message invoices"
+				subtitle="What businesses pay Hospio360: one monthly invoice each (platform fee, guest messages, devices), the daily fee behind it, fee rules and statements"
 			>
 				{money && view === "statements" && (
 					<button
@@ -235,8 +237,8 @@ export function FeesScreen({
 			</PageHeader>
 			{!money && (
 				<ReadOnlyNote>
-					Support can see statements and fee rules. Daily fees, recording payments,
-					sending statements and fee rules are for Finance admin.
+					Support can see invoices, statements and fee rules. Daily fees, recording payments,
+					extensions, credit notes, voids, sending statements and fee rules are for Finance admin.
 				</ReadOnlyNote>
 			)}
 			<PillTabs
@@ -244,6 +246,7 @@ export function FeesScreen({
 				value={view}
 				onChange={(k) => void setView(k === defaultView ? null : k)}
 			/>
+			{view === "invoices" && <InvoicesTab role={role} businesses={businesses} />}
 			{view === "daily" && <DailyFeesTab role={role} businesses={businesses} />}
 			{view === "rules" && (
 				<FeeRulesTab

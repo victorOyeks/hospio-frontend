@@ -8,7 +8,9 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import type { DailyFeeRow } from "@hospio/api/actions/daily-fees";
+import type { BusinessBillingView } from "@hospio/api/actions/billing";
 import type { DevicePackageView } from "@hospio/api/actions/device-packages";
+import type { AdminRole } from "@hospio/api/demo/fixtures/platform-extra";
 import type {
 	FeeStatementItem,
 	PaymentSummaryData,
@@ -28,6 +30,7 @@ import { StatusPill } from "@hospio/ui/shared/status-pill";
 import { cn } from "@hospio/ui/utils";
 import { optionLabel, PackageProgress, packageStatus } from "../devices/device-package";
 import { howPaidLabel, throughPos } from "../shared";
+import { InvoicesTab } from "../invoices";
 import { BusinessTabHeader } from "./nav";
 
 const feeTone = {
@@ -43,29 +46,32 @@ const settlementTone = {
 } as const;
 
 const dailyTone: Record<string, "success" | "info" | "grey" | "brand" | "warning" | "danger"> = {
+	ACCRUED: "brand",
+	INVOICED: "warning",
 	PAID: "success",
 	SHADOW: "info",
 	NO_FEE: "grey",
-	SCHEDULED: "brand",
-	PENDING: "warning",
-	PART_PAID: "warning",
-	UNPAID: "danger",
-	CARRIED: "grey",
 };
 const dailyLabel: Record<string, string> = {
-	PAID: "debited",
+	ACCRUED: "for this month's invoice",
+	INVOICED: "on invoice, unpaid",
+	PAID: "paid",
 	SHADOW: "statement only",
 	NO_FEE: "no fee",
-	SCHEDULED: "debit at 6am",
-	PENDING: "being debited",
-	PART_PAID: "part debited",
-	UNPAID: "not debited",
-	CARRIED: "moved on",
+};
+
+const billingState: Record<string, { label: string; tone: "success" | "warning" | "danger" | "grey" }> = {
+	NO_INVOICES: { label: "No invoices yet", tone: "grey" },
+	PAID_UP: { label: "Paid up", tone: "success" },
+	DUE: { label: "Invoice due", tone: "warning" },
+	OVERDUE: { label: "Overdue", tone: "danger" },
+	RESTRICTED: { label: "Paused for an unpaid invoice", tone: "danger" },
 };
 
 /**
  * Business · Money tab: what it pays Hospio360, settlements and the payment summary. A business on monthly fees shows its fee
- * statements; a daily-fee business (a % of each day's sales, debited from its POS provider account) shows this month's days.
+ * statements; a daily-fee business (a % of each day's sales) shows its Hospio360 monthly invoices (billing state, the list with
+ * the same panel and actions as Fees & billing → Invoices) and this month's days.
  */
 export function MoneyTab({
 	businessId,
@@ -77,6 +83,8 @@ export function MoneyTab({
 	dailyFeesError = null,
 	feeRate,
 	devicePackages = [],
+	billing = null,
+	role,
 }: {
 	businessId: string;
 	businessName: string;
@@ -89,13 +97,13 @@ export function MoneyTab({
 	feeRate?: number;
 	/** The business's devices & internet packages, one per hotel. */
 	devicePackages?: DevicePackageView[];
+	/** GET /platform/admin/businesses/{id}/billing: the monthly invoice state. */
+	billing?: BusinessBillingView | null;
+	role: AdminRole;
 }) {
 	const outstanding = statements.reduce((a, s) => a + s.outstanding, 0);
 	const daily = dailyFees !== null;
 	const dayFees = (dailyFees ?? []).reduce((a, d) => a + d.fee, 0);
-	const dayCollected = (dailyFees ?? []).reduce((a, d) => a + (d.collected ?? 0), 0);
-	const unpaidDays = (dailyFees ?? []).filter((d) => d.status === "UNPAID" || d.status === "PART_PAID").length;
-	const shadow = (dailyFees ?? []).some((d) => d.status === "SHADOW");
 	const paidBy = (keys: (k: string) => boolean) =>
 		summary.byProvider.filter((p) => keys(p.provider)).reduce((a, p) => a + p.gross, 0);
 	const cash = paidBy((k) => k === "cash");
@@ -116,8 +124,7 @@ export function MoneyTab({
 						label="Hospio fees this month"
 						value={nairaShort(dayFees)}
 						icon={CoinsIcon}
-						pill={unpaidDays > 0 ? <StatusPill tone="danger">{plural(unpaidDays, "unpaid day")}</StatusPill> : undefined}
-						hint={shadow ? `${feeRate ?? ""}% of sales · statement only, not debited yet` : `${nairaShort(dayCollected)} debited`}
+						hint={`${feeRate ?? ""}% of sales so far · on next month's invoice`}
 					/>
 				) : (
 				<KpiCard
@@ -147,10 +154,19 @@ export function MoneyTab({
 							hint="Card and transfer on Moniepoint or OPay · straight to the hotel"
 						/>
 						<KpiCard
-							label="Hospio fees debited"
-							value={nairaShort(dayCollected)}
+							label="Hospio360 invoices"
+							value={billing ? nairaShort(billing.outstanding) : "—"}
 							icon={ReceiptIcon}
-							hint={shadow ? "Automatic debit isn't on yet" : `of ${nairaShort(dayFees)} this month`}
+							pill={
+								billing ? (
+									<StatusPill tone={billingState[billing.state]?.tone ?? "grey"}>{billingState[billing.state]?.label ?? billing.state}</StatusPill>
+								) : undefined
+							}
+							hint={
+								billing
+									? `${plural(billing.openInvoices, "open invoice")}${billing.latestNumber ? ` · latest ${billing.latestNumber}` : ""}`
+									: "Billing could not be loaded"
+							}
 						/>
 					</>
 				) : (
@@ -174,11 +190,23 @@ export function MoneyTab({
 					</>
 				)}
 			</div>
+			{daily && (
+				<section className="flex flex-col gap-3" data-testid="business-invoices">
+					<div className="flex flex-wrap items-center gap-2">
+						<h2 className="text-[16px] font-semibold text-ink">Hospio360 monthly invoices</h2>
+						{billing && (
+							<StatusPill tone={billingState[billing.state]?.tone ?? "grey"}>{billingState[billing.state]?.label ?? billing.state}</StatusPill>
+						)}
+						{billing && billing.outstanding > 0 && <span className="text-[13px] text-ink-2">{naira(billing.outstanding)} outstanding</span>}
+					</div>
+					<InvoicesTab role={role} businessId={businessId} />
+				</section>
+			)}
 			<div className="grid gap-4 xl:grid-cols-2">
 				{daily ? (
 					<SectionCard
 						title="Daily fees · this month"
-						subtitle={`${feeRate ?? ""}% of each day's sales, debited at 6am from the hotel's POS provider account`}
+						subtitle={`${feeRate ?? ""}% of each day's sales, billed on the Hospio360 monthly invoice`}
 						action={{ label: "Daily fees", href: `/dashboard/fees?view=daily&dbiz=${businessId}` }}
 						flush
 					>
@@ -199,7 +227,7 @@ export function MoneyTab({
 													{fmtDay(d.date)} · {d.hotelName ?? "Hotel"}
 												</p>
 												<p className="text-xs text-ink-3">
-													sales {naira(d.sales)} · debited {naira(d.collected ?? 0)}
+													sales {naira(d.sales)}
 												</p>
 											</div>
 											<span className="text-[13px] font-semibold text-ink">{naira(d.fee)}</span>
@@ -266,7 +294,7 @@ export function MoneyTab({
 					>
 						<p className="mb-3 text-[13px] text-ink-2">
 							Card and transfer payments on the hotel's Moniepoint or OPay terminals land in the hotel's own account. Hospio360
-							doesn't hold or settle them; its {feeRate ?? ""}% fee is debited from that account each morning.
+							doesn't hold or settle them; its {feeRate ?? ""}% fee is billed on one Hospio360 invoice each month, nothing is debited.
 						</p>
 						{posProviders.length === 0 ? (
 							<p className="text-[13px] text-ink-3">No approved POS payments this month yet.</p>
