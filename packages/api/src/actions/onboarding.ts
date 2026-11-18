@@ -156,12 +156,19 @@ export async function checkReferralCode(code: string): Promise<
 
 /**
  * POST /identity/auth/phone/send-code: a 6-digit code by SMS, or on WhatsApp with "WHATSAPP" (an SMS while the WhatsApp
- * code template isn't approved). Staging also accepts 123456.
+ * code template isn't approved). Staging also accepts 123456. No new code within 60 s of the last one (`sent: false`,
+ * the waiting code's `expiresAt`, `retryInSeconds`); `ifNone` sends only when no code is still valid.
  */
 export async function sendPhoneCode(
 	channel: "SMS" | "WHATSAPP" = "SMS",
+	options: { ifNone?: boolean } = {},
 ): Promise<
-	ActionResult<{ expiresAt: string; deliveries?: Delivery[] | null }>
+	ActionResult<{
+		expiresAt: string | null;
+		deliveries?: Delivery[] | null;
+		sent: boolean;
+		retryInSeconds: number;
+	}>
 > {
 	const { auth } = await withSession();
 	if (!auth) return { ok: false, error: "Sign in again" };
@@ -169,19 +176,33 @@ export async function sendPhoneCode(
 		await demoDelay(400);
 		return {
 			ok: true,
-			data: { expiresAt: new Date(Date.now() + 10 * 60_000).toISOString() },
+			data: {
+				expiresAt: new Date(Date.now() + 10 * 60_000).toISOString(),
+				sent: true,
+				retryInSeconds: 60,
+			},
 		};
 	}
 	const { data, error } = await api("@post/identity/auth/phone/send-code", {
 		auth,
-		body: { channel },
+		body: options.ifNone ? { channel, ifNone: true } : { channel },
 	});
 	if (error || !data)
 		return {
 			ok: false,
 			error: errorMessage(error, "The code could not be sent"),
 		};
-	return { ok: true, data: data.data };
+	const d = data.data;
+	return {
+		ok: true,
+		data: {
+			expiresAt: d.expiresAt,
+			deliveries: d.deliveries,
+			// An older API always sent and had no cooldown fields.
+			sent: d.sent ?? true,
+			retryInSeconds: d.retryInSeconds ?? 0,
+		},
+	};
 }
 
 /** GET /messaging/channels: whether a code can go on WhatsApp right now ("Send on WhatsApp instead"). */

@@ -81,6 +81,8 @@ export const statementLabel: Record<string, string> = {
 export function statementMeaning(s: MarketerStatementRow) {
 	switch (s.status) {
 		case "DRAFT":
+			if (s.finalStatement)
+				return "Final statement · paid whatever the amount (no minimum)";
 			return s.queryUntil
 				? `Ready · raise a query by ${fmtLongDate(s.queryUntil)}`
 				: "Ready · 7 days to raise a query";

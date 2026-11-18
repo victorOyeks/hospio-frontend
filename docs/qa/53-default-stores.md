@@ -15,8 +15,8 @@ starts on the store of its kind:
 
 The stores are made when the hotel is created, on both paths: the back-office onboarding **Hotels** step and an owner
 adding a hotel (self-serve wizard or My business). They are made only when the hotel has no store at all, so a hotel
-whose stores someone already set up is never given extra ones. **Hotels created before 18 Nov 2026 were not changed**:
-they still add their stores in Inventory (the DEF-077 hint stays for them).
+whose stores someone already set up is never given extra ones. Hotels created before 18 Nov 2026 with no store at all
+get the same four stores from a one-time backfill (QA 56 section 3); a hotel that already had stores is never changed.
 
 ## Links
 
@@ -62,8 +62,8 @@ Name everything "QA Stores <your initials>". Use `@hospio-qa.test` emails only.
 
 1. **Do:** sign in as Tunde (`tunde@royalsuites.ng`) → **Inventory**. **Expect:** Simpas Ikeja's own stores, exactly as
    before (no second Main/Kitchen/Bar store).
-2. **Do:** in a hotel made before 18 Nov with no stores, **Add outlet**. **Expect:** the DEF-077 hint "No store yet · add
-   one in Inventory first" as before.
+2. **Do:** in a hotel made before 18 Nov that had no stores, after the backfill (QA 56 section 3), **Add outlet**.
+   **Expect:** the store preselected as for a new hotel (no DEF-077 hint).
 
 ## What to report
 

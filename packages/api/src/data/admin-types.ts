@@ -477,6 +477,8 @@ export type MarketerStatementRow = {
 	bankAccountName?: string;
 	bankChecked: boolean;
 	createdAt?: string;
+	/** An ENDED marketer's last statement: open lines and carried balances, paid whatever the amount. */
+	finalStatement?: boolean;
 };
 export type MarketerStatementDetail = {
 	statement: MarketerStatementRow;

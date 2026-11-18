@@ -450,6 +450,8 @@ export const MarketerStatement = z.object({
 	bankAccountName: str,
 	bankChecked: z.boolean().nullable().optional(),
 	createdAt: str,
+	/** An ENDED marketer's last statement: paid whatever the amount (the minimum doesn't apply). */
+	finalStatement: z.boolean().nullable().optional(),
 });
 
 export const StatementDetail = z.object({

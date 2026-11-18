@@ -19,9 +19,14 @@ import {
 
 export function StatementPill({ s }: { s: MarketerStatementRow }) {
 	return (
-		<StatusPill tone={statementTone[s.status] ?? "grey"}>
-			{statementLabel[s.status] ?? s.status}
-		</StatusPill>
+		<span className="inline-flex flex-wrap items-center gap-1">
+			<StatusPill tone={statementTone[s.status] ?? "grey"}>
+				{statementLabel[s.status] ?? s.status}
+			</StatusPill>
+			{s.finalStatement && (
+				<StatusPill tone="warning">Final statement</StatusPill>
+			)}
+		</span>
 	);
 }
 
