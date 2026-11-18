@@ -10,7 +10,7 @@ import { ConfirmModal } from "@hospio/ui/shared/modal";
 import { emptyLinksShared, LinksSharedFields, linksSharedReady } from "@hospio/ui/shared/links-shared";
 import type { LegalRecord } from "@hospio/api/api/routes-legal";
 import { Note } from "@hospio/ui/shared/detail-list";
-import { LegalRecordsTable } from "@hospio/ui/shared/legal-records";
+import { CHANNEL_LABELS, LegalRecordsTable } from "@hospio/ui/shared/legal-records";
 import { SectionCard } from "@hospio/ui/shared/section-card";
 import { btn } from "@hospio/ui/shared/ui";
 import { BusinessTabHeader } from "./nav";
@@ -80,7 +80,7 @@ export function AcceptanceTab({
 				{ownerDone
 					? "The owner has accepted the Terms, Privacy Policy, Data Processing Terms and the daily debit authority."
 					: "The owner hasn't accepted all of the Terms, Privacy Policy, Data Processing Terms and the daily debit authority yet: they are asked at their next sign-in."}
-				{shared ? ` Links shared by ${shared.recordedByName ?? "Hospio360"} (${shared.channel?.toLowerCase().replace("_", " ")}, ${shared.sharedOn}).` : ""}
+				{shared ? ` Links shared by ${shared.recordedByName ?? "Hospio360"} (${CHANNEL_LABELS[shared.channel ?? ""] ?? shared.channel}, ${shared.sharedOn}).` : ""}
 			</Note>
 			<SectionCard title="Records" subtitle="Newest first. Records are never changed or removed." flush>
 				<LegalRecordsTable records={records} empty="No acceptances yet" />

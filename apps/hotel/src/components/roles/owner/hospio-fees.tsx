@@ -44,7 +44,7 @@ function devicePayLabel(p: DevicePackageView) {
 function deviceStatus(s: string) {
 	if (s === "PAID_OFF") return <StatusPill tone="success">Paid off</StatusPill>;
 	if (s === "INSTALLED") return <StatusPill tone="warning">Paying off</StatusPill>;
-	if (s === "DRAFT") return <StatusPill tone="info">Agreed · not installed yet</StatusPill>;
+	if (s === "DRAFT") return <StatusPill tone="info">Not installed yet</StatusPill>;
 	return <StatusPill tone="grey">{s}</StatusPill>;
 }
 

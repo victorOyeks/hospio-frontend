@@ -160,6 +160,9 @@ export async function DashboardShell({ children }: PropsWithChildren) {
 		asked &&
 		(!!device || user.roles.some((r) => SHARED_DESK_ROLES.includes(r)));
 
+	// The legal gate (hospio-backend docs/legal-acceptance.md) comes first: the PIN prompt waits until the terms are accepted.
+	const legalGate = !!legal?.canAccept && legal.pending.length > 0;
+
 	const badges = {
 		...(unpaidSales ? { unpaidSales } : {}),
 		...(inbox ? { inbox } : {}),
@@ -186,7 +189,7 @@ export async function DashboardShell({ children }: PropsWithChildren) {
 					<RememberBrand value={encodeBrandCookie(brand, activeHotel.name)} />
 				)}
 				{support && <SupportBar endsAt={support.endsAt} />}
-				{legal?.canAccept && legal.pending.length > 0 && (
+				{legal && legalGate && (
 					<LegalGate
 						pending={legal.pending}
 						firstTime={!legal.records.some((r) => r.event === "ACCEPTED")}
@@ -240,7 +243,7 @@ export async function DashboardShell({ children }: PropsWithChildren) {
 							activeHotelId={activeHotel?.id}
 						/>
 						{device && <IdleLock minutes={device.autoLockMinutes} />}
-						{pinPrompt && <PinPrompt onDevice={!!device} />}
+						{pinPrompt && !legalGate && <PinPrompt onDevice={!!device} />}
 						<div className="flex flex-1 flex-col gap-5 px-8 py-6">
 							{/* "Manage … in Hotel setup" links only where Hotel setup exists (manager, owner). */}
 							<SetupLinks allowed={role === "MANAGER" || role === "OWNER"}>
