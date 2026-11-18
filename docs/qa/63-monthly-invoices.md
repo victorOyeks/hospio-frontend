@@ -12,7 +12,8 @@ Hospio360 no longer debits anything. Each business gets **one invoice a month** 
 | VAT | Not charged unless Settings → Fee defaults → Invoice VAT is above 0 |
 | Due | 7 days after issue (the **8th**); grace 3 days (last day the **11th**) |
 | Reminders | 6th, 7th, 8th (due today), 9th and 10th (overdue), **11th final warning**: email to the owner, bell to owner and managers |
-| Paused (RESTRICTED) | From **06:00 on the 12th** if unpaid: card/transfer POS payments, new bar/kitchen sales and tabs (new orders and adding lines), new bookings and walk-ins are refused (HTTP 423, readable message). Still allowed: sign-in, viewing, check-out, **cash** on existing folios/tabs, reports and exports, paying the invoice |
+| Paused (RESTRICTED) | From **06:00 on the 12th** if unpaid: card/transfer POS payments, new bar/kitchen sales and tabs (new orders and adding lines), **new guest laundry orders**, new bookings and walk-ins are refused (HTTP 423, readable message). Still allowed: sign-in, viewing, check-out, **cash** on existing folios/tabs, laundry orders already taken (moving them on, handing back, charging to the room, cash, cancelling), reports and exports, paying the invoice |
+| Daily email | **None.** The 00:05 "your sales and Hospio fee" statement email stopped on 18 Nov 2026. Each day still shows under Hospio fees ("This month so far") |
 | Lifted | Within a minute of paying (Paystack), or when an admin records a full payment, grants an extension or voids |
 | Who pays | Only the **owner**, the full amount, with **Pay now** (Paystack). Managers see their locations' lines, read-only. Admins (Super admin, Finance admin) record offline payments (part payments allowed), extend **once**, add a credit note / adjustment, void (optionally reissue) |
 
@@ -89,7 +90,12 @@ With the QA business RESTRICTED:
 3. **Do (front desk):** new booking and a walk-in. **Expect:** refused with that sentence.
 4. **Do:** take **cash** on an existing folio and on an existing tab; **check out** a guest; open Reports and export a CSV.
    **Expect:** all work.
-5. **Do (admin):** Hotels list. **Expect:** the hotel counts under "POS paused" (unpaid Hospio360 invoice).
+5. **Do (laundry or front desk → Guest laundry):** **New guest order** for an in-house guest, pick an item, **Take order**.
+   **Expect:** refused with "New laundry orders are paused: the Hospio360 invoice HIN-… is unpaid. They resume within a minute of
+   the owner paying it …"; no order is made, with or without "Charge to the room now".
+6. **Do:** on a laundry order taken **before** the pause: move it on (Start, Ready), **Charge to room** or take **cash**, hand it
+   back, add a pocket note, cancel another. **Expect:** all work; card or transfer for it is refused like any other card payment.
+7. **Do (admin):** Hotels list. **Expect:** the hotel counts under "POS paused" (unpaid Hospio360 invoice).
 
 ## 5 · Pay now (Paystack test mode)
 
@@ -102,6 +108,37 @@ With the QA business RESTRICTED:
 5. **Expect:** within a minute the red banner is gone for everyone; card payments, new sales and bookings work again.
 6. **Expect (admin):** the log has Payment, Paid, Receipt sent, Restriction lifted; the row is **Paid**.
 7. **Do:** open Pay now in the panel directly (not from the banner). **Expect:** the same flow.
+
+### 5a · The owner's own Paystack test (prepared 18 Nov 2026)
+
+A small invoice is waiting, **unpaid and not yet due**, on a QA business. Nothing else needs setting up.
+
+| | |
+|---|---|
+| Business | QA Debit Rate rrydw (one location, QA Debit Rate Ikorodu rrydw; rate 1.2 %) |
+| Sign in | https://web-staging.hospio360.com · `qa.debitrate.rrydw@hospio-qa.test` · `Hospio123!` (owner; terms already accepted, no modal) |
+| Invoice | **HIN-202610-0003**, October 2026, **₦3,000.00** (sales ₦250,000 × 1.2 %), issued 18 Nov, due 25 Nov, last day 28 Nov |
+
+1. **Do:** open https://web-staging.hospio360.com, sign in with the email and password above.
+   **Expect:** the dashboard, with a white notice at the top: "Your October 2026 invoice is ready · NGN 3,000.00 for October 2026,
+   due Wed 25 Nov 2026" and **View invoice**.
+2. **Do:** tap **View invoice** (or **Billing & invoices** in the left menu, then the row HIN-202610-0003).
+   **Expect:** the invoice panel on the right: Platform fee ₦3,000, Total ₦3,000, To pay ₦3,000, and at the bottom right
+   **Pay now · ₦3,000**.
+3. **Do:** tap **Pay now · ₦3,000**. **Expect:** Paystack's checkout page (test mode) for **NGN 3,000**. The payer email shown is
+   `payments@hospio360.com`: Paystack refuses `.test` addresses, so QA owners pay under that address (real owners use their own).
+4. **Do:** choose **Card** and enter card `4084 0840 8408 4081`, any future expiry (e.g. `12/30`), CVV `408`, then **Pay**.
+   This Paystack test card normally goes straight through; if a PIN is asked for enter `0000`, if an OTP is asked for enter `123456`.
+5. **Expect:** Paystack says the payment was successful and returns to
+   `web-staging.hospio360.com/dashboard/billing?invoice=…&reference=HIN-202610-0003-…`; a toast "HIN-202610-0003 is paid · thank you";
+   the invoice shows **Paid**, and under **Payments & receipts** one payment of ₦3,000 by Paystack with a receipt number `RCP-202611-…`.
+6. **Do:** tap **Receipt PDF**. **Expect:** the receipt on Oyeks Global letterhead: ₦3,000, Paystack, the reference.
+7. **Do:** go to the Dashboard and reload. **Expect:** the "invoice is ready" notice is gone; Billing & invoices shows To pay ₦0.
+8. **Expect (admin, optional):** https://admin-staging.hospio360.com → Fees & billing → Invoices → HIN-202610-0003 is **Paid**, with
+   Payment, Paid and Receipt sent in its log.
+
+If it is left unpaid, the normal dates apply to this QA business only: reminders on 23 and 24 Nov, due 25 Nov, final warning 28 Nov,
+paused from 06:00 on 29 Nov. To cancel the test instead of paying: admin → the invoice → **Void** (reason "QA test").
 
 ## 6 · Admin actions (Finance admin or Super admin)
 
@@ -136,6 +173,9 @@ With the QA business RESTRICTED:
 
 ## 9 · Regression
 
+- **No daily email:** after midnight (or admin → Fees & billing → Daily fees → **Work out yesterday**) the day appears under
+  Hospio fees and **no** "your sales and Hospio fee" email is made (the owner's inbox gets nothing; the toast reads
+  "N worked out, N already done or skipped"). A day opened in Hospio fees shows "Statement emailed" only for days before 18 Nov.
 - **Hospio fees** (owner and manager): "This month so far" by default, a note "Billed monthly … added to your <Month> invoice, issued
   on the 1st" with a **Billing & invoices** link, statuses *For this month's invoice* / *On invoice, unpaid* / *Paid* / *No fee*;
   no Debited column, provider or debit reference anywhere.
