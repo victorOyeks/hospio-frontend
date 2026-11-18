@@ -3,7 +3,7 @@
 import type { z } from "zod";
 import type { ActionResult } from "@hospio/api/actions/auth";
 import { api, errorMessage } from "@hospio/api/api/client";
-import type { DailyFee, DayRun, DebitRun, FeeCollection, PosConfig, PosProviderKeys } from "@hospio/api/api/routes-fees";
+import type { DailyFee, DayRun, DebitRun, FeeCollection, FeeRefund, PosConfig, PosProviderKeys } from "@hospio/api/api/routes-fees";
 import { withSession } from "@hospio/api/api/server";
 
 /**
@@ -17,6 +17,7 @@ export type PosConfigView = z.infer<typeof PosConfig>;
 export type PosProviderKeysView = z.infer<typeof PosProviderKeys>;
 export type DayRunResult = z.infer<typeof DayRun>;
 export type DebitRunResult = z.infer<typeof DebitRun>;
+export type FeeRefundResult = z.infer<typeof FeeRefund>;
 
 const fail = <T>(error: unknown, fallback: string): ActionResult<T> => ({ ok: false, error: errorMessage(error, fallback) });
 
@@ -58,6 +59,19 @@ export async function runFeeDebit(): Promise<ActionResult<DebitRunResult>> {
 export async function redoFeeDay(id: string): Promise<ActionResult<DailyFeeRow>> {
 	const { data, error } = await api("@post/platform/admin/fees/daily/:id/redo", { ...(await withSession()), params: { id } });
 	return error || !data ? fail(error, "The day could not be worked out again") : { ok: true, data: data.data };
+}
+
+/**
+ * POST /platform/admin/fees/daily/{id}/refund (money roles): Hospio360 gave back part of what the day collected; the
+ * referring marketer's commission on it is clawed back on their next statement.
+ */
+export async function refundFeeDay(id: string, amount: number, reason: string): Promise<ActionResult<FeeRefundResult>> {
+	const { data, error } = await api("@post/platform/admin/fees/daily/:id/refund", {
+		...(await withSession()),
+		params: { id },
+		body: { amount, reason: reason.trim() },
+	});
+	return error || !data ? fail(error, "The refund could not be recorded") : { ok: true, data: data.data };
 }
 
 export async function feeCollection(businessId: string, hotelId: string): Promise<ActionResult<FeeCollectionView>> {

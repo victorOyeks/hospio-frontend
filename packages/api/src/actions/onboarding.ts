@@ -69,6 +69,8 @@ export type SignUpInput = {
 	password: string;
 	businessName: string;
 	city?: string;
+	/** The marketer's code from the sign-up link (?ref=); identity refuses an unknown or inactive one. */
+	referralCode?: string;
 };
 
 /** POST /identity/auth/sign-up: the owner account and business are created and the owner is signed in. */
@@ -90,7 +92,11 @@ export async function signUp(
 		return { ok: true, data: { roles: ["OWNER"] } };
 	}
 	const { data, error } = await api("@post/identity/auth/sign-up", {
-		body: { ...input, city: input.city ?? null },
+		body: {
+			...input,
+			city: input.city ?? null,
+			referralCode: input.referralCode?.trim().toUpperCase() || null,
+		},
 		headers: await clientAgentHeaders(),
 	});
 	if (error || !data)
@@ -107,6 +113,44 @@ export async function signUp(
 	return {
 		ok: true,
 		data: { roles: data.data.roles, deliveries: data.data.deliveries },
+	};
+}
+
+/**
+ * GET /platform/public/referral-codes/{code} (no session): whether a sign-up link's code can refer, and the referrer's
+ * first name. Valid only for an active marketer who accepted the agreement.
+ */
+export async function checkReferralCode(code: string): Promise<
+	ActionResult<{
+		code: string;
+		valid: boolean;
+		referrerFirstName?: string;
+		message?: string;
+	}>
+> {
+	const c = code.trim().toUpperCase();
+	if (!c) return { ok: false, error: "Enter a referral code" };
+	if (DEMO_AUTH) {
+		await demoDelay(200);
+		return { ok: true, data: { code: c, valid: true, referrerFirstName: "Kunle" } };
+	}
+	const { data, error } = await api("@get/platform/public/referral-codes/:code", {
+		params: { code: c },
+	});
+	if (error || !data)
+		return {
+			ok: false,
+			error: errorMessage(error, "The referral code couldn't be checked"),
+		};
+	const d = data.data;
+	return {
+		ok: true,
+		data: {
+			code: d.code ?? c,
+			valid: d.valid,
+			referrerFirstName: d.referrerFirstName ?? undefined,
+			message: d.message ?? undefined,
+		},
 	};
 }
 

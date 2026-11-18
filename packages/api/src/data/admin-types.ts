@@ -294,16 +294,35 @@ export type MarketerProfileRow = {
 	businesses: number;
 	earnedTotal: number;
 	due: number;
+	/** Referred businesses per stage (LIVE, ONBOARDING…), every stage counted. */
+	byStage?: Record<string, number>;
+	/** The Referral Partner Agreement the marketer accepted (version, when, who). */
+	agreementVersion?: string;
+	agreementAcceptedAt?: string;
+	agreementAcceptedName?: string;
+	agreementAccepted?: boolean;
+	/** Bank details: when saved, why they last changed, and finance's check (cleared by every save). */
+	bankSavedAt?: string;
+	bankChangeNote?: string;
+	bankCheckedAt?: string;
+	bankCheckedByName?: string;
+	bankChecked?: boolean;
 };
 export type MarketerAgreementRow = {
 	id: string;
 	businessId: string;
+	profileId?: string;
+	fullName?: string;
 	sharePct: number;
 	months: number;
 	whtPct: number;
 	status: string;
 	startedOn?: string;
 	endedOn?: string;
+	/** The earning window: from the business's first collected fee, for `months` months (null until then). */
+	windowStart?: string;
+	windowEnd?: string;
+	endedReason?: string;
 };
 export type ReferralStage =
 	| "LEAD"
@@ -325,7 +344,14 @@ export type ReferralItem = {
 	sentAt: string;
 	updatedAt?: string;
 };
-export type CommissionStatus = "DUE" | "PAID" | "WAITING" | string;
+/** ACCRUED (waiting for the next statement), ON_STATEMENT, PAID; DUE and WAITING on lines from before statements. */
+export type CommissionStatus =
+	| "ACCRUED"
+	| "ON_STATEMENT"
+	| "PAID"
+	| "DUE"
+	| "WAITING"
+	| string;
 export type CommissionLine = {
 	id: string;
 	businessId?: string;
@@ -340,6 +366,14 @@ export type CommissionLine = {
 	status: CommissionStatus;
 	paidOn?: string;
 	paidReference?: string;
+	/** DAILY_FEE (a day's collected fee) or CLAWBACK (a refund of one); empty on old monthly lines. */
+	source?: string;
+	feeDate?: string;
+	earnedOn?: string;
+	sharePct?: number;
+	whtPct?: number;
+	statementId?: string;
+	note?: string;
 };
 export type MarketerDetailData = {
 	profile: MarketerProfileRow;
@@ -349,6 +383,141 @@ export type MarketerDetailData = {
 	earnedTotal: number;
 	due: number;
 	paid: number;
+	businesses: number;
+	byStage: Record<string, number>;
+	nextStatement: StatementLineItem[];
+	statements: MarketerStatementRow[];
+	currentAgreementVersion: string;
+};
+
+// ---- marketer statements ---------------------------------------------------------------------------
+
+/** A read the screen shows with its error (and an empty value) when the service refused. */
+export type LoadResult<T> =
+	| { ok: true; data: T }
+	| { ok: false; error: string; data: T };
+
+export type MarketerStatementStatus =
+	| "DRAFT"
+	| "QUERIED"
+	| "APPROVED"
+	| "PAID"
+	| "CARRIED_OVER";
+export const STATEMENT_STATUSES: MarketerStatementStatus[] = [
+	"DRAFT",
+	"QUERIED",
+	"APPROVED",
+	"PAID",
+	"CARRIED_OVER",
+];
+/** One commission line: a day's collected fee (or a clawback when a collected fee was refunded). */
+export type StatementLineItem = {
+	id: string;
+	businessId?: string;
+	businessName: string;
+	hotelId?: string;
+	source: "DAILY_FEE" | "CLAWBACK" | string;
+	feeDate?: string;
+	earnedOn?: string;
+	month?: string;
+	/** Negative on a clawback. */
+	feeCollected: number;
+	sharePct: number;
+	gross: number;
+	whtPct: number;
+	wht: number;
+	net: number;
+	status: string;
+	note?: string;
+};
+export type StatementBusinessGroupItem = {
+	businessId?: string;
+	businessName: string;
+	feesCollected: number;
+	gross: number;
+	wht: number;
+	net: number;
+	lines: number;
+};
+/** A marketer's monthly statement, made on the 5th for the month before. */
+export type MarketerStatementRow = {
+	id: string;
+	profileId?: string;
+	marketerName: string;
+	marketerEmail?: string;
+	/** yyyy-MM */
+	month: string;
+	status: MarketerStatementStatus;
+	lineCount: number;
+	feesCollected: number;
+	gross: number;
+	/** Zero or negative. */
+	clawback: number;
+	wht: number;
+	net: number;
+	carriedIn: number;
+	payable: number;
+	minimumPayout: number;
+	carriedToMonth?: string;
+	queryUntil?: string;
+	canQuery: boolean;
+	queryNote?: string;
+	queriedAt?: string;
+	queryAnswer?: string;
+	approvedAt?: string;
+	approvedByName?: string;
+	paidAmount?: number;
+	paidReference?: string;
+	paidOn?: string;
+	paidRecordedName?: string;
+	paidEmailSentAt?: string;
+	bankName?: string;
+	bankAccount?: string;
+	bankAccountName?: string;
+	bankChecked: boolean;
+	createdAt?: string;
+};
+export type MarketerStatementDetail = {
+	statement: MarketerStatementRow;
+	businesses: StatementBusinessGroupItem[];
+	lines: StatementLineItem[];
+	carriedFrom: MarketerStatementRow[];
+};
+export type MarketerStatementList = {
+	statements: MarketerStatementRow[];
+	counts: Record<string, number>;
+	/** Payable per status. */
+	totals: Record<string, number>;
+};
+export type MyStatementsData = {
+	statements: MarketerStatementRow[];
+	nextStatement: StatementLineItem[];
+	minimumPayout: number;
+};
+export type StatementRunResult = {
+	month: string;
+	made: number;
+	carriedOver: number;
+	skipped: number;
+	notes: string[];
+};
+/** Who referred a business, with its marketer agreements. */
+export type BusinessMarketerData = {
+	businessId: string;
+	profileId?: string;
+	fullName?: string;
+	referralCode?: string;
+	status?: string;
+	agreements: MarketerAgreementRow[];
+};
+export type MarketerChangeResult = {
+	businessId: string;
+	fromProfileId?: string;
+	fromName?: string;
+	toProfileId?: string;
+	toName?: string;
+	ended: MarketerAgreementRow[];
+	opened?: MarketerAgreementRow;
 };
 export type MarketerLoginData = {
 	userId: string;
@@ -371,7 +540,16 @@ export type MarketerMeData = {
 		paid: number;
 		businesses: number;
 		referrals: number;
+		/** Net of the lines waiting for the next statement. */
+		nextStatement: number;
+		/** Statements under the minimum payout, rolling into the next. */
+		carried: number;
+		byStage: Record<string, number>;
 	};
+	currentAgreementVersion: string;
+	agreementAccepted: boolean;
+	minimumPayout: number;
+	whtPct: number;
 };
 export type MarketerBusinessItem = {
 	id: string;
@@ -383,6 +561,15 @@ export type MarketerBusinessItem = {
 	sharePct: number;
 	lastMonthShare: number;
 	lastMonth?: string;
+	/** The marketer's agreement for the business: ACTIVE, ENDED, or none yet (not live). */
+	agreementStatus?: string;
+	agreementStartedOn?: string;
+	agreementEndedOn?: string;
+	/** Null until the business's first fee is collected. */
+	windowStart?: string;
+	windowEnd?: string;
+	months: number;
+	earnedNet: number;
 };
 export type CommissionStatementData = {
 	month: string;

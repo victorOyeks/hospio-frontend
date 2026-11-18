@@ -4,16 +4,25 @@ import { revalidatePath } from "next/cache";
 import type { ActionResult } from "@hospio/api/actions/auth";
 import { api, errorMessage } from "@hospio/api/api/client";
 import { withSession } from "@hospio/api/api/server";
-import { toMarketerProfileRow, toReferralItem } from "@hospio/api/data/admin";
+import {
+	adminData,
+	toMarketerProfileRow,
+	toReferralItem,
+	toStatementDetail,
+} from "@hospio/api/data/admin";
 import type {
 	CommissionStatementData,
 	MarketerProfileRow,
+	MarketerStatementDetail,
 	ReferralItem,
 } from "@hospio/api/data/admin-types";
 import { live } from "@hospio/api/data/live";
 import { demoDelay } from "@hospio/api/demo/mode";
 
-/** The marketer portal's writes (`/platform/marketer/**`): bank details, a new referral, the month's statement. */
+/**
+ * The marketer portal's reads and writes (`/platform/marketer/**`): the agreement, bank details, a new referral, a
+ * statement and a query on it.
+ */
 
 function revalidateMarketer() {
 	for (const p of [
@@ -25,18 +34,40 @@ function revalidateMarketer() {
 		revalidatePath(p);
 }
 
+/**
+ * PUT /platform/marketer/me/bank: bank, 10-digit account number and account name. `note` (why) is required by the server
+ * when saved details change; every save waits for finance to check the details again.
+ */
 export async function saveMarketerBank(
-	input: { bankName: string; bankAccount: string; bankAccountName: string },
+	input: {
+		bankName: string;
+		bankAccount: string;
+		bankAccountName: string;
+		note?: string;
+	},
 	fallback?: MarketerProfileRow,
 ): Promise<ActionResult<MarketerProfileRow>> {
 	if (!live("platform")) {
 		await demoDelay(400);
 		if (!fallback) return { ok: false, error: "Profile not found" };
-		return { ok: true, data: { ...fallback, ...input } };
+		return {
+			ok: true,
+			data: {
+				...fallback,
+				bankName: input.bankName,
+				bankAccount: input.bankAccount,
+				bankAccountName: input.bankAccountName,
+				bankChangeNote: input.note,
+				bankSavedAt: new Date().toISOString(),
+				bankCheckedAt: undefined,
+				bankCheckedByName: undefined,
+				bankChecked: false,
+			},
+		};
 	}
 	const { data, error } = await api("@put/platform/marketer/me/bank", {
 		...(await withSession()),
-		body: input,
+		body: { ...input, note: input.note?.trim() || null },
 	});
 	if (error || !data)
 		return {
@@ -44,7 +75,11 @@ export async function saveMarketerBank(
 			error: errorMessage(error, "The bank details could not be saved"),
 		};
 	revalidateMarketer();
-	return { ok: true, data: toMarketerProfileRow(data.data, fallback) };
+	// A save clears finance's check: read it from the saved profile, not the row on screen.
+	return {
+		ok: true,
+		data: toMarketerProfileRow(data.data, { ...fallback, bankChecked: null }),
+	};
 }
 
 export async function createReferral(input: {
@@ -131,4 +166,86 @@ export async function loadCommissionStatement(
 			text: d.text,
 		},
 	};
+}
+
+/** POST /platform/marketer/agreement: accept the Referral Partner Agreement (the version the portal shows). */
+export async function acceptMarketerAgreement(
+	version: string,
+	fallback?: MarketerProfileRow,
+): Promise<ActionResult<MarketerProfileRow>> {
+	if (!live("platform")) {
+		await demoDelay(400);
+		if (!fallback) return { ok: false, error: "Profile not found" };
+		return {
+			ok: true,
+			data: {
+				...fallback,
+				agreementVersion: version,
+				agreementAcceptedAt: new Date().toISOString(),
+				agreementAcceptedName: fallback.fullName,
+				agreementAccepted: true,
+			},
+		};
+	}
+	const { data, error } = await api("@post/platform/marketer/agreement", {
+		...(await withSession()),
+		body: { version },
+	});
+	if (error || !data)
+		return {
+			ok: false,
+			error: errorMessage(error, "The agreement could not be accepted"),
+		};
+	revalidateMarketer();
+	return {
+		ok: true,
+		data: toMarketerProfileRow(data.data, {
+			...fallback,
+			agreementAccepted: true,
+		}),
+	};
+}
+
+/** GET /platform/marketer/statements/{id}: one of my statements with its lines per business. */
+export async function loadMyStatement(
+	id: string,
+): Promise<ActionResult<MarketerStatementDetail>> {
+	const d = await adminData.marketer.statement(id);
+	return d ? { ok: true, data: d } : { ok: false, error: "That statement didn't load" };
+}
+
+/** POST /platform/marketer/statements/{id}/query: raise a query (within 7 days of the statement being made). */
+export async function queryMyStatement(
+	id: string,
+	note: string,
+	fallback?: MarketerStatementDetail,
+): Promise<ActionResult<MarketerStatementDetail>> {
+	if (!live("platform")) {
+		await demoDelay(400);
+		if (!fallback) return { ok: false, error: "Statement not found" };
+		return {
+			ok: true,
+			data: {
+				...fallback,
+				statement: {
+					...fallback.statement,
+					status: "QUERIED",
+					queryNote: note,
+					queriedAt: new Date().toISOString(),
+					canQuery: false,
+				},
+			},
+		};
+	}
+	const { data, error } = await api(
+		"@post/platform/marketer/statements/:id/query",
+		{ ...(await withSession()), params: { id }, body: { note } },
+	);
+	if (error || !data)
+		return {
+			ok: false,
+			error: errorMessage(error, "The query could not be sent"),
+		};
+	revalidateMarketer();
+	return { ok: true, data: toStatementDetail(data.data) };
 }
