@@ -53,8 +53,11 @@ export async function submitPartnerApplication(
 			fields: fieldErrors(parsed.error),
 		};
 	const h = await headers();
+	// Behind Cloudflare the visitor's address is in CF-Connecting-IP; otherwise the first hop nginx recorded.
 	const address =
-		h.get("x-forwarded-for")?.split(",")[0]?.trim() || h.get("x-real-ip");
+		h.get("cf-connecting-ip")?.trim() ||
+		h.get("x-forwarded-for")?.split(",")[0]?.trim() ||
+		h.get("x-real-ip");
 	const trouble = `We couldn't send your application just now. Please try again in a minute, or email us at ${CONTACT_EMAIL}.`;
 	try {
 		const res = await fetch(`${API_URL}/platform/public/partner-applications`, {
@@ -62,7 +65,8 @@ export async function submitPartnerApplication(
 			headers: {
 				"Content-Type": "application/json",
 				Accept: "application/json",
-				...(address ? { "X-Forwarded-For": address } : {}),
+				// Believed by platform-service only from our own servers (SiteCallers); from anyone else the caller's own address counts.
+				...(address ? { "X-Client-Address": address } : {}),
 				"User-Agent": (h.get("user-agent") ?? "unknown").slice(0, 300),
 			},
 			body: JSON.stringify({
