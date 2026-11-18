@@ -11,7 +11,8 @@ import { runAtHotel, type ScopedActions, type ScopedName } from "./at-hotel";
 import { folioById, folioForBooking, postCharge } from "./folio";
 import { fillTemplate, messageTemplates } from "./guest-messages";
 import { messageGuest } from "./owner";
-import { recordPayment } from "./payment";
+import { emailReceipt } from "./ml";
+import { recordPayment, resendReceipt } from "./payment";
 import {
 	cancelBooking,
 	changeBookingDates,
@@ -52,6 +53,9 @@ const DIRECT: ScopedActions = {
 	folioById,
 	postCharge,
 	recordPayment,
+	// The receipt step of the same panel, at the payment's own hotel (an owner's booking may be at another branch).
+	emailReceipt,
+	resendReceipt,
 	messageGuest,
 	messageTemplates,
 	fillTemplate,
