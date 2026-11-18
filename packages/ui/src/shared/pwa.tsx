@@ -256,15 +256,15 @@ export function OpenInAppBanner() {
 			<div className="min-w-0 flex-1 text-[13px]">
 				<p className="font-semibold text-ink">{APP_NAME} is installed on this device.</p>
 				{hint ? (
-					<p className="flex items-center gap-1 text-ink-2" data-open-in-app-hint>
+					<p className="text-ink-2" data-open-in-app-hint>
 						{android ? (
 							<>
 								Tap <b>⋮</b> then <b>&lsquo;Open in {APP_NAME}&rsquo;</b>.
 							</>
 						) : (
 							<>
-								Click <b>&lsquo;Open in app&rsquo;</b> in the address bar
-								<ArrowUpRightIcon className="size-4 shrink-0 text-brand" />
+								Click <b>&lsquo;Open in app&rsquo;</b> in the address bar{" "}
+								<ArrowUpRightIcon className="inline size-4 align-text-bottom text-brand" />
 							</>
 						)}
 					</p>
