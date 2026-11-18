@@ -6,6 +6,7 @@ import {
 	type LucideIcon,
 	MegaphoneIcon,
 } from "lucide-react";
+import Link from "next/link";
 import { btn } from "@hospio/ui/shared/ui";
 import { cn } from "@hospio/ui/utils";
 import { btnLg, CONTACT_EMAIL, Section } from "@/components/site";
@@ -106,16 +107,16 @@ export function Pricing() {
 						WHT applies).
 					</p>
 				</div>
-				<a
-					href={`mailto:${CONTACT_EMAIL}?subject=${encodeURIComponent("Hospio360 partner program")}`}
+				<Link
+					href="/partners/apply"
 					className={cn(
 						btn.primary,
 						btnLg,
 						"inline-flex items-center self-start md:self-center",
 					)}
 				>
-					Become a partner
-				</a>
+					Apply to be a partner
+				</Link>
 			</div>
 		</Section>
 	);

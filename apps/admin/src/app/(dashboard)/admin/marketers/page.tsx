@@ -6,6 +6,7 @@ import {
 import { MarketersScreen } from "@/components/roles/admin/marketers";
 import { getActiveRole, getUser } from "@hospio/api/dal";
 import { adminData } from "@hospio/api/data/admin";
+import { partnerApplicationsData } from "@hospio/api/data/partner-applications";
 import { adminRole } from "../role";
 
 export const dynamic = "force-dynamic";
@@ -21,7 +22,17 @@ export default async function MarketersPage({
 	const activeRole = adminRole(await getActiveRole());
 	// Statements are money (Super admin and Finance admin): others never ask for them.
 	const money = activeRole === "SUPER_ADMIN" || activeRole === "FINANCE_ADMIN";
-	const [user, marketers, statements, commissions, referrals] = await Promise.all([
+	const appId = param(sp, "app");
+	const [
+		user,
+		marketers,
+		statements,
+		commissions,
+		referrals,
+		applications,
+		openedApplication,
+		partnerDefaults,
+	] = await Promise.all([
 		getUser(),
 		adminData.marketers.list(),
 		money
@@ -44,6 +55,15 @@ export default async function MarketersPage({
 			page: tab === "referrals" ? page : 0,
 			size: 100,
 		}),
+		// Always read: the tab's badge counts the applications waiting.
+		partnerApplicationsData.list({
+			status: param(sp, "astatus"),
+			q: param(sp, "aq"),
+			page: tab === "applications" ? page : 0,
+			size: 25,
+		}),
+		appId ? partnerApplicationsData.get(appId) : Promise.resolve(null),
+		partnerApplicationsData.defaults(activeRole),
 	]);
 	return (
 		<MarketersScreen
@@ -52,6 +72,9 @@ export default async function MarketersPage({
 			commissions={commissions}
 			statements={statements}
 			referrals={referrals}
+			applications={applications}
+			openedApplication={openedApplication}
+			partnerDefaults={partnerDefaults}
 			inviterName={user?.fullName ?? "Hospio360"}
 		/>
 	);
