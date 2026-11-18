@@ -20,7 +20,7 @@ export default async function BusinessMoneyPage({
 	if (!business) notFound();
 	// A daily-fee business (1.5 % of each day's sales, billed on the Hospio360 monthly invoice) has no fee statements: its
 	// Money tab shows its invoices and this month's days instead.
-	const daily = business.feeModelKey === "PERCENT_OF_SALES";
+	const daily = !business.feeModelKey || business.feeModelKey === "PERCENT_OF_SALES"; // no model stored = the platform default (% of sales)
 	const now = new Date().toLocaleDateString("en-CA", { timeZone: "Africa/Lagos" });
 	const [statements, settlements, summary, days, devices, billing, role] = await Promise.all([
 		daily ? Promise.resolve({ content: [] }) : adminData.fees.statements({ businessId: id, size: 24 }),
