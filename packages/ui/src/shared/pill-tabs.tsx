@@ -32,7 +32,7 @@ export function PillTabs<K extends string>({
 	};
 
 	return (
-		<div className={cn("inline-flex w-fit gap-[2px] rounded-[10px] bg-subtle p-1", className)}>
+		<div className={cn("scrollbar-hidden inline-flex w-fit max-w-full gap-[2px] overflow-x-auto rounded-[10px] bg-subtle p-1", className)}>
 			{tabs.map((t) => {
 				const isActive = active === t.key;
 				return (
@@ -41,7 +41,7 @@ export function PillTabs<K extends string>({
 						type="button"
 						onClick={() => set(t.key)}
 						className={cn(
-							"flex items-center gap-[6px] rounded-lg py-[6px] pl-[10px] pr-2 text-xs transition-colors",
+							"flex shrink-0 items-center gap-[6px] whitespace-nowrap rounded-lg py-[6px] pl-[10px] pr-2 text-xs transition-colors",
 							isActive ? "bg-card font-semibold text-ink shadow-[0_1px_3px_rgba(0,0,0,0.08)]" : "font-medium text-ink-2 hover:text-ink",
 						)}
 					>
