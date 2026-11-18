@@ -44,6 +44,25 @@ The hotel app and the admin portal install separately ("Hospio360" and "Hospio36
 
 Inside the installed app, the install banner and menu item never show.
 
+## Already installed: links, and "Open in app"
+
+The manifest names itself in `related_applications` (`platform: webapp`, this environment's own
+`/manifest.webmanifest`) and sets `launch_handler: { client_mode: ["navigate-existing", "auto"] }`, so opening the app
+again focuses its open window instead of starting a second one.
+
+- **Android:** a Hospio360 link tapped in WhatsApp, email or another app opens in the installed app (Android hands links
+  inside the app's scope to it). A link opened or typed inside Chrome stays in Chrome; Chrome's ⋮ menu then shows
+  **Open in Hospio360**.
+- **Computer (Chrome/Edge):** a tab on an installed app's site shows an **Open in app** button in the address bar.
+- **iPad/iPhone:** iOS never hands links to a Home Screen app; they open in Safari. Open the app from its icon.
+
+When the site is opened in a normal browser tab on a device where the app is installed, Chrome and Edge (Android and
+computers) can tell (`navigator.getInstalledRelatedApps()`), and a banner says **"Hospio360 is installed on this
+device."** A website cannot switch itself into the installed app, so **Open the app** shows where the browser's own
+button is: Android "Tap ⋮ then 'Open in Hospio360'", computer "Click 'Open in app' in the address bar".
+**Continue in browser** hides the banner for 7 days on that device. Inside the installed app, on iOS and in Firefox (which
+cannot tell) it never shows.
+
 ## What is cached, and what never is
 
 Cached (in a cache named after the build, `hospio-shell-<build>`):
