@@ -207,7 +207,7 @@ function MyStatementPanel({
 			open={!!id}
 			onOpenChange={(o) => !o && onClose()}
 			title={s ? `Statement · ${monthLabel(s.month)}` : "Statement"}
-			subtitle={s ? `${s.lineCount} lines · payable ${naira2(s.payable)}` : undefined}
+			subtitle={s ? `${s.lineCount} ${s.lineCount === 1 ? "line" : "lines"} · payable ${naira2(s.payable)}` : undefined}
 			icon={FileTextIcon}
 			width="lg"
 			footer={

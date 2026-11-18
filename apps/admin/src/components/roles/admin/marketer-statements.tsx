@@ -370,7 +370,7 @@ function StatementPanel({
 			onOpenChange={(o) => !o && onClose()}
 			title={s ? `${s.marketerName} · ${monthLabel(s.month)}` : "Statement"}
 			subtitle={
-				s ? `${s.lineCount} lines · payable ${naira2(s.payable)}` : undefined
+				s ? `${s.lineCount} ${s.lineCount === 1 ? "line" : "lines"} · payable ${naira2(s.payable)}` : undefined
 			}
 			icon={FileTextIcon}
 			width="lg"

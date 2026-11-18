@@ -920,7 +920,7 @@ function MarketerPanel({
 												{monthLabel(st.month)}
 												<span className="font-normal text-ink-3">
 													{" "}
-													· {st.lineCount} lines
+													· {st.lineCount} {st.lineCount === 1 ? "line" : "lines"}
 												</span>
 											</span>
 											<span className="font-semibold">
