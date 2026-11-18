@@ -100,7 +100,8 @@ export function TemplateStep({ ctx }: { ctx: WizardCtx }) {
 	// Hotel templates go to locations with rooms; the others take the venue setup.
 	const hotels = ctx.hotels.filter((h) => hasAccommodation(h));
 	const venues = ctx.hotels.filter((h) => !hasAccommodation(h));
-	const [made, setMade] = useState<Record<string, OnboardingOutlet[]>>(saved?.outlets ?? {});
+	// The outlets are read from fnb-service every time (the owner may add some too); the draft does not keep them.
+	const [made, setMade] = useState<Record<string, OnboardingOutlet[]>>({});
 	const [fresh, setFresh] = useState<Record<string, NewOutlet[]>>({});
 	const venueIds = venues.map((v) => v.id).join(",");
 	// What each venue already has (the owner or an earlier visit may have added some).
@@ -217,7 +218,6 @@ export function TemplateStep({ ctx }: { ctx: WizardCtx }) {
 				appliedTo: done,
 				picked,
 				appliedAt: when,
-				outlets: venueSave.outlets,
 			} as NonNullable<WizardData["template"]>);
 			if (row && applied === picked.length && venueSave.ok) ctx.goTo(nextStep("template"));
 		});
@@ -229,7 +229,6 @@ export function TemplateStep({ ctx }: { ctx: WizardCtx }) {
 				appliedTo,
 				picked,
 				appliedAt,
-				outlets: made,
 			} as NonNullable<WizardData["template"]>);
 			if (row) ctx.goTo(nextStep("template"));
 		});
