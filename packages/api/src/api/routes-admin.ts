@@ -1048,6 +1048,11 @@ export const adminRoutes = {
 		params: z.object({ provider: z.string() }),
 		output: envelope(IntegrationTest),
 	},
+	// Brevo card → Send a test email (Super admin): one short email, recorded like any delivery; test addresses refused.
+	"@post/platform/admin/integrations/brevo/send-test": {
+		input: z.object({ to: z.string() }),
+		output: envelope(IntegrationTest),
+	},
 
 	// platform · marketer portal
 	"@get/platform/marketer/me": { output: envelope(MarketerMe) },
