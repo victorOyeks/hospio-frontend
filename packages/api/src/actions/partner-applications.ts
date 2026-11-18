@@ -73,7 +73,8 @@ export async function approvePartnerApplication(
 			body: {
 				fullName: input.fullName,
 				email: input.email,
-				phone: input.phone || null,
+				// Empty (the admin cleared it) invites without a phone; the service keeps the applicant's only when none is sent.
+				phone: input.phone ?? "",
 				sharePct: input.sharePct,
 				months: input.months,
 			},

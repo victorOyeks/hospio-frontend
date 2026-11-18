@@ -1327,7 +1327,7 @@ function InviteMarketerPanel({
 												? approvePartnerApplication(application, {
 														fullName: name,
 														email,
-														phone: phone || undefined,
+														phone,
 														sharePct: Number(share),
 														months: Number(months),
 													})
