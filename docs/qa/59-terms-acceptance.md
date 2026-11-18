@@ -58,7 +58,8 @@ those, only check that the modal appears, then sign out.
 ## 4 · Staff first sign-in
 
 1. **Do:** as the owner add a staff member (`@hospio-qa.test`), sign in as them (accept invite or temporary password).
-   **Expect:** "Before you continue" modal with one box (Staff terms of use); the screen behind can't be used.
+   **Expect:** "Before you continue · Please accept to continue." with one box (Staff terms of use), Sign out
+   and Accept and continue, nothing else; the screen behind can't be used.
 2. **Do:** tick, **Accept and continue**. **Expect:** modal closes; Acceptance tab: "Staff terms of use · STAFF-2026-11 · Ticked ·
    First sign-in" with the staff member's role and hotel.
 
@@ -76,8 +77,8 @@ those, only check that the modal appears, then sign out.
 
 1. **Do (Super admin):** Platform → **Legal documents** → Publish a new version: Staff terms of use, version `STAFF-2026-11-QA`,
    effective today, not material, "QA test". **Expect:** it shows **In force**; the old one **Replaced**.
-2. **Do:** sign in as the staff member from 4. **Expect:** "We've updated our terms" with "Staff terms of use · STAFF-2026-11-QA ·
-   QA test". Accept. Acceptance tab: "Ticked · New version".
+2. **Do:** sign in as the staff member from 4. **Expect:** "Before you continue · We've updated our terms. Please accept to continue." with
+   the Staff terms box. Accept. Acceptance tab: "Ticked · New version".
 3. **Do:** try a material change effective in 10 days. **Expect:** refused: "A material change needs 30 days' notice".
 
 ## 7 · Records

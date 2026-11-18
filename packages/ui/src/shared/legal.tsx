@@ -157,23 +157,11 @@ export function LegalGate({
 		>
 			<div className="w-full max-w-lg rounded-xl bg-background p-6 shadow-xl">
 				<h2 id="legal-gate-title" className="text-lg font-semibold text-foreground">
-					{firstTime ? "Before you continue" : "We've updated our terms"}
+					Before you continue
 				</h2>
 				<p className="mt-1 text-sm text-muted-foreground">
-					{firstTime
-						? "Please read and accept the terms below to use Hospio360. Each link opens the document in a new tab."
-						: "A new version takes effect. Please read it and accept it to carry on. Each link opens the document in a new tab."}
+					{firstTime ? "Please accept to continue." : "We've updated our terms. Please accept to continue."}
 				</p>
-				{!firstTime && (
-					<ul className="mt-3 space-y-1 text-sm">
-						{pending.map((d) => (
-							<li key={d.key} className="text-foreground">
-								<span className="font-medium">{d.title}</span> · {d.version}
-								{d.summary ? <span className="text-muted-foreground"> · {d.summary}</span> : null}
-							</li>
-						))}
-					</ul>
-				)}
 				<div className="mt-4 space-y-3">
 					{boxes.map((b) => (
 						<TickBox key={b.id} id={b.id} checked={!!ticked[b.id]} onChange={(v) => setTicked((t) => ({ ...t, [b.id]: v }))}>
@@ -194,10 +182,6 @@ export function LegalGate({
 						{saving ? "Saving…" : "Accept and continue"}
 					</Button>
 				</div>
-				<p className="mt-3 text-xs text-muted-foreground">
-					Hospio360 is a product of Oyeks Global Limited (RC 10001123), Lagos, Nigeria · hello@oyeksglobal.com. We keep a record of your
-					acceptance: the version, the date and time, your IP address and browser.
-				</p>
 			</div>
 		</div>
 	);
