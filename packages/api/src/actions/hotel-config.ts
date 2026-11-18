@@ -127,12 +127,15 @@ export async function saveSetupSection(
 	return { ok: true, data: null };
 }
 
-/** POST /hotel-config/setup/apply-template: a saved template by id, or settings given inline. */
+/**
+ * POST /hotel-config/setup/apply-template: a saved template by id, settings given inline, or `builtIn: "VENUE"` for the built-in
+ * lounge / bar / restaurant template (only at a location without rooms).
+ */
 export async function applyTemplate(
-	input: { templateId?: string; settings?: Record<string, unknown> },
+	input: { templateId?: string; settings?: Record<string, unknown>; builtIn?: "VENUE" },
 	hotelId?: string,
 ): Promise<ActionResult<null>> {
-	if (!input.templateId && !input.settings)
+	if (!input.templateId && !input.settings && !input.builtIn)
 		return { ok: false, error: "Choose a template" };
 	if (!live("hotel-config")) {
 		await demoDelay(600);
@@ -143,6 +146,7 @@ export async function applyTemplate(
 		body: {
 			templateId: input.templateId ?? null,
 			settings: input.settings ?? null,
+			...(input.builtIn ? { builtIn: input.builtIn } : {}),
 		},
 	});
 	if (error)

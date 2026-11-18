@@ -16,7 +16,7 @@ import { OutletMark } from "@hospio/ui/shared/outlet-mark";
 import { cn } from "@hospio/ui/utils";
 
 export type OutletSwitchProps = {
-	desk: "KITCHEN" | "BAR";
+	desk: "KITCHEN" | "BAR" | "WAITER" | "CASHIER";
 	outlets: { id: string; name: string; kind: string }[];
 	/** The outlet this device works (cookie `hms.outlet.<desk>`). */
 	current?: string;
@@ -30,6 +30,8 @@ export type OutletSwitchProps = {
 const ALL_PAGES: Record<OutletSwitchProps["desk"], string[]> = {
 	BAR: ["/dashboard/tabs", "/dashboard/sales"],
 	KITCHEN: ["/dashboard/sales"],
+	WAITER: ["/dashboard/sales"],
+	CASHIER: ["/dashboard/sales"],
 };
 
 /**

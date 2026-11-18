@@ -154,6 +154,7 @@ const DEPARTMENTS: { key: string; name: string; roles: string[] }[] = [
 	{ key: "MAINTENANCE", name: "Maintenance", roles: ["MAINTENANCE"] },
 	{ key: "KITCHEN", name: "Kitchen", roles: ["KITCHEN"] },
 	{ key: "BAR", name: "Bar", roles: ["BAR"] },
+	{ key: "SERVICE", name: "Service", roles: ["WAITER", "CASHIER"] },
 	{ key: "STORE", name: "Store", roles: ["INVENTORY"] },
 	{ key: "FINANCE", name: "Finance", roles: ["FINANCE"] },
 ];

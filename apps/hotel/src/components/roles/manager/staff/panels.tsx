@@ -66,6 +66,8 @@ export const ROLE_OPTIONS = [
 	{ value: "MAINTENANCE", label: "Maintenance" },
 	{ value: "KITCHEN", label: "Kitchen" },
 	{ value: "BAR", label: "Bar" },
+	{ value: "WAITER", label: "Waiter" },
+	{ value: "CASHIER", label: "Cashier" },
 	{ value: "INVENTORY", label: "Store" },
 	{ value: "FINANCE", label: "Finance" },
 ];

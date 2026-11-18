@@ -23,6 +23,8 @@ const ROLE_RANK: HotelRole[] = [
 	"MAINTENANCE",
 	"KITCHEN",
 	"BAR",
+	"WAITER",
+	"CASHIER",
 	"SUPER_ADMIN",
 	"SUPPORT",
 	"FINANCE_ADMIN",
@@ -38,6 +40,8 @@ export const departmentOf: Record<string, string> = {
 	MAINTENANCE: "Maintenance",
 	KITCHEN: "Kitchen",
 	BAR: "Bar",
+	WAITER: "Service",
+	CASHIER: "Cashier",
 	INVENTORY: "Store",
 	FINANCE: "Finance",
 };

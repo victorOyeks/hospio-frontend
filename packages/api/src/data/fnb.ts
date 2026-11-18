@@ -247,14 +247,21 @@ function demoSalesHistory(
 }
 
 /** The cookie that remembers which outlet a desk works on this device (the sidebar's "Serving at" switch). */
-export const outletCookie = (role: "KITCHEN" | "BAR") => `hms.outlet.${role}`;
+/**
+ * A desk that works outlets: the bar its BAR outlets, the kitchen its KITCHEN and RESTAURANT ones, and the floor roles (a waiter,
+ * a cashier: hospio-backend docs/plan-venue-type.md, phase 3) every outlet of the location.
+ */
+export type OutletDesk = "KITCHEN" | "BAR" | "WAITER" | "CASHIER";
+export const outletCookie = (role: OutletDesk) => `hms.outlet.${role}`;
 /** Set ("1") while a manager or lead looks at every outlet of the desk at once (Tabs and Sales). */
-export const allOutletsCookie = (role: "KITCHEN" | "BAR") =>
+export const allOutletsCookie = (role: OutletDesk) =>
 	`hms.outlet.${role}.all`;
 
 /** The outlets a desk works: a bar its BAR outlets, a kitchen its KITCHEN and RESTAURANT ones. */
-const ofDesk = (role: "KITCHEN" | "BAR", all: OutletRow[]) =>
-	all.filter((o) => (role === "BAR" ? o.kind === "BAR" : o.kind !== "BAR"));
+const ofDesk = (role: OutletDesk, all: OutletRow[]) =>
+	role === "WAITER" || role === "CASHIER"
+		? all
+		: all.filter((o) => (role === "BAR" ? o.kind === "BAR" : o.kind !== "BAR"));
 
 /** Where a desk works on this device: its outlets, the one picked and whether "All outlets" is on. */
 export type DeskOutlets = {
@@ -272,7 +279,7 @@ export const fnbData = {
 		 * The outlet a desk works: the one picked on this device (OUTLET_COOKIE, when the hotel has several, e.g. a
 		 * Bar and a Patio Lounge), else a kitchen role gets the first KITCHEN or RESTAURANT outlet, the bar the first BAR one.
 		 */
-		forRole: async (role: "KITCHEN" | "BAR"): Promise<OutletRow | null> => {
+		forRole: async (role: OutletDesk): Promise<OutletRow | null> => {
 			const [all, jar] = await Promise.all([
 				loadOutlets(),
 				cookies().catch(() => null),
@@ -287,14 +294,14 @@ export const fnbData = {
 			);
 		},
 		/** The outlets a desk can work (the switch shows when there is more than one). */
-		forRoleAll: async (role: "KITCHEN" | "BAR"): Promise<OutletRow[]> =>
+		forRoleAll: async (role: OutletDesk): Promise<OutletRow[]> =>
 			ofDesk(role, await loadOutlets()),
 		/**
 		 * The desk's outlets, the one this device works (`forRole`) and whether "All outlets" is on: the cookie set by
 		 * `chooseOutlet(desk, "ALL")`, honoured only when `canSeeAll` (seesAllOutlets) and there is more than one outlet.
 		 */
 		desk: async (
-			role: "KITCHEN" | "BAR",
+			role: OutletDesk,
 			canSeeAll: boolean,
 		): Promise<DeskOutlets> => {
 			const [outlet, all, jar] = await Promise.all([
@@ -466,10 +473,12 @@ export const fnbData = {
 		 * Sales still owing money (any day) for the sidebar; null when it can't be read. With several outlets of the desk it counts
 		 * the outlet being served at (as the Sales list shows), unless "All outlets" is on.
 		 */
-		unpaidSales: async (desk: "BAR" | "KITCHEN", canSeeAll = false): Promise<number | null> => {
+		unpaidSales: async (desk: OutletDesk, canSeeAll = false): Promise<number | null> => {
 			if (!live("fnb")) return null;
 			const d = await fnbData.outlets.desk(desk, canSeeAll).catch(() => null);
-			const outletId = d && d.outlets.length > 1 && !d.all ? d.outlet?.id : undefined;
+			// A cashier collects for every outlet, so the count is the location's.
+			const outletId =
+				desk !== "CASHIER" && d && d.outlets.length > 1 && !d.all ? d.outlet?.id : undefined;
 			const { data: res, error } = await api("@get/fnb/sales/history/unpaid", {
 				...(await withSession()),
 				query: outletId ? { desk, outletId } : { desk },

@@ -9,7 +9,7 @@ import { live } from "@hospio/api/data/live";
  * till (`/tills/mine`), that till's entries and its role's tills closed in the last 7 days; the default float
  * comes from Hotel setup → Money. Cash taken for this role's orders lands in this till.
  */
-export async function DeskTill({ desk }: { desk: "KITCHEN" | "BAR" }) {
+export async function DeskTill({ desk }: { desk: "KITCHEN" | "BAR" | "CASHIER" }) {
 	const user = await getUser();
 	if (!user) redirect("/auth");
 	const isDemo = !live("finance");

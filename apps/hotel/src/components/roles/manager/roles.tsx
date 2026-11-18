@@ -35,7 +35,7 @@ const LEVEL_OPTIONS: { value: Level; label: string; hint: string }[] = [
 ];
 
 /** The roles a manager or the owner can give at a hotel (the owner role and Hospio360 roles are not given here). */
-const GIVABLE_ALL: HotelRole[] = ["MANAGER", "FRONT_OFFICE", "HOUSEKEEPING", "LAUNDRY", "MAINTENANCE", "KITCHEN", "BAR", "INVENTORY", "FINANCE"];
+const GIVABLE_ALL: HotelRole[] = ["MANAGER", "FRONT_OFFICE", "HOUSEKEEPING", "LAUNDRY", "MAINTENANCE", "KITCHEN", "BAR", "WAITER", "CASHIER", "INVENTORY", "FINANCE"];
 
 const label = (role: string) => roleLabels[role as HotelRole] ?? role;
 /** "Tue 1 Dec" from yyyy-mm-dd, read as a calendar day (no time zone shift). */

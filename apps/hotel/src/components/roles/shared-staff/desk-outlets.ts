@@ -8,7 +8,7 @@ import { seesAllOutlets } from "@hospio/api/supervisor";
  * outlets (`peers`, their ids, give each its colour and icon; one outlet means no marks), and whether the
  * all-outlets view is on (Tabs and Sales, for a manager, the owner or Full access).
  */
-export async function deskOutlets(desk: "KITCHEN" | "BAR") {
+export async function deskOutlets(desk: "KITCHEN" | "BAR" | "WAITER" | "CASHIER") {
 	const session = await getSession();
 	const canSeeAll = seesAllOutlets(session, desk);
 	const d = await data.outlets.desk(desk, canSeeAll);

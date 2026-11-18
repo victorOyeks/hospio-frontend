@@ -19,7 +19,7 @@ export async function MyPaymentsPage({
 	roleTitle,
 }: {
 	searchParams: Promise<SearchParamsRecord>;
-	desk: "BAR" | "KITCHEN" | "LAUNDRY";
+	desk: "BAR" | "KITCHEN" | "LAUNDRY" | "CASHIER" | "WAITER";
 	roleTitle: string;
 }) {
 	const sp = await searchParams;

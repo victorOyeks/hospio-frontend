@@ -22,6 +22,9 @@ export const BOARD_DEPARTMENTS: {
 	{ key: "MAINTENANCE", name: "Maintenance", board: "MAINTENANCE", openLabel: ["open repair", "open repairs"] },
 	{ key: "KITCHEN", name: "Kitchen", board: "KITCHEN", openLabel: ["order open", "orders open"] },
 	{ key: "BAR", name: "Bar", board: "BAR", openLabel: ["tab or sale open", "tabs and sales open"] },
+	// Waiters and cashiers (hospio-backend docs/plan-venue-type.md, phase 3): shown once the location has them or rotas them.
+	{ key: "WAITER", name: "Waiters", board: "WAITER", openLabel: ["tab open", "tabs open"] },
+	{ key: "CASHIER", name: "Cashier", board: "CASHIER", openLabel: ["sale to collect", "sales to collect"] },
 	{ key: "INVENTORY", name: "Store", board: "STORE", openLabel: ["request waiting", "requests waiting"] },
 	{ key: "FINANCE", name: "Finance", board: "FINANCE", openLabel: ["till open", "tills open"] },
 ];

@@ -89,7 +89,7 @@ export const fromEarlierDay = (s: Pick<SaleRow, "createdAt" | "status">) =>
 
 const capitalise = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
 
-export type PayDesk = "BAR" | "KITCHEN" | "MANAGER" | "OWNER";
+export type PayDesk = "BAR" | "KITCHEN" | "MANAGER" | "OWNER" | "WAITER" | "CASHIER";
 
 /**
  * One sale (Sales screen, Recent sales on Bar today and Kitchen orders): who, where, every line with its

@@ -26,8 +26,10 @@ export function isHousekeepingSupervisor(
  */
 export function seesAllOutlets(
 	session: Pick<Session, "roleSet" | "levels">,
-	desk: "KITCHEN" | "BAR",
+	desk: "KITCHEN" | "BAR" | "WAITER" | "CASHIER",
 ): boolean {
+	// A cashier takes the money for every outlet; a waiter sees them together only as a head waiter (Full access).
+	if (desk === "CASHIER" && session.roleSet.includes("CASHIER")) return true;
 	return (
 		session.roleSet.includes("MANAGER") ||
 		session.roleSet.includes("OWNER") ||

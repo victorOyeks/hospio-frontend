@@ -4,6 +4,7 @@
  */
 import type { HotelRole } from "@hospio/api/roles";
 import { barHelp } from "./bar";
+import { cashierHelp } from "./cashier";
 import { accountHelp, staffHelp } from "./everyone";
 import { financeHelp } from "./finance";
 import { frontOfficeHelp } from "./front-office";
@@ -16,6 +17,7 @@ import { managerHelp } from "./manager";
 import { marketerHelp } from "./marketer";
 import { ownerHelp } from "./owner";
 import { platformHelp } from "./platform";
+import { waiterHelp } from "./waiter";
 import type {
 	HelpAudience,
 	HelpGuide,
@@ -87,6 +89,8 @@ const ROUTES: Record<Exclude<HelpAudience, "EVERYONE">, string[]> = {
 	MAINTENANCE: ["preventive", "store", "rooms"],
 	KITCHEN: ["sales", "menu", "store", "payments", "till"],
 	BAR: ["tabs", "sales", "menu", "stock", "payments", "till"],
+	WAITER: ["sales"],
+	CASHIER: ["sales", "payments", "till"],
 	INVENTORY: ["requests", "orders", "deliveries", "counts", "suppliers"],
 	FINANCE: [
 		"month",
@@ -125,6 +129,8 @@ const MODULES: Partial<Record<HelpAudience, HelpModule>> = {
 	BAR: barHelp,
 	INVENTORY: inventoryHelp,
 	FINANCE: financeHelp,
+	WAITER: waiterHelp,
+	CASHIER: cashierHelp,
 	PLATFORM: platformHelp,
 	MARKETER: marketerHelp,
 };
