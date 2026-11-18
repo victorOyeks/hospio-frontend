@@ -30,6 +30,8 @@ export type { HelpAudience, HelpGuide, HelpModule, WhatsNewItem };
 const ROUTES: Record<Exclude<HelpAudience, "EVERYONE">, string[]> = {
 	OWNER: [
 		"hotels",
+		"hospio-fees",
+		"billing",
 		"bookings",
 		"staff",
 		"financials",
@@ -46,6 +48,8 @@ const ROUTES: Record<Exclude<HelpAudience, "EVERYONE">, string[]> = {
 	],
 	MANAGER: [
 		"departments",
+		"hospio-fees",
+		"billing",
 		"rooms",
 		"bookings",
 		"folios",

@@ -16,7 +16,10 @@ import { SectionCard } from "@hospio/ui/shared/section-card";
 import { StatusPill } from "@hospio/ui/shared/status-pill";
 import { btn, cell, tableHead, tableRow } from "@hospio/ui/shared/ui";
 
-/** Monthly device invoices (instalments and data plan): status, how paid, and Mark paid for the money roles. */
+/**
+ * Monthly device invoices (instalments and data plan): status, how paid and the Hospio360 monthly invoice (HIN-…) that bills
+ * each one (docs/plan-monthly-invoices.md). Nothing is debited; one not yet on a monthly invoice can still be marked paid by hand.
+ */
 
 export function invoiceStatus(i: DeviceInvoiceView) {
 	switch (i.status) {
@@ -36,7 +39,7 @@ export const invoiceLabel = (i: DeviceInvoiceView) =>
 		? `Data plan · ${new Date(`${i.dueOn}T12:00:00`).toLocaleDateString("en-GB", { month: "long", year: "numeric" })}`
 		: `Instalment ${i.sequence}${i.ofCount ? ` of ${i.ofCount}` : ""}`;
 
-const via: Record<string, string> = { DEBIT: "Debited", PAYSTACK: "Paystack", MANUAL: "By hand" };
+const via: Record<string, string> = { DEBIT: "Debited (before Nov 2026)", PAYSTACK: "Paystack", MANUAL: "By hand", MONTHLY_INVOICE: "Monthly invoice" };
 
 export function DeviceInvoicesTable({
 	rows,
@@ -81,7 +84,12 @@ export function DeviceInvoicesTable({
 					<tbody>
 						{rows.map((i) => (
 							<tr key={i.id} className={tableRow}>
-								<td className={`${cell} font-semibold`}>{i.number}</td>
+								<td className={`${cell} font-semibold`}>
+									{i.number}
+									{i.monthlyInvoiceNumber && (
+										<span className="block text-[11px] font-normal text-ink-3">On {i.monthlyInvoiceNumber}</span>
+									)}
+								</td>
 								{showHotel && <td className={cell}>{i.hotelName ?? "—"}</td>}
 								<td className={cell}>{invoiceLabel(i)}</td>
 								<td className={cell}>{fmtLongDate(i.dueOn)}</td>
@@ -90,16 +98,11 @@ export function DeviceInvoicesTable({
 									<span className="flex flex-col items-start gap-[2px]">
 										{invoiceStatus(i)}
 										{i.paidVia && <span className="text-[11px] text-ink-3">{via[i.paidVia] ?? i.paidVia}</span>}
-										{i.lastError && i.status !== "PAID" && (
-											<span className="block max-w-[220px] truncate text-[11px] text-danger" title={i.lastError}>
-												Debit: {i.lastError}
-											</span>
-										)}
-										{i.posPaused && <span className="text-[11px] font-semibold text-danger">POS paused</span>}
+										{i.posPaused && <span className="text-[11px] font-semibold text-danger">POS paused · unpaid invoice</span>}
 									</span>
 								</td>
 								<td className={`${cell} text-right`}>
-									{money && (i.status === "DUE" || i.status === "OVERDUE") && (
+									{money && (i.status === "DUE" || i.status === "OVERDUE") && !i.monthlyInvoiceNumber && (
 										<button type="button" className="text-[13px] font-semibold text-brand hover:underline" onClick={() => setPaying(i)}>
 											Mark paid
 										</button>
@@ -176,14 +179,14 @@ export function AllDeviceInvoices({ money, superAdmin }: { money: boolean; super
 		const r = await runDeviceInvoices();
 		setBusy(false);
 		if (!r.ok) return toast.error(r.error);
-		toast.success(`${r.data.issued} issued, ${r.data.paid} paid, ${r.data.failed} not debited, ${r.data.overdue} now overdue`);
+		toast.success(`${r.data.issued} issued, ${r.data.paid} paid, ${r.data.overdue} now overdue`);
 		void load();
 	};
 	const open = (rows ?? []).filter((i) => i.status === "DUE" || i.status === "OVERDUE");
 	return (
 		<SectionCard
 			title="Monthly device invoices"
-			subtitle={`Instalments and data plans · issued on their day, debited from the hotel's POS account · ${open.length} open`}
+			subtitle={`Instalments and data plans · each billed on that month's Hospio360 invoice · ${open.length} open`}
 			headerRight={
 				superAdmin ? (
 					<button type="button" className={btn.secondary} onClick={() => void run()} disabled={busy}>

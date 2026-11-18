@@ -73,7 +73,7 @@ export type SignUpInput = {
 	city?: string;
 	/** The marketer's code from the sign-up link (?ref=); identity refuses an unknown or inactive one. */
 	referralCode?: string;
-	/** The two required boxes: Terms, Privacy Policy and Data Processing Terms; the daily debit authority (platform default rate). */
+	/** The two required boxes: Terms, Privacy Policy and Data Processing Terms; the monthly invoice agreement (document key DEBIT, platform default rate). */
 	acceptTerms: boolean;
 	acceptDebit: boolean;
 };

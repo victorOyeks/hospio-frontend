@@ -71,7 +71,7 @@ const schema = z.object({
 		.optional(),
 	// The two required boxes (hospio-backend docs/legal-acceptance.md).
 	acceptTerms: z.boolean().refine((v) => v, "Tick this box to agree to the Terms, Privacy Policy and Data Processing Terms"),
-	acceptDebit: z.boolean().refine((v) => v, "Tick this box to authorise the daily debit"),
+	acceptDebit: z.boolean().refine((v) => v, "Tick this box to agree to pay the monthly invoice"),
 });
 
 /** The referral code's check (GET /platform/public/referral-codes/{code}): who referred them, or why it doesn't work. */
@@ -94,7 +94,7 @@ export function SignUpForm({
 	debitRatePct,
 }: {
 	referralCode?: string;
-	/** The platform default rate the debit box states (public legal documents, DEBIT); 1.5 when unknown. */
+	/** The platform default rate the monthly invoice box states (public legal documents, DEBIT); 1.5 when unknown. */
 	debitRatePct?: number | null;
 }) {
 	const router = useRouter();

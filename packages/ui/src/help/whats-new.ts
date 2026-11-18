@@ -5,6 +5,16 @@ export const whatsNewWeek = "Week of 15 November 2026";
 
 export const whatsNew: WhatsNewItem[] = [
 	{
+		title: "One monthly invoice",
+		body: "Nothing is debited from your account any more. On the 1st Hospio360 sends one invoice for the month before: the platform fee for each location, guest messages and devices & internet. Pay it within 7 days under “Billing & invoices” with “Pay now”, and download the invoice and receipts there. If it is still unpaid after the 11th, card/transfer POS payments, new sales and new bookings pause until it is paid; check-out and cash on existing bills keep working. Hospio fees still shows this month so far.",
+		audience: ["OWNER", "MANAGER"],
+	},
+	{
+		title: "Monthly invoices in Fees & billing",
+		body: "Fees & billing opens on “Invoices”: every business's monthly invoice with its status, the reminder log, and Record payment, Extend, Credit note and Void. The daily debit and “Run debit” are gone. Settings → Fee defaults has the invoice VAT and minimum.",
+		audience: ["PLATFORM"],
+	},
+	{
 		title: "Pick up where you were after the lock screen",
 		body: "When a shared tablet locks, or you sign in again after being signed out, you go back to the page you were on. Check-in, New booking, a bar sale, a kitchen order, a till handover and a housekeeping problem report keep what you had typed, with “Restored what you were typing · Clear” at the top. Only you get it back: someone else unlocking starts on their own home page. Payments are never kept; take them again.",
 		audience: ["FRONT_OFFICE", "BAR", "KITCHEN", "HOUSEKEEPING", "MANAGER"],

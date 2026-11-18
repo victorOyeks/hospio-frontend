@@ -523,7 +523,7 @@ export const managerHelp: HelpModule = {
 			goodToKnow: [
 				"Don't send a second charge while one is waiting.",
 				"If the POS doesn't answer, take cash or a bank transfer instead.",
-				"If it says POS payments are paused, Hospio360's daily fee is unpaid for 3 days: take cash or a transfer and tell the owner.",
+				"If it says POS payments are paused, the Hospio360 invoice is unpaid: take cash and ask the owner to pay it under Billing & invoices.",
 			],
 		},
 		{

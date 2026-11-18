@@ -287,7 +287,7 @@ export function NewBusinessPanel({
 	const [email, setEmail] = useState("");
 	const [phone, setPhone] = useState("");
 	const [city, setCity] = useState("");
-	// One fee model: a % of each day's sales, debited daily from the hotel's POS provider account. Only the rate varies.
+	// One fee model: a % of each day's sales, billed on the business's monthly invoice. Only the rate varies.
 	// Fee lock: the platform default unless a signed addendum says otherwise.
 	const lock = useFeeLock(null, null);
 	const [marketer, setMarketer] = useState("");
@@ -459,8 +459,8 @@ export function NewBusinessPanel({
 				</PanelSection>
 				<PanelSection title="Hospio360 fee">
 					<p className="text-[13px] text-ink-2">
-						{feeModelLabels.PERCENT_OF_SALES}: a share of each day's sales, debited each morning from the hotel's Moniepoint or OPay
-						account.
+						{feeModelLabels.PERCENT_OF_SALES}: a share of each day's sales, billed on one Hospio360 invoice each month (issued on
+						the 1st, due 7 days later). Nothing is debited.
 					</p>
 					<FeeLockField lock={lock} />
 				</PanelSection>

@@ -50,7 +50,7 @@ export default async function PlatformPaymentsPage({
 				? adminData.payments.summary({ businessId })
 				: Promise.resolve(null),
 			data.platform.businesses(),
-			// POS & fee collection: every hotel, read only on that tab; its keys and debit state load from the browser.
+			// POS & fee collection: every hotel, read only on that tab; its keys and fee state load from the browser.
 			tab === "pos" && money
 				? adminData.hotels.directory()
 				: Promise.resolve(null),

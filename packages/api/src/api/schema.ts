@@ -11,6 +11,7 @@ import { ownerRoutes } from "./routes-owner";
 import { devicePackageRoutes } from "./routes-device-packages";
 import { legalRoutes } from "./routes-legal";
 import { feeRoutes } from "./routes-fees";
+import { billingRoutes } from "./routes-billing";
 import { paymentRoutes } from "./routes-payments";
 import { profileRoutes } from "./routes-profile";
 import { venueRoutes } from "./routes-venue";
@@ -1109,6 +1110,9 @@ export const CommInvoice = z.object({
 	paymentReference: z.string().nullable(),
 	paidByName: z.string().nullable(),
 	note: z.string().nullable(),
+	/** Billed on this Hospio360 monthly invoice (docs/plan-monthly-invoices.md); its own Pay is refused. */
+	monthlyInvoiceId: z.string().nullable().optional(),
+	monthlyInvoiceNumber: z.string().nullable().optional(),
 });
 export const CommLine = z.object({
 	kind: z.string(),
@@ -1146,6 +1150,7 @@ const paging = z
 export const schema = createSchema({
 	...ownerRoutes,
 	...feeRoutes,
+	...billingRoutes,
 	...devicePackageRoutes,
 	...legalRoutes,
 	...mlRoutes,

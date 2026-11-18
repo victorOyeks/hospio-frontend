@@ -53,19 +53,13 @@ export function KeysCell({ c }: { c: HotelCollectionSummary | null }) {
 	);
 }
 
-/** Debit on, statement only (shadow) or not set up, plus the POS pause the debit can cause. */
-export function DebitCell({ c }: { c: HotelCollectionSummary | null }) {
+/** The Hospio fee is billed on the business's monthly invoice; POS payments pause while that invoice is unpaid past its last day. */
+export function FeeStateCell({ c }: { c: HotelCollectionSummary | null }) {
 	if (!c) return <span className="text-ink-3">—</span>;
 	return (
 		<span className="flex flex-wrap items-center gap-1">
-			{c.debitEnabled ? (
-				<StatusPill tone="success">Debit on</StatusPill>
-			) : c.provider ? (
-				<StatusPill tone="info">Statement only</StatusPill>
-			) : (
-				<StatusPill tone="grey">Not set up</StatusPill>
-			)}
-			{c.posPaused && <StatusPill tone="danger">POS paused</StatusPill>}
+			<StatusPill tone="info">Monthly invoice</StatusPill>
+			{c.posPaused && <StatusPill tone="danger">POS paused · unpaid invoice</StatusPill>}
 		</span>
 	);
 }
@@ -87,22 +81,13 @@ export function LastFeeCell({ f }: { f: HotelDirectoryRow["lastFee"] }) {
 
 /** The fee filter on both lists. */
 export const FEE_FILTERS = [
-	{ value: "on", label: "Debit on" },
-	{ value: "shadow", label: "Statement only" },
-	{ value: "unset", label: "Not set up" },
 	{ value: "nokeys", label: "No POS keys" },
-	{ value: "paused", label: "POS paused" },
+	{ value: "paused", label: "POS paused (unpaid invoice)" },
 ];
 
 export function feeFilterMatches(h: HotelDirectoryRow, filter: string) {
 	const c = h.collection;
 	switch (filter) {
-		case "on":
-			return !!c?.debitEnabled;
-		case "shadow":
-			return !!c && !c.debitEnabled && !!c.provider;
-		case "unset":
-			return !c?.provider;
 		case "nokeys":
 			return !!c && !c.keysIn;
 		case "paused":

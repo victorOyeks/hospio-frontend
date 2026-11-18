@@ -30,6 +30,9 @@ const ROLE_FREE = ["/select-role", "/verify-phone", "/onboarding", "/handover"];
 /** Screens every role shares (Figma "Everywhere" / Staff · Shared): served from /shared/* for any role. */
 const SHARED = ["/notifications", "/profile", "/help", "/shifts", "/inbox"];
 
+/** Links to Billing & invoices from outside the app (emails, Paystack's return, the bell's service path). */
+const BILLING_ALIASES = ["/billing", "/hotel-owner/billing", "/manager/billing"];
+
 function startsWithAny(pathname: string, paths: string[]) {
 	return paths.some((p) => pathname === p || pathname.startsWith(`${p}/`));
 }
@@ -127,6 +130,14 @@ async function gate(request: NextRequest) {
 	const { pathname } = request.nextUrl;
 	const token = request.cookies.get(COOKIES.token)?.value;
 	const session = token ? decodeSession(token) : null;
+
+	// Hospio360's invoice emails, the bell and Paystack's return link to /hotel-owner/billing?invoice=… (or /billing): open
+	// Billing & invoices through /dashboard for whoever is signed in (owner or manager), query kept.
+	if (APP === "hotel" && BILLING_ALIASES.includes(pathname)) {
+		const target = request.nextUrl.clone();
+		target.pathname = "/dashboard/billing";
+		return NextResponse.redirect(target);
+	}
 
 	if (startsWithAny(pathname, PUBLIC)) {
 		// Already signed in: straight to the page the sign-in link asked for (a page of this app only), else the dashboard.

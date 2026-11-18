@@ -34,8 +34,8 @@ import { PackageInvoices } from "./device-invoices";
 
 export const OPTIONS = [
 	{ value: "OWN_DEVICES", label: "Own devices", hint: "The hotel has its own tablets and internet: nothing supplied, nothing charged" },
-	{ value: "TRANSACTION", label: "From transactions", hint: "A share of each day's sales, debited each morning with the Hospio fee until paid off" },
-	{ value: "MONTHLY", label: "Monthly", hint: "The total in 1 to 6 monthly instalments, invoiced and debited" },
+	{ value: "TRANSACTION", label: "From transactions", hint: "A share of each day's sales, billed with the Hospio fee on the monthly invoice until paid off" },
+	{ value: "MONTHLY", label: "Monthly", hint: "The total in 1 to 6 monthly instalments, each billed on that month's Hospio360 invoice" },
 	{ value: "ONE_TIME", label: "One time", hint: "Paid in full at installation (cash or transfer)" },
 ] as const;
 type Option = (typeof OPTIONS)[number]["value"];
@@ -59,8 +59,8 @@ export function packageStatus(p: { status: string; paymentOption: string }) {
 }
 
 const sourceLabel: Record<string, string> = {
-	TRANSACTION: "From the daily debit",
-	INVOICE: "Monthly invoice",
+	TRANSACTION: "From sales, on the monthly invoice",
+	INVOICE: "Device invoice",
 	ONE_TIME: "One-time payment",
 	MANUAL: "Recorded by hand",
 };
@@ -380,7 +380,7 @@ function PackageSummary({
 										? `${fmtLongDate(p.expectedFinish)} (about ${p.daysLeft} days)`
 										: p.status === "PAID_OFF"
 											? "Paid off"
-											: "After the first debits",
+											: "After the first invoices are paid",
 								},
 							]
 						: []),
@@ -404,7 +404,7 @@ function PackageSummary({
 			)}
 			{p.status === "DRAFT" && p.paymentOption === "TRANSACTION" && (
 				<Note tone="info">
-					Collection starts the day the devices are installed. It is taken with the Hospio fee, so the hotel's automatic debit must be on.
+					Collection starts the day the devices are installed: the share of sales is billed with the Hospio fee on the business's monthly invoice.
 				</Note>
 			)}
 			{(p.status === "INSTALLED" || p.status === "PAID_OFF") && (
@@ -479,12 +479,12 @@ function PackageSummary({
 				title="Mark the devices installed"
 				subtitle={
 					p.paymentOption === "TRANSACTION"
-						? `From this day, ${p.deviceRate ?? 2.5}% of each day's sales is added to the hotel's daily debit until ${naira(p.total)} is paid.`
+						? `From this day, ${p.deviceRate ?? 2.5}% of each day's sales is billed on the business's monthly invoice until ${naira(p.total)} is paid.`
 						: p.paymentOption === "MONTHLY"
-							? `The first of ${p.months} monthly instalments of ${naira(p.monthlyInstalment ?? 0)} is invoiced from this day.`
+							? `The first of ${p.months} monthly instalments of ${naira(p.monthlyInstalment ?? 0)} is billed from this day, on that month's Hospio360 invoice.`
 							: p.paymentOption === "ONE_TIME"
 								? `Record the ${naira(p.total)} payment once it is received.`
-								: "The data plan is invoiced monthly from this day."
+								: "The data plan is billed monthly from this day, on the Hospio360 invoice."
 				}
 				footer={
 					<>

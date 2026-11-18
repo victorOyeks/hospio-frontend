@@ -123,6 +123,9 @@ export const DeviceInvoice = z.object({
 	lastError: str,
 	daysOverdue: z.number(),
 	posPaused: z.boolean(),
+	/** The Hospio360 monthly invoice that bills it (docs/plan-monthly-invoices.md); its own Pay is refused. */
+	monthlyInvoiceId: str,
+	monthlyInvoiceNumber: str,
 });
 
 const hotelParams = z.object({ businessId: z.string(), hotelId: z.string() });

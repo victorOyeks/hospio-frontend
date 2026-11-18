@@ -1,24 +1,18 @@
 "use client";
 
-import { useRouter, useSearchParams } from "next/navigation";
-import { useCallback, useEffect, useRef, useState } from "react";
-import { toast } from "sonner";
-import {
-	confirmDeviceInvoice,
-	type DeviceInvoiceView,
-	ownerDeviceInvoices,
-	payDeviceInvoice,
-} from "@hospio/api/actions/device-packages";
+import Link from "next/link";
+import { useEffect, useState } from "react";
+import { type DeviceInvoiceView, ownerDeviceInvoices } from "@hospio/api/actions/device-packages";
 import { Note } from "@hospio/ui/shared/detail-list";
 import { naira } from "@hospio/ui/shared/format";
 import { SectionCard } from "@hospio/ui/shared/section-card";
 import { StatusPill } from "@hospio/ui/shared/status-pill";
-import { btn, cell, tableHead, tableRow } from "@hospio/ui/shared/ui";
+import { cell, tableHead, tableRow } from "@hospio/ui/shared/ui";
 
 /**
- * Hospio fees → device invoices (hospio-backend docs/plan-device-packages.md): the monthly instalments and data plan. Each is
- * debited from the hotel's POS provider account; one that wasn't can be paid online (Paystack). Coming back from Paystack
- * (?reference=DEV-…) confirms the payment.
+ * Hospio fees → device invoices (hospio-backend docs/plan-device-packages.md, docs/plan-monthly-invoices.md): the monthly
+ * instalments and data plan. Each one due in a month is billed on that month's Hospio360 invoice and paid under Billing &
+ * invoices; nothing is paid here. Older ones stay listed as they were.
  */
 
 const label = (i: DeviceInvoiceView) =>
@@ -35,41 +29,29 @@ function status(i: DeviceInvoiceView) {
 	return <StatusPill tone="warning">Due</StatusPill>;
 }
 
-export function OwnerDeviceInvoices({ canPay }: { canPay: boolean }) {
-	const router = useRouter();
-	const params = useSearchParams();
-	const [rows, setRows] = useState<DeviceInvoiceView[] | null>(null);
-	const [busy, setBusy] = useState<string | null>(null);
-	const confirmed = useRef(false);
-	const load = useCallback(async () => {
-		const r = await ownerDeviceInvoices();
-		if (r.ok) setRows(r.data);
-	}, []);
-	useEffect(() => {
-		void load();
-	}, [load]);
-	// Back from Paystack: confirm once, then drop the reference from the address.
-	useEffect(() => {
-		const ref = params.get("reference") ?? params.get("trxref");
-		if (!ref || !ref.startsWith("DEV-") || confirmed.current) return;
-		confirmed.current = true;
-		void confirmDeviceInvoice(ref).then((r) => {
-			if (r.ok) toast.success(`${r.data.number} is paid`);
-			else toast.error(r.error);
-			router.replace("/dashboard/hospio-fees");
-			void load();
-		});
-	}, [params, router, load]);
+/** Where an instalment is paid: its Hospio360 monthly invoice, linked when it has been issued. */
+function onInvoice(i: DeviceInvoiceView) {
+	if (i.status === "PAID" || i.status === "VOID") return null;
+	if (i.monthlyInvoiceNumber)
+		return (
+			<Link
+				href={`/dashboard/billing${i.monthlyInvoiceId ? `?invoice=${encodeURIComponent(i.monthlyInvoiceId)}` : ""}`}
+				className="text-[12px] font-semibold text-primary underline underline-offset-2"
+			>
+				On invoice {i.monthlyInvoiceNumber}
+			</Link>
+		);
+	const month = new Date(`${i.dueOn.slice(0, 7)}-01T12:00:00`).toLocaleDateString("en-GB", { month: "long" });
+	return <span className="text-[12px] text-ink-3">Billed on your {month} invoice</span>;
+}
 
-	const pay = async (i: DeviceInvoiceView) => {
-		setBusy(i.id);
-		const r = await payDeviceInvoice(i.id, `${window.location.origin}/dashboard/hospio-fees`);
-		if (!r.ok) {
-			setBusy(null);
-			return toast.error(r.error);
-		}
-		window.location.assign(r.data.authorizationUrl);
-	};
+export function OwnerDeviceInvoices() {
+	const [rows, setRows] = useState<DeviceInvoiceView[] | null>(null);
+	useEffect(() => {
+		void ownerDeviceInvoices().then((r) => {
+			if (r.ok) setRows(r.data);
+		});
+	}, []);
 
 	if (!rows || rows.length === 0) return null;
 	const owed = rows.filter((i) => i.status === "DUE" || i.status === "OVERDUE");
@@ -79,14 +61,18 @@ export function OwnerDeviceInvoices({ canPay }: { canPay: boolean }) {
 			title="Device invoices"
 			subtitle={
 				owed.length
-					? `${naira(owed.reduce((a, i) => a + i.amount - i.paidAmount, 0))} to pay · debited from your POS provider account, or pay online`
-					: "Monthly instalments and data plan · debited from your POS provider account"
+					? `${naira(owed.reduce((a, i) => a + i.amount - i.paidAmount, 0))} still to pay · billed on your Hospio360 monthly invoice`
+					: "Monthly instalments and data plan · billed on your Hospio360 monthly invoice"
 			}
 			flush
 		>
 			{paused && (
 				<Note tone="danger" className="mx-5 mb-3">
-					POS payments are paused: a device invoice is more than 14 days overdue. Pay it and they start again straight away.
+					POS payments are paused until the Hospio360 invoice is paid. Pay it under{" "}
+					<Link href="/dashboard/billing" className="font-medium underline underline-offset-2">
+						Billing &amp; invoices
+					</Link>{" "}
+					and they start again within a minute.
 				</Note>
 			)}
 			<div className="overflow-x-auto">
@@ -112,13 +98,7 @@ export function OwnerDeviceInvoices({ canPay }: { canPay: boolean }) {
 								<td className={cell}>{day(i.dueOn)}</td>
 								<td className={`${cell} text-right font-semibold`}>{naira(i.amount)}</td>
 								<td className={cell}>{status(i)}</td>
-								<td className={`${cell} text-right`}>
-									{canPay && (i.status === "DUE" || i.status === "OVERDUE") && (
-										<button type="button" className={btn.primary} disabled={busy === i.id} onClick={() => void pay(i)}>
-											{busy === i.id ? "Opening Paystack…" : `Pay ${naira(i.amount - i.paidAmount)}`}
-										</button>
-									)}
-								</td>
+								<td className={`${cell} text-right`}>{onInvoice(i)}</td>
 							</tr>
 						))}
 					</tbody>

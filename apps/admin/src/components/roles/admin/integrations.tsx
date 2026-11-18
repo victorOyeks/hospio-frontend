@@ -44,9 +44,9 @@ import { useRefresh } from "./live";
 const GROUPS: { key: IntegrationGroup; title: string; subtitle: string }[] = [
 	{ key: "EMAIL", title: "Email", subtitle: "Sign-in codes, invites, statements and guest booking emails" },
 	{ key: "MESSAGING", title: "Messaging", subtitle: "WhatsApp to guests and SMS phone checks" },
-	{ key: "PAYMENTS", title: "Payments", subtitle: "Online payments, such as guest-message invoices" },
+	{ key: "PAYMENTS", title: "Payments", subtitle: "Online payments: owners paying their Hospio360 monthly invoice (Paystack)" },
 	{ key: "POS", title: "POS", subtitle: "The server's POS setting, used by hotels without their own keys" },
-	{ key: "FEE_DEBIT", title: "Fee debit", subtitle: "How Hospio's daily fee is debited from hotels" },
+	{ key: "FEE_DEBIT", title: "Fee debit (no longer used)", subtitle: "Nothing is debited any more: Hospio360 bills one invoice a month. Kept for reference" },
 ];
 
 export function IntegrationsScreen({ data }: { data: IntegrationsData }) {
@@ -65,7 +65,7 @@ export function IntegrationsScreen({ data }: { data: IntegrationsData }) {
 		<>
 			<PageHeader
 				title="Integrations"
-				subtitle="The keys Hospio360 uses to send email and messages, take payments and debit the daily fee"
+				subtitle="The keys Hospio360 uses to send email and messages and take payments"
 			>
 				{reload}
 			</PageHeader>

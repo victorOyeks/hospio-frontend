@@ -9,7 +9,7 @@ import { Checkbox } from "@hospio/ui/primitives/checkbox";
 
 /**
  * The tick boxes for the legal documents (hospio-backend docs/legal-acceptance.md). One box for the Terms, Privacy Policy and Data
- * Processing Terms, one for the daily debit authority, one for each other document (Staff terms, Referral partner terms, Devices).
+ * Processing Terms, one for the monthly invoice agreement (document key DEBIT), one for each other document (Staff terms, Referral partner terms, Devices).
  */
 
 export const LEGAL_SITE = "https://hospio360.com";
@@ -56,16 +56,16 @@ export function formatRatePct(rate: number | null | undefined): string {
 }
 
 /**
- * The debit box. It states the rate this business is debited: `doc.ratePct` from the server (the owner's agreed rate under a signed
- * addendum, else the platform default); the acceptance records the same rate (acceptItem).
+ * The monthly invoice box (document key DEBIT). It states the rate this business's monthly invoice charges: `doc.ratePct` from the
+ * server (the owner's agreed rate under a signed addendum, else the platform default); the acceptance records the same rate (acceptItem).
  */
 export function DebitLabel({ doc, ratePct }: { doc?: Pick<LegalDoc, "url" | "slug" | "title" | "ratePct">; ratePct?: number | null }) {
 	return (
 		<>
-			I authorise Hospio360 (a product of Oyeks Global Limited) to debit{" "}
-			<span data-testid="debit-rate">{formatRatePct(doc?.ratePct ?? ratePct)}</span> of my business&apos;s daily sales from my business
-			account each day at 06:00.{" "}
-			<DocLink doc={doc ?? { url: legalUrl("fees"), slug: "fees", title: "Fees" }}>How the fee works</DocLink>
+			I agree to pay Hospio360&apos;s monthly invoice —{" "}
+			<span data-testid="debit-rate">{formatRatePct(doc?.ratePct ?? ratePct)}</span> of my business&apos;s daily sales — within 7 days of
+			issue.{" "}
+			<DocLink doc={doc ?? { url: legalUrl("fees"), slug: "fees", title: "Fees and monthly invoice" }}>How the fee works</DocLink>
 		</>
 	);
 }

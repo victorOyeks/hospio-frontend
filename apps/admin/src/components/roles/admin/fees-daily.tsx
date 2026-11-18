@@ -1,6 +1,6 @@
 "use client";
 
-import { CreditCardIcon, PlayIcon, RefreshCwIcon } from "lucide-react";
+import { PlayIcon, RefreshCwIcon } from "lucide-react";
 import { parseAsString, useQueryState } from "nuqs";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
@@ -10,7 +10,6 @@ import {
 	redoFeeDay,
 	refundFeeDay,
 	runFeeDay,
-	runFeeDebit,
 } from "@hospio/api/actions/daily-fees";
 import type { BusinessRow } from "@hospio/api/data/types";
 import type { AdminRole } from "@hospio/api/demo/fixtures/platform-extra";
@@ -25,8 +24,8 @@ import { Loading } from "./live";
 
 /**
  * Fees & billing → Daily fees: every hotel's daily Hospio fee in one list (GET /platform/admin/fees/daily with no filters),
- * narrowed here by business, status or hotel. A day opens its breakdown; a Super admin can work out yesterday and run the
- * debit from the top.
+ * narrowed here by business, status or hotel. A day opens its breakdown; a Super admin can work out yesterday. Nothing is
+ * debited: each day's fee is ACCRUED until the month's Hospio360 invoice bills it (INVOICED), then PAID with the invoice.
  */
 export function DailyFeesTab({
 	role,
@@ -68,7 +67,7 @@ export function DailyFeesTab({
 			)
 			.sort((a, b) => b.date.localeCompare(a.date));
 	}, [days, biz, status, q]);
-	const due = rows.reduce((a, d) => a + d.due - (d.collected ?? 0), 0);
+	const waiting = rows.filter((d) => d.status === "ACCRUED").reduce((a, d) => a + d.fee + (d.deviceFee ?? 0), 0);
 
 	return (
 		<>
@@ -93,13 +92,11 @@ export function DailyFeesTab({
 							onChange={(v) => void setStatus(v || null)}
 							all="All statuses"
 							options={[
-								{ value: "PAID", label: "Debited" },
-								{ value: "SHADOW", label: "Statement only" },
-								{ value: "SCHEDULED", label: "Debit at 6am" },
-								{ value: "PENDING", label: "Waiting on provider" },
-								{ value: "PART_PAID", label: "Part debited" },
-								{ value: "UNPAID", label: "Not debited" },
+								{ value: "ACCRUED", label: "Waiting for the invoice" },
+								{ value: "INVOICED", label: "On invoice, unpaid" },
+								{ value: "PAID", label: "Paid" },
 								{ value: "NO_FEE", label: "No fee" },
+								{ value: "SHADOW", label: "Statement only (trial)" },
 							]}
 						/>
 					</>
@@ -109,8 +106,8 @@ export function DailyFeesTab({
 				title="Daily fees"
 				subtitle={
 					days
-						? `${rows.length} ${rows.length === 1 ? "day" : "days"} · ${naira(Math.max(0, due))} still to debit`
-						: "Each hotel's sales, fee and debit, newest first"
+						? `${rows.length} ${rows.length === 1 ? "day" : "days"} · ${naira(waiting)} waiting for this month's invoices`
+						: "Each hotel's sales and fee, newest first · billed on the monthly invoice"
 				}
 				headerRight={
 					<div className="flex flex-wrap gap-2">
@@ -131,24 +128,6 @@ export function DailyFeesTab({
 								}}
 							>
 								<PlayIcon className="mr-1 inline size-4" /> Work out yesterday
-							</button>
-						)}
-						{superAdmin && (
-							<button
-								type="button"
-								className={`${btn.secondary} ${btn.small}`}
-								disabled={busy}
-								onClick={async () => {
-									setBusy(true);
-									const r = await runFeeDebit();
-									setBusy(false);
-									if (r.ok) {
-										toast.success(`Debit run: ${r.data.tried} tried, ${r.data.paid} paid, ${r.data.pending} pending, ${r.data.unpaid} unpaid`);
-										void load();
-									} else toast.error(r.error);
-								}}
-							>
-								<CreditCardIcon className="mr-1 inline size-4" /> Run debit now
 							</button>
 						)}
 						<button
@@ -183,7 +162,7 @@ export function DailyFeesTab({
 					day={open}
 					onClose={() => setOpen(null)}
 					onRedo={
-						superAdmin && (open.status === "SHADOW" || open.status === "NO_FEE")
+						superAdmin && ["SHADOW", "NO_FEE", "ACCRUED"].includes(open.status)
 							? async () => {
 									const r = await redoFeeDay(open.id);
 									if (r.ok) {

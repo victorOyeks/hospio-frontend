@@ -13,10 +13,10 @@ import { PageHeader } from "@hospio/ui/shared/page-header";
 import { FilterSelect, SearchBox, Toolbar } from "@hospio/ui/shared/toolbar";
 import { can, StagePill, stageMeta } from "../shared";
 import { HotelDrawer } from "./drawer";
-import { DebitCell, FEE_FILTERS, feeFilterMatches, KeysCell, LastFeeCell, Pending, useHotelFees } from "./status";
+import { FeeStateCell, FEE_FILTERS, feeFilterMatches, KeysCell, LastFeeCell, Pending, useHotelFees } from "./status";
 
 /**
- * Customers → Hotels: every hotel across every business on one list, so a hotel's POS keys, fee debit and daily fees are a
+ * Customers → Hotels: every hotel across every business on one list, so a hotel's POS keys, fee state and daily fees are a
  * click away instead of four pages down. Filters live in the URL (`?q=&businessId=&stage=&fee=`) and a row opens the hotel
  * panel (`?hotel=`).
  */
@@ -48,7 +48,6 @@ export function HotelsScreen({ role, hotels: base }: { role: AdminRole; hotels: 
 	}, [hotels, q, biz, stage, fee]);
 
 	const withKeys = hotels.filter((h) => h.collection?.keysIn).length;
-	const debitOn = hotels.filter((h) => h.collection?.debitEnabled).length;
 	const paused = hotels.filter((h) => h.collection?.posPaused).length;
 	const filtered = !!(q || biz || stage || fee);
 
@@ -72,7 +71,7 @@ export function HotelsScreen({ role, hotels: base }: { role: AdminRole; hotels: 
 		...(money
 			? ([
 					{ id: "keys", header: "POS keys", cell: ({ row }) => (feesLoading ? <Pending /> : <KeysCell c={row.original.collection} />) },
-					{ id: "debit", header: "Hospio fee", cell: ({ row }) => (feesLoading ? <Pending /> : <DebitCell c={row.original.collection} />) },
+					{ id: "fee", header: "Hospio fee", cell: ({ row }) => (feesLoading ? <Pending /> : <FeeStateCell c={row.original.collection} />) },
 					{ id: "lastFee", header: "Last daily fee", cell: ({ row }) => (feesLoading ? <Pending /> : <LastFeeCell f={row.original.lastFee} />) },
 				] as ColumnDef<HotelDirectoryRow, unknown>[])
 			: []),
@@ -87,8 +86,8 @@ export function HotelsScreen({ role, hotels: base }: { role: AdminRole; hotels: 
 			<div className="grid grid-cols-2 gap-4 md:grid-cols-4">
 				<KpiCard label="Hotels" value={hotels.length} icon={BedDoubleIcon} hint={`${hotels.reduce((a, h) => a + h.rooms, 0)} rooms`} />
 				<KpiCard label="Businesses" value={businesses.length} icon={BuildingIcon} />
-				{money && <KpiCard label="POS keys in" value={feesLoading ? "…" : withKeys} icon={CreditCardIcon} hint={`Debit on for ${debitOn}`} />}
-				{money && <KpiCard label="POS paused" value={feesLoading ? "…" : paused} icon={PauseCircleIcon} hint="Fee unpaid for 3 days" />}
+				{money && <KpiCard label="POS keys in" value={feesLoading ? "…" : withKeys} icon={CreditCardIcon} hint="For taking guest payments" />}
+				{money && <KpiCard label="POS paused" value={feesLoading ? "…" : paused} icon={PauseCircleIcon} hint="Unpaid Hospio360 invoice" />}
 			</div>
 			{feesError && <Note tone="warning">{feesError}. The hotels are listed; open one to see its fees.</Note>}
 			<Toolbar

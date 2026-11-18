@@ -13,6 +13,8 @@ import { SidebarInset, SidebarProvider } from "@hospio/ui/primitives/sidebar";
 import { SupportBar } from "@hospio/ui/shared/support-bar";
 import { LegalGate } from "@hospio/ui/shared/legal";
 import { loadMyLegal } from "@hospio/api/actions/legal";
+import { billingStatus } from "@hospio/api/actions/billing";
+import { BillingBanner } from "@hospio/ui/shared/billing-banner";
 import { logout } from "@hospio/api/actions/auth";
 import { APP } from "@hospio/api/app";
 import { data } from "@hospio/api/data";
@@ -104,6 +106,7 @@ export async function DashboardShell({ children }: PropsWithChildren) {
 		brand,
 		desk,
 		legal,
+		billing,
 	] = await Promise.all([
 		// getBusiness answers from the fixture (LIVE) in demo mode, so nothing changes there.
 		ownerHotel ? getBusiness() : Promise.resolve(null),
@@ -137,6 +140,8 @@ export async function DashboardShell({ children }: PropsWithChildren) {
 			: Promise.resolve(null),
 		// The legal documents this person still has to accept (hospio-backend docs/legal-acceptance.md); never while support views as the owner.
 		support ? Promise.resolve(null) : loadMyLegal().catch(() => null),
+		// Hospio360's monthly invoice banner (docs/plan-monthly-invoices.md): reminders for the owner and managers, the pause for everyone.
+		APP === "hotel" && user.businessId ? billingStatus().catch(() => null) : Promise.resolve(null),
 	]);
 	if (ownerHotel) {
 		// A self-serve owner still in the wizard goes back to it; one handed over by Hospio360 reviews the
@@ -254,6 +259,7 @@ export async function DashboardShell({ children }: PropsWithChildren) {
 						{device && <IdleLock minutes={device.autoLockMinutes} />}
 						{pinPrompt && !legalGate && <PinPrompt onDevice={!!device} />}
 						<div className="flex flex-1 flex-col gap-5 px-5 py-6 lg:px-8">
+							{APP === "hotel" && user.businessId && <BillingBanner initial={billing} role={role} />}
 							{/* "Manage … in Hotel setup" links only where Hotel setup exists (manager, owner). */}
 							<SetupLinks allowed={role === "MANAGER" || role === "OWNER"}>
 								{notUsedHere ? (

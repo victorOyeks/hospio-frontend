@@ -2279,8 +2279,10 @@ const WARNING_KINDS = new Set([
 /** The screens each role has under /dashboard (besides the shared ones), so a notification only links where the role can go. */
 const ROLE_SCREENS: Record<string, string[]> = {
 	OWNER: [
+		"billing",
 		"bookings",
 		"financials",
+		"hospio-fees",
 		"hotel-setup",
 		"hotels",
 		"inventory",
@@ -2296,10 +2298,12 @@ const ROLE_SCREENS: Record<string, string[]> = {
 	MANAGER: [
 		"activity",
 		"approvals",
+		"billing",
 		"bookings",
 		"departments",
 		"financials",
 		"folios",
+		"hospio-fees",
 		"hotel-setup",
 		"inventory",
 		"menus",

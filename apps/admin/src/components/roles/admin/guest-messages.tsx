@@ -397,7 +397,7 @@ export function GuestMessageBilling() {
 
 			<SectionCard
 				title="Guest-message invoices"
-				subtitle="One per hotel per month, issued on the 1st and due 10 days later · unpaid suspends the hotel's guest messages"
+				subtitle="One per hotel per month, made on the 1st · billed and paid on the business's Hospio360 monthly invoice (HIN-…)"
 				headerRight={
 					<div className="flex items-center gap-2">
 						<select
@@ -443,7 +443,12 @@ export function GuestMessageBilling() {
 							<tbody>
 								{invoices.content.map((i) => (
 									<tr key={i.id} className={tableRow}>
-										<td className={cn(cell, "font-semibold")}>{i.number}</td>
+										<td className={cn(cell, "font-semibold")}>
+											{i.number}
+											{i.monthlyInvoiceNumber && (
+												<span className="block text-[11px] font-normal text-ink-3">On {i.monthlyInvoiceNumber}</span>
+											)}
+										</td>
 										<td className={cell}>{i.hotelName ?? "—"}</td>
 										<td className={cell}>{monthName(i.month)}</td>
 										<td className={cn(cell, "text-right")}>{i.emailCount + i.smsCount + i.whatsappCount}</td>
@@ -454,7 +459,7 @@ export function GuestMessageBilling() {
 											{i.paidVia && <span className="block text-xs text-ink-3">{i.paidVia.startsWith("PAYSTACK") ? "Paystack" : "By hand"}</span>}
 										</td>
 										<td className={cn(cell, "text-right")}>
-											{(i.status === "DUE" || i.status === "OVERDUE") && (
+											{(i.status === "DUE" || i.status === "OVERDUE") && !i.monthlyInvoiceNumber && (
 												<button type="button" className="text-[13px] font-semibold text-brand hover:underline" onClick={() => setPaying(i)}>
 													Mark paid
 												</button>

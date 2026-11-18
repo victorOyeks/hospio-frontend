@@ -105,15 +105,6 @@ export const DayRun = z.object({
 	notes: z.array(z.string()),
 });
 
-export const DebitRun = z.object({
-	tried: z.number(),
-	paid: z.number(),
-	pending: z.number(),
-	unpaid: z.number(),
-	paused: z.number(),
-	resumed: z.number(),
-});
-
 const range = z.object({ from: z.string().optional(), to: z.string().optional() });
 
 export const feeRoutes = {
@@ -125,7 +116,6 @@ export const feeRoutes = {
 		output: envelope(z.array(DailyFee)),
 	},
 	"@post/platform/admin/fees/daily/run": { query: z.object({ date: z.string() }), output: envelope(DayRun) },
-	"@post/platform/admin/fees/daily/debit": { output: envelope(DebitRun) },
 	"@post/platform/admin/fees/daily/:id/redo": { params: z.object({ id: z.string() }), output: envelope(DailyFee) },
 	"@post/platform/admin/fees/daily/:id/refund": {
 		params: z.object({ id: z.string() }),
@@ -134,11 +124,6 @@ export const feeRoutes = {
 	},
 	"@get/platform/admin/businesses/:businessId/hotels/:hotelId/fee-collection": {
 		params: z.object({ businessId: z.string(), hotelId: z.string() }),
-		output: envelope(FeeCollection),
-	},
-	"@put/platform/admin/businesses/:businessId/hotels/:hotelId/fee-collection": {
-		params: z.object({ businessId: z.string(), hotelId: z.string() }),
-		input: z.object({ provider: z.string().nullable(), debitEnabled: z.boolean() }),
 		output: envelope(FeeCollection),
 	},
 	"@get/payment/admin/hotels/:hotelId/pos-config": {
