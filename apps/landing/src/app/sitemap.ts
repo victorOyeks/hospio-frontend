@@ -1,8 +1,18 @@
 import type { MetadataRoute } from "next";
 import { SITE_INDEXABLE, SITE_URL } from "@/components/site";
+import { LEGAL_DOCUMENTS } from "@/legal/documents";
 
-/** Only the home page is public content for now (the legal pages are still being prepared). Empty on staging. */
+/** The home page and the published legal documents. Empty on staging. */
 export default function sitemap(): MetadataRoute.Sitemap {
 	if (!SITE_INDEXABLE) return [];
-	return [{ url: `${SITE_URL}/`, changeFrequency: "monthly", priority: 1 }];
+	return [
+		{ url: `${SITE_URL}/`, changeFrequency: "monthly", priority: 1 },
+		{ url: `${SITE_URL}/legal`, changeFrequency: "monthly", priority: 0.5 },
+		...LEGAL_DOCUMENTS.map((d) => ({
+			url: `${SITE_URL}/legal/${d.slug}`,
+			lastModified: d.effectiveDate,
+			changeFrequency: "monthly" as const,
+			priority: 0.4,
+		})),
+	];
 }
