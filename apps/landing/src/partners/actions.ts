@@ -97,12 +97,11 @@ export async function submitPartnerApplication(
 				fields,
 			};
 		}
+		// The site's own sentence, so the address to write to is the one this site gives everywhere else.
 		if (res.status === 429)
 			return {
 				ok: false,
-				error:
-					message ||
-					`You've sent a few applications in a short time. Please try again in an hour, or email us at ${CONTACT_EMAIL}.`,
+				error: `You've sent a few applications in a short time. Please try again in an hour, or email us at ${CONTACT_EMAIL}.`,
 			};
 		console.error("partner application:", res.status, message);
 		return { ok: false, error: trouble };
