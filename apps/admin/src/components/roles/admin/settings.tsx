@@ -215,7 +215,7 @@ export function SettingsScreen({
 					>
 						<FieldRow>
 							<TextField
-								label="Share of Hospio360 fee (%)"
+								label="Share of the platform fee collected (%)"
 								value={str(f.marketerSharePct)}
 								onChange={(v) => set("fees", "marketerSharePct", num(v))}
 								disabled={!editable}
@@ -232,7 +232,7 @@ export function SettingsScreen({
 							value={str(f.whtPct)}
 							onChange={(v) => set("fees", "whtPct", num(v))}
 							disabled={!editable}
-							hint="Deducted from every marketer payout and remitted to FIRS."
+							hint="Deducted on every marketer statement and remitted to FIRS."
 						/>
 						{save("fees")}
 					</SectionCard>

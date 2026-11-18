@@ -8,6 +8,7 @@ import {
 	adminDailyFees,
 	type DailyFeeRow,
 	redoFeeDay,
+	refundFeeDay,
 	runFeeDay,
 	runFeeDebit,
 } from "@hospio/api/actions/daily-fees";
@@ -35,6 +36,7 @@ export function DailyFeesTab({
 	businesses: BusinessRow[];
 }) {
 	const superAdmin = role === "SUPER_ADMIN";
+	const money = role === "SUPER_ADMIN" || role === "FINANCE_ADMIN";
 	const opts = parseAsString.withDefault("").withOptions({ scroll: false });
 	const [biz, setBiz] = useQueryState("dbiz", opts);
 	const [status, setStatus] = useQueryState("dstatus", opts);
@@ -189,6 +191,23 @@ export function DailyFeesTab({
 										setOpen(r.data);
 										void load();
 									} else toast.error(r.error);
+								}
+							: undefined
+					}
+					onRefund={
+						money
+							? async (amount, reason) => {
+									const r = await refundFeeDay(open.id, amount, reason);
+									if (!r.ok) {
+										toast.error(r.error, { duration: 8000 });
+										return false;
+									}
+									toast.success(
+										`${naira(amount)} refund recorded${r.data.clawback ? " · the marketer's commission is clawed back on their next statement" : ""}`,
+									);
+									setOpen({ ...open, refunded: r.data.refunded ?? (open.refunded ?? 0) + amount, refundNote: reason });
+									void load();
+									return true;
 								}
 							: undefined
 					}

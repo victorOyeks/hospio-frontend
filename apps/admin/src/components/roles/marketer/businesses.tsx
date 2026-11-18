@@ -9,15 +9,23 @@ import type {
 	MarketerMeData,
 } from "@hospio/api/data/admin-types";
 import { DataTable, TwoLine } from "@hospio/ui/shared/data-table";
-import { DetailList, Note, TotalsList } from "@hospio/ui/shared/detail-list";
+import { DetailList } from "@hospio/ui/shared/detail-list";
 import { fmtLongDate, naira, plural } from "@hospio/ui/shared/format";
 import { PageHeader } from "@hospio/ui/shared/page-header";
 import { PanelSection, SidePanel } from "@hospio/ui/shared/side-panel";
 import { StatusPill } from "@hospio/ui/shared/status-pill";
 import { CommissionTable } from "../admin/marketers";
-import { monthsLeft, stageLabel, stageTone } from "./shared";
+import { earningLine, stageLabel, stageTone } from "./shared";
 
-/** Marketer — My businesses: GET /platform/marketer/businesses with the ledger lines per business. */
+const agreementTone = (s?: string) =>
+	s === "ACTIVE" ? "success" : s === "ENDED" ? "grey" : "info";
+const agreementText = (s?: string) =>
+	s === "ACTIVE" ? "Active" : s === "ENDED" ? "Ended" : "Not started";
+
+/**
+ * Marketer — My businesses: GET /platform/marketer/businesses (every business that named me, any stage) with each one's
+ * agreement, earning window and what it has earned, and the commission lines per business.
+ */
 export function MarketerBusinesses({
 	me,
 	businesses,
@@ -30,7 +38,6 @@ export function MarketerBusinesses({
 	const [open, setOpen] = useQueryState("open");
 	const p = me.profile;
 	const selected = businesses.find((b) => b.id === open) ?? null;
-	const wht = (n: number) => Math.round(n * 0.05);
 
 	const columns: ColumnDef<MarketerBusinessItem, unknown>[] = [
 		{
@@ -53,37 +60,30 @@ export function MarketerBusinesses({
 			),
 		},
 		{
-			accessorKey: "since",
-			header: "Live since",
-			cell: ({ row }) =>
-				row.original.since ? fmtLongDate(row.original.since) : "—",
+			accessorKey: "agreementStatus",
+			header: "Agreement",
+			cell: ({ row }) => (
+				<TwoLine
+					primary={
+						<StatusPill tone={agreementTone(row.original.agreementStatus)}>
+							{agreementText(row.original.agreementStatus)}
+						</StatusPill>
+					}
+					secondary={earningLine(row.original, p.months)}
+				/>
+			),
 		},
 		{
 			accessorKey: "sharePct",
 			header: "Your share",
-			cell: ({ row }) => `${row.original.sharePct}%`,
+			cell: ({ row }) => `${row.original.sharePct || p.sharePct}%`,
 		},
 		{
-			accessorKey: "lastMonthShare",
-			header: "Last month",
+			accessorKey: "earnedNet",
+			header: "Earned (net)",
 			cell: ({ row }) => (
-				<span className="font-semibold">
-					{naira(row.original.lastMonthShare)}
-				</span>
+				<span className="font-semibold">{naira(row.original.earnedNet)}</span>
 			),
-		},
-		{
-			id: "left",
-			header: "Months left",
-			accessorFn: (b) => monthsLeft(b.since, p.months),
-			cell: ({ row }) => {
-				const n = monthsLeft(row.original.since, p.months);
-				return n > 0 ? (
-					`${n} of ${p.months}`
-				) : (
-					<span className="text-ink-3">ended</span>
-				);
-			},
 		},
 	];
 
@@ -91,7 +91,7 @@ export function MarketerBusinesses({
 		<>
 			<PageHeader
 				title="My businesses"
-				subtitle={`${businesses.length} businesses you brought to Hospio360 · you earn ${p.sharePct}% of our share for ${p.months} months each`}
+				subtitle={`${plural(businesses.length, "business", "businesses")} that named you · you earn ${p.sharePct}% of the platform fee collected from each, for ${p.months} months from its first collected fee`}
 			/>
 			<DataTable
 				columns={columns}
@@ -127,52 +127,37 @@ export function MarketerBusinesses({
 									),
 								},
 								{
-									label: "Live since",
-									value: selected.since ? fmtLongDate(selected.since) : "—",
+									label: "Agreement",
+									value: (
+										<StatusPill tone={agreementTone(selected.agreementStatus)}>
+											{agreementText(selected.agreementStatus)}
+										</StatusPill>
+									),
 								},
 								{
-									label: "Months left",
-									value: `${monthsLeft(selected.since, p.months)} of ${p.months}`,
+									label: "Agreement started",
+									value: selected.agreementStartedOn
+										? fmtLongDate(selected.agreementStartedOn)
+										: "—",
 								},
-								{ label: "Your share", value: `${selected.sharePct}%` },
+								{
+									label: "Earning window",
+									value: earningLine(selected, p.months),
+								},
+								{
+									label: "First collected fee",
+									value: selected.windowStart
+										? fmtLongDate(selected.windowStart)
+										: "Not yet",
+								},
+								{
+									label: "Your share",
+									value: `${selected.sharePct || p.sharePct}% for ${selected.months || p.months} months`,
+								},
+								{ label: "Earned so far (net)", value: naira(selected.earnedNet) },
 							]}
 						/>
-						<PanelSection
-							title={
-								selected.lastMonth
-									? `Last month · ${selected.lastMonth}`
-									: "Last month"
-							}
-						>
-							<TotalsList
-								rows={[
-									{
-										label: `Your ${selected.sharePct}% of the Hospio360 share`,
-										value: naira(selected.lastMonthShare),
-									},
-									{
-										label: "WHT 5%",
-										value: `-${naira(wht(selected.lastMonthShare))}`,
-									},
-									{
-										label: "Paid to you",
-										value: naira(
-											selected.lastMonthShare - wht(selected.lastMonthShare),
-										),
-										strong: true,
-									},
-								]}
-							/>
-						</PanelSection>
-						{ledger.some(
-							(c) => c.businessId === selected.id && c.status === "WAITING",
-						) && (
-							<Note tone="warning">
-								This business hasn't paid its Hospio360 fee yet. Your commission for
-								the month is paid once they do.
-							</Note>
-						)}
-						<PanelSection title="History">
+						<PanelSection title="Commission lines">
 							<CommissionTable
 								rows={ledger.filter(
 									(c) =>

@@ -10,20 +10,23 @@ import {
 	PercentIcon,
 	UserPlusIcon,
 } from "lucide-react";
+import Link from "next/link";
 import { useQueryState } from "nuqs";
 import { useEffect, useState } from "react";
 import {
 	inviteMarketer,
 	loadMarketer,
-	payCommission,
 	setReferralStage,
 	updateMarketer,
 } from "@hospio/api/actions/platform-admin";
+import { markMarketerBankChecked } from "@hospio/api/actions/marketer-admin";
 import { useAction } from "@hospio/api/actions/use-action";
 import type {
 	CommissionLine,
+	LoadResult,
 	MarketerInvitedData,
 	MarketerProfileRow,
+	MarketerStatementList,
 	Paged,
 	ReferralItem,
 	ReferralStage,
@@ -31,7 +34,7 @@ import type {
 import type { AdminRole } from "@hospio/api/demo/fixtures/platform-extra";
 import { DataTable, TwoLine } from "@hospio/ui/shared/data-table";
 import { withDeliveries } from "@hospio/ui/shared/deliveries-store";
-import { DetailList, Note, TotalsList } from "@hospio/ui/shared/detail-list";
+import { DetailList, Note } from "@hospio/ui/shared/detail-list";
 import { FieldRow, SelectField, TextField } from "@hospio/ui/shared/field";
 import {
 	fmtLongDate,
@@ -50,7 +53,7 @@ import {
 	SidePanel,
 	WhatHappens,
 } from "@hospio/ui/shared/side-panel";
-import { StatusPill } from "@hospio/ui/shared/status-pill";
+import { type PillTone, StatusPill } from "@hospio/ui/shared/status-pill";
 import { FilterSelect, SearchBox, Toolbar } from "@hospio/ui/shared/toolbar";
 import { btn } from "@hospio/ui/shared/ui";
 import { cn } from "@hospio/ui/utils";
@@ -64,6 +67,13 @@ import {
 	useRefresh,
 } from "./live";
 import { can, ReadOnlyNote, StagePill } from "./shared";
+import { BankCheckPill, bankCheckLine } from "../marketer/bank";
+import { byStageLine, monthLabel, naira2 } from "../marketer/shared";
+import {
+	StatementLinesTable,
+	StatementPill,
+} from "../marketer/statement-detail";
+import { MarketerStatementsTab } from "./marketer-statements";
 
 const statusTone = {
 	PENDING: "warning",
@@ -82,19 +92,23 @@ const stageForPill = (s: ReferralStage) =>
 
 /**
  * Admin — E1–E7 · Marketers (Figma 3305:3841): profiles from GET /platform/admin/marketers, a detail
- * panel with agreements, referrals and commissions, invite (E5), approve (E3), change share (E6), end
- * (E7), pay commissions (E4) and a referrals board; everything writes to platform-service.
+ * panel with the agreement, bank check, business agreements, statements and referrals, invite (E5),
+ * approve (E3), change share (E6), end (E7), monthly statements for finance (make, approve, record the
+ * payment, export) and a referrals board; everything writes to platform-service.
  */
 export function MarketersScreen({
 	role,
 	marketers: initial,
 	commissions,
+	statements,
 	referrals,
 	inviterName,
 }: {
 	role: AdminRole;
 	marketers: MarketerProfileRow[];
 	commissions: Paged<CommissionLine>;
+	/** The statements tab (money roles), filtered by `?smonth=&sstatus=`. */
+	statements: LoadResult<MarketerStatementList>;
 	referrals: Paged<ReferralItem>;
 	inviterName: string;
 }) {
@@ -113,7 +127,6 @@ export function MarketersScreen({
 		m: MarketerProfileRow;
 	} | null>(null);
 	const [share, setShare] = useState<MarketerProfileRow | null>(null);
-	const [pay, setPay] = useState<CommissionLine | null>(null);
 	const { run, pending } = useAction();
 	const { refresh } = useRefresh();
 	const money = can.money(role);
@@ -151,7 +164,46 @@ export function MarketersScreen({
 			cell: ({ row }) =>
 				`${row.original.sharePct}% · ${row.original.months} months`,
 		},
-		{ accessorKey: "businesses", header: "Businesses" },
+		{
+			accessorKey: "businesses",
+			header: "Businesses referred",
+			cell: ({ row }) => (
+				<TwoLine
+					primary={row.original.businesses}
+					secondary={byStageLine(row.original.byStage) || undefined}
+				/>
+			),
+		},
+		{
+			id: "checks",
+			header: "Agreement · bank",
+			cell: ({ row }) => (
+				<span className="flex flex-wrap gap-1">
+					<StatusPill
+						dot={false}
+						tone={row.original.agreementAccepted ? "success" : "grey"}
+					>
+						{row.original.agreementAccepted ? "accepted" : "not accepted"}
+					</StatusPill>
+					<StatusPill
+						dot={false}
+						tone={
+							row.original.bankChecked
+								? "success"
+								: row.original.bankName
+									? "warning"
+									: "grey"
+						}
+					>
+						{row.original.bankChecked
+							? "bank checked"
+							: row.original.bankName
+								? "bank to check"
+								: "no bank"}
+					</StatusPill>
+				</span>
+			),
+		},
 		{
 			accessorKey: "earnedTotal",
 			header: "Earned so far",
@@ -237,10 +289,17 @@ export function MarketersScreen({
 				/>
 			),
 		},
-		{ accessorKey: "month", header: "Month" },
+		{
+			accessorKey: "month",
+			header: "Fee day",
+			cell: ({ row }) =>
+				row.original.feeDate
+					? fmtLongDate(row.original.feeDate)
+					: row.original.month,
+		},
 		{
 			accessorKey: "baseAmount",
-			header: "Hospio360 share",
+			header: "Fee collected",
 			cell: ({ row }) => (
 				<span className="text-ink-2">{naira(row.original.baseAmount)}</span>
 			),
@@ -270,21 +329,10 @@ export function MarketersScreen({
 			cell: ({ row }) => <CommissionStatusPill status={row.original.status} />,
 		},
 		{
-			id: "pay",
+			id: "ref",
 			header: "",
 			cell: ({ row }) =>
-				money && row.original.status === "DUE" ? (
-					<button
-						type="button"
-						className={cn(btn.secondary, btn.small)}
-						onClick={(e) => {
-							e.stopPropagation();
-							setPay(row.original);
-						}}
-					>
-						Pay
-					</button>
-				) : row.original.paidReference ? (
+				row.original.paidReference ? (
 					<span className="text-xs text-ink-3">
 						{row.original.paidReference}
 					</span>
@@ -296,7 +344,7 @@ export function MarketersScreen({
 		<>
 			<PageHeader
 				title="Marketers"
-				subtitle="People who bring hotels onto Hospio360 · a share of our fee for a number of months, 5% WHT deducted"
+				subtitle="People who refer hotels to Hospio360 · a share of the platform fee collected from each business they refer, for a number of months · monthly statements, 5% WHT deducted"
 			>
 				{editable && (
 					<button
@@ -322,6 +370,7 @@ export function MarketersScreen({
 					label="Businesses referred"
 					value={marketers.reduce((a, m) => a + m.businesses, 0)}
 					icon={UserPlusIcon}
+					hint="Every stage, from lead to live"
 				/>
 				<KpiCard
 					label="Earned all time"
@@ -329,9 +378,10 @@ export function MarketersScreen({
 					icon={CoinsIcon}
 				/>
 				<KpiCard
-					label="Due now"
+					label="Due on statements"
 					value={nairaShort(marketers.reduce((a, m) => a + m.due, 0))}
 					icon={CoinsIcon}
+					hint="Statements made and not paid yet"
 					pill={
 						marketers.some((m) => m.due > 0) ? (
 							<StatusPill tone="warning">
@@ -349,8 +399,13 @@ export function MarketersScreen({
 							...(money
 								? [
 										{
+											key: "statements",
+											label: "Statements",
+											count: statements.data.counts.all ?? 0,
+										},
+										{
 											key: "commissions",
-											label: "Commissions",
+											label: "Commission lines",
 											count: commissions.total,
 										},
 									]
@@ -393,9 +448,10 @@ export function MarketersScreen({
 								}}
 								all="Any status"
 								options={[
-									{ value: "DUE", label: "Due" },
+									{ value: "ACCRUED", label: "Next statement" },
+									{ value: "ON_STATEMENT", label: "On a statement" },
 									{ value: "PAID", label: "Paid" },
-									{ value: "WAITING", label: "Waiting on the hotel" },
+									{ value: "DUE", label: "Due (before statements)" },
 								]}
 							/>
 							<FilterSelect
@@ -426,7 +482,14 @@ export function MarketersScreen({
 					data={commissions.content}
 					server={{ page: commissions, onPage: setPage }}
 					emptyTitle="No commissions"
-					emptyHint="Commissions are created when a referred business pays its monthly fee."
+					emptyHint="A line is made for each day's platform fee collected from a referred business; finance pays them through monthly statements."
+				/>
+			)}
+			{active === "statements" && money && (
+				<MarketerStatementsTab
+					role={role}
+					result={statements}
+					onChanged={refresh}
 				/>
 			)}
 			{active === "referrals" && (
@@ -447,7 +510,6 @@ export function MarketersScreen({
 				onEnd={(m) => setConfirm({ kind: "end", m })}
 				onReactivate={(m) => setConfirm({ kind: "reactivate", m })}
 				onShare={setShare}
-				onPay={setPay}
 				onChanged={refresh}
 			/>
 
@@ -473,8 +535,9 @@ export function MarketersScreen({
 			>
 				<WhatHappens
 					items={[
-						`${confirm?.m.sharePct}% of the Hospio360 share for ${confirm?.m.months} months per business they bring`,
-						"5% withholding tax is deducted from every payout",
+						`${confirm?.m.sharePct}% of the platform fee collected from each business they refer, for ${confirm?.m.months} months from its first collected fee`,
+						"They accept the Referral Partner Agreement before their referral link works",
+						"5% withholding tax is deducted on every statement",
 						"They see only businesses they referred",
 					]}
 				/>
@@ -506,7 +569,7 @@ export function MarketersScreen({
 				onOpenChange={(o) => !o && setConfirm(null)}
 				tone="danger"
 				title={`End agreement with ${confirm?.m.fullName}?`}
-				subtitle="No new referrals; commissions already earned are still paid out"
+				subtitle="No new referrals; commission already earned is still paid through their statements"
 				confirmLabel="End agreement"
 				pending={pending}
 				onConfirm={() =>
@@ -526,8 +589,8 @@ export function MarketersScreen({
 					tone="danger"
 					items={[
 						"The referral link stops working today",
-						`${naira(confirm?.m.due ?? 0)} due now is still paid in the next run`,
-						"Months already running keep paying until they expire",
+						`${naira(confirm?.m.due ?? 0)} on statements made is still paid`,
+						"What their businesses already earned stays on their statements",
 					]}
 				/>
 			</ConfirmModal>
@@ -538,14 +601,6 @@ export function MarketersScreen({
 				onSaved={(m) => {
 					update(m);
 					setShare(null);
-					refresh();
-				}}
-			/>
-			<PayCommissionModal
-				line={pay}
-				onClose={() => setPay(null)}
-				onPaid={() => {
-					setPay(null);
 					refresh();
 				}}
 			/>
@@ -562,28 +617,30 @@ export function MarketersScreen({
 	);
 }
 
+const commissionStatus: Record<string, { label: string; tone: PillTone }> = {
+	ACCRUED: { label: "next statement", tone: "info" },
+	ON_STATEMENT: { label: "on a statement", tone: "brand" },
+	PAID: { label: "paid", tone: "success" },
+	DUE: { label: "due", tone: "warning" },
+	WAITING: { label: "not collected", tone: "grey" },
+};
+
 export function CommissionStatusPill({ status }: { status: string }) {
+	const s = commissionStatus[status];
 	return (
-		<StatusPill
-			dot={false}
-			tone={
-				status === "PAID" ? "success" : status === "DUE" ? "warning" : "grey"
-			}
-		>
-			{status === "WAITING" ? "hotel hasn't paid" : status.toLowerCase()}
+		<StatusPill dot={false} tone={s?.tone ?? "grey"}>
+			{s?.label ?? status.toLowerCase()}
 		</StatusPill>
 	);
 }
 
-/** The commission ledger as a compact table (also used by the marketer portal). */
+/** Commission lines as a compact table (also used by the marketer portal); paid through monthly statements. */
 export function CommissionTable({
 	rows,
 	sharePct,
-	onPay,
 }: {
 	rows: CommissionLine[];
 	sharePct?: number;
-	onPay?: (c: CommissionLine) => void;
 }) {
 	if (rows.length === 0)
 		return <p className="text-sm text-ink-3">Nothing earned yet.</p>;
@@ -592,16 +649,15 @@ export function CommissionTable({
 			<table className="w-full text-left">
 				<thead>
 					<tr className="border-b border-line bg-[#fafafa] text-[11px] font-semibold uppercase tracking-[0.04em] text-ink-3">
-						<th className="px-3 py-2">Month</th>
+						<th className="px-3 py-2">Fee day</th>
 						<th className="px-3 py-2">Business</th>
-						<th className="px-3 py-2 text-right">Hospio360 share</th>
+						<th className="px-3 py-2 text-right">Fee collected</th>
 						<th className="px-3 py-2 text-right">
 							{sharePct ? `${sharePct}%` : "Commission"}
 						</th>
 						<th className="px-3 py-2 text-right">WHT</th>
 						<th className="px-3 py-2 text-right">Net</th>
 						<th className="px-3 py-2">Status</th>
-						{onPay && <th className="px-3 py-2" />}
 					</tr>
 				</thead>
 				<tbody>
@@ -610,7 +666,14 @@ export function CommissionTable({
 							key={c.id}
 							className="border-b border-line text-[13px] last:border-b-0"
 						>
-							<td className="px-3 py-2">{c.month}</td>
+							<td className="px-3 py-2">
+								{c.feeDate ? fmtLongDate(c.feeDate) : c.month}
+								{c.source === "CLAWBACK" && (
+									<StatusPill tone="danger" dot={false} className="ml-2">
+										clawback
+									</StatusPill>
+								)}
+							</td>
 							<td className="px-3 py-2">{c.businessName}</td>
 							<td className="px-3 py-2 text-right text-ink-2">
 								{naira(c.baseAmount)}
@@ -625,19 +688,6 @@ export function CommissionTable({
 							<td className="px-3 py-2">
 								<CommissionStatusPill status={c.status} />
 							</td>
-							{onPay && (
-								<td className="px-3 py-2 text-right">
-									{c.status === "DUE" && (
-										<button
-											type="button"
-											className={cn(btn.secondary, btn.small)}
-											onClick={() => onPay(c)}
-										>
-											Pay
-										</button>
-									)}
-								</td>
-							)}
 						</tr>
 					))}
 				</tbody>
@@ -655,7 +705,6 @@ function MarketerPanel({
 	onEnd,
 	onReactivate,
 	onShare,
-	onPay,
 	onChanged,
 }: {
 	id: string | null;
@@ -666,7 +715,6 @@ function MarketerPanel({
 	onEnd: (m: MarketerProfileRow) => void;
 	onReactivate: (m: MarketerProfileRow) => void;
 	onShare: (m: MarketerProfileRow) => void;
-	onPay: (c: CommissionLine) => void;
 	onChanged: () => void;
 }) {
 	const { data, setData, loading, error } = useLoaded(id, loadMarketer);
@@ -691,7 +739,7 @@ function MarketerPanel({
 			width="lg"
 			footerInfo={
 				m
-					? `${m.sharePct}% of the Hospio360 share for ${m.months} months per business · joined ${fmtLongDate(m.joined)}`
+					? `${m.sharePct}% of the platform fee collected for ${m.months} months per business · joined ${fmtLongDate(m.joined)}`
 					: undefined
 			}
 			footer={
@@ -745,19 +793,79 @@ function MarketerPanel({
 						columns={2}
 						items={[
 							{ label: "Earned so far", value: naira(data.earnedTotal) },
-							{ label: "Due now", value: naira(data.due) },
+							{ label: "Due on statements", value: naira(data.due) },
 							{ label: "Paid out", value: naira(data.paid) },
 							{ label: "Referral code", value: m.referralCode ?? "—" },
 							{
-								label: "Bank",
-								value: m.bankName
-									? `${m.bankName} · ${m.bankAccount} · ${m.bankAccountName}`
-									: "Not given yet",
+								label: "Businesses referred",
+								value: `${data.businesses}${byStageLine(data.byStage) ? ` · ${byStageLine(data.byStage)}` : ""}`,
 							},
-							{ label: "Businesses", value: data.agreements.length },
+							{
+								label: "Agreement",
+								value: m.agreementAcceptedAt ? (
+									<span>
+										{m.agreementVersion ?? "—"} · accepted{" "}
+										{fmtLongDate(m.agreementAcceptedAt)}
+										{m.agreementAcceptedName
+											? ` by ${m.agreementAcceptedName}`
+											: ""}
+										{m.agreementVersion &&
+										m.agreementVersion !== data.currentAgreementVersion ? (
+											<span className="text-warning">
+												{" "}
+												· current is {data.currentAgreementVersion}
+											</span>
+										) : null}
+									</span>
+								) : (
+									<StatusPill tone="warning">
+										Not accepted ({data.currentAgreementVersion})
+									</StatusPill>
+								),
+							},
 						]}
 					/>
-					<PanelSection title="Agreements">
+					<PanelSection title="Bank details">
+						<div className="flex flex-col gap-2 rounded-xl border border-line px-4 py-3">
+							<div className="flex items-center gap-3">
+								<p className="min-w-0 flex-1 text-[13px] font-semibold text-ink">
+									{m.bankName
+										? `${m.bankName} · ${m.bankAccount ?? "—"} · ${m.bankAccountName ?? "—"}`
+										: "Not given yet"}
+								</p>
+								<BankCheckPill p={m} />
+							</div>
+							<p className="text-xs text-ink-3">
+								{bankCheckLine(m)}
+								{m.bankSavedAt ? ` · saved ${fmtLongDate(m.bankSavedAt)}` : ""}
+							</p>
+							{m.bankChangeNote && (
+								<p className="text-xs text-ink-2">
+									Why they changed: {m.bankChangeNote}
+								</p>
+							)}
+							{money && m.bankName && !m.bankChecked && (
+								<button
+									type="button"
+									className={cn(btn.secondary, btn.small, "w-fit")}
+									disabled={pending}
+									onClick={() =>
+										run(
+											() => markMarketerBankChecked(m.id, m),
+											`${m.fullName}'s bank details marked checked`,
+											(profile) => {
+												setData({ ...data, profile });
+												onChanged();
+											},
+										)
+									}
+								>
+									Mark checked
+								</button>
+							)}
+						</div>
+					</PanelSection>
+					<PanelSection title="Agreements per business">
 						{data.agreements.length === 0 ? (
 							<p className="text-sm text-ink-3">
 								No business has gone live from their referrals yet.
@@ -769,14 +877,24 @@ function MarketerPanel({
 										key={a.id}
 										className="flex items-center gap-3 px-4 py-[10px] text-[13px]"
 									>
-										<span className="min-w-0 flex-1 font-semibold text-ink">
-											{data.referrals.find((r) => r.businessId === a.businessId)
-												?.hotelName ?? `Business ${a.businessId.slice(0, 8)}`}
-										</span>
-										<span className="text-ink-2">
-											{a.sharePct}% · {a.months} months
-											{a.startedOn ? ` from ${fmtLongDate(a.startedOn)}` : ""}
-										</span>
+										<div className="min-w-0 flex-1">
+											<p className="font-semibold text-ink">
+												{data.referrals.find(
+													(r) => r.businessId === a.businessId,
+												)?.hotelName ?? `Business ${a.businessId.slice(0, 8)}`}
+											</p>
+											<p className="text-xs text-ink-3">
+												{a.sharePct}% · {a.months} months · {a.whtPct}% WHT
+												{a.startedOn
+													? ` · started ${fmtLongDate(a.startedOn)}`
+													: ""}
+												{a.windowStart
+													? ` · earning ${fmtLongDate(a.windowStart)} to ${a.windowEnd ? fmtLongDate(a.windowEnd) : "—"}`
+													: " · window starts with the first collected fee"}
+												{a.endedOn ? ` · ended ${fmtLongDate(a.endedOn)}` : ""}
+												{a.endedReason ? ` (${a.endedReason})` : ""}
+											</p>
+										</div>
 										<StatusPill
 											tone={a.status === "ACTIVE" ? "success" : "grey"}
 										>
@@ -786,6 +904,48 @@ function MarketerPanel({
 								))}
 							</ul>
 						)}
+					</PanelSection>
+					{money && (
+						<PanelSection title={`Statements · ${data.statements.length}`}>
+							{data.statements.length === 0 ? (
+								<p className="text-sm text-ink-3">No statements yet.</p>
+							) : (
+								<ul className="divide-y divide-line rounded-xl border border-line">
+									{data.statements.map((st) => (
+										<li
+											key={st.id}
+											className="flex items-center gap-3 px-4 py-[10px] text-[13px]"
+										>
+											<span className="min-w-0 flex-1 font-semibold text-ink">
+												{monthLabel(st.month)}
+												<span className="font-normal text-ink-3">
+													{" "}
+													· {st.lineCount} lines
+												</span>
+											</span>
+											<span className="font-semibold">
+												{naira2(st.payable)}
+											</span>
+											<StatementPill s={st} />
+										</li>
+									))}
+								</ul>
+							)}
+							<Link
+								href={`/dashboard/marketers?tab=statements&sprofile=${m.id}`}
+								className={cn(btn.link, "w-fit")}
+							>
+								Open in Statements
+							</Link>
+						</PanelSection>
+					)}
+					<PanelSection
+						title={`Next statement so far · ${naira2(data.nextStatement.reduce((a, l) => a + l.net, 0))}`}
+					>
+						<StatementLinesTable
+							lines={data.nextStatement}
+							empty="No lines waiting for the next statement."
+						/>
 					</PanelSection>
 					<PanelSection title={`Referrals · ${data.referrals.length}`}>
 						{data.referrals.length === 0 ? (
@@ -848,12 +1008,8 @@ function MarketerPanel({
 							</ul>
 						)}
 					</PanelSection>
-					<PanelSection title="Commission ledger">
-						<CommissionTable
-							rows={data.commissions}
-							sharePct={m.sharePct}
-							onPay={money ? onPay : undefined}
-						/>
+					<PanelSection title="Commission lines">
+						<CommissionTable rows={data.commissions} sharePct={m.sharePct} />
 					</PanelSection>
 				</div>
 			)}
@@ -968,7 +1124,7 @@ function ShareModal({
 			open={open}
 			onOpenChange={(o) => !o && onClose()}
 			title={`Change ${marketer?.fullName ?? ""}'s share`}
-			subtitle="Applies to new businesses they bring from today; agreements already running keep their terms"
+			subtitle="Applies to businesses they refer from today; agreements already running keep their terms"
 			icon={PercentIcon}
 			size="form"
 			footer={
@@ -1001,7 +1157,7 @@ function ShareModal({
 		>
 			<FieldRow>
 				<TextField
-					label="Share of Hospio360 fee (%)"
+					label="Share of the platform fee collected (%)"
 					value={share}
 					onChange={setShare}
 				/>
@@ -1011,94 +1167,6 @@ function ShareModal({
 					onChange={setMonths}
 				/>
 			</FieldRow>
-		</Modal>
-	);
-}
-
-function PayCommissionModal({
-	line,
-	onClose,
-	onPaid,
-}: {
-	line: CommissionLine | null;
-	onClose: () => void;
-	onPaid: () => void;
-}) {
-	const { run, pending } = useAction();
-	const [ref, setRef] = useState("");
-	const [paidOn, setPaidOn] = useState(new Date().toISOString().slice(0, 10));
-	return (
-		<Modal
-			open={!!line}
-			onOpenChange={(o) => !o && onClose()}
-			title={`Pay ${line?.marketerName ?? ""}`}
-			subtitle={line ? `${line.businessName} · ${line.month}` : undefined}
-			icon={CoinsIcon}
-			size="form"
-			footer={
-				<>
-					<button type="button" className={btn.secondary} onClick={onClose}>
-						Cancel
-					</button>
-					<button
-						type="button"
-						className={btn.primary}
-						disabled={pending || !line}
-						onClick={() =>
-							line &&
-							run(
-								() =>
-									payCommission(
-										line.id,
-										{
-											reference: ref || undefined,
-											paidOn: paidOn || undefined,
-										},
-										line,
-									),
-								`${naira(line.net)} marked paid`,
-								() => {
-									setRef("");
-									onPaid();
-								},
-							)
-						}
-					>
-						Pay {line ? naira(line.net) : ""}
-					</button>
-				</>
-			}
-		>
-			{line && (
-				<div className="flex flex-col gap-4">
-					<TotalsList
-						rows={[
-							{ label: "Commission", value: naira(line.gross) },
-							{ label: "Withholding tax", value: `-${naira(line.wht)}` },
-							{
-								label: "Paid to marketer",
-								value: naira(line.net),
-								strong: true,
-							},
-						]}
-					/>
-					<TextField
-						label="Bank transfer reference"
-						value={ref}
-						onChange={setRef}
-						placeholder="GTB-…"
-					/>
-					<TextField
-						label="Paid on"
-						type="date"
-						value={paidOn}
-						onChange={setPaidOn}
-					/>
-					<Note tone="info">
-						WHT is remitted to FIRS monthly; the marketer gets a credit note.
-					</Note>
-				</div>
-			)}
 		</Modal>
 	);
 }
@@ -1241,7 +1309,7 @@ function InviteMarketerPanel({
 					<PanelSection title="Agreement">
 						<FieldRow>
 							<SelectField
-								label="Share of Hospio360 fee"
+								label="Share of the platform fee"
 								value={share}
 								onChange={setShare}
 								options={[
@@ -1262,8 +1330,9 @@ function InviteMarketerPanel({
 							/>
 						</FieldRow>
 						<Note tone="info">
-							Paid monthly after the hotel pays its fee. 5% WHT is deducted.{" "}
-							{plural(Number(months) || 0, "month")} per business.
+							Earns on the platform fee collected from each business they refer,
+							for {plural(Number(months) || 0, "month")} from its first collected
+							fee. A statement on the 5th, paid by the 15th; 5% WHT is deducted.
 						</Note>
 					</PanelSection>
 				</div>

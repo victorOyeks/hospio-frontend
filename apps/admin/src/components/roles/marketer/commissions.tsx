@@ -1,301 +1,273 @@
 "use client";
 
-import { BanknoteIcon, DownloadIcon, LandmarkIcon } from "lucide-react";
+import {
+	BanknoteIcon,
+	CalendarIcon,
+	CoinsIcon,
+	FileTextIcon,
+	RotateCwIcon,
+} from "lucide-react";
+import { useQueryState } from "nuqs";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import {
-	loadCommissionStatement,
-	saveMarketerBank,
+	loadMyStatement,
+	queryMyStatement,
 } from "@hospio/api/actions/marketer";
 import { useAction } from "@hospio/api/actions/use-action";
 import type {
-	CommissionLine,
+	LoadResult,
 	MarketerMeData,
+	MarketerStatementRow,
+	MyStatementsData,
 } from "@hospio/api/data/admin-types";
-import type { PageResult } from "@hospio/api/data/paging";
-import { DetailList, Note } from "@hospio/ui/shared/detail-list";
+import { Note } from "@hospio/ui/shared/detail-list";
 import { EmptyState } from "@hospio/ui/shared/empty-state";
-import { useListParams } from "@hospio/ui/shared/list-params";
-import { ServerPager } from "@hospio/ui/shared/server-pager";
-import { SelectField, TextField } from "@hospio/ui/shared/field";
-import { naira, nairaShort } from "@hospio/ui/shared/format";
+import { TextareaField } from "@hospio/ui/shared/field";
+import { nairaShort } from "@hospio/ui/shared/format";
 import { KpiCard } from "@hospio/ui/shared/kpi-card";
-import { Modal } from "@hospio/ui/shared/modal";
 import { PageHeader } from "@hospio/ui/shared/page-header";
-import { PillTabs } from "@hospio/ui/shared/pill-tabs";
 import { SectionCard } from "@hospio/ui/shared/section-card";
 import { PanelSection, SidePanel } from "@hospio/ui/shared/side-panel";
 import { btn } from "@hospio/ui/shared/ui";
 import { cn } from "@hospio/ui/utils";
-import { CommissionTable } from "../admin/marketers";
-import { monthOptions } from "../admin/live";
-
-const BANKS = [
-	"GTBank",
-	"Access",
-	"Zenith",
-	"UBA",
-	"First Bank",
-	"Kuda",
-	"Moniepoint",
-	"OPay",
-	"Stanbic IBTC",
-	"Fidelity",
-	"Sterling",
-	"Wema",
-];
+import { Loading, useLoaded } from "../admin/live";
+import { AgreementTerms } from "./agreement";
+import { BankDetailsCard } from "./bank";
+import { monthLabel, naira2, statementMeaning } from "./shared";
+import {
+	StatementBody,
+	StatementLinesTable,
+	StatementPill,
+} from "./statement-detail";
 
 /**
- * Marketer — Commissions: GET /platform/marketer/commissions one page at a time (`?status=&page=`), the money and tab
- * counts over every line from the server, the text statement, and PUT /marketer/me/bank.
+ * Marketer — Commissions, statements first: GET /platform/marketer/statements (my statements and the lines waiting for
+ * the next one), one statement in a panel (`?open=`) with Raise a query while it can be queried, and my bank details.
  */
 export function MarketerCommissions({
 	me: initialMe,
 	result,
-	overall,
 }: {
 	me: MarketerMeData;
-	/** The ledger page on screen, for the status tab. */
-	result: PageResult<CommissionLine>;
-	/** Every line's counts and money (no status filter), for the cards and tabs. */
-	overall: PageResult<CommissionLine>;
+	result: LoadResult<MyStatementsData>;
 }) {
 	const router = useRouter();
-	const list = useListParams();
 	const [me, setMe] = useState(initialMe);
 	useEffect(() => setMe(initialMe), [initialMe]);
-	const [statement, setStatement] = useState(false);
-	const [bank, setBank] = useState(false);
-	const months = monthOptions(12).map((o) => o.value);
-	const [month, setMonth] = useState(months[0]);
-	const [bankName, setBankName] = useState(me.profile.bankName ?? "");
-	const [account, setAccount] = useState(me.profile.bankAccount ?? "");
-	const [accountName, setAccountName] = useState(
-		me.profile.bankAccountName ?? me.profile.fullName,
-	);
-	const { run, pending } = useAction();
-	const active = list.params.status ?? "ALL";
-	const counts = overall.data.counts ?? {};
-	const totals = overall.data.totals ?? {};
+	const [open, setOpen] = useQueryState("open");
 	const p = me.profile;
-
-	const download = (text: string, name: string) => {
-		const blob = new Blob([text], { type: "text/plain;charset=utf-8" });
-		const url = URL.createObjectURL(blob);
-		const a = document.createElement("a");
-		a.href = url;
-		a.download = name;
-		a.click();
-		URL.revokeObjectURL(url);
-	};
+	const { statements, nextStatement } = result.data;
+	const nextNet = nextStatement.reduce((a, l) => a + l.net, 0);
 
 	return (
 		<>
 			<PageHeader
 				title="Commissions"
-				subtitle={`${p.sharePct}% of the Hospio360 share on each business, for ${p.months} months · 5% withholding tax deducted · paid once the hotel has paid`}
-			>
-				<button
-					type="button"
-					onClick={() => setBank(true)}
-					className={cn(btn.secondary, "flex items-center gap-2")}
-				>
-					<LandmarkIcon className="size-4" /> Bank details
-				</button>
-				<button
-					type="button"
-					onClick={() => setStatement(true)}
-					className={cn(btn.primary, "flex items-center gap-2")}
-				>
-					<DownloadIcon className="size-4" /> Download statement
-				</button>
-			</PageHeader>
-			{!p.bankName && (
-				<Note tone="warning">
-					Add your bank details so Hospio360 can pay you. Nothing is paid until they
-					are in.
-				</Note>
-			)}
+				subtitle={`${p.sharePct}% of the platform fee collected from each business you refer, for ${p.months} months · ${me.whtPct}% WHT deducted · a statement on the 5th, paid by the 15th`}
+			/>
 			<div className="grid grid-cols-2 gap-4 md:grid-cols-4">
 				<KpiCard
-					label="Paid all time"
+					label="Next statement so far"
+					value={nairaShort(me.totals.nextStatement || nextNet)}
+					icon={CalendarIcon}
+					hint="Statement on the 5th"
+				/>
+				<KpiCard
+					label="Due to you"
+					value={nairaShort(me.totals.due)}
+					icon={CoinsIcon}
+					hint="Approved statements are paid by the 15th"
+				/>
+				<KpiCard
+					label="Paid so far"
 					value={nairaShort(me.totals.paid)}
 					icon={BanknoteIcon}
 				/>
 				<KpiCard
-					label="Due now"
-					value={nairaShort(totals.due ?? 0)}
-					icon={BanknoteIcon}
-					hint="Paid on the 5th"
-				/>
-				<KpiCard
-					label="Waiting on hotels"
-					value={nairaShort(totals.waiting ?? 0)}
-					icon={BanknoteIcon}
-					hint="They haven't paid Hospio360 yet"
-				/>
-				<KpiCard
-					label="Gross before WHT"
-					value={nairaShort(totals.gross ?? 0)}
-					icon={BanknoteIcon}
-					hint={`WHT ${naira(totals.wht ?? 0)}`}
+					label="Carried over"
+					value={nairaShort(me.totals.carried)}
+					icon={RotateCwIcon}
+					hint={`Under ${naira2(me.minimumPayout).replace(".00", "")} · rolls into the next statement`}
 				/>
 			</div>
-			<PillTabs
-				tabs={[
-					{ key: "ALL", label: "All", count: counts.all ?? 0 },
-					{ key: "DUE", label: "Due", count: counts.DUE ?? 0 },
-					{ key: "WAITING", label: "Waiting", count: counts.WAITING ?? 0 },
-					{ key: "PAID", label: "Paid", count: counts.PAID ?? 0 },
-				]}
-				value={active}
-				onChange={(k) => list.set({ status: k === "ALL" ? null : k })}
-			/>
-			<SectionCard title="Ledger" subtitle="One line per business per month">
-				{result.ok ? (
-					<CommissionTable rows={result.data.content} sharePct={p.sharePct} />
-				) : (
-					<EmptyState title="The ledger didn't load" hint={result.error}>
-						<button
-							type="button"
-							onClick={() => router.refresh()}
-							className={cn(btn.secondary, btn.small, "mt-2")}
-						>
-							Try again
-						</button>
-					</EmptyState>
-				)}
-				{result.data.total > 0 && (
-					<ServerPager bare page={result.data} onPage={list.goTo} />
-				)}
-			</SectionCard>
-			<Note tone="info">
-				How it's worked out: the hotel pays Hospio360 its monthly fee → you get{" "}
-				{p.sharePct}% of that → 5% withholding tax comes off → the rest is
-				transferred to your bank.
-			</Note>
 
-			<Modal
-				open={statement}
-				onOpenChange={setStatement}
-				title="Download statement"
-				subtitle="A text statement of every line in the month, with the WHT deducted"
-				icon={DownloadIcon}
-				size="confirm"
-				footer={
-					<>
-						<button
-							type="button"
-							className={btn.secondary}
-							onClick={() => setStatement(false)}
+			<div className="grid gap-4 xl:grid-cols-[1fr_380px]">
+				<SectionCard
+					title="Statements"
+					subtitle="One a month, made on the 5th for the month before"
+					count={statements.length}
+					flush
+				>
+					{!result.ok ? (
+						<EmptyState
+							title="Your statements didn't load"
+							hint={result.error}
+							className="mx-5 mb-5"
 						>
-							Cancel
-						</button>
-						<button
-							type="button"
-							className={btn.primary}
-							disabled={pending || !month}
-							onClick={() =>
-								run(
-									() => loadCommissionStatement(month),
-									`Statement for ${month} downloaded`,
-									(s) => {
-										download(s.text, `hms-commissions-${s.month}.txt`);
-										setStatement(false);
-									},
-								)
-							}
-						>
-							Download .txt
-						</button>
-					</>
-				}
-			>
-				<SelectField
-					label="Month"
-					value={month}
-					onChange={setMonth}
-					options={monthOptions(12)}
-				/>
-			</Modal>
-
-			<SidePanel
-				open={bank}
-				onOpenChange={setBank}
-				title="Bank details"
-				subtitle="Where your commissions are paid"
-				icon={LandmarkIcon}
-				width="md"
-				footer={
-					<>
-						<button
-							type="button"
-							className={btn.secondary}
-							onClick={() => setBank(false)}
-						>
-							Cancel
-						</button>
-						<button
-							type="button"
-							className={btn.primary}
-							disabled={pending || !bankName || !account || !accountName}
-							onClick={() =>
-								run(
-									() =>
-										saveMarketerBank(
-											{
-												bankName,
-												bankAccount: account,
-												bankAccountName: accountName,
-											},
-											p,
-										),
-									"Bank details saved",
-									(profile) => {
-										setMe({ ...me, profile });
-										setBank(false);
-									},
-								)
-							}
-						>
-							Save
-						</button>
-					</>
-				}
-			>
-				<div className="flex flex-col gap-5">
-					<DetailList
-						columns={2}
-						items={[
-							{ label: "Marketer", value: p.fullName },
-							{ label: "Email", value: p.email },
-						]}
+							<button
+								type="button"
+								onClick={() => router.refresh()}
+								className={cn(btn.secondary, btn.small, "mt-2")}
+							>
+								Try again
+							</button>
+						</EmptyState>
+					) : statements.length === 0 ? (
+						<EmptyState
+							title="No statements yet"
+							hint="Your first statement is made on the 5th after a fee is collected from a business you referred."
+							className="mx-5 mb-5"
+						/>
+					) : (
+						<StatementList rows={statements} onOpen={(id) => setOpen(id)} />
+					)}
+				</SectionCard>
+				<div className="flex flex-col gap-4">
+					<BankDetailsCard
+						profile={p}
+						onSaved={(profile) => setMe({ ...me, profile })}
 					/>
-					<PanelSection title="Account">
-						<SelectField
-							label="Bank"
-							value={bankName}
-							onChange={setBankName}
-							options={
-								BANKS.includes(bankName) || !bankName
-									? BANKS
-									: [bankName, ...BANKS]
-							}
-						/>
-						<TextField
-							label="Account number"
-							value={account}
-							onChange={setAccount}
-							placeholder="0123456789"
-						/>
-						<TextField
-							label="Name on the account"
-							value={accountName}
-							onChange={setAccountName}
-						/>
-					</PanelSection>
+					<SectionCard title="How you are paid" bodyClassName="pt-2">
+						<AgreementTerms me={me} />
+					</SectionCard>
 				</div>
-			</SidePanel>
+			</div>
+
+			<SectionCard
+				title="Next statement so far"
+				subtitle={`Lines earned since your last statement · ${naira2(nextNet)} net so far`}
+				bodyClassName="pt-2"
+			>
+				<StatementLinesTable
+					lines={nextStatement}
+					empty="Nothing yet: lines appear as fees are collected from the businesses you referred."
+				/>
+			</SectionCard>
+
+			<MyStatementPanel id={open} onClose={() => void setOpen(null)} />
 		</>
+	);
+}
+
+function StatementList({
+	rows,
+	onOpen,
+}: {
+	rows: MarketerStatementRow[];
+	onOpen: (id: string) => void;
+}) {
+	return (
+		<ul className="divide-y divide-line border-t border-line">
+			{rows.map((s) => (
+				<li key={s.id}>
+					<button
+						type="button"
+						onClick={() => onOpen(s.id)}
+						className="flex w-full items-center gap-3 px-5 py-3 text-left hover:bg-subtle/60"
+					>
+						<FileTextIcon className="size-4 shrink-0 text-ink-3" />
+						<div className="min-w-0 flex-1">
+							<p className="text-[13px] font-semibold text-ink">
+								{monthLabel(s.month)}
+							</p>
+							<p className="truncate text-xs text-ink-3">
+								{statementMeaning(s)}
+							</p>
+						</div>
+						<span className="text-[13px] font-semibold text-ink">
+							{naira2(s.payable)}
+						</span>
+						<StatementPill s={s} />
+					</button>
+				</li>
+			))}
+		</ul>
+	);
+}
+
+function MyStatementPanel({
+	id,
+	onClose,
+}: {
+	id: string | null;
+	onClose: () => void;
+}) {
+	const { data, setData, loading, error } = useLoaded(id, loadMyStatement);
+	const { run, pending } = useAction();
+	const [asking, setAsking] = useState(false);
+	const [note, setNote] = useState("");
+	useEffect(() => {
+		setAsking(false);
+		setNote("");
+	}, [id]);
+	const s = data?.statement;
+	return (
+		<SidePanel
+			open={!!id}
+			onOpenChange={(o) => !o && onClose()}
+			title={s ? `Statement · ${monthLabel(s.month)}` : "Statement"}
+			subtitle={s ? `${s.lineCount} lines · payable ${naira2(s.payable)}` : undefined}
+			icon={FileTextIcon}
+			width="lg"
+			footer={
+				s?.canQuery && !asking ? (
+					<button
+						type="button"
+						className={btn.secondary}
+						onClick={() => setAsking(true)}
+					>
+						Raise a query
+					</button>
+				) : asking && data ? (
+					<>
+						<button
+							type="button"
+							className={btn.secondary}
+							onClick={() => setAsking(false)}
+						>
+							Cancel
+						</button>
+						<button
+							type="button"
+							className={btn.primary}
+							disabled={pending || note.trim().length < 5}
+							onClick={() =>
+								run(
+									() => queryMyStatement(data.statement.id, note.trim(), data),
+									"Query sent to Hospio360",
+									(d) => {
+										setData(d);
+										setAsking(false);
+										setNote("");
+									},
+								)
+							}
+						>
+							Send query
+						</button>
+					</>
+				) : undefined
+			}
+		>
+			{loading && <Loading />}
+			{error && <Note tone="danger">{error}</Note>}
+			{data && (
+				<div className="flex flex-col gap-5">
+					{asking && (
+						<PanelSection title="Raise a query">
+							<TextareaField
+								label="What looks wrong?"
+								value={note}
+								onChange={setNote}
+								placeholder="A day's fee from Royal Suites is missing…"
+								hint="Hospio360 answers before approving the statement."
+							/>
+						</PanelSection>
+					)}
+					<StatementBody detail={data} />
+				</div>
+			)}
+		</SidePanel>
 	);
 }

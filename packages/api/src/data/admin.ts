@@ -20,11 +20,14 @@ import type {
 	IntegrationView,
 	MarketerAgreement,
 	MarketerProfile,
+	MarketerStatement,
 	PayoutBatch,
 	PlatformActivity,
 	PlatformChange,
 	Referral,
 	Settlement,
+	StatementDetail,
+	StatementLine,
 	SupportTicket,
 	SupportTicketComment,
 } from "@hospio/api/api/routes-admin";
@@ -57,12 +60,18 @@ import {
 	type IntegrationFieldType,
 	type IntegrationItem,
 	type IntegrationsData,
+	type LoadResult,
 	type MarketerAgreementRow,
 	type MarketerBusinessItem,
 	type MarketerDetailData,
 	type MarketerMeData,
 	type MarketerProfileRow,
+	type MarketerStatementDetail,
+	type MarketerStatementList,
+	type MarketerStatementRow,
+	type MarketerStatementStatus,
 	type MarketerStatus,
+	type MyStatementsData,
 	type OverviewData,
 	type Paged,
 	type PaymentSummaryData,
@@ -72,6 +81,8 @@ import {
 	type ReferralItem,
 	type ReferralStage,
 	type SettlementItem,
+	STATEMENT_STATUSES,
+	type StatementLineItem,
 	type SupportAccessGrantItem,
 	type TeamMemberRow,
 	type TicketDetailData,
@@ -288,9 +299,12 @@ const marketerStatus = (v: string): MarketerStatus =>
 export const toMarketerProfileRow = (
 	p: MarketerProfile,
 	extra: {
-		businesses?: number;
+		businesses?: number | null;
 		earnedTotal?: number | null;
 		due?: number | null;
+		byStage?: Record<string, number> | null;
+		agreementAccepted?: boolean | null;
+		bankChecked?: boolean | null;
 	} = {},
 ): MarketerProfileRow => ({
 	id: p.id,
@@ -310,16 +324,106 @@ export const toMarketerProfileRow = (
 	businesses: extra.businesses ?? 0,
 	earnedTotal: n(extra.earnedTotal),
 	due: n(extra.due),
+	byStage: extra.byStage ?? undefined,
+	agreementVersion: s(p.agreementVersion),
+	agreementAcceptedAt: s(p.agreementAcceptedAt),
+	agreementAcceptedName: s(p.agreementAcceptedName),
+	agreementAccepted: extra.agreementAccepted ?? !!p.agreementAcceptedAt,
+	bankSavedAt: s(p.bankSavedAt),
+	bankChangeNote: s(p.bankChangeNote),
+	bankCheckedAt: s(p.bankCheckedAt),
+	bankCheckedByName: s(p.bankCheckedByName),
+	bankChecked: extra.bankChecked ?? !!p.bankCheckedAt,
 });
-const toAgreementRow = (a: MarketerAgreement): MarketerAgreementRow => ({
+export const toAgreementRow = (
+	a: MarketerAgreement,
+): MarketerAgreementRow => ({
 	id: a.id,
 	businessId: a.businessId ?? "",
+	profileId: s(a.profileId),
+	fullName: s(a.fullName),
 	sharePct: n(a.sharePct),
 	months: n(a.months),
 	whtPct: n(a.whtPct),
 	status: a.status,
 	startedOn: s(a.startedOn),
 	endedOn: s(a.endedOn),
+	windowStart: s(a.windowStart),
+	windowEnd: s(a.windowEnd),
+	endedReason: s(a.endedReason),
+});
+const statementStatus = (v: string): MarketerStatementStatus =>
+	(STATEMENT_STATUSES as string[]).includes(v)
+		? (v as MarketerStatementStatus)
+		: "DRAFT";
+export const toStatementRow = (r: MarketerStatement): MarketerStatementRow => ({
+	id: r.id,
+	profileId: s(r.profileId),
+	marketerName: r.marketerName ?? "—",
+	marketerEmail: s(r.marketerEmail),
+	month: r.month,
+	status: statementStatus(r.status),
+	lineCount: n(r.lineCount),
+	feesCollected: n(r.feesCollected),
+	gross: n(r.gross),
+	clawback: n(r.clawback),
+	wht: n(r.wht),
+	net: n(r.net),
+	carriedIn: n(r.carriedIn),
+	payable: n(r.payable),
+	minimumPayout: n(r.minimumPayout) || 5000,
+	carriedToMonth: s(r.carriedToMonth),
+	queryUntil: s(r.queryUntil),
+	canQuery: !!r.canQuery,
+	queryNote: s(r.queryNote),
+	queriedAt: s(r.queriedAt),
+	queryAnswer: s(r.queryAnswer),
+	approvedAt: s(r.approvedAt),
+	approvedByName: s(r.approvedByName),
+	paidAmount: r.paidAmount ?? undefined,
+	paidReference: s(r.paidReference),
+	paidOn: s(r.paidOn),
+	paidRecordedName: s(r.paidRecordedName),
+	paidEmailSentAt: s(r.paidEmailSentAt),
+	bankName: s(r.bankName),
+	bankAccount: s(r.bankAccount),
+	bankAccountName: s(r.bankAccountName),
+	bankChecked: !!r.bankChecked,
+	createdAt: s(r.createdAt),
+});
+export const toStatementLine = (l: StatementLine): StatementLineItem => ({
+	id: l.id,
+	businessId: s(l.businessId),
+	businessName: l.businessName ?? "—",
+	hotelId: s(l.hotelId),
+	source: l.source ?? "DAILY_FEE",
+	feeDate: s(l.feeDate),
+	earnedOn: s(l.earnedOn),
+	month: s(l.month),
+	feeCollected: n(l.feeCollected),
+	sharePct: n(l.sharePct),
+	gross: n(l.gross),
+	whtPct: n(l.whtPct),
+	wht: n(l.wht),
+	net: n(l.net),
+	status: l.status ?? "ACCRUED",
+	note: s(l.note),
+});
+export const toStatementDetail = (
+	d: StatementDetail,
+): MarketerStatementDetail => ({
+	statement: toStatementRow(d.statement),
+	businesses: (d.businesses ?? []).map((b) => ({
+		businessId: s(b.businessId),
+		businessName: b.businessName ?? "—",
+		feesCollected: n(b.feesCollected),
+		gross: n(b.gross),
+		wht: n(b.wht),
+		net: n(b.net),
+		lines: n(b.lines),
+	})),
+	lines: (d.lines ?? []).map(toStatementLine),
+	carriedFrom: (d.carriedFrom ?? []).map(toStatementRow),
 });
 const referralStage = (v: string): ReferralStage =>
 	v === "CONTACTED" || v === "ONBOARDING" || v === "LIVE" || v === "LOST"
@@ -357,6 +461,13 @@ export const toCommissionLine = (
 	status: c.status,
 	paidOn: s(c.paidOn) ?? (c.paidAt ? c.paidAt.slice(0, 10) : undefined),
 	paidReference: s(c.paidReference),
+	source: s(c.source),
+	feeDate: s(c.feeDate),
+	earnedOn: s(c.earnedOn),
+	sharePct: c.sharePct ?? undefined,
+	whtPct: c.whtPct ?? undefined,
+	statementId: s(c.statementId),
+	note: s(c.note),
 });
 const fromCommissionRow = (r: CommissionRow) =>
 	toCommissionLine(r.commission, r.marketerName, r.businessName);
@@ -635,6 +746,212 @@ const demoTeam: TeamMemberRow[] = platform.demoAdminUsers.map((u) => ({
 
 /** The demo marketer: whoever signs in walks through Kunle Oshodi's portal. */
 const demoMe = demoMarketers[0];
+
+// Demo statements: a few days of collected fees per business, each line at the marketer's share less 5% WHT.
+const r2 = (v: number) => Math.round(v * 100) / 100;
+const demoMonth = (back: number) => {
+	const d = new Date();
+	d.setDate(1);
+	d.setMonth(d.getMonth() - back);
+	return d.toISOString().slice(0, 7);
+};
+function demoLines(
+	month: string,
+	businesses: { name: string; fee: number }[],
+	sharePct: number,
+	status: string,
+	clawback?: { name: string; amount: number },
+): StatementLineItem[] {
+	const line = (
+		id: string,
+		name: string,
+		fee: number,
+		date: string,
+		source = "DAILY_FEE",
+		note?: string,
+	): StatementLineItem => {
+		const gross = r2((fee * sharePct) / 100);
+		const wht = r2(gross * 0.05);
+		return {
+			id,
+			businessId: demoBizId(name),
+			businessName: name,
+			source,
+			feeDate: date,
+			earnedOn: date,
+			month,
+			feeCollected: fee,
+			sharePct,
+			gross,
+			whtPct: 5,
+			wht,
+			net: r2(gross - wht),
+			status,
+			note,
+		};
+	};
+	const lines = businesses.flatMap((b, i) =>
+		[3, 2, 1].map((d) =>
+			line(
+				`ln-${month}-${i}-${d}`,
+				b.name,
+				b.fee + d * 150,
+				`${month}-${String(d * 7).padStart(2, "0")}`,
+			),
+		),
+	);
+	if (clawback)
+		lines.push(
+			line(
+				`ln-${month}-cb`,
+				clawback.name,
+				-clawback.amount,
+				`${month}-20`,
+				"CLAWBACK",
+				"Part of a collected fee refunded to the hotel",
+			),
+		);
+	return lines;
+}
+const sumOf = (xs: StatementLineItem[], k: "gross" | "wht" | "net") =>
+	r2(xs.reduce((a, l) => a + l[k], 0));
+function demoStatement(
+	id: string,
+	m: MarketerProfileRow,
+	month: string,
+	lines: StatementLineItem[],
+	status: MarketerStatementStatus,
+	extra: Partial<MarketerStatementRow> = {},
+): { row: MarketerStatementRow; lines: StatementLineItem[] } {
+	const net = sumOf(lines, "net");
+	const carriedIn = extra.carriedIn ?? 0;
+	return {
+		lines,
+		row: {
+			id,
+			profileId: m.id,
+			marketerName: m.fullName,
+			marketerEmail: m.email,
+			month,
+			status,
+			lineCount: lines.length,
+			feesCollected: r2(
+				lines
+					.filter((l) => l.source !== "CLAWBACK")
+					.reduce((a, l) => a + l.feeCollected, 0),
+			),
+			gross: sumOf(
+				lines.filter((l) => l.source !== "CLAWBACK"),
+				"gross",
+			),
+			clawback: sumOf(
+				lines.filter((l) => l.source === "CLAWBACK"),
+				"gross",
+			),
+			wht: sumOf(lines, "wht"),
+			net,
+			carriedIn,
+			payable: r2(net + carriedIn),
+			minimumPayout: 5000,
+			canQuery: false,
+			bankName: m.bankName,
+			bankAccount: m.bankAccount,
+			bankAccountName: m.bankAccountName,
+			bankChecked: true,
+			createdAt: `${month}-05T08:00:00Z`,
+			...extra,
+		},
+	};
+}
+const demoStatementSet = (() => {
+	const [kunle, amaka] = demoMarketers;
+	const last = demoMonth(1);
+	const before = demoMonth(2);
+	const kunleBiz = [
+		{ name: "Royal Suites Ltd", fee: 15800 },
+		{ name: "Eko Garden Hotels", fee: 4800 },
+	];
+	return [
+		demoStatement(
+			"st-1",
+			kunle,
+			last,
+			demoLines(last, kunleBiz, kunle.sharePct, "ON_STATEMENT", {
+				name: "Eko Garden Hotels",
+				amount: 2400,
+			}),
+			"DRAFT",
+			{
+				canQuery: true,
+				queryUntil: new Date(Date.now() + 3 * 864e5).toISOString(),
+				createdAt: new Date(Date.now() - 4 * 864e5).toISOString(),
+			},
+		),
+		demoStatement(
+			"st-2",
+			kunle,
+			before,
+			demoLines(before, kunleBiz, kunle.sharePct, "PAID"),
+			"PAID",
+			{
+				approvedAt: `${demoMonth(1)}-12T10:00:00Z`,
+				approvedByName: "Ngozi Umeh",
+				paidReference: "GTB-778120",
+				paidOn: `${demoMonth(1)}-14`,
+				paidRecordedName: "Ngozi Umeh",
+			},
+		),
+		demoStatement(
+			"st-3",
+			amaka,
+			last,
+			demoLines(
+				last,
+				[{ name: "Pearl Inn Enugu", fee: 1100 }],
+				amaka.sharePct,
+				"ON_STATEMENT",
+			),
+			"CARRIED_OVER",
+			{ carriedToMonth: demoMonth(0) },
+		),
+	].map((x) =>
+		x.row.status === "PAID"
+			? { ...x, row: { ...x.row, paidAmount: x.row.payable } }
+			: x,
+	);
+})();
+const demoMarketerStatements = demoStatementSet.map((x) => x.row);
+const demoStatementDetail = (id: string): MarketerStatementDetail | null => {
+	const x = demoStatementSet.find((d) => d.row.id === id);
+	if (!x) return null;
+	const names = [...new Set(x.lines.map((l) => l.businessName))];
+	return {
+		statement: x.row,
+		lines: x.lines,
+		carriedFrom: [],
+		businesses: names.map((name) => {
+			const ls = x.lines.filter((l) => l.businessName === name);
+			return {
+				businessId: ls[0]?.businessId,
+				businessName: name,
+				feesCollected: r2(ls.reduce((a, l) => a + l.feeCollected, 0)),
+				gross: sumOf(ls, "gross"),
+				wht: sumOf(ls, "wht"),
+				net: sumOf(ls, "net"),
+				lines: ls.length,
+			};
+		}),
+	};
+};
+const demoNextStatement = demoLines(
+	demoMonth(0),
+	[
+		{ name: "Royal Suites Ltd", fee: 16200 },
+		{ name: "Eko Garden Hotels", fee: 5100 },
+	],
+	demoMe.sharePct,
+	"ACCRUED",
+);
 
 // ---- the seam ------------------------------------------------------------------------------------
 
@@ -1142,19 +1459,25 @@ export const adminData = {
 				const m = demoMarketers.find((x) => x.id === id);
 				if (!m) return give(null);
 				const commissions = demoCommissions.filter((c) => c.profileId === id);
+				const theirs = platform.demoBusinesses.filter(
+					(b) => b.marketer === m.fullName,
+				);
+				const byStage: Record<string, number> = {};
+				for (const b of theirs) byStage[b.stage] = (byStage[b.stage] ?? 0) + 1;
 				return give({
 					profile: m,
-					agreements: platform.demoBusinesses
-						.filter((b) => b.marketer === m.fullName)
-						.map((b) => ({
-							id: `ag-${b.id}`,
-							businessId: b.id,
-							sharePct: m.sharePct,
-							months: m.months,
-							whtPct: 5,
-							status: "ACTIVE",
-							startedOn: b.since,
-						})),
+					agreements: theirs.map((b) => ({
+						id: `ag-${b.id}`,
+						businessId: b.id,
+						profileId: m.id,
+						fullName: m.fullName,
+						sharePct: m.sharePct,
+						months: m.months,
+						whtPct: 5,
+						status: "ACTIVE",
+						startedOn: b.since,
+						windowStart: b.stage === "LIVE" ? b.since : undefined,
+					})),
 					referrals: demoReferrals.filter((r) => r.profileId === id),
 					commissions,
 					earnedTotal: m.earnedTotal,
@@ -1162,6 +1485,11 @@ export const adminData = {
 					paid: commissions
 						.filter((c) => c.status === "PAID")
 						.reduce((a, c) => a + c.net, 0),
+					businesses: theirs.length,
+					byStage,
+					nextStatement: id === demoMe.id ? demoNextStatement : [],
+					statements: demoMarketerStatements.filter((x) => x.profileId === id),
+					currentAgreementVersion: "RPA-2026-11",
 				});
 			}
 			const { data: res, error } = await api(
@@ -1172,9 +1500,10 @@ export const adminData = {
 			const d = res.data;
 			return {
 				profile: toMarketerProfileRow(d.profile, {
-					businesses: d.agreements?.length ?? 0,
+					businesses: d.businesses ?? d.agreements?.length ?? 0,
 					earnedTotal: d.earnedTotal,
 					due: d.due,
+					byStage: d.byStage,
 				}),
 				agreements: (d.agreements ?? []).map(toAgreementRow),
 				referrals: (d.referrals ?? []).map(toReferralItem),
@@ -1182,7 +1511,72 @@ export const adminData = {
 				earnedTotal: n(d.earnedTotal),
 				due: n(d.due),
 				paid: n(d.paid),
+				businesses: n(d.businesses ?? d.agreements?.length),
+				byStage: d.byStage ?? {},
+				nextStatement: (d.nextStatement ?? []).map(toStatementLine),
+				statements: (d.statements ?? []).map(toStatementRow),
+				currentAgreementVersion: d.currentAgreementVersion ?? "RPA-2026-11",
 			};
+		},
+		/** Monthly statements (money roles), newest month first, with counts and payable totals per status. */
+		statements: async (
+			query: { month?: string; status?: string; profileId?: string } = {},
+		): Promise<LoadResult<MarketerStatementList>> => {
+			if (!live("platform")) {
+				const inScope = demoMarketerStatements.filter(
+					(x) =>
+						(!query.month || x.month === query.month) &&
+						(!query.profileId || x.profileId === query.profileId),
+				);
+				const counts: Record<string, number> = { all: inScope.length };
+				const totals: Record<string, number> = {};
+				for (const x of inScope) {
+					counts[x.status] = (counts[x.status] ?? 0) + 1;
+					totals[x.status] = (totals[x.status] ?? 0) + x.payable;
+				}
+				return give({
+					ok: true,
+					data: {
+						statements: inScope.filter(
+							(x) => !query.status || x.status === query.status,
+						),
+						counts,
+						totals,
+					},
+				});
+			}
+			const { data: res, error } = await api(
+				"@get/platform/admin/marketer-statements",
+				{ ...(await withSession()), query: clean(query) },
+			);
+			if (error || !res) {
+				fail("platform-service marketer statements", error);
+				return {
+					ok: false,
+					error: errorMessage(error, "Statements didn't load"),
+					data: { statements: [], counts: {}, totals: {} },
+				};
+			}
+			return {
+				ok: true,
+				data: {
+					statements: res.data.statements.map(toStatementRow),
+					counts: res.data.counts ?? {},
+					totals: res.data.totals ?? {},
+				},
+			};
+		},
+		statement: async (id: string): Promise<MarketerStatementDetail | null> => {
+			if (!live("platform")) return give(demoStatementDetail(id));
+			const { data: res, error } = await api(
+				"@get/platform/admin/marketer-statements/:id",
+				{ ...(await withSession()), params: { id } },
+			);
+			if (error || !res) {
+				fail("platform-service marketer statement", error);
+				return null;
+			}
+			return toStatementDetail(res.data);
 		},
 		referrals: async (
 			query: {
@@ -1258,7 +1652,16 @@ export const adminData = {
 		me: async (): Promise<MarketerMeData | null> => {
 			if (!live("platform"))
 				return give({
-					profile: demoMe,
+					profile: {
+						...demoMe,
+						agreementVersion: "RPA-2026-11",
+						agreementAcceptedAt: "2026-11-02T09:30:00Z",
+						agreementAcceptedName: demoMe.fullName,
+						agreementAccepted: true,
+						bankCheckedAt: "2026-11-03T10:00:00Z",
+						bankCheckedByName: "Ngozi Umeh",
+						bankChecked: true,
+					},
 					totals: {
 						earnedTotal: demoMe.earnedTotal,
 						due: demoMe.due,
@@ -1266,7 +1669,14 @@ export const adminData = {
 						businesses: demoMe.businesses,
 						referrals: demoReferrals.filter((r) => r.profileId === demoMe.id)
 							.length,
+						nextStatement: sumOf(demoNextStatement, "net"),
+						carried: 0,
+						byStage: { LIVE: demoMe.businesses },
 					},
+					currentAgreementVersion: "RPA-2026-11",
+					agreementAccepted: true,
+					minimumPayout: 5000,
+					whtPct: 5,
 				});
 			const { data: res, error } = await api(
 				"@get/platform/marketer/me",
@@ -1282,6 +1692,8 @@ export const adminData = {
 					businesses: t.businesses,
 					earnedTotal: t.earnedTotal,
 					due: t.due,
+					byStage: t.byStage,
+					agreementAccepted: res.data.agreementAccepted,
 				}),
 				totals: {
 					earnedTotal: n(t.earnedTotal),
@@ -1289,7 +1701,14 @@ export const adminData = {
 					paid: n(t.paid),
 					businesses: t.businesses,
 					referrals: t.referrals,
+					nextStatement: n(t.nextStatement),
+					carried: n(t.carried),
+					byStage: t.byStage ?? {},
 				},
+				currentAgreementVersion: res.data.currentAgreementVersion ?? "RPA-2026-11",
+				agreementAccepted: !!res.data.agreementAccepted,
+				minimumPayout: n(res.data.minimumPayout) || 5000,
+				whtPct: res.data.whtPct ?? 5,
 			};
 		},
 		businesses: async (): Promise<MarketerBusinessItem[]> => {
@@ -1307,6 +1726,18 @@ export const adminData = {
 							sharePct: demoMe.sharePct,
 							lastMonthShare: Math.round((b.mrr * demoMe.sharePct) / 100),
 							lastMonth: "2026-10",
+							agreementStatus: "ACTIVE",
+							agreementStartedOn: b.since,
+							windowStart: b.since,
+							windowEnd: new Date(
+								new Date(b.since).setMonth(
+									new Date(b.since).getMonth() + demoMe.months,
+								),
+							)
+								.toISOString()
+								.slice(0, 10),
+							months: demoMe.months,
+							earnedNet: Math.round((b.mrr * demoMe.sharePct * 0.95) / 100),
 						})),
 				);
 			const { data: res, error } = await api(
@@ -1324,7 +1755,60 @@ export const adminData = {
 				sharePct: n(b.sharePct),
 				lastMonthShare: n(b.lastMonthShare),
 				lastMonth: s(b.lastMonth),
+				agreementStatus: s(b.agreementStatus),
+				agreementStartedOn: s(b.agreementStartedOn),
+				agreementEndedOn: s(b.agreementEndedOn),
+				windowStart: s(b.windowStart),
+				windowEnd: s(b.windowEnd),
+				months: n(b.months),
+				earnedNet: n(b.earnedNet),
 			}));
+		},
+		/** My statements (newest first) and the lines waiting for the next one. */
+		statements: async (): Promise<LoadResult<MyStatementsData>> => {
+			if (!live("platform"))
+				return give({
+					ok: true,
+					data: {
+						statements: demoMarketerStatements.filter(
+							(x) => x.profileId === demoMe.id,
+						),
+						nextStatement: demoNextStatement,
+						minimumPayout: 5000,
+					},
+				});
+			const { data: res, error } = await api(
+				"@get/platform/marketer/statements",
+				await withSession(),
+			);
+			if (error || !res) {
+				fail("platform-service my statements", error);
+				return {
+					ok: false,
+					error: errorMessage(error, "Your statements didn't load"),
+					data: { statements: [], nextStatement: [], minimumPayout: 5000 },
+				};
+			}
+			return {
+				ok: true,
+				data: {
+					statements: res.data.statements.map(toStatementRow),
+					nextStatement: (res.data.nextStatement ?? []).map(toStatementLine),
+					minimumPayout: n(res.data.minimumPayout) || 5000,
+				},
+			};
+		},
+		statement: async (id: string): Promise<MarketerStatementDetail | null> => {
+			if (!live("platform")) return give(demoStatementDetail(id));
+			const { data: res, error } = await api(
+				"@get/platform/marketer/statements/:id",
+				{ ...(await withSession()), params: { id } },
+			);
+			if (error || !res) {
+				fail("platform-service my statement", error);
+				return null;
+			}
+			return toStatementDetail(res.data);
 		},
 		/** One page of my referrals, newest first, with counts per stage. */
 		referralsPage: async (

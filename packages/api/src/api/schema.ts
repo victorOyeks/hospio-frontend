@@ -1141,6 +1141,7 @@ export const schema = createSchema({
 			password: z.string(),
 			businessName: z.string(),
 			city: z.string().nullable().optional(),
+			referralCode: z.string().nullable().optional(),
 		}),
 		output: envelope(AuthResponse),
 	},

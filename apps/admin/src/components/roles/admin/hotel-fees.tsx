@@ -348,7 +348,10 @@ export function FeeTable({ days, onOpen, showHotel = false }: { days: DailyFeeRo
 							<td className={cell}>{naira(d.sales)}</td>
 							<td className={cell}>{naira(d.fee)}</td>
 							<td className={cell}>{naira(d.due)}</td>
-							<td className={cell}>{naira(d.collected ?? 0)}</td>
+							<td className={cell}>
+								{naira(d.collected ?? 0)}
+								{(d.refunded ?? 0) > 0 && <span className="block text-xs text-danger">{naira(d.refunded)} refunded</span>}
+							</td>
 							<td className={cell}>{feeStatus(d.status)}</td>
 						</tr>
 					))}
@@ -358,7 +361,28 @@ export function FeeTable({ days, onOpen, showHotel = false }: { days: DailyFeeRo
 	);
 }
 
-export function FeeDayModal({ day, onClose, onRedo }: { day: DailyFeeRow; onClose: () => void; onRedo?: () => void }) {
+/** What Hospio360 can still give back from a day: the platform fee it collected less what was already refunded. */
+export const refundableOf = (day: DailyFeeRow) => Math.max(0, Math.round(((day.platformPaid ?? 0) - (day.refunded ?? 0)) * 100) / 100);
+
+export function FeeDayModal({
+	day,
+	onClose,
+	onRedo,
+	onRefund,
+}: {
+	day: DailyFeeRow;
+	onClose: () => void;
+	onRedo?: () => void;
+	/** Money roles: record a refund of part of the collected platform fee (the marketer's commission is clawed back). */
+	onRefund?: (amount: number, reason: string) => Promise<boolean>;
+}) {
+	const refundable = refundableOf(day);
+	const [refunding, setRefunding] = useState(false);
+	const [amount, setAmount] = useState("");
+	const [reason, setReason] = useState("");
+	const [busy, setBusy] = useState(false);
+	const value = Number(amount.replace(/,/g, ""));
+	const amountError = amount && (!(value > 0) || value > refundable) ? `Enter an amount up to ${naira(refundable)}` : undefined;
 	return (
 		<Modal
 			open
@@ -390,6 +414,7 @@ export function FeeDayModal({ day, onClose, onRedo }: { day: DailyFeeRow; onClos
 						{ label: "Carried from earlier days", value: naira(day.carriedIn ?? 0) },
 						{ label: "Due", value: naira(day.due) },
 						{ label: "Debited", value: naira(day.collected ?? 0) },
+						...((day.refunded ?? 0) > 0 ? [{ label: "Refunded", value: <span className="text-danger">{naira(day.refunded)}</span> }] : []),
 						{ label: "Status", value: feeStatus(day.status) },
 						{ label: "Debit from", value: providerLabel(day.provider) },
 						{ label: "Reference", value: day.debitRef ?? "—" },
@@ -397,6 +422,48 @@ export function FeeDayModal({ day, onClose, onRedo }: { day: DailyFeeRow; onClos
 					]}
 				/>
 				{day.lastError && <Note tone="warning">{day.lastError}</Note>}
+				{day.refundNote && <Note tone="info">Refund: {day.refundNote}</Note>}
+				{onRefund && refundable > 0 && !refunding && (
+					<button type="button" className={btn.secondary} onClick={() => setRefunding(true)}>
+						Record refund
+					</button>
+				)}
+				{onRefund && refunding && (
+					<div className="flex flex-col gap-3 rounded-xl border border-line p-4">
+						<TextField
+							label="Amount refunded (₦)"
+							value={amount}
+							onChange={setAmount}
+							error={amountError}
+							hint={`Up to ${naira(refundable)} of the platform fee collected that day`}
+							required
+						/>
+						<TextField label="Reason" value={reason} onChange={setReason} placeholder="Debited twice; refunded to the hotel" required />
+						<Note tone="info">The referring marketer's commission on the refunded amount comes off their next statement.</Note>
+						<div className="flex justify-end gap-2">
+							<button type="button" className={btn.secondary} onClick={() => setRefunding(false)}>
+								Cancel
+							</button>
+							<button
+								type="button"
+								className={btn.primary}
+								disabled={busy || !amount || !!amountError || reason.trim().length < 3}
+								onClick={async () => {
+									setBusy(true);
+									const ok = await onRefund(value, reason);
+									setBusy(false);
+									if (ok) {
+										setRefunding(false);
+										setAmount("");
+										setReason("");
+									}
+								}}
+							>
+								Record refund
+							</button>
+						</div>
+					</div>
+				)}
 				{onRedo && (
 					<button type="button" className={btn.secondary} onClick={onRedo}>
 						Work this day out again

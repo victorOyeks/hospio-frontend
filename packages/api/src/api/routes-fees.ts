@@ -52,6 +52,16 @@ export const DailyFee = z.object({
 	deviceCarriedIn: num,
 	platformPaid: num,
 	devicePaid: num,
+	refunded: num,
+	refundNote: str,
+});
+
+/** POST /platform/admin/fees/daily/{id}/refund: what was given back and the marketer clawback line it made (if any). */
+export const FeeRefund = z.object({
+	dailyFeeId: z.string(),
+	refunded: num,
+	platformCollected: num,
+	clawback: z.looseObject({ id: z.string(), net: num }).nullable().optional(),
 });
 
 export const ProviderState = z.object({
@@ -117,6 +127,11 @@ export const feeRoutes = {
 	"@post/platform/admin/fees/daily/run": { query: z.object({ date: z.string() }), output: envelope(DayRun) },
 	"@post/platform/admin/fees/daily/debit": { output: envelope(DebitRun) },
 	"@post/platform/admin/fees/daily/:id/redo": { params: z.object({ id: z.string() }), output: envelope(DailyFee) },
+	"@post/platform/admin/fees/daily/:id/refund": {
+		params: z.object({ id: z.string() }),
+		input: z.object({ amount: z.number(), reason: z.string() }),
+		output: envelope(FeeRefund),
+	},
 	"@get/platform/admin/businesses/:businessId/hotels/:hotelId/fee-collection": {
 		params: z.object({ businessId: z.string(), hotelId: z.string() }),
 		output: envelope(FeeCollection),

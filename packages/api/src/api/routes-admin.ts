@@ -296,6 +296,15 @@ export const MarketerProfile = z.object({
 	endedAt: str,
 	referralCode: str,
 	createdAt: str,
+	agreementVersion: str,
+	agreementAcceptedAt: str,
+	agreementAcceptedBy: str,
+	agreementAcceptedName: str,
+	bankSavedAt: str,
+	bankChangeNote: str,
+	bankCheckedAt: str,
+	bankCheckedByName: str,
+	updatedAt: str,
 });
 
 export const MarketerAgreement = z.object({
@@ -310,6 +319,9 @@ export const MarketerAgreement = z.object({
 	startedOn: str,
 	endedOn: str,
 	profileId: str,
+	windowStart: str,
+	windowEnd: str,
+	endedReason: str,
 });
 
 export const Commission = z.object({
@@ -326,6 +338,13 @@ export const Commission = z.object({
 	paidAt: str,
 	paidReference: str,
 	paidOn: str,
+	source: str,
+	feeDate: str,
+	earnedOn: str,
+	sharePct: num,
+	whtPct: num,
+	statementId: str,
+	note: str,
 });
 
 export const CommissionRow = z.object({
@@ -350,11 +369,140 @@ export const Referral = z.object({
 	createdAt: str,
 });
 
+const ByStage = z.record(z.string(), z.number()).nullable().optional();
+
 export const MarketerListRow = z.object({
 	profile: MarketerProfile,
 	businesses: z.number(),
 	earnedTotal: z.number().nullable(),
 	due: z.number().nullable(),
+	byStage: ByStage,
+	agreementAccepted: z.boolean().nullable().optional(),
+	bankChecked: z.boolean().nullable().optional(),
+});
+
+// ---- platform: marketer statements (docs/plan-marketers.md) ------------------------------------------
+
+/** One commission line on a statement (or waiting for the next one): a day's collected fee, or a clawback. */
+export const StatementLine = z.object({
+	id: z.string(),
+	businessId: str,
+	businessName: str,
+	hotelId: str,
+	source: str,
+	feeDate: str,
+	earnedOn: str,
+	month: str,
+	feeCollected: num,
+	sharePct: num,
+	gross: num,
+	whtPct: num,
+	wht: num,
+	net: num,
+	status: str,
+	note: str,
+});
+
+export const StatementBusinessGroup = z.object({
+	businessId: str,
+	businessName: str,
+	feesCollected: num,
+	gross: num,
+	wht: num,
+	net: num,
+	lines: num,
+});
+
+/** A marketer's monthly statement: DRAFT → (QUERIED) → APPROVED → PAID, or CARRIED_OVER under the minimum payout. */
+export const MarketerStatement = z.object({
+	id: z.string(),
+	profileId: str,
+	marketerName: str,
+	marketerEmail: str,
+	month: z.string(),
+	status: z.string(),
+	lineCount: num,
+	feesCollected: num,
+	gross: num,
+	clawback: num,
+	wht: num,
+	net: num,
+	carriedIn: num,
+	payable: num,
+	minimumPayout: num,
+	carriedToMonth: str,
+	queryUntil: str,
+	canQuery: z.boolean().nullable().optional(),
+	queryNote: str,
+	queriedAt: str,
+	queryAnswer: str,
+	approvedAt: str,
+	approvedByName: str,
+	paidAmount: num,
+	paidReference: str,
+	paidOn: str,
+	paidRecordedName: str,
+	paidEmailSentAt: str,
+	bankName: str,
+	bankAccount: str,
+	bankAccountName: str,
+	bankChecked: z.boolean().nullable().optional(),
+	createdAt: str,
+});
+
+export const StatementDetail = z.object({
+	statement: MarketerStatement,
+	businesses: z.array(StatementBusinessGroup).nullable().optional(),
+	lines: z.array(StatementLine).nullable().optional(),
+	carriedFrom: z.array(MarketerStatement).nullable().optional(),
+});
+
+export const StatementList = z.object({
+	statements: z.array(MarketerStatement),
+	counts: z.record(z.string(), z.number()).nullable().optional(),
+	totals: z.record(z.string(), z.number()).nullable().optional(),
+});
+
+export const MyStatements = z.object({
+	statements: z.array(MarketerStatement),
+	nextStatement: z.array(StatementLine).nullable().optional(),
+	minimumPayout: num,
+});
+
+export const StatementRun = z.object({
+	month: z.string(),
+	made: z.number(),
+	carriedOver: z.number(),
+	skipped: z.number(),
+	notes: z.array(z.string()).nullable().optional(),
+});
+
+/** Who referred a business (GET /platform/admin/businesses/{id}/marketer). */
+export const BusinessMarketer = z.object({
+	businessId: z.string(),
+	profileId: str,
+	fullName: str,
+	referralCode: str,
+	status: str,
+	agreements: z.array(MarketerAgreement).nullable().optional(),
+});
+
+export const MarketerChange = z.object({
+	businessId: z.string(),
+	fromProfileId: str,
+	fromName: str,
+	toProfileId: str,
+	toName: str,
+	ended: z.array(MarketerAgreement).nullable().optional(),
+	opened: MarketerAgreement.nullable().optional(),
+});
+
+/** The public sign-up page's check of a ?ref= code. */
+export const ReferralCodeCheck = z.object({
+	code: str,
+	valid: z.boolean(),
+	referrerFirstName: str,
+	message: str,
 });
 
 export const MarketerLogin = z.object({
@@ -379,6 +527,11 @@ export const MarketerDetail = z.object({
 	earnedTotal: z.number().nullable(),
 	due: z.number().nullable(),
 	paid: z.number().nullable(),
+	businesses: num,
+	byStage: ByStage,
+	nextStatement: z.array(StatementLine).nullable().optional(),
+	statements: z.array(MarketerStatement).nullable().optional(),
+	currentAgreementVersion: str,
 });
 
 export const MarketerTotals = z.object({
@@ -387,10 +540,17 @@ export const MarketerTotals = z.object({
 	paid: z.number().nullable(),
 	businesses: z.number(),
 	referrals: z.number(),
+	nextStatement: num,
+	carried: num,
+	byStage: ByStage,
 });
 export const MarketerMe = z.object({
 	profile: MarketerProfile,
 	totals: MarketerTotals,
+	currentAgreementVersion: str,
+	agreementAccepted: z.boolean().nullable().optional(),
+	minimumPayout: num,
+	whtPct: num,
 });
 
 export const MarketerBusiness = z.object({
@@ -403,6 +563,13 @@ export const MarketerBusiness = z.object({
 	sharePct: z.number().nullable(),
 	lastMonthShare: z.number().nullable(),
 	lastMonth: str,
+	agreementStatus: str,
+	agreementStartedOn: str,
+	agreementEndedOn: str,
+	windowStart: str,
+	windowEnd: str,
+	months: num,
+	earnedNet: num,
 });
 
 export const CommissionStatement = z.object({
@@ -805,6 +972,55 @@ export const adminRoutes = {
 		input: z.object({ reference: str, paidOn: str }).optional(),
 		output: envelope(Commission),
 	},
+	"@post/platform/admin/marketers/:id/bank-checked": {
+		params: z.object({ id: z.string() }),
+		output: envelope(MarketerProfile),
+	},
+	// Monthly statements (money roles; making them is Super admin). The CSV export is fetched raw (actions/marketer-statements.ts).
+	"@get/platform/admin/marketer-statements": {
+		query: z
+			.object({ month: z.string(), status: z.string(), profileId: z.string() })
+			.partial()
+			.optional(),
+		output: envelope(StatementList),
+	},
+	"@get/platform/admin/marketer-statements/:id": {
+		params: z.object({ id: z.string() }),
+		output: envelope(StatementDetail),
+	},
+	"@post/platform/admin/marketer-statements/run": {
+		query: z.object({ month: z.string() }),
+		output: envelope(StatementRun),
+	},
+	"@post/platform/admin/marketer-statements/:id/approve": {
+		params: z.object({ id: z.string() }),
+		input: z.object({ answer: str }),
+		output: envelope(StatementDetail),
+	},
+	"@post/platform/admin/marketer-statements/:id/payment": {
+		params: z.object({ id: z.string() }),
+		input: z.object({
+			reference: z.string(),
+			paidOn: z.string(),
+			amount: z.number(),
+		}),
+		output: envelope(StatementDetail),
+	},
+	// Who referred a business: read and change (audit-logged; tenant's PUT no longer takes a changed marketerId).
+	"@get/platform/admin/businesses/:businessId/marketer": {
+		params: z.object({ businessId: z.string() }),
+		output: envelope(BusinessMarketer),
+	},
+	"@put/platform/admin/businesses/:businessId/marketer": {
+		params: z.object({ businessId: z.string() }),
+		input: z.object({ profileId: z.string().nullable(), reason: z.string() }),
+		output: envelope(MarketerChange),
+	},
+	// Public: the hotel sign-up page checks a ?ref= code (no session).
+	"@get/platform/public/referral-codes/:code": {
+		params: z.object({ code: z.string() }),
+		output: envelope(ReferralCodeCheck),
+	},
 
 	// platform · settings
 	"@get/platform/admin/settings": { output: envelope(PlatformSettings) },
@@ -840,8 +1056,23 @@ export const adminRoutes = {
 			bankName: z.string(),
 			bankAccount: z.string(),
 			bankAccountName: z.string(),
+			note: str,
 		}),
 		output: envelope(MarketerProfile),
+	},
+	"@post/platform/marketer/agreement": {
+		input: z.object({ version: z.string() }),
+		output: envelope(MarketerProfile),
+	},
+	"@get/platform/marketer/statements": { output: envelope(MyStatements) },
+	"@get/platform/marketer/statements/:id": {
+		params: z.object({ id: z.string() }),
+		output: envelope(StatementDetail),
+	},
+	"@post/platform/marketer/statements/:id/query": {
+		params: z.object({ id: z.string() }),
+		input: z.object({ note: z.string() }),
+		output: envelope(StatementDetail),
 	},
 	"@get/platform/marketer/referrals": {
 		query: z
@@ -998,6 +1229,16 @@ export type MarketerDetail = z.infer<typeof MarketerDetail>;
 export type MarketerMe = z.infer<typeof MarketerMe>;
 export type MarketerBusiness = z.infer<typeof MarketerBusiness>;
 export type CommissionStatement = z.infer<typeof CommissionStatement>;
+export type StatementLine = z.infer<typeof StatementLine>;
+export type StatementBusinessGroup = z.infer<typeof StatementBusinessGroup>;
+export type MarketerStatement = z.infer<typeof MarketerStatement>;
+export type StatementDetail = z.infer<typeof StatementDetail>;
+export type StatementList = z.infer<typeof StatementList>;
+export type MyStatements = z.infer<typeof MyStatements>;
+export type StatementRun = z.infer<typeof StatementRun>;
+export type BusinessMarketer = z.infer<typeof BusinessMarketer>;
+export type MarketerChange = z.infer<typeof MarketerChange>;
+export type ReferralCodeCheck = z.infer<typeof ReferralCodeCheck>;
 export type Integration = z.infer<typeof Integration>;
 export type IntegrationView = z.infer<typeof IntegrationView>;
 export type PlatformSettings = z.infer<typeof PlatformSettings>;
