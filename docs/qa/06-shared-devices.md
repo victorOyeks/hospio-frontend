@@ -23,20 +23,29 @@ Password for every account: `Hospio123!`
 |---|---|---|---|
 | Manager | Tunde Bakare | `tunde@royalsuites.ng` | (has one; not needed) |
 | Owner | Godwin Kwin | `godwin@royalsuites.ng` | none: owners never have a PIN |
-| Bar (Full access) | Segun Ajayi | `segun@royalsuites.ng` | **258013** |
-| Kitchen (Full access) | Mariam Bello | `mariam@royalsuites.ng` | **369150** |
+| Bar (Full access) | Segun Ajayi | `segun@royalsuites.ng` | has one; **not reliable**, don't type it |
+| Kitchen (Full access) | Mariam Bello | `mariam@royalsuites.ng` | has one; **not reliable**, don't type it |
 | Kitchen (Edit) | QA Cook | `qa.cook@royalsuites.ng` | none |
 | Front office | Victor | `victor@royalsuites.ng` | none |
 | Housekeeping | Grace | `grace@royalsuites.ng` | none |
 | Second owner (two hotels) | QA Owner B | `qa.ownerb.fcekd@hospio-qa.test` | none |
 
-Bar staff left by the automated runs (bar role at Simpas Ikeja, password `Hospio123!`):
+**PIN test staff with known PINs** (Simpas Ikeja, Can edit, password `Hospio123!`, made 18 Nov 2026 through Staff → Add
+staff, first sign-in and the first-PIN prompt). Use these whenever a step types a PIN:
 
-| Name | Email | PIN |
-|---|---|---|
-| QA PIN Ada l184h | `qa.pin.ada.l184h@hospio-qa.test` | **513794** |
-| QA PIN Kemi l184h | `qa.pin.kemi.l184h@hospio-qa.test` | **619428** |
-| QA PIN Newbie l184h | `qa.pin.newbie.l184h@hospio-qa.test` | none (a "No PIN yet" tile) |
+| Role | Name | Email | PIN |
+|---|---|---|---|
+| Bar | QA PIN Bar | `qa.pin.bar@hospio-qa.test` | **482916** |
+| Front office | QA PIN Front | `qa.pin.front@hospio-qa.test` | **735184** |
+| Kitchen | QA PIN Kitchen | `qa.pin.kitchen@hospio-qa.test` | **691347** |
+
+If one of these PINs stops working, someone changed it: tell the QA lead, don't guess (five wrong tries lock it for 15
+minutes), and don't change it to something else without updating this table.
+
+**The PINs once listed here for Segun (258013), Mariam (369150), QA PIN Ada l184h (513794) and QA PIN Kemi l184h
+(619428) are not reliable**: they were changed by other test runs and no longer match. Don't type them; use the table
+above or **Sign in with email instead**. QA PIN Newbie l184h has a PIN now too (unknown), so for a "No PIN yet" tile
+make a fresh person (below).
 
 Other "QA PIN …" people from earlier runs were taken off the hotel. For lockout, pause and suspend tests make fresh
 staff through **Staff → Add staff** (invite), named "QA PIN <your initials>", and accept the invite from the link in
@@ -60,26 +69,27 @@ tablet, the other is the manager's desk.
    **Expect:** "Use this device as a shared device" between Switch role and Sign out.
 2. **Do:** choose it. **Expect:** a form: Device name, Who uses it (a button per role, none picked for a manager),
    Lock after (5 minutes by default). With more than one hotel a Hotel picker shows.
-3. **Do:** Device name "QA Bar tablet <initials>", pick **Bar**, Lock after 5 minutes → **Set up device**.
-   **Expect:** "… is a shared device"; the window shows the lock screen: **Simpas Ikeja**, "QA Bar tablet … · Bar",
-   the time, "Who's using this device?", a search box, tiles for the bar staff (Segun, QA PIN …) and **Sign in with
-   email instead** at the bottom. Tunde (manager), Mariam (kitchen) and Godwin (owner) are not tiles.
-4. **Do:** type "Seg" in the search box. **Expect:** only Segun's tile.
+3. **Do:** Device name "QA Bar tablet <initials>", pick **Bar** and **Front office**, Lock after 5 minutes → **Set up
+   device**. **Expect:** "… is a shared device"; the window shows the lock screen: **Simpas Ikeja**, "QA Bar tablet …",
+   the time, "Who's using this device?", a search box, tiles for the bar and front office staff (Segun, QA PIN Bar,
+   QA PIN Front, …) and **Sign in with email instead** at the bottom. Tunde (manager), Mariam and QA PIN Kitchen
+   (kitchen) and Godwin (owner) are not tiles.
+4. **Do:** type "QA PIN B" in the search box. **Expect:** only QA PIN Bar's tile.
 5. **Do:** go to `/dashboard` in the address bar. **Expect:** back on the lock screen.
 6. **Do:** as Segun (Full access at the bar) on another device, the menu shows "Use this device as a shared device"
    with only **Bar** to pick. As QA Cook (Edit) the item is not in the menu. Godwin sees it with every role.
 
-## 2 · Switch people (Segun, QA PIN Ada)
+## 2 · Switch people (QA PIN Bar, QA PIN Front)
 
-1. **Do:** tap Segun → type **999999** on the keyboard. **Expect:** "Wrong PIN. 4 tries left before your PIN
+1. **Do:** tap QA PIN Bar → type **999999** on the keyboard. **Expect:** "Wrong PIN. 4 tries left before your PIN
    is locked for 15 minutes". Escape closes the pad.
-2. **Do:** tap Segun → tap **2**, **5**, **8**, **0**, **1**, **3** on the pad. **Expect:** the sixth digit unlocks without pressing Unlock: Bar today as Segun;
+2. **Do:** tap QA PIN Bar → tap **4**, **8**, **2**, **9**, **1**, **6** on the pad. **Expect:** the sixth digit unlocks without pressing Unlock: Bar today as QA PIN Bar;
    the header has **Lock** (wide screens: "Lock · Switch person"); the branch is Simpas Ikeja only.
 3. **Do:** **New sale** → Star lager → **Open a tab** → **Open a tab**. **Expect:** the tab opens; on Tabs (or via
-   the API `GET /fnb/orders?outletId=…`) it shows **Opened by Segun Ajayi**.
-4. **Do:** **Lock**. **Expect:** the lock screen. Tap "QA PIN Ada …" → PIN 513794 → make a sale the same way.
-   **Expect:** that sale is opened by QA PIN Ada, not Segun.
-5. **Do:** Lock → Segun → 258013. **Expect:** back as Segun. The account menu's last item now reads **Lock**, not
+   the API `GET /fnb/orders?outletId=…`) it shows **Opened by QA PIN Bar**.
+4. **Do:** **Lock**. **Expect:** the lock screen. Tap "QA PIN Front" → PIN 735184. **Expect:** front office (not the
+   bar), as QA PIN Front; anything done is recorded under QA PIN Front, not QA PIN Bar.
+5. **Do:** Lock → QA PIN Bar → 482916. **Expect:** back as QA PIN Bar. The account menu's last item now reads **Lock**, not
    Sign out (signing out on a shared device locks it).
 
 ## 3 · No PIN yet and the PIN prompt (a fresh "QA PIN" bar person)
@@ -102,12 +112,12 @@ tablet, the other is the manager's desk.
    **Expect:** after the dashboard loads, "Set a PIN for the shared tablets" with **Not now**. It is skippable.
 2. A first sign-in with a temporary password (after changing it) asks the same.
 
-## 5 · PIN in My profile & security (Segun)
+## 5 · PIN in My profile & security (QA PIN Bar)
 
 1. **Do:** My profile & security → **Security**. **Expect:** a "PIN for shared devices" card ("Set") with
    **Change PIN**. Owners don't have this card.
-2. **Do:** Change PIN → new 258013, again 258013, password → Change PIN. **Expect:** "That's your current PIN. Pick a new
-   one". With a wrong password: "Your password is wrong". (Leave Segun on 258013.)
+2. **Do:** Change PIN → new 482916, again 482916, password → Change PIN. **Expect:** "That's your current PIN. Pick a new
+   one". With a wrong password: "Your password is wrong". (Leave QA PIN Bar on 482916.)
 3. My shifts → Change PIN does the same (exactly 6 digits, with the password).
 
 ## 6 · Wrong PINs lock the person, not the device (a fresh QA PIN person with a PIN)
@@ -116,7 +126,7 @@ tablet, the other is the manager's desk.
    fifth "Wrong PIN. Your PIN is now locked for 15 minutes. Sign in with email instead, or ask your manager".
 2. **Do:** enter the right PIN. **Expect:** "Your PIN is locked for 15 more minutes …"; their tile shows "PIN locked ·
    15 min".
-3. **Expect:** Segun can still unlock: the device is not locked.
+3. **Expect:** QA PIN Bar can still unlock (482916): the device is not locked.
 4. **Do:** as Tunde, Notifications. **Expect:** "<name>'s PIN is locked" — "5 wrong PINs on QA Bar tablet …".
 
 ## 7 · Idle lock (Tunde sets a short time)
@@ -124,7 +134,7 @@ tablet, the other is the manager's desk.
 1. **Do:** as Tunde (manager window) → Hotel setup → **Shared devices**. **Expect:** a table: Device (and who set it
    up), Desk, Last used, Last person, Auto-lock, with edit and remove buttons.
 2. **Do:** edit "QA Bar tablet …" → Lock after **1 minute** → Save. **Expect:** "Device saved", 1 min.
-3. **Do:** on the tablet unlock as Segun (reload first), then don't touch it. **Expect:** after about 30 seconds a toast
+3. **Do:** on the tablet unlock as QA PIN Bar (reload first), then don't touch it. **Expect:** after about 30 seconds a toast
    "Locking in 30 seconds — Tap anywhere to stay signed in …"; after 1 minute the lock screen with "Locked after 1
    minute without use".
 4. **Do:** unlock again and keep tapping every 10-20 seconds for 2 minutes. **Expect:** it stays open; the toast goes
@@ -155,7 +165,7 @@ tablet, the other is the manager's desk.
 
 ## 11 · Remove the device (Tunde)
 
-1. **Do:** with Segun unlocked on the tablet, Tunde → Hotel setup → Shared devices → remove (bin) → **Remove device**.
+1. **Do:** with QA PIN Bar unlocked on the tablet, Tunde → Hotel setup → Shared devices → remove (bin) → **Remove device**.
    **Expect:** "… removed"; it leaves the list.
 2. **Do:** on the tablet click anything (or wait up to a minute). **Expect:** the normal sign-in page with "This
    device was removed as a shared device by a manager". `/lock` now goes to sign-in too.
@@ -168,8 +178,8 @@ tablet, the other is the manager's desk.
 
 ## 13 · Activity log (Tunde → Activity log)
 
-**Expect** lines like: "Tunde Bakare set up QA Bar tablet … as a shared device (Bar)", "Segun Ajayi signed in with PIN
-on QA Bar tablet …", "Wrong PIN for … on QA Bar tablet … (1 of 5)", "…'s PIN was locked on …", "Segun Ajayi locked QA
+**Expect** lines like: "Tunde Bakare set up QA Bar tablet … as a shared device (Bar)", "QA PIN Bar signed in with PIN
+on QA Bar tablet …", "Wrong PIN for … on QA Bar tablet … (1 of 5)", "…'s PIN was locked on …", "QA PIN Bar locked QA
 Bar tablet … (switch person / idle 1 min)", "Tunde Bakare changed shared device …", "… set a PIN (first PIN)", "Tunde
 Bakare reset …'s PIN", "Tunde Bakare removed shared device …". Sales made on the tablet show under the person who
 unlocked.
