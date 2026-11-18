@@ -52,7 +52,21 @@ export const PEOPLE_ROLES: HotelRole[] = [
 	"INVENTORY",
 ];
 
+export type PeopleLevel = "FULL" | "EDIT" | "VIEW";
+
+/** A manager runs the hotel at Full; every department role starts at Can edit, so price changes and the like go to the manager. */
+export const defaultLevel = (role: string): PeopleLevel =>
+	role === "MANAGER" || role === "OWNER" ? "FULL" : "EDIT";
+
+const LEVEL_OPTIONS: { value: PeopleLevel; label: string; hint: string }[] = [
+	{ value: "EDIT", label: "Can edit", hint: "Day-to-day work; prices and settings go to the manager" },
+	{ value: "FULL", label: "Full", hint: "Everything the role allows, no approval" },
+	{ value: "VIEW", label: "View only", hint: "Can look, cannot change" },
+];
+const levelLabel: Record<PeopleLevel, string> = { FULL: "Full", EDIT: "Can edit", VIEW: "View only" };
+
 type LoginRow = OnboardingLogin & {
+	level?: PortalUserRow["level"];
 	fromDirectory?: boolean;
 	status?: PortalUserRow["status"];
 	inviteStatus?: PortalUserRow["inviteStatus"];
@@ -72,6 +86,7 @@ function mergeLogins(
 		return {
 			...l,
 			hotelName: l.hotelName ?? (l.hotelId ? names.get(l.hotelId) : undefined),
+			level: u?.level,
 			status: u?.status,
 			inviteStatus: u?.inviteStatus,
 			lastSignIn: u?.lastSignIn,
@@ -88,6 +103,7 @@ function mergeLogins(
 			hotelId: u.hotelIds[0],
 			hotelName: u.hotel,
 			fromDirectory: true,
+			level: u.level,
 			status: u.status,
 			inviteStatus: u.inviteStatus,
 			lastSignIn: u.lastSignIn,
@@ -134,14 +150,16 @@ export function PeopleStep({ ctx }: { ctx: WizardCtx }) {
 		phone: string;
 		role: HotelRole;
 		hotelId: string;
+		level?: PeopleLevel;
 	}): Promise<boolean> => {
+		const level = input.level ?? defaultLevel(input.role);
 		const created = await call(() =>
 			createUser({
 				fullName: input.fullName,
 				email: input.email,
 				phone: input.phone || null,
 				role: input.role,
-				level: "FULL",
+				level,
 				hotelId: input.hotelId,
 				businessId: business.id,
 			}),
@@ -170,7 +188,7 @@ export function PeopleStep({ ctx }: { ctx: WizardCtx }) {
 				email: input.email,
 				phone: input.phone,
 				role: input.role,
-				level: "FULL",
+				level,
 				hotels: [login.hotelName ?? "Hotel"],
 				hotelIds: [input.hotelId],
 				hotel: login.hotelName,
@@ -178,7 +196,7 @@ export function PeopleStep({ ctx }: { ctx: WizardCtx }) {
 					{
 						id: `${created.userId}-g0`,
 						role: input.role,
-						level: "FULL",
+						level,
 						hotelId: input.hotelId,
 						hotelName: login.hotelName,
 						paused: false,
@@ -296,6 +314,18 @@ export function PeopleStep({ ctx }: { ctx: WizardCtx }) {
 							isHotelRole(row.original.role)
 								? roleLabels[row.original.role]
 								: row.original.role,
+					},
+					{
+						id: "level",
+						header: "Level",
+						cell: ({ row }) => {
+							const l = row.original.level as PeopleLevel | undefined;
+							return l && levelLabel[l] ? (
+								<StatusPill tone={l === "FULL" ? "brand" : l === "EDIT" ? "info" : "grey"}>{levelLabel[l]}</StatusPill>
+							) : (
+								"—"
+							);
+						},
 					},
 					{
 						id: "password",
@@ -447,12 +477,20 @@ function AddPersonPanel({
 		phone: string;
 		role: HotelRole;
 		hotelId: string;
+		level: PeopleLevel;
 	}) => Promise<boolean>;
 }) {
 	const [fullName, setName] = useState("");
 	const [email, setEmail] = useState("");
 	const [phone, setPhone] = useState("");
-	const [role, setRole] = useState<string>("MANAGER");
+	const [role, setRoleOnly] = useState<string>("MANAGER");
+	// The level follows the role (Manager Full, the rest Can edit) until the admin picks one.
+	const [level, setLevel] = useState<PeopleLevel>("FULL");
+	const [levelPicked, setLevelPicked] = useState(false);
+	const setRole = (r: string) => {
+		setRoleOnly(r);
+		if (!levelPicked) setLevel(defaultLevel(r));
+	};
 	const [hotelId, setHotelId] = useState(hotels[0]?.id ?? "");
 	const { pending, busy } = useWizardSave();
 	const emailOk = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim());
@@ -465,6 +503,8 @@ function AddPersonPanel({
 		setName("");
 		setEmail("");
 		setPhone("");
+		setLevelPicked(false);
+		setLevel(defaultLevel(role));
 	};
 	return (
 		<SidePanel
@@ -498,6 +538,7 @@ function AddPersonPanel({
 									phone: phone.trim(),
 									role,
 									hotelId: hotelId || hotels[0].id,
+									level,
 								});
 								if (ok) {
 									toast.success(`${fullName.trim()} added`);
@@ -563,6 +604,25 @@ function AddPersonPanel({
 							required
 						/>
 					</FieldRow>
+					<SelectField
+						label="Access level"
+						value={level}
+						onChange={(v) => {
+							setLevel(v as PeopleLevel);
+							setLevelPicked(true);
+						}}
+						options={LEVEL_OPTIONS.map((o) => ({
+							value: o.value,
+							label: `${o.label}${o.value === defaultLevel(role) ? " (usual for this role)" : ""}`,
+							hint: o.hint,
+						}))}
+						hint={
+							level === "FULL" && role !== "MANAGER"
+								? "Full skips the manager: their price changes and the like apply at once."
+								: "Can edit is the usual level for staff; the manager approves price changes."
+						}
+						required
+					/>
 				</PanelSection>
 			</div>
 		</SidePanel>
@@ -691,7 +751,8 @@ function ImportPeopleModal({
 				)}
 				<Note tone="info">
 					Each person is created one by one; a duplicate email is reported and
-					the rest continue.
+					the rest continue. Managers get Full access; everyone else starts at
+					Can edit, so their price changes wait for the manager.
 				</Note>
 			</div>
 		</Modal>

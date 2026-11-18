@@ -2,6 +2,8 @@
 
 import { AlertTriangleIcon, EyeIcon } from "lucide-react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useEffect } from "react";
 import { KpiCard } from "@hospio/ui/shared/kpi-card";
 import { PageHeader } from "@hospio/ui/shared/page-header";
 import { StatusPill } from "@hospio/ui/shared/status-pill";
@@ -19,7 +21,17 @@ const toneLabel: Record<DepartmentLive["tone"], { label: string; tone: "success"
 };
 
 /** Manager · Departments: what every team is doing right now, one card per department. */
-export function DepartmentsScreen({ departments, hotelName, approvalsWaiting, roomsReady, staffOnShift, staffScheduled }: { departments: DepartmentLive[]; hotelName: string; approvalsWaiting: number; roomsReady: number; staffOnShift: number; staffScheduled: number }) {
+export function DepartmentsScreen({ departments: all, hotelName, approvalsWaiting, roomsReady, hasRooms = true }: { departments: DepartmentLive[]; hotelName: string; approvalsWaiting: number; roomsReady: number; hasRooms?: boolean }) {
+	const router = useRouter();
+	// The board is live: read it again every minute while the page is open.
+	useEffect(() => {
+		const t = setInterval(() => router.refresh(), 60_000);
+		return () => clearInterval(t);
+	}, [router]);
+	// Teams this hotel does not run (no rooms, no bar, nobody in the role) are left out.
+	const departments = all.filter((d) => d.present !== false);
+	const staffOnShift = departments.reduce((s, d) => s + d.onShift, 0);
+	const staffScheduled = departments.reduce((s, d) => s + d.scheduled, 0);
 	const attention = departments.filter((d) => d.tone === "warning" || d.tone === "danger").reduce((s, d) => s + d.open, 0);
 	return (
 		<>
@@ -28,11 +40,17 @@ export function DepartmentsScreen({ departments, hotelName, approvalsWaiting, ro
 			</PageHeader>
 
 			<div className="grid grid-cols-2 gap-4 xl:grid-cols-4">
-				<KpiCard label="Staff on shift" value={`${staffOnShift} of ${staffScheduled}`} icon={UsersIcon} />
-				<KpiCard label="Needs attention" value={`${attention} things`} icon={AlertTriangleIcon} />
-				<KpiCard label="Waiting for you" value={`${approvalsWaiting} approvals`} icon={ClipboardCheckIcon} hint={<Link href="/dashboard/approvals" className="font-semibold text-brand">Open approvals →</Link>} />
-				<KpiCard label="Rooms ready to sell" value={roomsReady} icon={LayoutGridIcon} />
+				<KpiCard label="Staff on shift" value={staffScheduled > 0 ? `${staffOnShift} of ${staffScheduled}` : `${staffOnShift} clocked in`} icon={UsersIcon} hint={staffScheduled === 0 ? <Link href="/dashboard/shifts" className="font-semibold text-brand">Nobody on today's rota →</Link> : undefined} />
+				<KpiCard label="Needs attention" value={attention === 0 ? "Nothing" : `${attention} ${attention === 1 ? "thing" : "things"}`} icon={AlertTriangleIcon} />
+				<KpiCard label="Waiting for you" value={`${approvalsWaiting} ${approvalsWaiting === 1 ? "approval" : "approvals"}`} icon={ClipboardCheckIcon} hint={<Link href="/dashboard/approvals" className="font-semibold text-brand">Open approvals →</Link>} />
+				{hasRooms && <KpiCard label="Rooms ready to sell" value={roomsReady} icon={LayoutGridIcon} />}
 			</div>
+
+			{departments.length === 0 && (
+				<p className="rounded-card border border-line bg-card px-5 py-6 text-sm text-ink-2">
+					No team has people, shifts or work recorded here yet. Add staff in Staff and their shifts in Shifts, and each team shows up with what it is doing.
+				</p>
+			)}
 
 			<div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
 				{departments.map((d) => {
@@ -48,7 +66,7 @@ export function DepartmentsScreen({ departments, hotelName, approvalsWaiting, ro
 								<StatusPill tone={t.tone}>{d.tone === "warning" ? `${d.open} ${t.label}` : t.label}</StatusPill>
 							</div>
 							<p className="text-xs text-ink-3">
-								{d.onShift} on shift · {d.scheduled} scheduled
+								{d.onShift} on shift · {d.scheduled === 0 ? "nobody on today's rota" : `${d.scheduled} scheduled`}
 							</p>
 							<dl className="flex flex-col gap-[6px] text-[13px]">
 								<div className="flex justify-between gap-3">
@@ -61,12 +79,12 @@ export function DepartmentsScreen({ departments, hotelName, approvalsWaiting, ro
 								</div>
 								<div className="flex justify-between gap-3">
 									<dt className="text-ink-2">Last action</dt>
-									<dd className="truncate text-right font-semibold text-ink">{fmtTime(d.lastAt)}</dd>
+									<dd className="truncate text-right font-semibold text-ink">{d.lastAt ? fmtTime(d.lastAt) : "—"}</dd>
 								</div>
 							</dl>
 							<p className={`flex items-center gap-[6px] text-xs font-medium ${d.tone === "danger" ? "text-danger" : d.tone === "warning" ? "text-warning" : "text-ink-2"}`}>
 								<AlertTriangleIcon className="size-[14px] shrink-0" />
-								<span className="truncate">{d.lastAction}</span>
+								<span className="truncate">{d.lastAction || "Nothing recorded in the last 24 hours"}</span>
 							</p>
 						</Link>
 					);

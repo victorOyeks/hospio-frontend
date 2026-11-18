@@ -1067,6 +1067,8 @@ export type DepartmentLive = {
 	open: number;
 	openLabel: string;
 	tone: "success" | "warning" | "danger" | "grey";
+	/** False when the hotel does not run this team (no rooms, no bar, nobody in the role): the board leaves it out. */
+	present?: boolean;
 };
 
 /** One group of choices on a dish or drink (size, extras, how it is cooked). */

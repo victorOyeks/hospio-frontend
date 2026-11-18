@@ -482,7 +482,7 @@ export function BarTodayScreen({
 					lines.length
 						? `${plural(
 								lines.reduce((s, l) => s + l.qty, 0),
-								"drink",
+								lines.some((l) => l.item.preparedAt) ? "item" : "drink",
 							)} · ${naira(est.total)}`
 						: "Nothing yet"
 				}
@@ -621,7 +621,9 @@ export function BarTodayScreen({
 								amount: current.total,
 								description: `${current.number} · ${plural(
 									liveLines(current).reduce((s, l) => s + l.qty, 0),
-									"drink",
+									liveLines(current).some((l) => l.preparedAt)
+										? "item"
+										: "drink",
 								)}`,
 								terminalId: outlet?.terminalId,
 							}

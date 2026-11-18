@@ -409,7 +409,11 @@ export function BarTabsScreen({
 								},
 							]}
 						/>
-						<PanelSection title="Drinks">
+						<PanelSection
+							title={
+								current.lines.some((l) => l.preparedAt) ? "Items" : "Drinks"
+							}
+						>
 							<ul className="divide-y divide-line rounded-control border border-line">
 								{current.lines.map((l, i) => (
 									<li

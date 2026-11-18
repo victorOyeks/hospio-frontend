@@ -187,6 +187,25 @@ export function MoneyField({
 						const digits = e.target.value.replace(/[^\d]/g, "");
 						onChange(digits === "" ? "" : Number(digits));
 					}}
+					// A prefilled amount is selected on entry, so typing replaces it instead of adding to it
+					// (typing 3000 into "2,500" gave ₦25,003,000). The mouseup after a click would clear the selection.
+					onFocus={(e) => {
+						const el = e.currentTarget;
+						el.select();
+						el.dataset.justFocused = "1";
+					}}
+					onMouseUp={(e) => {
+						if (e.currentTarget.dataset.justFocused) {
+							e.preventDefault();
+							delete e.currentTarget.dataset.justFocused;
+						}
+					}}
+					onBlur={(e) => {
+						delete e.currentTarget.dataset.justFocused;
+					}}
+					onKeyDown={(e) => {
+						delete e.currentTarget.dataset.justFocused;
+					}}
 					disabled={disabled}
 					placeholder={placeholder}
 					className={cn(inputCls, "pl-8", error && "border-danger")}

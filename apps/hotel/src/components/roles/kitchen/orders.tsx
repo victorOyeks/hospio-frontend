@@ -129,7 +129,10 @@ export function KitchenOrdersScreen({
 	closed = [],
 	outlets = [],
 	peers = [],
+	hasRooms = true,
 }: {
+	/** False for a business without rooms (a lounge, a restaurant): no room service anywhere on the board. */
+	hasRooms?: boolean;
 	/** The ids of the kitchen's outlets (KITCHEN and RESTAURANT): with several, the outlet's colour and icon mark the title and cards. */
 	peers?: string[];
 	orders: OrderRow[];
@@ -517,7 +520,7 @@ export function KitchenOrdersScreen({
 						title={outletName}
 					/>
 				}
-				subtitle={`${outletName} and room service · ${openCount} open · ${plural(rows.filter((o) => colOf(o) === "OPEN" || colOf(o) === "SENT").length, "order")} cooking`}
+				subtitle={`${outletName}${hasRooms ? " and room service" : ""} · ${openCount} open · ${plural(rows.filter((o) => colOf(o) === "OPEN" || colOf(o) === "SENT").length, "order")} cooking`}
 			>
 				<Link
 					href="/dashboard/payments"
@@ -1189,12 +1192,14 @@ export function KitchenOrdersScreen({
 							setKind(k);
 							if (k === "ROOM_SERVICE" && settle === "NOW") setSettle("LATER");
 						}}
-						columns={3}
 						options={[
 							{ value: "DINE_IN", label: "Dine-in" },
-							{ value: "ROOM_SERVICE", label: "Room service" },
+							...(hasRooms
+								? [{ value: "ROOM_SERVICE" as const, label: "Room service" }]
+								: []),
 							{ value: "TAKEAWAY", label: "Takeaway" },
 						]}
+						columns={hasRooms ? 3 : 2}
 					/>
 					{kind === "DINE_IN" && (
 						<SelectField
@@ -1204,7 +1209,7 @@ export function KitchenOrdersScreen({
 							options={tables.map((t) => ({
 								value: t.id,
 								label: `Table ${t.number}`,
-								hint: `${t.seats} seats`,
+								hint: plural(t.seats, "seat"),
 							}))}
 							placeholder={tables.length ? "Pick a table" : "No tables set up"}
 							setupLink="tables"

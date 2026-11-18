@@ -51,6 +51,7 @@ import {
 	toStaffRow,
 } from "./mappers/identity";
 import { lagosDate, lagosDay } from "./mappers/finance";
+import { buildDepartments } from "./departments";
 import { fnbData } from "./fnb";
 import { inventoryData } from "./inventory";
 import { lmData } from "./lm";
@@ -81,6 +82,7 @@ import * as platformExtra from "@hospio/api/demo/fixtures/platform-extra";
 import * as stay from "@hospio/api/demo/fixtures/stay";
 import type {
 	AdminUserRow,
+	DepartmentLive,
 	ApprovalLimits,
 	ApprovalRow,
 	AreaRow,
@@ -1889,7 +1891,64 @@ export const data = {
 		list: () => give(ops.demoReports),
 	},
 	departments: {
-		live: () => give(ops.demoDepartments),
+		/** Manager · Departments: the last hour (platform board), clocked in / scheduled today (rota) and each team's open work. */
+		live: async (): Promise<DepartmentLive[]> => {
+			if (!live("platform")) return give(ops.demoDepartments);
+			const today = lagosDate();
+			const s = await withSession();
+			const safe = <T>(p: Promise<T>, fallback: T): Promise<T> =>
+				p.catch((e) => {
+					console.error("departments:", e);
+					return fallback;
+				});
+			const [board, clock, rota, staff, active, rooms, outlets] = await Promise.all([
+				safe(api("@get/platform/departments/live", s), null),
+				live("finance")
+					? safe(api("@get/finance/workforce/clock", { ...s, query: { date: today } }), null)
+					: null,
+				live("finance")
+					? safe(api("@get/finance/workforce/rota", { ...s, query: { from: today, to: today } }), null)
+					: null,
+				safe(data.staff.list(), []),
+				safe(getActiveHotel(), null),
+				safe(data.rooms.list(), []),
+				safe(data.outlets.list(), []),
+			]);
+			const hasRooms = rooms.length > 0 || (active?.roomCount ?? 0) > 0;
+			const kitchens = outlets.filter((o) => o.kind !== "BAR");
+			const bars = outlets.filter((o) => o.kind === "BAR");
+			const openOrders = async (list: typeof outlets) =>
+				(await Promise.all(list.map((o) => safe(data.outlets.orders(o.id), [])))).flat().filter((o) => o.status !== "CLOSED" && o.status !== "CANCELLED").length;
+			const [arrivals, cleaning, laundry, repairs, kitchenOpen, barOpen, requests, tills] = await Promise.all([
+				hasRooms ? safe(data.bookings.buckets().then((b) => b.arrivals.filter((x) => x.status === "BOOKED").length), 0) : 0,
+				hasRooms ? safe(data.housekeeping.tasks().then((t) => t.filter((x) => x.status !== "DONE" && x.status !== "INSPECTED").length), 0) : 0,
+				hasRooms ? safe(data.laundry.orders().then((o) => o.length), 0) : 0,
+				safe(data.maintenance.workOrders("open"), []),
+				openOrders(kitchens),
+				openOrders(bars),
+				safe(data.inventory.openRequests().then((r) => r.filter((x) => x.status === "REQUESTED" || x.status === "PART_ISSUED").length), 0),
+				safe(data.finance.tills().then((t) => t.filter((x) => x.status === "OPEN").length), 0),
+			]);
+			return buildDepartments({
+				board: board?.data?.data ?? null,
+				clock: clock?.data?.data ?? [],
+				shifts: (rota?.data?.data ?? []).filter((x) => x.status !== "CANCELLED"),
+				staff: staff.map((p) => ({ userId: p.userId, role: p.role, status: p.status })),
+				hasRooms,
+				outletKinds: outlets.map((o) => o.kind),
+				open: {
+					FRONT_OFFICE: arrivals,
+					HOUSEKEEPING: cleaning,
+					LAUNDRY: laundry,
+					MAINTENANCE: repairs.length,
+					KITCHEN: kitchenOpen,
+					BAR: barOpen,
+					INVENTORY: requests,
+					FINANCE: tills,
+				},
+				urgentRepairs: repairs.filter((r) => r.overdue || r.priority === "URGENT").length,
+			});
+		},
 	},
 	outlets: {
 		...fnbData.outlets,
@@ -2001,7 +2060,16 @@ export const data = {
 						`The business could not be loaded (${error?.status ?? "no response"})`,
 				);
 			}
-			return toBusinessRowFromBusiness(res.data);
+			const row = toBusinessRowFromBusiness(res.data);
+			// The business answer carries only the account manager's id: name them from identity (Hospio360 staff).
+			if (row.accountManagerId) {
+				const { data: am } = await api("@get/identity/users/:id", {
+					...(await withSession()),
+					params: { id: row.accountManagerId },
+				}).catch(() => ({ data: null }));
+				if (am?.data?.fullName) row.accountManager = am.data.fullName;
+			}
+			return row;
 		},
 		/** A business's hotels for the detail page and the wizard. */
 		businessHotels: async (id: string): Promise<HotelSummary[]> => {
