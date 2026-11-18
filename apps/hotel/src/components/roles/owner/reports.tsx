@@ -57,6 +57,8 @@ export const REPORTS: {
 	name: string;
 	area: string;
 	description: string;
+	/** An outlet report (hospio-backend docs/plan-venue-type.md phase 2): built here only, not scheduled or emailed. */
+	outlets?: boolean;
 }[] = [
 	{
 		kind: "DAILY_SUMMARY",
@@ -95,7 +97,96 @@ export const REPORTS: {
 		description:
 			"Everyone who stayed or is booked in the period, with contacts",
 	},
+	{
+		kind: "SALES_BY_OUTLET",
+		name: "Sales by outlet",
+		area: "Outlets",
+		description: "Sales, money paid, still to pay and cancelled per bar, lounge or restaurant",
+		outlets: true,
+	},
+	{
+		kind: "SALES_BY_ITEM",
+		name: "Sales by item",
+		area: "Outlets",
+		description: "Every item sold with its category, quantity and revenue",
+		outlets: true,
+	},
+	{
+		kind: "SALES_BY_CATEGORY",
+		name: "Sales by category",
+		area: "Outlets",
+		description: "Drinks, food and the rest: quantity and revenue per menu category",
+		outlets: true,
+	},
+	{
+		kind: "SALES_BY_STAFF",
+		name: "Sales by staff",
+		area: "Outlets",
+		description: "Who sold what, what they collected and what they voided",
+		outlets: true,
+	},
+	{
+		kind: "SALES_BY_HOUR",
+		name: "Sales by hour",
+		area: "Outlets",
+		description: "Your busy hours: sales and money per hour of the day",
+		outlets: true,
+	},
+	{
+		kind: "PAYMENTS_BY_METHOD",
+		name: "Payments by method & POS",
+		area: "Outlets",
+		description: "Cash, transfer and card per POS terminal taken at the outlets",
+		outlets: true,
+	},
+	{
+		kind: "VOIDS_DISCOUNTS",
+		name: "Voids & discounts",
+		area: "Outlets",
+		description: "Cancelled sales, voided items, discounts and complimentary sales, with who and why",
+		outlets: true,
+	},
+	{
+		kind: "STOCK_USE",
+		name: "Stock used vs sold",
+		area: "Outlets",
+		description: "What the recipes of items sold call for against what the stores gave out",
+		outlets: true,
+	},
 ];
+
+/** A printable page of a built report, for "Save as PDF" in the browser's print dialog. */
+function printReport(title: string, subtitle: string, built: BuiltReport) {
+	const esc = (v: unknown) =>
+		String(v ?? "")
+			.replace(/&/g, "&amp;")
+			.replace(/</g, "&lt;")
+			.replace(/>/g, "&gt;")
+			.replace(/"/g, "&quot;");
+	const cell = (v: string | number, col: string) =>
+		typeof v === "number" && col.includes("NGN") ? v.toLocaleString("en-NG") : v;
+	const w = window.open("", "_blank");
+	if (!w) {
+		toast.error("Allow pop-ups to save the report as a PDF");
+		return;
+	}
+	w.document.write(`<!doctype html><html><head><meta charset="utf-8"><title>${esc(title)}</title><style>
+body{font-family:system-ui,-apple-system,Segoe UI,sans-serif;color:#1f1f1f;margin:24px}
+h1{font-size:18px;margin:0 0 4px;color:#7a1f2b}p{font-size:12px;color:#555;margin:0 0 12px}
+table{border-collapse:collapse;width:100%;font-size:11px}th,td{border-bottom:1px solid #ddd;padding:5px 6px;text-align:left}
+th{background:#f6f1f2;font-weight:600}td.n{text-align:right}@page{margin:14mm}
+</style></head><body><h1>${esc(title)}</h1><p>${esc(subtitle)}</p><table><thead><tr>${built.columns
+		.map((c) => `<th>${esc(c)}</th>`)
+		.join("")}</tr></thead><tbody>${built.rows
+		.map(
+			(r) =>
+				`<tr>${r.map((v, j) => `<td${typeof v === "number" ? ' class="n"' : ""}>${esc(cell(v, built.columns[j]))}</td>`).join("")}</tr>`,
+		)
+		.join("")}</tbody></table>${built.note ? `<p style="margin-top:12px">${esc(built.note)}</p>` : ""}<p>Hospio360 · ${esc(new Date().toLocaleString("en-GB", { timeZone: "Africa/Lagos" }))}</p></body></html>`);
+	w.document.close();
+	w.focus();
+	w.print();
+}
 
 const EVERY = {
 	DAILY: "Every day",
@@ -165,7 +256,9 @@ export function OwnerReports({
 	);
 	// Occupancy and the guest list are about stays: left out when no location has rooms (hospio-backend docs/plan-venue-type.md).
 	const stays = hotels.length === 0 || hotels.some((h) => h.hasAccommodation !== false);
-	const list = REPORTS.filter(
+	// A business of lounges, bars and restaurants sees its outlet reports first.
+	const ordered = stays ? REPORTS : [...REPORTS.filter((r) => r.outlets), ...REPORTS.filter((r) => !r.outlets)];
+	const list = ordered.filter(
 		(r) =>
 			(stays || (r.kind !== "OCCUPANCY" && r.kind !== "GUESTS")) &&
 			(!search ||
@@ -211,7 +304,7 @@ export function OwnerReports({
 								</span>
 								<div className="min-w-0 flex-1">
 									<p className="text-sm font-bold text-ink">{r.name}</p>
-									<p className="text-xs text-ink-3">{r.area} · CSV</p>
+									<p className="text-xs text-ink-3">{r.area} · CSV{r.outlets ? " · PDF" : ""}</p>
 								</div>
 								{sched.length > 0 && (
 									<StatusPill dot={false} tone="info">
@@ -237,12 +330,14 @@ export function OwnerReports({
 								>
 									Open
 								</Button>
+								{!r.outlets && (
 								<Button
 									className={`${btn.primary} ${btn.small} flex-1`}
 									onClick={() => setSchedule(r.kind)}
 								>
 									<CalendarClockIcon className="size-3" /> Schedule
 								</Button>
+								)}
 							</div>
 						</div>
 					);
@@ -502,6 +597,17 @@ function ReportPanel({
 			footer={
 				report && (
 					<>
+						{report.outlets ? (
+							<Button
+								variant="outline"
+								className={btn.secondary}
+								disabled={!built || built.rows.length === 0 || loading}
+								onClick={() => built && printReport(report.name, what, built)}
+							>
+								<FileTextIcon className="size-4" /> Save as PDF
+							</Button>
+						) : (
+						<>
 						<Button
 							variant="outline"
 							className={btn.secondary}
@@ -531,6 +637,8 @@ function ReportPanel({
 						>
 							<MailIcon className="size-4" /> Email me
 						</Button>
+						</>
+						)}
 						<Button
 							className={btn.primary}
 							disabled={!built || built.rows.length === 0 || loading}

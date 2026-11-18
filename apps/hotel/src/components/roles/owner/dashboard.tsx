@@ -38,6 +38,10 @@ import type {
 } from "@hospio/api/data/types";
 import { ApprovalPanel } from "./approval-panel";
 import {
+	type VenueLocationToday,
+	VenueTodaySection,
+} from "@/components/venue/venue-today";
+import {
 	DownloadModal,
 	MiniBars,
 	hotelStatusLabel,
@@ -62,6 +66,8 @@ export function OwnerDashboard({
 	limit,
 	outletSales,
 	activeAccommodation = true,
+	venues = [],
+	activeId,
 }: {
 	user: Me;
 	businessName: string;
@@ -76,6 +82,10 @@ export function OwnerDashboard({
 	outletSales?: OutletSalesDayRow | null;
 	/** The active location has accommodation (hospio-backend docs/plan-venue-type.md); its outlet sales then mention rooms. */
 	activeAccommodation?: boolean;
+	/** Today at each lounge, bar or restaurant of the business (phase 2 venue dashboard); empty for hotels only. */
+	venues?: VenueLocationToday[];
+	/** The location in the branch box: its venue shows first. */
+	activeId?: string;
 }) {
 	const [open, setOpen] = useParam("open");
 	const [download, setDownload] = useState(false);
@@ -208,6 +218,21 @@ export function OwnerDashboard({
 					hint={`${plural(hotels.filter((h) => h.openIssues >= 5).length, allHotels ? "hotel" : "location")} need attention`}
 				/>
 			</div>
+
+			{venues.length > 0 && (
+				<section className="flex flex-col gap-3" aria-label="Venues today">
+					<div>
+						<h2 className="text-base font-bold text-ink">
+							{venues.length > 1 ? "Your lounges, bars and restaurants today" : `${venues[0].name} today`}
+						</h2>
+						<p className="text-xs text-ink-3">Live from the outlets, tills and clock · only real figures</p>
+					</div>
+					<VenueTodaySection
+						locations={venues}
+						initial={venues.some((v) => v.hotelId === activeId) ? activeId : "all"}
+					/>
+				</section>
+			)}
 
 			<div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_420px]">
 				<SectionCard
@@ -427,7 +452,10 @@ export function OwnerDashboard({
 				</SectionCard>
 			</div>
 
-			<OutletSalesCard sales={outletSales} rooms={activeAccommodation} />
+			{/* At a venue the section above already shows its outlets. */}
+			{(activeAccommodation || venues.length === 0) && (
+				<OutletSalesCard sales={outletSales} rooms={activeAccommodation} />
+			)}
 
 			<ApprovalPanel
 				approval={selected}

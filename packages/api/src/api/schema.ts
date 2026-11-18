@@ -13,6 +13,7 @@ import { legalRoutes } from "./routes-legal";
 import { feeRoutes } from "./routes-fees";
 import { paymentRoutes } from "./routes-payments";
 import { profileRoutes } from "./routes-profile";
+import { venueRoutes } from "./routes-venue";
 import { pagedOf, pageParams } from "./paged";
 
 /**
@@ -1155,6 +1156,7 @@ export const schema = createSchema({
 	...lmRoutes,
 	...deviceRoutes,
 	...profileRoutes,
+	...venueRoutes,
 	// identity
 	"@post/identity/auth/refresh": {
 		input: z.object({ refreshToken: z.string() }),

@@ -58,6 +58,7 @@ import { inventoryData } from "./inventory";
 import { lmData } from "./lm";
 import { mlData } from "./ml";
 import { opsData } from "./ops";
+import { venueData } from "./venue";
 import { ownerData } from "./owner";
 import { toAreaRow, toRoomRow, toRoomTypeRow } from "./mappers/property";
 import {
@@ -648,6 +649,8 @@ const matches = (q: string | undefined, ...fields: (string | undefined)[]) =>
 	fields.some((f) => (f ?? "").toLowerCase().includes(q.trim().toLowerCase()));
 
 export const data = {
+	/** Venue dashboards and reports (hospio-backend docs/plan-venue-type.md phase 2). */
+	venue: venueData,
 	/** The owner portal: every hotel of the business, each row tagged with its hotel (./owner, docs/owner-portal.md). */
 	owner: ownerData,
 	business: {
