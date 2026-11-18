@@ -261,6 +261,8 @@ export function toOrderRow(o: Order, outletName?: string): OrderRow {
 		notes: o.notes ?? undefined,
 		paidAmount: o.paidAmount ?? undefined,
 		ticketFrom: o.ticketFrom || undefined,
+		balance: o.balance ?? undefined,
+		splitParts: o.splitParts ?? undefined,
 	};
 }
 

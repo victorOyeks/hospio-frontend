@@ -26,6 +26,7 @@ import { fmtLongDate } from "@hospio/ui/shared/format";
 import { ConfirmModal, Modal } from "@hospio/ui/shared/modal";
 import { WhatHappens } from "@hospio/ui/shared/side-panel";
 import { btn } from "@hospio/ui/shared/ui";
+import { saveStaffOutlets, StaffOutletsField, worksOutlets } from "@hospio/ui/shared/staff-outlets";
 
 /**
  * A staff member's account, as the owner (every hotel) and the manager (their hotel) run it: details, a pause for some
@@ -40,6 +41,8 @@ type Person = Pick<
 	userId?: string;
 	id: string;
 	hotelName?: string;
+	/** Their role at this hotel: a waiter, cashier, bar or kitchen person can be kept to some outlets (Edit details). */
+	role?: string;
 };
 
 const uid = (p: Person) => p.userId ?? p.id;
@@ -67,7 +70,10 @@ export function EditDetailsModal({
 		email: "",
 		jobTitle: "",
 	});
+	/** The outlets ticked; null until the picker is touched (nothing is sent then). */
+	const [outletIds, setOutletIds] = useState<string[] | null>(null);
 	useEffect(() => {
+		setOutletIds(null);
 		if (staff)
 			setForm({
 				fullName: staff.fullName,
@@ -104,13 +110,23 @@ export function EditDetailsModal({
 						className={btn.primary}
 						disabled={
 							pending ||
-							Object.keys(changes).length === 0 ||
+							(Object.keys(changes).length === 0 && outletIds === null) ||
 							!form.fullName.trim() ||
 							!emailOk
 						}
 						onClick={() =>
 							run(
-								() => updateStaffDetails(uid(staff), changes),
+								async () => {
+									if (Object.keys(changes).length > 0) {
+										const r = await updateStaffDetails(uid(staff), changes);
+										if (!r.ok) return r;
+									}
+									if (!worksOutlets(staff.role)) return { ok: true as const, data: null };
+									const o = await saveStaffOutlets(uid(staff), outletIds, staff.hotelId);
+									return o.ok
+										? o
+										: { ok: false as const, error: `The details were saved, but not the outlets: ${o.error}` };
+								},
 								`${form.fullName.trim()} saved`,
 								() => {
 									onClose();
@@ -152,6 +168,14 @@ export function EditDetailsModal({
 					value={form.jobTitle}
 					onChange={(v) => setForm((f) => ({ ...f, jobTitle: v }))}
 					placeholder="e.g. Night auditor"
+				/>
+				<StaffOutletsField
+					hotelId={staff.hotelId}
+					role={staff.role}
+					userId={uid(staff)}
+					value={outletIds}
+					onChange={setOutletIds}
+					disabled={pending}
 				/>
 				<Note tone="info">
 					They are told in the app. A new email is what they sign in with from

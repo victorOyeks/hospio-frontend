@@ -47,7 +47,13 @@ import { SearchBox, Toolbar } from "@hospio/ui/shared/toolbar";
 import { btn } from "@hospio/ui/shared/ui";
 import { HotelFilter } from "./common";
 
-type Hotel = { hotelId: string; name: string; hasAccommodation?: boolean };
+type Hotel = {
+	hotelId: string;
+	name: string;
+	hasAccommodation?: boolean;
+	/** The location records tips (Hotel setup → Restaurant & bar): the Tips report is listed only then. */
+	recordTips?: boolean;
+};
 /** The "All hotels" choice in a select (an empty value is not allowed there). */
 const ALL = "all";
 
@@ -151,6 +157,13 @@ export const REPORTS: {
 		name: "Stock used vs sold",
 		area: "Outlets",
 		description: "What the recipes of items sold call for against what the stores gave out",
+		outlets: true,
+	},
+	{
+		kind: "TIPS",
+		name: "Tips",
+		area: "Outlets",
+		description: "Tips recorded when sales were paid: totals, each person, each day and every tip. Tips are not sales and are not in any sales figure",
 		outlets: true,
 	},
 ];
@@ -258,9 +271,12 @@ export function OwnerReports({
 	const stays = hotels.length === 0 || hotels.some((h) => h.hasAccommodation !== false);
 	// A business of lounges, bars and restaurants sees its outlet reports first.
 	const ordered = stays ? REPORTS : [...REPORTS.filter((r) => r.outlets), ...REPORTS.filter((r) => !r.outlets)];
+	// Tips: only where the location picked (or, with every location, any of them) records tips.
+	const tips = hotels.some((h) => h.recordTips && (!q.hotel || h.hotelId === q.hotel));
 	const list = ordered.filter(
 		(r) =>
 			(stays || (r.kind !== "OCCUPANCY" && r.kind !== "GUESTS")) &&
+			(r.kind !== "TIPS" || tips) &&
 			(!search ||
 			`${r.name} ${r.description} ${r.area}`
 				.toLowerCase()

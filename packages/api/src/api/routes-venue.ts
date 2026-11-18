@@ -172,6 +172,13 @@ export const VenueReport = z.object({
 			total: money,
 			complimentary: z.boolean(),
 			openedBy: str,
+			/** Phase 4: the part given by hand (the rest is happy hour), complimentary items and their worth, why, who gave and who approved. */
+			byHand: z.number().nullable().optional(),
+			complimentaryItems: z.number().nullable().optional(),
+			complimentaryAmount: z.number().nullable().optional(),
+			reasons: str,
+			givenBy: str,
+			approvedBy: str,
 		}),
 	),
 	discountsTruncated: z.boolean(),

@@ -377,7 +377,14 @@ export function FinancialsScreen(p: FinancialsProps) {
 			header: "Expected",
 			accessorKey: "expected",
 			cell: ({ row }) => (
-				<span className="font-semibold">{naira(row.original.expected)}</span>
+				<div>
+					<span className="font-semibold">{naira(row.original.expected)}</span>
+					{row.original.status === "OPEN" && (row.original.cashTips ?? 0) > 0 && (
+						<p className="text-[11px] text-ink-3">
+							Cash tips held {naira(row.original.cashTips ?? 0)} (in the drawer, not takings)
+						</p>
+					)}
+				</div>
 			),
 		},
 		{

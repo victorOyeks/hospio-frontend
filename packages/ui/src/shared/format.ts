@@ -7,6 +7,15 @@ export function naira(n: number | null | undefined) {
 	return `${sign}₦${Math.round(Math.abs(n)).toLocaleString("en-NG")}`;
 }
 
+/** As `naira`, keeping the kobo when there are any: a part of a split bill is often ₦3,333.33. */
+export function nairaExact(n: number | null | undefined) {
+	if (n == null || Number.isNaN(n)) return "₦0";
+	const kobo = Math.round(Math.abs(n) * 100);
+	if (kobo % 100 === 0) return naira(n);
+	const sign = n < 0 ? "-" : "";
+	return `${sign}₦${(kobo / 100).toLocaleString("en-NG", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+}
+
 /** ₦1.2M / ₦45k for KPI tiles. */
 export function nairaShort(n: number | null | undefined) {
 	if (n == null || Number.isNaN(n)) return "₦0";

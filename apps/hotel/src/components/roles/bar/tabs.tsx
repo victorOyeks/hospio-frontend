@@ -6,6 +6,7 @@ import {
 	PlusIcon,
 	ReceiptIcon,
 	XIcon,
+	ReceiptTextIcon,
 } from "lucide-react";
 import { parseAsString, useQueryState } from "nuqs";
 import { useState } from "react";
@@ -61,6 +62,7 @@ import {
 	toLineInputs,
 	useOrderRows,
 } from "../shared-staff/outlet-shared";
+import { BillSheet } from "../shared-staff/bill-sheet";
 import { OrderPaymentPanel } from "../shared-staff/pos-payment";
 import {
 	BigButton,
@@ -69,7 +71,7 @@ import {
 	minutesSince,
 } from "../shared-staff/tablet";
 
-type Sub = "add" | "move" | "pay" | "room" | "new" | null;
+type Sub = "add" | "move" | "pay" | "room" | "new" | "bill" | null;
 
 /**
  * Who is at the screen. "bar": the bar's tabs, as before. "waiter" (hospio-backend docs/plan-venue-type.md, phase 3): the tabs
@@ -446,8 +448,16 @@ export function BarTabsScreen({
 									{waiter ? "Add items" : "Add drinks"}
 								</BigButton>
 							)}
+							<BigButton tone="secondary" onClick={() => setSub("bill")}>
+								<ReceiptTextIcon className="size-5" />{" "}
+								{(current.splitParts ?? 0) > 0
+									? "Open the split bill"
+									: canPay
+										? "Split or discount"
+										: "Discount or void"}
+							</BigButton>
 							{canPay && (
-								<BigButton onClick={() => setSub("pay")}>
+								<BigButton onClick={() => setSub((current.splitParts ?? 0) > 0 ? "bill" : "pay")}>
 									<CreditCardIcon className="size-5" />{" "}
 									{cashier ? "Take payment" : "Close & pay"}
 								</BigButton>
@@ -937,6 +947,26 @@ export function BarTabsScreen({
 				</div>
 			</Modal>
 
+			{/* The bill: split it and pay part by part, discounts, complimentary items, requests to a manager (phase 4). */}
+			<BillSheet
+				orderId={sub === "bill" && current ? current.id : null}
+				onClose={() => {
+					setSub(null);
+					if (current)
+						void readOrder(current.id, outletName).then((r) => {
+							if (r.ok && r.data) put(r.data);
+						});
+				}}
+				desk={waiter ? "WAITER" : cashier ? "CASHIER" : "BAR"}
+				terminals={terminals}
+				inHouse={inHouse}
+				onChanged={(id) =>
+					void readOrder(id, outletName).then((r) => {
+						if (r.ok && r.data) put(r.data);
+					})
+				}
+			/>
+
 			<OrderPaymentPanel
 				open={sub === "pay" && !!current}
 				onOpenChange={(o) => !o && setSub(null)}
@@ -947,10 +977,12 @@ export function BarTabsScreen({
 						? {
 								orderId: current.id,
 								guestName: current.guestName ?? "Bar guest",
-								amount: Math.max(current.total - (current.paidAmount ?? 0), 0),
+								amount: current.balance ?? Math.max(current.total - (current.paidAmount ?? 0), 0),
 								description: `Tab ${current.number}`,
 								roomNumber: current.roomNumber,
 								terminalId: outlet?.terminalId,
+								tipAllowed: settings.recordTips,
+								tipFor: current.openedBy,
 							}
 						: null
 				}

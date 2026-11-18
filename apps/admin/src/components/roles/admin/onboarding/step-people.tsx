@@ -19,6 +19,7 @@ import { fmtAgo } from "@hospio/ui/shared/format";
 import { Modal } from "@hospio/ui/shared/modal";
 import { RowActions } from "@hospio/ui/shared/row-actions";
 import { PanelSection, SidePanel } from "@hospio/ui/shared/side-panel";
+import { saveStaffOutlets, StaffOutletsField, worksOutlets } from "@hospio/ui/shared/staff-outlets";
 import { StatusPill } from "@hospio/ui/shared/status-pill";
 import { btn } from "@hospio/ui/shared/ui";
 import { cn } from "@hospio/ui/utils";
@@ -163,6 +164,8 @@ export function PeopleStep({ ctx }: { ctx: WizardCtx }) {
 		role: HotelRole;
 		hotelId: string;
 		level?: PeopleLevel;
+		/** The outlets a waiter, cashier, bar or kitchen person is kept to (none = every outlet of the location). */
+		outletIds?: string[];
 	}): Promise<boolean> => {
 		const level = input.level ?? defaultLevel(input.role);
 		const created = await call(() =>
@@ -177,6 +180,14 @@ export function PeopleStep({ ctx }: { ctx: WizardCtx }) {
 			}),
 		);
 		if (!created) return false;
+		// Their outlets, now that the user exists (fnb, with the location's header). The person stays added if this is refused.
+		if (worksOutlets(input.role) && input.outletIds && input.outletIds.length > 0) {
+			const o = await saveStaffOutlets(created.userId, input.outletIds, input.hotelId);
+			if (!o.ok)
+				toast.error(`${input.fullName} was added, but their outlets were not saved: ${o.error}. They work every outlet for now`, {
+					duration: 8000,
+				});
+		}
 		const login: OnboardingLogin = {
 			userId: created.userId,
 			fullName: input.fullName,
@@ -491,6 +502,7 @@ function AddPersonPanel({
 		role: HotelRole;
 		hotelId: string;
 		level: PeopleLevel;
+		outletIds?: string[];
 	}) => Promise<boolean>;
 }) {
 	const [fullName, setName] = useState("");
@@ -509,8 +521,10 @@ function AddPersonPanel({
 		hotels.find((h) => h.id === (hotelId || hotels[0]?.id)),
 	);
 	// A lounge, bar or restaurant has no front office or housekeeping: picking one drops a role it can't take.
+	const [outletIds, setOutletIds] = useState<string[] | null>(null);
 	const setHotelId = (id: string) => {
 		setHotelIdOnly(id);
+		setOutletIds(null);
 		const allowed = rolesFor(hotels.find((h) => h.id === id));
 		if (isHotelRole(role) && !allowed.includes(role)) setRole("MANAGER");
 	};
@@ -527,6 +541,7 @@ function AddPersonPanel({
 		setPhone("");
 		setLevelPicked(false);
 		setLevel(defaultLevel(role));
+		setOutletIds(null);
 	};
 	return (
 		<SidePanel
@@ -561,6 +576,7 @@ function AddPersonPanel({
 									role,
 									hotelId: hotelId || hotels[0].id,
 									level,
+									outletIds: outletIds ?? undefined,
 								});
 								if (ok) {
 									toast.success(`${fullName.trim()} added`);
@@ -626,6 +642,13 @@ function AddPersonPanel({
 							required
 						/>
 					</FieldRow>
+					<StaffOutletsField
+						hotelId={hotelId || hotels[0]?.id}
+						role={role}
+						value={outletIds}
+						onChange={setOutletIds}
+						disabled={pending}
+					/>
 					<SelectField
 						label="Access level"
 						value={level}

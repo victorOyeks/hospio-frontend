@@ -12,6 +12,7 @@ import {
 	ShoppingBagIcon,
 	UtensilsIcon,
 	XIcon,
+	ReceiptIcon,
 } from "lucide-react";
 import Link from "next/link";
 import { parseAsString, useQueryState } from "nuqs";
@@ -71,6 +72,7 @@ import {
 	toLineInputs,
 	useOrderRows,
 } from "../shared-staff/outlet-shared";
+import { BillSheet } from "../shared-staff/bill-sheet";
 import { OrderPaymentPanel } from "../shared-staff/pos-payment";
 import { RecentSales } from "../shared-staff/recent-sales";
 import { SalePanel } from "../shared-staff/sale-panel";
@@ -103,6 +105,7 @@ type Panel =
 	| { kind: "ticket"; id: string }
 	| { kind: "new" }
 	| { kind: "pay"; id: string }
+	| { kind: "bill"; id: string }
 	| { kind: "room"; id: string }
 	| { kind: "done"; id: string; how: string }
 	| null;
@@ -825,15 +828,27 @@ export function KitchenOrdersScreen({
 							{["OPEN", "SENT", "READY", "SERVED"].includes(current.status) &&
 								!settled(current) &&
 								current.total > 0 && (
-									<BigButton
-										tone="secondary"
-										onClick={() => {
-											setChargeError(null);
-											setPanel({ kind: "pay", id: current.id });
-										}}
-									>
-										<CreditCardIcon className="size-5" /> Take payment
-									</BigButton>
+									<>
+										<BigButton
+											tone="secondary"
+											onClick={() => {
+												setChargeError(null);
+												setPanel({ kind: "bill", id: current.id });
+											}}
+										>
+											<ReceiptIcon className="size-5" />{" "}
+											{(current.splitParts ?? 0) > 0 ? "Open the split bill" : "Split or discount"}
+										</BigButton>
+										<BigButton
+											tone="secondary"
+											onClick={() => {
+												setChargeError(null);
+												setPanel({ kind: (current.splitParts ?? 0) > 0 ? "bill" : "pay", id: current.id });
+											}}
+										>
+											<CreditCardIcon className="size-5" /> Take payment
+										</BigButton>
+									</>
 								)}
 							{current.status === "SERVED" && settled(current) && (
 								<BigButton
@@ -1370,6 +1385,15 @@ export function KitchenOrdersScreen({
 				</div>
 			</SidePanel>
 
+			{/* The bill: split it and pay part by part, discounts, complimentary items, requests to a manager (phase 4). */}
+			<BillSheet
+				orderId={panel?.kind === "bill" ? panel.id : null}
+				onClose={() => setPanel(current ? { kind: "ticket", id: current.id } : null)}
+				desk="KITCHEN"
+				terminals={terminals}
+				inHouse={inHouse}
+			/>
+
 			{/* Take payment */}
 			<OrderPaymentPanel
 				open={panel?.kind === "pay" && !!current}
@@ -1387,7 +1411,9 @@ export function KitchenOrdersScreen({
 									(current.kind === "ROOM_SERVICE"
 										? `Room ${current.roomNumber ?? ""}`
 										: "Walk-in"),
-								amount: current.total,
+								amount: current.balance ?? current.total,
+								tipAllowed: settings.recordTips,
+								tipFor: current.openedBy,
 								description: `${current.number} · ${liveLines(current)
 									.map((l) => `${l.qty} ${l.name}`)
 									.join(", ")}`,

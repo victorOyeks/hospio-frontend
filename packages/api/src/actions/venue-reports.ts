@@ -3,6 +3,7 @@ import "server-only";
 import { atHotel } from "@hospio/api/api/server";
 import { data } from "@hospio/api/data";
 import type { VenueReport } from "@hospio/api/data/venue";
+import { tipsReport } from "./bill";
 
 /**
  * The outlet reports for lounges, bars and restaurants (hospio-backend docs/plan-venue-type.md phase 2), also offered to hotels for
@@ -19,6 +20,7 @@ export const VENUE_REPORT_KINDS = [
 	"PAYMENTS_BY_METHOD",
 	"VOIDS_DISCOUNTS",
 	"STOCK_USE",
+	"TIPS",
 ] as const;
 export type VenueReportKind = (typeof VENUE_REPORT_KINDS)[number];
 
@@ -51,12 +53,76 @@ async function reportAt(h: Hotel, from: string, to: string) {
 	return atHotel(h.id, () => data.venue.report(from, to));
 }
 
+/**
+ * Tips (phase 4; only where the location records them): the totals, each person, each day, then every tip, in one table so the
+ * CSV and the printed page carry all four. Tips are never sales, so nothing here is in any sales figure.
+ */
+async function buildTips(
+	from: string,
+	to: string,
+	hotels: Hotel[],
+): Promise<{ ok: true; data: Built } | { ok: false; error: string }> {
+	const all = await Promise.all(
+		hotels.map(async (h) => ({ hotel: h, r: await atHotel(h.id, () => tipsReport(from, to)) })),
+	);
+	// A location that can't be read is left out when others can (one that doesn't record tips answers with nothing either way).
+	const read = all.flatMap((x) => (x.r.ok ? [{ hotel: x.hotel, r: x.r.data }] : []));
+	const failedAt = all.find((x) => !x.r.ok);
+	if (read.length === 0 && failedAt && !failedAt.r.ok)
+		return { ok: false, error: `${failedAt.hotel.name}: ${failedAt.r.error}` };
+	const period = from === to ? from : `${from} to ${to}`;
+	const rows = read
+		.filter(({ r }) => r.count > 0)
+		.flatMap(({ hotel, r }) => [
+			[hotel.name, "Total", period, "", "", "Everyone", "", r.count, r.total, r.cash, r.card + r.transfer, ""],
+			...r.byStaff.map((s) => [hotel.name, "By staff", "", "", "", s.name ?? "Not recorded", "", s.count, s.total, s.cash, s.other, ""]),
+			...r.byDay.map((d) => [hotel.name, "By day", d.date, "", "", "", "", d.count, d.total, d.cash, d.other, ""]),
+			...r.tips.map((t) => [
+				hotel.name,
+				"Tip",
+				when(t.at),
+				t.number ?? "",
+				t.outletName ?? "",
+				t.staffName ?? "Not recorded",
+				METHOD[t.method] ?? t.method,
+				1,
+				t.amount,
+				t.method === "CASH" ? t.amount : 0,
+				t.method === "CASH" ? 0 : t.amount,
+				t.takenByName ?? "",
+			]),
+		]);
+	const cut = read.some(({ r }) => r.truncated);
+	return {
+		ok: true,
+		data: {
+			columns: [
+				"Location",
+				"Section",
+				"When",
+				"Sale",
+				"Outlet",
+				"Staff",
+				"Method",
+				"Tips",
+				"Amount (NGN)",
+				"Cash (NGN)",
+				"Card or transfer (NGN)",
+				"Taken by",
+			],
+			rows,
+			note: `Tips are not sales and are not in any sales figure. Each location has its total first, then each person, each day and every tip. Staff is who the tip is for; Taken by is who took the payment. Cash tips sit in the cashier's drawer until they are paid out to staff.${cut ? " Only the latest tips are listed one by one: pick a shorter period for all of them. The totals cover the whole period." : ""}${failedAt && !failedAt.r.ok ? ` ${failedAt.hotel.name} could not be read: ${failedAt.r.error}.` : ""}`,
+		},
+	};
+}
+
 export async function buildVenueReport(
 	kind: VenueReportKind,
 	from: string,
 	to: string,
 	hotels: Hotel[],
 ): Promise<{ ok: true; data: Built } | { ok: false; error: string }> {
+	if (kind === "TIPS") return buildTips(from, to, hotels);
 	const all = await Promise.all(
 		hotels.map(async (h) => ({ hotel: h, r: await reportAt(h, from, to) })),
 	);
@@ -219,7 +285,7 @@ export async function buildVenueReport(
 					columns: ["Location", "Method", "POS terminal", "Payments", "Amount (NGN)"],
 					rows,
 					note: [
-						"Money taken at the outlets in the period, by when it was taken. Tips are not recorded in Hospio360, so there is no tips column.",
+						"Money taken at the outlets in the period, by when it was taken. Tips are not sales: where a location records them they are in the Tips report.",
 						...notes,
 					].join(" "),
 				},
@@ -238,6 +304,10 @@ export async function buildVenueReport(
 					v.amount,
 					v.by ?? "Not recorded",
 					v.reason ?? "",
+					"",
+					"",
+					"",
+					"",
 				]),
 				...r.discounts.map((d) => [
 					hotel.name,
@@ -248,8 +318,12 @@ export async function buildVenueReport(
 					"",
 					"",
 					d.complimentary ? d.total : d.discount,
-					d.openedBy ?? "Not recorded",
-					"",
+					d.givenBy || d.openedBy || "Not recorded",
+					d.reasons ?? "",
+					d.byHand ?? "",
+					d.complimentaryItems ?? "",
+					d.complimentaryAmount ?? "",
+					d.approvedBy ?? "",
 				]),
 			]);
 			const cut = reps.some(({ r }) => r.voidsTruncated || r.discountsTruncated);
@@ -267,9 +341,13 @@ export async function buildVenueReport(
 						"Amount (NGN)",
 						"By",
 						"Reason",
+						"Given by hand (NGN)",
+						"Complimentary items",
+						"Complimentary worth (NGN)",
+						"Approved by",
 					],
 					rows,
-					note: `A cancelled sale's amount is what was on it; a voided item's is its price times the quantity. Discounts list who opened the sale.${cut ? " Only the latest 500 of each are listed: pick a shorter period for all of them." : ""}`,
+					note: `A cancelled sale's amount is what was on it; a voided item's is its price times the quantity. A discount lists who gave it (who opened the sale when nobody did, as with happy hour) and, where a manager approved it, who. Given by hand is the part a person took off; the rest of the amount is happy hour. Complimentary items are counted with their worth.${cut ? " Only the latest 500 of each are listed: pick a shorter period for all of them." : ""}`,
 				},
 			};
 		}

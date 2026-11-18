@@ -87,6 +87,9 @@ export function TillScreen({
 			p.createdAt.slice(0, 10) === new Date().toISOString().slice(0, 10),
 	);
 	const paidOut = open?.cashOut ?? 0;
+	// Cash tips sit in the drawer with the takings until they are paid out; nothing is shown where there are none.
+	const tipsHeld = open?.cashTips ?? 0;
+	const tipsLine = `Cash tips held ${naira(tipsHeld)} (in the drawer, not takings)`;
 	const variance =
 		open && typeof counted === "number" ? counted - open.expected : 0;
 	// The colleague and the note of a half-done handover come back after the lock screen for the same person; the cash is
@@ -189,6 +192,7 @@ export function TillScreen({
 					}
 				/>
 			</div>
+			{open && tipsHeld > 0 && <Note tone="info">{tipsLine}</Note>}
 			<div className="grid gap-4 xl:grid-cols-2">
 				<SectionCard
 					title="Cash in this till"
@@ -246,7 +250,9 @@ export function TillScreen({
 										)}
 									</span>
 									<span className="flex-1 font-medium text-ink">
-										{e.description ||
+										{e.kind === "TIP"
+											? "Cash tip"
+											: e.description ||
 											(e.kind === "PAYMENT"
 												? "Cash payment"
 												: e.kind === "PAY_IN"
@@ -535,6 +541,7 @@ export function TillScreen({
 								{ label: "Opening float", value: naira(open.openingFloat) },
 								{ label: "Cash in", value: naira(open.cashIn) },
 								{ label: "Paid out", value: `− ${naira(open.cashOut ?? 0)}` },
+								...(tipsHeld > 0 ? [{ label: "Cash tips held", value: naira(tipsHeld) }] : []),
 								{
 									label: "Expected",
 									value: naira(open.expected),
@@ -543,6 +550,7 @@ export function TillScreen({
 							]}
 						/>
 					)}
+					{tipsHeld > 0 && <Note tone="info">{tipsLine}. Count them with the rest.</Note>}
 					<MoneyField
 						label="Cash counted"
 						value={counted}
@@ -658,6 +666,7 @@ export function TillScreen({
 							}))}
 						placeholder="Choose a colleague"
 					/>
+					{tipsHeld > 0 && <Note tone="info">{tipsLine}. Count them with the rest.</Note>}
 					<MoneyField
 						label="Cash counted together"
 						value={counted}

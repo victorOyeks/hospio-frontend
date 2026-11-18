@@ -20,7 +20,7 @@ import {
 	SelectField,
 	TextField,
 } from "@hospio/ui/shared/field";
-import { naira } from "@hospio/ui/shared/format";
+import { naira, nairaExact } from "@hospio/ui/shared/format";
 import { Note, TotalsList } from "@hospio/ui/shared/detail-list";
 import { SidePanel } from "@hospio/ui/shared/side-panel";
 import { StatusPill } from "@hospio/ui/shared/status-pill";
@@ -56,6 +56,11 @@ export type PaymentTarget = {
 	role?: string;
 	/** The selling outlet's own POS (Hotel setup → Restaurants & tables): picked first while it is online. */
 	terminalId?: string;
+	/** The part of a split bill this pays (docs/plan-venue-type.md, phase 4). */
+	partId?: string;
+	/** The location records tips: a tip can be added on top of the amount. `tipFor` is who served. */
+	tipAllowed?: boolean;
+	tipFor?: string;
 };
 export type TakenPayment = {
 	id: string;
@@ -188,6 +193,7 @@ export function usePaymentSteps(
 	const [card, setCard] = useState<CardState>("waiting");
 	const [attempt, setAttempt] = useState(0);
 	const [tendered, setTendered] = useState<number | "">("");
+	const [tip, setTip] = useState<number | "">("");
 	// By email when the guest has one; a guest with a phone and no email can get it on WhatsApp (the approved receipt
 	// template, when RECEIPT is in the backend's WhatsApp list), as the automatic receipt does; else the desk prints it.
 	const waKinds = useWhatsAppKinds();
@@ -222,6 +228,7 @@ export function usePaymentSteps(
 		setFolioId(t?.folioId ?? "");
 		setGuestName(t?.guestName ?? "");
 		setAmount(t?.amountDue ?? "");
+		setTip("");
 		setDescription(t?.description ?? "Room charges");
 		setMethod("CARD");
 		setTerminal(defaultTerminal(terminals, t?.role, t?.terminalId));
@@ -302,6 +309,8 @@ export function usePaymentSteps(
 			orderId: tgt?.orderId,
 			role: tgt?.role,
 			terminalId: terminal || undefined,
+			partId: tgt?.partId,
+			tipAmount: tipN || undefined,
 		})
 			.then((r) => {
 				clearTimeout(t);
@@ -412,6 +421,7 @@ export function usePaymentSteps(
 	}
 
 	const amt = typeof amount === "number" ? amount : 0;
+	const tipN = tgt?.tipAllowed && tgt.orderId && typeof tip === "number" ? tip : 0;
 	const folio = folios.find((f) => f.id === folioId);
 	// Which POS the payment went to: payment-service's answer, else the one picked here.
 	const posName =
@@ -476,6 +486,8 @@ export function usePaymentSteps(
 				receipt: "NONE",
 				orderId: tgt?.orderId,
 				role: tgt?.role,
+				partId: tgt?.partId,
+				tipAmount: tipN || undefined,
 			}).catch(
 				(e: unknown) =>
 					({
@@ -667,7 +679,7 @@ export function usePaymentSteps(
 						<button
 							type="button"
 							className={btn.primary}
-							disabled={typeof tendered !== "number" || tendered < amt}
+							disabled={typeof tendered !== "number" || tendered < amt + tipN}
 							onClick={() => setStep("receipt")}
 						>
 							Cash received
@@ -795,8 +807,27 @@ export function usePaymentSteps(
 						/>
 					) : (
 						<TotalsList
-							rows={[{ label: "Taking", value: naira(amt), strong: true }]}
+							rows={[{ label: "Taking", value: nairaExact(amt), strong: true }]}
 						/>
+					)}
+					{tgt?.tipAllowed && tgt.orderId && (
+						<>
+							<MoneyField
+								label="Tip (optional)"
+								value={tip}
+								onChange={setTip}
+								hint={`Not part of the sale. Recorded for ${tgt.tipFor || "whoever served"}`}
+							/>
+							{tipN > 0 && (
+								<TotalsList
+									rows={[
+										{ label: "Bill", value: nairaExact(amt) },
+										{ label: "Tip", value: nairaExact(tipN) },
+										{ label: "The guest pays", value: nairaExact(amt + tipN), strong: true },
+									]}
+								/>
+							)}
+						</>
 					)}
 					<ChoiceCards
 						label="Method"
@@ -985,7 +1016,13 @@ export function usePaymentSteps(
 			{step === "cash" && (
 				<div className="flex flex-col gap-4">
 					<TotalsList
-						rows={[{ label: "Amount due", value: naira(amt), strong: true }]}
+						rows={[
+							{
+								label: tipN > 0 ? `Amount due (with the ${nairaExact(tipN)} tip)` : "Amount due",
+								value: nairaExact(amt + tipN),
+								strong: true,
+							},
+						]}
 					/>
 					<MoneyField
 						label="Cash received"
@@ -993,12 +1030,12 @@ export function usePaymentSteps(
 						onChange={setTendered}
 						required
 					/>
-					{typeof tendered === "number" && tendered >= amt && (
-						<Note tone="success">Change to give: {naira(tendered - amt)}</Note>
+					{typeof tendered === "number" && tendered >= amt + tipN && (
+						<Note tone="success">Change to give: {nairaExact(tendered - amt - tipN)}</Note>
 					)}
-					{typeof tendered === "number" && tendered > 0 && tendered < amt && (
+					{typeof tendered === "number" && tendered > 0 && tendered < amt + tipN && (
 						<Note tone="danger">
-							{naira(amt - tendered)} short — take the rest another way or
+							{nairaExact(amt + tipN - tendered)} short — take the rest another way or
 							record a part payment.
 						</Note>
 					)}

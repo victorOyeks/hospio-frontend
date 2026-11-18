@@ -1,6 +1,8 @@
 import { redirect } from "next/navigation";
 import { OwnerDashboard } from "@/components/roles/owner/dashboard";
 import { venueToday } from "@/lib/venue-today";
+import { saleRequests } from "@hospio/api/actions/bill";
+import { atHotel } from "@hospio/api/api/server";
 import { getActiveHotel, getUser } from "@hospio/api/dal";
 import { data } from "@hospio/api/data";
 import { live } from "@hospio/api/data/live";
@@ -49,9 +51,17 @@ export default async function OwnerHomePage({
 			: null;
 	// Lounges, bars and restaurants (hospio-backend docs/plan-venue-type.md phase 2): today at each, read at that location.
 	const venues = hotels.filter((h) => h.hasAccommodation === false);
-	const [worth, venueDays] = await Promise.all([
+	const [worth, venueDays, floorRequests] = await Promise.all([
 		data.hotels.worth(hotels, approvals),
 		Promise.all(venues.map((h) => venueToday({ id: h.hotelId, name: h.name }))),
+		// Voids, discounts and complimentary items asked for from an outlet screen (phase 4), read at each location.
+		Promise.all(
+			hotels.map((h) =>
+				atHotel(h.hotelId, () => saleRequests())
+					.then((rows) => rows.map((r) => ({ ...r, hotelName: h.name })))
+					.catch(() => []),
+			),
+		).then((x) => x.flat()),
 	]);
 	return (
 		<OwnerDashboard
@@ -68,6 +78,7 @@ export default async function OwnerHomePage({
 			activeAccommodation={hasAccommodation(active)}
 			venues={venueDays}
 			activeId={active?.id}
+			floorRequests={floorRequests}
 		/>
 	);
 }

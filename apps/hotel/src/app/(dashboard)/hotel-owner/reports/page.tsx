@@ -9,9 +9,11 @@ export default async function Page() {
 		data.owner.hotelList(),
 		data.owner.reports(),
 	]);
+	// The Tips report is listed only where a location records tips (Hotel setup → Restaurant & bar).
+	const tips = await Promise.all(hotels.map((h) => data.outlets.recordsTips(h.id).catch(() => false)));
 	return (
 		<OwnerReports
-			hotels={hotels.map((h) => ({ hotelId: h.id, name: h.name, hasAccommodation: h.hasAccommodation }))}
+			hotels={hotels.map((h, i) => ({ hotelId: h.id, name: h.name, hasAccommodation: h.hasAccommodation, recordTips: tips[i] }))}
 			schedules={reports.schedules}
 			runs={reports.runs}
 		/>

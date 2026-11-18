@@ -103,6 +103,8 @@ export const TillItem = z.object({
 	cashIn: num,
 	cashOut: num,
 	expectedCash: z.number(),
+	/** Cash tips in the drawer, held for staff (inside expectedCash; phase 4). Missing or 0 where tips are not recorded. */
+	cashTips: num,
 	countedCash: num,
 	variance: num,
 	status: z.string(),

@@ -1956,6 +1956,18 @@ export const data = {
 	},
 	outlets: {
 		...fnbData.outlets,
+		/**
+		 * Whether a location records tips (OUTLETS.recordTips, off by default): one small read, for screens that only need this
+		 * (the Tips report in the report list). `hotelId` for a location other than the active one; false when it can't be read.
+		 */
+		recordsTips: async (hotelId?: string): Promise<boolean> => {
+			if (!live("hotel-config")) return false;
+			const { data: res } = await api("@get/hotel-config/setup/:section", {
+				...(await withSession(hotelId ? { hotelId } : undefined)),
+				params: { section: "OUTLETS" },
+			}).catch(() => ({ data: null }));
+			return res?.data?.recordTips === true;
+		},
 		/** OUTLETS (room charge, tabs, tab limit) and TAXES_CURRENCY from Hotel setup; the contract's defaults when it cannot be read. */
 		settings: async (): Promise<OutletSettingsRow> => {
 			const accommodation = hasAccommodation(await getActiveHotel().catch(() => null));
@@ -1968,6 +1980,8 @@ export const data = {
 				tabNameRequired: false,
 				waitersTakePayment: false,
 				waiterCash: false,
+				discountRoles: ["CASHIER", "BAR"],
+				recordTips: false,
 				vatPct: 7.5,
 				serviceChargePct: 0,
 				pricesIncludeTax: true,
@@ -1990,6 +2004,10 @@ export const data = {
 				tabNameRequired: b(value("outlets", "tabNameRequired"), false),
 				waitersTakePayment: b(value("outlets", "waitersTakePayment"), false),
 				waiterCash: b(value("outlets", "waiterCash"), false),
+				discountRoles: Array.isArray(value("outlets", "discountRoles"))
+					? (value("outlets", "discountRoles") as unknown[]).map(String)
+					: fallback.discountRoles,
+				recordTips: b(value("outlets", "recordTips"), false),
 				vatPct: n(value("taxes", "vatPct"), fallback.vatPct),
 				serviceChargePct: n(value("taxes", "serviceChargePct"), 0),
 				pricesIncludeTax: b(value("taxes", "pricesIncludeTax"), true),

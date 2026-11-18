@@ -120,8 +120,15 @@ export const OrderLineItem = z.object({
 	quantity: z.number(),
 	unitPrice: z.number(),
 	taxRate: num,
-	/** Happy hour discount on the line (new). */
+	/** Everything taken off the line: happy hour + by hand + its share of a discount on the bill. */
 	discount: num,
+	/** Given by hand on this line, its share of the bill's discount, and whether the line is complimentary (phase 4). */
+	manualDiscount: num,
+	billDiscount: num,
+	complimentary: bool,
+	discountReason: str,
+	discountByName: str,
+	discountApprovedByName: str,
 	options: str,
 	notes: str,
 	status: z.string(),
@@ -173,6 +180,14 @@ export const OrderItem = z.object({
 	 * made here. The name of the selling outlet. Money fields are the whole order's, so never shown.
 	 */
 	ticketFrom: str,
+	/** Phase 4: what parts of a split bill put on rooms, what is still to pay, the bill's own discount, and the parts of a split. */
+	roomAmount: num,
+	balance: num,
+	billDiscountPct: num,
+	billDiscountAmount: num,
+	discountReason: str,
+	discountByName: str,
+	splitParts: num,
 });
 
 // ---- sales history --------------------------------------------------------------------------------

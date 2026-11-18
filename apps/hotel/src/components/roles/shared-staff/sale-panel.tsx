@@ -44,6 +44,8 @@ import {
 	stationName,
 	stationStatus,
 } from "./outlet-shared";
+import { type Bill, readBill } from "@hospio/api/actions/bill";
+import { BillSheet } from "./bill-sheet";
 import { OrderPaymentPanel } from "./pos-payment";
 import { BigButton } from "./tablet";
 
@@ -125,7 +127,9 @@ export function SalePanel({
 	const [order, setOrder] = useState<OrderRow | null>(null);
 	const [error, setError] = useState<string | null>(null);
 	const [loading, setLoading] = useState(false);
-	const [sub, setSub] = useState<null | "pay" | "room" | "cancel">(null);
+	const [sub, setSub] = useState<null | "pay" | "room" | "cancel" | "bill">(null);
+	/** The sale's bill while it is open: whether it is split, whether a tip can be added, what the caller may do on it. */
+	const [bill, setBill] = useState<Bill | null>(null);
 	const [roomPick, setRoomPick] = useState("");
 	const [roomError, setRoomError] = useState<string | null>(null);
 	const [waiting, setWaiting] = useState(false);
@@ -155,6 +159,9 @@ export function SalePanel({
 				: null;
 		if (req !== reqRef.current) return r.data;
 		setOrder(o?.ok && o.data ? o.data : null);
+		const b = desk && d && open ? await readBill(id).catch(() => null) : null;
+		if (req !== reqRef.current) return r.data;
+		setBill(b?.ok ? b.data : null);
 		return r.data;
 	}, []);
 
@@ -163,6 +170,7 @@ export function SalePanel({
 		setRoomError(null);
 		setSale(null);
 		setOrder(null);
+		setBill(null);
 		setWaiting(false);
 		if (saleId) void load(saleId);
 		else reqRef.current++;
@@ -267,6 +275,8 @@ export function SalePanel({
 				: "Paid";
 
 	const live = sale?.lines.filter((l) => l.status !== "CANCELLED") ?? [];
+	/** A split stands on the bill: money is taken part by part, from the bill. */
+	const splitStands = !!bill?.split && bill.split.parts.some((p) => p.status !== "PAID") && bill.balance > 0;
 	const partPaid = (sale?.paidAmount ?? 0) > 0 && (sale?.balance ?? 0) > 0;
 	const roomPart =
 		sale && s?.status === "ON_ROOM"
@@ -317,8 +327,15 @@ export function SalePanel({
 								<BedDoubleIcon className="size-5" /> Charge to room
 							</BigButton>
 						)}
+						{desk && bill && sale && s && s.status !== "CANCELLED" && sale.balance > 0 &&
+							(bill.can.split || bill.can.discount || bill.split) && (
+								<BigButton tone="secondary" onClick={() => setSub("bill")}>
+									<ReceiptIcon className="size-5" />{" "}
+									{splitStands ? "Open the split bill" : bill.can.split ? "Split or discount" : "Discount or void"}
+								</BigButton>
+							)}
 						{sale?.can.pay && desk && (
-							<BigButton onClick={() => setSub("pay")}>
+							<BigButton onClick={() => setSub(splitStands ? "bill" : "pay")}>
 								<CreditCardIcon className="size-5" />{" "}
 								{partPaid ? "Collect the balance" : "Take payment"}
 							</BigButton>
@@ -642,6 +659,8 @@ export function SalePanel({
 									roomNumber: s.roomNumber,
 									amount: sale.balance,
 									description: `${s.number} · ${s.items}`.slice(0, 200),
+									tipAllowed: !!bill?.can.tips,
+									tipFor: s.openedByName ?? undefined,
 								}
 							: null
 					}
@@ -650,6 +669,19 @@ export function SalePanel({
 					}}
 				/>
 			)}
+
+			{/* The bill: split it and pay part by part, discounts, complimentary items, requests to a manager. */}
+			<BillSheet
+				orderId={sub === "bill" && s ? s.id : null}
+				onClose={() => {
+					setSub(null);
+					if (saleId) void load(saleId);
+				}}
+				desk={desk}
+				terminals={terminals}
+				inHouse={inHouse}
+				onChanged={(id) => onChanged?.(id)}
+			/>
 
 			{/* Charge to room */}
 			<SidePanel

@@ -24,7 +24,9 @@ import { ProgressBar } from "@hospio/ui/shared/progress-bar";
 import { SectionCard } from "@hospio/ui/shared/section-card";
 import { StatusPill } from "@hospio/ui/shared/status-pill";
 import { btn } from "@hospio/ui/shared/ui";
+import type { SaleRequestView } from "@hospio/api/actions/bill";
 import type { Hotel, Me } from "@hospio/api/api/schema";
+import { floorRequestTitle } from "@/lib/approval-labels";
 import type { bookingBuckets } from "@hospio/api/data";
 import type {
 	ApprovalRow,
@@ -111,11 +113,14 @@ export function ManagerDashboard({
 	hotel,
 	data,
 	venue = null,
+	floorRequests = [],
 }: {
 	user: Me;
 	hotel: Hotel | null;
 	data: DashboardData;
 	venue?: ManagerVenue | null;
+	/** Voids, discounts and complimentary items staff asked for from an outlet screen, still waiting (phase 4). */
+	floorRequests?: SaleRequestView[];
 }) {
 	const firstName = user.fullName.split(" ")[0];
 	// A lounge, bar or restaurant (hospio-backend docs/plan-venue-type.md): no rooms, arrivals or folios; sales and tills instead.
@@ -166,8 +171,11 @@ export function ManagerDashboard({
 		acc[s.role] = (acc[s.role] ?? 0) + 1;
 		return acc;
 	}, {});
+	// Requests from the floor are approvals too: each shows once, as its own line with the sale and the reason.
+	const floor = floorRequests.filter((r) => r.status === "PENDING");
+	const floorIds = new Set(floor.map((r) => r.approvalId));
 	const pendingApprovals = approvals.filter(
-		(a) => a.status === "PENDING" && a.approverLevel === "MANAGER",
+		(a) => a.status === "PENDING" && a.approverLevel === "MANAGER" && !floorIds.has(a.id),
 	);
 
 	// ---- "needs your action": approvals first, then urgent repairs, then overdue balances ----------
@@ -180,6 +188,15 @@ export function ManagerDashboard({
 		href: string;
 		primary?: boolean;
 	}[] = [
+		...floor.map((r) => ({
+			key: `s-${r.id}`,
+			title: floorRequestTitle(r),
+			detail: `${r.reason}${r.worth ? ` · ${naira(r.worth)}` : ""}`,
+			tone: "warning" as const,
+			cta: "Review",
+			href: `/dashboard/approvals?open=${r.approvalId}`,
+			primary: true,
+		})),
 		...pendingApprovals.slice(0, 3).map((a) => ({
 			key: `a-${a.id}`,
 			title: a.description,
@@ -437,10 +454,10 @@ export function ManagerDashboard({
 										<FlagIcon className="size-4" />
 									</span>
 									<div className="min-w-0 flex-1">
-										<p className="truncate text-[13px] font-semibold text-ink">
+										<p className="truncate text-[13px] font-semibold text-ink" title={a.title}>
 											{a.title}
 										</p>
-										<p className="truncate text-xs text-ink-3">{a.detail}</p>
+										<p className="truncate text-xs text-ink-3" title={a.detail}>{a.detail}</p>
 									</div>
 									<Button
 										asChild
