@@ -344,7 +344,7 @@ export function TemplateStep({ ctx }: { ctx: WizardCtx }) {
 							</div>
 						))}
 						{ctx.editable && (
-							<button type="button" className={cn(btn.secondary, "self-start")} onClick={() => addRow(v.id)}>
+							<button type="button" className={cn(btn.secondary, "inline-flex items-center gap-2 self-start")} onClick={() => addRow(v.id)}>
 								<PlusIcon className="size-4" /> Add an outlet
 							</button>
 						)}
