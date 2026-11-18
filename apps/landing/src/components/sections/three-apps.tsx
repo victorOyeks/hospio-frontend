@@ -102,7 +102,7 @@ function ManagerPreview() {
 		<div aria-hidden className="h-[236px] rounded-[14px] bg-subtle p-5">
 			<div className="flex h-full flex-col gap-3 rounded-control bg-card p-4">
 				<p className="text-[13px] font-bold text-ink">
-					Rooms right now · Simpas Ikeja
+					Rooms right now · Ivory Court Ikeja
 				</p>
 				{roomsNow.map((r) => (
 					<div key={r.label} className="flex items-center gap-2">
@@ -138,7 +138,7 @@ function StaffPreview() {
 				))}
 			</div>
 			<div className="flex flex-1 flex-col items-center justify-center gap-3 p-5">
-				<p className="text-[15px] font-bold text-ink">Victor Eze</p>
+				<p className="text-[15px] font-bold text-ink">Tosin Adewole</p>
 				<p className="text-xs text-ink-2">Receptionist · enter your PIN</p>
 				<div className="flex items-center gap-[10px]">
 					{[0, 1, 2, 3].map((i) => (

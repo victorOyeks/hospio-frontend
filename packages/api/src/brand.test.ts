@@ -37,19 +37,19 @@ describe("brand", () => {
 			{
 				primary: "#0B4F50",
 				darkNav: false,
-				shortName: "Simpas",
+				shortName: "Ivory Court",
 				logoUrl: "https://x.test/l.png",
 			},
-			"Simpas Ikeja",
+			"Ivory Court Ikeja",
 		);
 		expect(decodeBrandCookie(raw)).toEqual({
 			brand: {
 				primary: "#0b4f50",
 				darkNav: false,
-				shortName: "Simpas",
+				shortName: "Ivory Court",
 				logoUrl: "https://x.test/l.png",
 			},
-			hotelName: "Simpas Ikeja",
+			hotelName: "Ivory Court Ikeja",
 		});
 		expect(
 			decodeBrandCookie(encodeURIComponent(JSON.stringify({ c: "#zzzzzz" }))),

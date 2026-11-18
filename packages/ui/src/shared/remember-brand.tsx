@@ -20,7 +20,7 @@ export function RememberBrand({ value }: { value: string }) {
 	return null;
 }
 
-/** "Not Simpas Ikeja? Use the Hospio360 look": forgets the remembered hotel's look on this browser. */
+/** "Not Ivory Court Ikeja? Use the Hospio360 look": forgets the remembered hotel's look on this browser. */
 export function ForgetBrand({ hotelName }: { hotelName: string | null }) {
 	const router = useRouter();
 	return (

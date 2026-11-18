@@ -202,7 +202,7 @@ export function ManagerStep({
 								label="Full name"
 								value={form.fullName}
 								onChange={(v) => set("fullName", v)}
-								placeholder="Tunde Bakare"
+								placeholder="Dotun Alabede"
 								required
 								error={errors.fullName}
 							/>
@@ -221,7 +221,7 @@ export function ManagerStep({
 							type="email"
 							value={form.email}
 							onChange={(v) => set("email", v)}
-							placeholder="tunde.b@royalsuites.ng"
+							placeholder="dotun.a@ivorycourt.example.ng"
 							required
 							error={errors.email}
 							hint="They sign in with this"

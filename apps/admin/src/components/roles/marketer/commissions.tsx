@@ -260,7 +260,7 @@ function MyStatementPanel({
 								label="What looks wrong?"
 								value={note}
 								onChange={setNote}
-								placeholder="A day's fee from Royal Suites is missing…"
+								placeholder="A day's fee from Ivory Court Hotels is missing…"
 								hint="Hospio360 answers before approving the statement."
 							/>
 						</PanelSection>

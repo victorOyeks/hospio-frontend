@@ -99,7 +99,7 @@ export const lineLabel = (status: string) =>
 			? "new"
 			: status.toLowerCase();
 
-/** The room label for a booking: "A207 · Emeka Nwosu". */
+/** The room label for a booking: "A207 · Ikenna Uzoigwe". */
 export const roomLabel = (b: { roomNumber?: string; guestName: string }) =>
 	`${b.roomNumber ?? "—"} · ${b.guestName}`;
 

@@ -715,7 +715,7 @@ export function BillPanel({
 							label="Who it is paid to"
 							value={form.payee}
 							onChange={(v) => setForm({ ...form, payee: v })}
-							placeholder="e.g. Ikeja Electric"
+							placeholder="e.g. Power bill (prepaid meter)"
 							required
 						/>
 						<SelectField

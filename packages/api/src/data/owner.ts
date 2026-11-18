@@ -19,8 +19,10 @@ import {
 	type ListQuery,
 	type PageResult,
 	pageQuery,
+	slicePage,
 	toPaged,
 } from "./paging";
+import { demoStaff } from "@hospio/api/demo/fixtures/hotel";
 import { toStaffRow } from "./mappers/identity";
 import { lagosDate } from "./mappers/finance";
 import type {
@@ -80,6 +82,43 @@ function ownerStaffRows(u: UserSummary, names: Map<string, string>): OwnerStaffR
 			isManager: here.some((g) => g.role === "MANAGER"),
 		};
 	});
+}
+
+/** Demo mode: the sample hotel's people (the owner left out) as the owner's Staff rows, searched, filtered and paged here. */
+function demoOwnerStaffPage(
+	query: ListQuery & { hotel?: string | null; tab?: string | null },
+	names: Map<string, string>,
+): PageResult<OwnerStaffRow> {
+	const q = (query.q ?? "").trim().toLowerCase();
+	const rows: OwnerStaffRow[] = demoStaff
+		.filter((s) => s.role !== "OWNER")
+		.filter((s) => !query.hotel || s.hotelId === query.hotel)
+		.filter((s) => !q || `${s.fullName} ${s.email} ${s.jobTitle}`.toLowerCase().includes(q))
+		.map((s) => ({
+			...s,
+			hotelName: names.get(s.hotelId) ?? "Hotel",
+			key: `${s.id}:${s.hotelId}`,
+			grantIdsHere: [`${s.id}-grant`],
+			isManager: s.role === "MANAGER",
+		}));
+	const held = (r: OwnerStaffRow) => r.status === "PAUSED" || r.status === "SUSPENDED";
+	const invited = (r: OwnerStaffRow) => r.inviteStatus === "PENDING";
+	const counts = {
+		all: rows.length,
+		WORKING: rows.filter((r) => !held(r) && !invited(r)).length,
+		INVITED: rows.filter(invited).length,
+		HELD: rows.filter(held).length,
+	};
+	const shown = rows.filter((r) =>
+		query.tab === "active"
+			? !held(r) && !invited(r)
+			: query.tab === "invited"
+				? invited(r)
+				: query.tab === "held"
+					? held(r)
+					: true,
+	);
+	return { ok: true, data: slicePage(shown, query.page ?? 0, query.size ?? undefined, { counts }) };
 }
 
 /** The data seam, loaded when called: it imports this module, so a static import would be circular. */
@@ -283,9 +322,9 @@ export const ownerData = {
 	staffPage: async (
 		query: ListQuery & { hotel?: string | null; tab?: string | null } = {},
 	): Promise<PageResult<OwnerStaffRow>> => {
-		if (!live("identity")) return { ok: true, data: emptyPage<OwnerStaffRow>() };
 		const hotels = await hotelsOf();
 		const names = new Map(hotels.map((h) => [h.id, h.name]));
+		if (!live("identity")) return demoOwnerStaffPage(query, names);
 		const { hotel, tab, ...rest } = query;
 		const status =
 			tab === "active" ? "WORKING" : tab === "invited" ? "INVITED" : tab === "held" ? "HELD" : undefined;

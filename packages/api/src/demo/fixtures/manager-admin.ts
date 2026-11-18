@@ -64,29 +64,29 @@ export const demoManagerOnly = [
 export type StaffAccessRow = { id: string; fullName: string; department: string; grants: { role: string; level: "FULL" | "EDIT" | "VIEW"; paused?: boolean; until?: string }[] };
 
 export const demoStaffAccess: StaffAccessRow[] = [
-	{ id: "u-victor", fullName: "Victor Adeyemi", department: "Front office", grants: [{ role: "FRONT_OFFICE", level: "FULL" }, { role: "FINANCE", level: "VIEW" }] },
-	{ id: "u-toyin", fullName: "Toyin Balogun", department: "Front office", grants: [{ role: "FRONT_OFFICE", level: "EDIT" }] },
-	{ id: "u-bisi", fullName: "Bisi Adekunle", department: "Front office", grants: [{ role: "FRONT_OFFICE", level: "EDIT" }] },
-	{ id: "u-sade", fullName: "Sade Williams", department: "Front office", grants: [{ role: "FRONT_OFFICE", level: "VIEW", until: day(21) }] },
-	{ id: "u-grace", fullName: "Grace Okafor", department: "Housekeeping", grants: [{ role: "HOUSEKEEPING", level: "FULL" }, { role: "LAUNDRY", level: "VIEW" }] },
-	{ id: "u-kemi", fullName: "Kemi Adebayo", department: "Housekeeping", grants: [{ role: "HOUSEKEEPING", level: "EDIT" }] },
-	{ id: "u-ruth", fullName: "Ruth Eze", department: "Housekeeping", grants: [{ role: "HOUSEKEEPING", level: "EDIT" }] },
-	{ id: "u-ada", fullName: "Ada Okeke", department: "Housekeeping", grants: [{ role: "HOUSEKEEPING", level: "VIEW", paused: true }] },
-	{ id: "u-lola", fullName: "Lola Eze", department: "Laundry", grants: [{ role: "LAUNDRY", level: "FULL" }] },
-	{ id: "u-chinedu", fullName: "Chinedu Obi", department: "Maintenance", grants: [{ role: "MAINTENANCE", level: "FULL" }, { role: "INVENTORY", level: "EDIT" }] },
-	{ id: "u-ibrahim", fullName: "Ibrahim Danjuma", department: "Maintenance", grants: [{ role: "MAINTENANCE", level: "EDIT" }] },
-	{ id: "u-mariam", fullName: "Mariam Bello", department: "Kitchen", grants: [{ role: "KITCHEN", level: "FULL" }] },
-	{ id: "u-emeka", fullName: "Emeka Nwankwo", department: "Kitchen", grants: [{ role: "KITCHEN", level: "EDIT" }] },
-	{ id: "u-segun", fullName: "Segun Ajayi", department: "Bar", grants: [{ role: "BAR", level: "FULL" }, { role: "KITCHEN", level: "EDIT", until: day(7) }] },
-	{ id: "u-jide", fullName: "Jide Alabi", department: "Store", grants: [{ role: "INVENTORY", level: "FULL" }] },
-	{ id: "u-femi", fullName: "Femi Ojo", department: "Finance", grants: [{ role: "FINANCE", level: "FULL" }] },
+	{ id: "u-victor", fullName: "Tosin Adewole", department: "Front office", grants: [{ role: "FRONT_OFFICE", level: "FULL" }, { role: "FINANCE", level: "VIEW" }] },
+	{ id: "u-toyin", fullName: "Bukola Oladiran", department: "Front office", grants: [{ role: "FRONT_OFFICE", level: "EDIT" }] },
+	{ id: "u-bisi", fullName: "Morenike Adio", department: "Front office", grants: [{ role: "FRONT_OFFICE", level: "EDIT" }] },
+	{ id: "u-sade", fullName: "Abisola Coker", department: "Front office", grants: [{ role: "FRONT_OFFICE", level: "VIEW", until: day(21) }] },
+	{ id: "u-grace", fullName: "Ebere Nwagbo", department: "Housekeeping", grants: [{ role: "HOUSEKEEPING", level: "FULL" }, { role: "LAUNDRY", level: "VIEW" }] },
+	{ id: "u-kemi", fullName: "Yewande Ajibola", department: "Housekeeping", grants: [{ role: "HOUSEKEEPING", level: "EDIT" }] },
+	{ id: "u-ruth", fullName: "Esther Nwafor", department: "Housekeeping", grants: [{ role: "HOUSEKEEPING", level: "EDIT" }] },
+	{ id: "u-ada", fullName: "Ijeoma Nwabueze", department: "Housekeeping", grants: [{ role: "HOUSEKEEPING", level: "VIEW", paused: true }] },
+	{ id: "u-lola", fullName: "Nkiru Onwudiwe", department: "Laundry", grants: [{ role: "LAUNDRY", level: "FULL" }] },
+	{ id: "u-chinedu", fullName: "Obinna Ezeugo", department: "Maintenance", grants: [{ role: "MAINTENANCE", level: "FULL" }, { role: "INVENTORY", level: "EDIT" }] },
+	{ id: "u-ibrahim", fullName: "Usman Garkuwa", department: "Maintenance", grants: [{ role: "MAINTENANCE", level: "EDIT" }] },
+	{ id: "u-mariam", fullName: "Rukayat Oyelade", department: "Kitchen", grants: [{ role: "KITCHEN", level: "FULL" }] },
+	{ id: "u-emeka", fullName: "Chibuzor Okolie", department: "Kitchen", grants: [{ role: "KITCHEN", level: "EDIT" }] },
+	{ id: "u-segun", fullName: "Lanre Odukoya", department: "Bar", grants: [{ role: "BAR", level: "FULL" }, { role: "KITCHEN", level: "EDIT", until: day(7) }] },
+	{ id: "u-jide", fullName: "Bolaji Fasanmi", department: "Store", grants: [{ role: "INVENTORY", level: "FULL" }] },
+	{ id: "u-femi", fullName: "Wale Akinbode", department: "Finance", grants: [{ role: "FINANCE", level: "FULL" }] },
 ];
 
 export const demoSetupExtras: HotelSetupSection[] = [
 	{ key: "brand", title: "Brand & colours", description: "Your logo and colours on every screen your staff and guests see", icon: "palette", fields: [
 		{ key: "primary", label: "Brand colour", type: "text", value: "#4c091e", help: "Buttons, the sidebar and highlights" },
 		{ key: "logoText", label: "Short name on the sidebar", type: "text", value: "Hospio360" },
-		{ key: "receiptFooter", label: "Receipt footer", type: "text", value: "Thank you for staying with Simpas Hotels" },
+		{ key: "receiptFooter", label: "Receipt footer", type: "text", value: "Thank you for staying with Ivory Court Hotels" },
 		{ key: "darkNav", label: "Dark sidebar", type: "toggle", value: true },
 	] },
 	{ key: "pos", title: "Payments & POS", description: "Card terminals, providers and what happens when a terminal is offline", icon: "credit-card", fields: [

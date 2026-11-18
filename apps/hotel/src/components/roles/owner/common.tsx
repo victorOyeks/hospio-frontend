@@ -67,7 +67,7 @@ export function MiniBars({
 				{series.map((v, i) => (
 					<div
 						key={labels[i]}
-						className="group relative flex flex-1 items-end justify-center gap-[3px]"
+						className="group relative flex h-full flex-1 items-end justify-center gap-[3px]"
 						title={`${labels[i]} · ${format(v)}`}
 					>
 						<div

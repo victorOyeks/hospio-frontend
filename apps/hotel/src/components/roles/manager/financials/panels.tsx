@@ -203,7 +203,7 @@ export function RecordExpensePanel({
 					label="Paid to (optional)"
 					value={form.supplier}
 					onChange={(v) => set("supplier", v)}
-					placeholder="NNPC Ikeja"
+					placeholder="Allen Avenue Fuel Station"
 				/>
 				<TextareaField
 					label="Note"

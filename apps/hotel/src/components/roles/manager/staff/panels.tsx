@@ -633,7 +633,7 @@ export function StaffFormPanel({
 						label="Full name"
 						value={form.fullName}
 						onChange={(v) => set("fullName", v)}
-						placeholder="e.g. Ada Okeke"
+						placeholder="e.g. Ijeoma Nwabueze"
 						required
 					/>
 					<FieldRow>

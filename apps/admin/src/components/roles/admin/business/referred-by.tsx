@@ -203,7 +203,7 @@ function ChangeReferrerModal({
 					label="Reason"
 					value={reason}
 					onChange={setReason}
-					placeholder="The owner was introduced by Amaka, not Kunle"
+					placeholder="The owner was introduced by Adanna, not Olumide"
 					hint="At least 5 characters; kept in the audit log"
 					required
 				/>

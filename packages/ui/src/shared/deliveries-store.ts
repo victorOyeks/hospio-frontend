@@ -72,7 +72,7 @@ function deliveriesOf(data: unknown): DeliveryLike[] | undefined {
  * Wrap a server action's result (or its promise): when it succeeded and carries `deliveries`, they are
  * queued for the notice; the result is returned unchanged so it drops into `useAction`:
  *
- *   run(() => withDeliveries(createUser(input), "Invite for Ada"), "Admin added", after)
+ *   run(() => withDeliveries(createUser(input), "Invite for Ijeoma"), "Admin added", after)
  */
 export async function withDeliveries<R extends ResultLike>(
 	result: R | Promise<R>,

@@ -79,7 +79,7 @@ export const ticketStatus: Record<string, { label: string; tone: PillTone }> = {
 	RESOLVED: { label: "Resolved", tone: "success" },
 };
 
-/** "Businesses › Royal Suites Ltd" above a detail page: each step but the last links back. */
+/** "Businesses › Ivory Court Hotels Ltd" above a detail page: each step but the last links back. */
 export function Crumbs({ items }: { items: { label: string; href?: string }[] }) {
 	return (
 		<nav aria-label="Breadcrumb" className="flex flex-wrap items-center gap-1 text-[13px] font-medium text-ink-3">

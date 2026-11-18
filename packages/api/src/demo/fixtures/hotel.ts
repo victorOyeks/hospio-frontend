@@ -3,7 +3,7 @@ import type { HotelSummary, LeaveRow, RoomRow, RoomState, RoomTypeRow, ShiftRequ
 import { addDays, formatISO } from "date-fns";
 
 export const BUSINESS_ID = "b0000000-0000-4000-8000-000000000001";
-export const BUSINESS_NAME = "Royal Suites Ltd";
+export const BUSINESS_NAME = "Ivory Court Hotels Ltd";
 export const HOTEL_ID = "a0000000-0000-4000-8000-000000000001";
 
 export const today = () => formatISO(new Date(), { representation: "date" });
@@ -13,25 +13,27 @@ export const at = (offsetDays: number, hh: number, mm = 0) => {
 	d.setHours(hh, mm, 0, 0);
 	return d.toISOString();
 };
+/** Minutes before now: for live boards (kitchen wait times) read through a getter so they stay a few minutes old. */
+export const ago = (minutes: number) => new Date(Date.now() - minutes * 60_000).toISOString();
 
 export const demoHotels: Hotel[] = [
-	{ id: HOTEL_ID, businessId: BUSINESS_ID, name: "Simpas Ikeja", city: "Lagos", address: "12 Allen Avenue, Ikeja GRA", phone: "+234 801 000 0001", email: "ikeja@simpashotels.com", timezone: "Africa/Lagos", status: "ACTIVE", roomCount: 120 },
-	{ id: "a0000000-0000-4000-8000-000000000002", businessId: BUSINESS_ID, name: "Simpas Lekki", city: "Lagos", address: "4 Admiralty Way, Lekki Phase 1", phone: "+234 801 000 0002", email: "lekki@simpashotels.com", timezone: "Africa/Lagos", status: "ACTIVE", roomCount: 86 },
-	{ id: "a0000000-0000-4000-8000-000000000003", businessId: BUSINESS_ID, name: "Simpas Abuja", city: "Abuja", address: "Plot 9, Ademola Adetokunbo Cres, Wuse 2", phone: "+234 801 000 0003", email: "abuja@simpashotels.com", timezone: "Africa/Lagos", status: "ACTIVE", roomCount: 64 },
-	{ id: "a0000000-0000-4000-8000-000000000004", businessId: BUSINESS_ID, name: "Simpas Port Harcourt", city: "Port Harcourt", address: "22 Aba Road, GRA Phase 2", phone: "+234 801 000 0004", email: "ph@simpashotels.com", timezone: "Africa/Lagos", status: "ACTIVE", roomCount: 48 },
+	{ id: HOTEL_ID, businessId: BUSINESS_ID, name: "Ivory Court Ikeja", city: "Lagos", address: "12 Allen Avenue, Ikeja GRA", phone: "0800 000 0003", email: "ikeja@ivorycourt.example.ng", timezone: "Africa/Lagos", status: "ACTIVE", roomCount: 120 },
+	{ id: "a0000000-0000-4000-8000-000000000002", businessId: BUSINESS_ID, name: "Ivory Court Lekki", city: "Lagos", address: "4 Admiralty Way, Lekki Phase 1", phone: "0800 000 0004", email: "lekki@ivorycourt.example.ng", timezone: "Africa/Lagos", status: "ACTIVE", roomCount: 86 },
+	{ id: "a0000000-0000-4000-8000-000000000003", businessId: BUSINESS_ID, name: "Ivory Court Abuja", city: "Abuja", address: "Plot 9, Ademola Adetokunbo Cres, Wuse 2", phone: "0800 000 0005", email: "abuja@ivorycourt.example.ng", timezone: "Africa/Lagos", status: "ACTIVE", roomCount: 64 },
+	{ id: "a0000000-0000-4000-8000-000000000004", businessId: BUSINESS_ID, name: "Ivory Court Port Harcourt", city: "Port Harcourt", address: "22 Aba Road, GRA Phase 2", phone: "0800 000 0006", email: "ph@ivorycourt.example.ng", timezone: "Africa/Lagos", status: "ACTIVE", roomCount: 48 },
 ];
 
 /** The demo owner's business as GET /tenant/businesses/mine would answer: live, onboarding done. */
 export const demoBusiness: Business = {
 	id: BUSINESS_ID,
 	name: BUSINESS_NAME,
-	legalName: "Royal Suites Limited",
+	legalName: "Ivory Court Hotels Limited",
 	registrationNumber: "RC 1203944",
 	businessType: "Limited company",
 	ownerUserId: "demo-user",
-	ownerName: "Godwin Kwin",
-	ownerEmail: "godwin@royalsuites.ng",
-	ownerPhone: "+234 801 000 0001",
+	ownerName: "Kayode Ashiru",
+	ownerEmail: "kayode@ivorycourt.example.ng",
+	ownerPhone: "0800 000 0003",
 	stage: "LIVE",
 	source: "BACK_OFFICE",
 	accountManagerId: "au-2",
@@ -43,8 +45,8 @@ export const demoBusiness: Business = {
 	timezone: "Africa/Lagos",
 	city: "Lagos",
 	address: "7 Oba Akinjobi Way, Ikeja GRA, Lagos",
-	email: "godwin@royalsuites.ng",
-	phone: "+234 801 000 0001",
+	email: "kayode@ivorycourt.example.ng",
+	phone: "0800 000 0003",
 	logoUrl: null,
 	brandColour: "#4c091e",
 	contractStartsOn: "2024-01-10",
@@ -56,10 +58,10 @@ export const demoBusiness: Business = {
 };
 
 export const demoHotelSummaries: HotelSummary[] = [
-	{ id: demoHotels[0].id, name: "Simpas Ikeja", city: "Lagos", address: demoHotels[0].address ?? "", rooms: 120, timezone: "Africa/Lagos", occupancy: 84, manager: "Tunde Bakare" },
-	{ id: demoHotels[1].id, name: "Simpas Lekki", city: "Lagos", address: demoHotels[1].address ?? "", rooms: 86, timezone: "Africa/Lagos", occupancy: 71, manager: "Amaka Eze" },
-	{ id: demoHotels[2].id, name: "Simpas Abuja", city: "Abuja", address: demoHotels[2].address ?? "", rooms: 64, timezone: "Africa/Lagos", occupancy: 62, manager: "Ibrahim Musa" },
-	{ id: demoHotels[3].id, name: "Simpas Port Harcourt", city: "Port Harcourt", address: demoHotels[3].address ?? "", rooms: 48, timezone: "Africa/Lagos", occupancy: 55, manager: "Blessing Okoro" },
+	{ id: demoHotels[0].id, name: "Ivory Court Ikeja", city: "Lagos", address: demoHotels[0].address ?? "", rooms: 120, timezone: "Africa/Lagos", occupancy: 84, manager: "Dotun Alabede" },
+	{ id: demoHotels[1].id, name: "Ivory Court Lekki", city: "Lagos", address: demoHotels[1].address ?? "", rooms: 86, timezone: "Africa/Lagos", occupancy: 71, manager: "Oluchi Mbanefo" },
+	{ id: demoHotels[2].id, name: "Ivory Court Abuja", city: "Abuja", address: demoHotels[2].address ?? "", rooms: 64, timezone: "Africa/Lagos", occupancy: 62, manager: "Kabiru Shuaibu" },
+	{ id: demoHotels[3].id, name: "Ivory Court Port Harcourt", city: "Port Harcourt", address: demoHotels[3].address ?? "", rooms: 48, timezone: "Africa/Lagos", occupancy: 55, manager: "Precious Ekanem" },
 ];
 
 export function demoMe(email: string, name: string, roles: string[]): Me {
@@ -67,7 +69,7 @@ export function demoMe(email: string, name: string, roles: string[]): Me {
 		id: "demo-user",
 		fullName: name,
 		email,
-		phoneNumber: "+234 801 000 0002",
+		phoneNumber: "0800 000 0004",
 		businessId: BUSINESS_ID,
 		userStatus: "ACTIVE",
 		roles,
@@ -87,7 +89,7 @@ export const demoRoomTypes: RoomTypeRow[] = [
 	{ id: "rt-suite", name: "Suite", basePrice: 120000, capacityAdults: 3, capacityChildren: 2, rooms: 8, facilities: ["AC", "TV", "Wi-Fi", "Hot water", "Minibar", "Living room", "Bathtub", "Lounge access", "Butler"], specialPrices: [{ id: "sp-2", name: "Detty December", price: 150000, fromDate: "2026-12-15", toDate: "2026-12-31" }] },
 ];
 
-const guestsForRooms = ["Ngozi Okonkwo", "Chidinma Obi", "Musa Ibrahim", "Kelechi Uba", "Funke Adeyemi", "Emeka Nwosu", "Aisha Bello", "Tobi Lawal", "Yemi Alade", "Ifeoma Nwachukwu", "Bola Tinubu-Smith", "Uche Nnaji", "Halima Abubakar", "Seun Kuti", "Nneka Egbuna", "Dayo Amusa", "Zainab Yusuf", "Gbenga Ojo", "Amara Chukwu", "Femi Otedola"];
+const guestsForRooms = ["Adaeze Ibekwe", "Ogechi Nnadozie", "Haruna Dauda", "Chukwudi Anozie", "Titilayo Ogunsola", "Ikenna Uzoigwe", "Hadiza Jibrin", "Damilola Oyebode", "Bimpe Olatoye", "Chinwe Anyanwu", "Yetunde Hassan-Smith", "Chidi Anyaoha", "Safiya Mohammed", "Deji Ogunsanya", "Chinyere Ofoegbu", "Lekan Ojediran", "Maryam Abdulkadir", "Tunji Alao", "Amara Ugwu", "Jimi Oyetunde"];
 
 /** 120 rooms over 4 floors: A1xx–A3xx, B1xx; states spread like the dashboard mock (101 occupied). */
 export const demoRooms: RoomRow[] = (() => {
@@ -124,8 +126,8 @@ export const demoRooms: RoomRow[] = (() => {
 				outOfOrderReason: n === 41 ? "AC compressor replacement" : n === 99 ? "Water damage · ceiling" : undefined,
 				outOfOrderUntil: n === 41 ? day(2) : n === 99 ? day(9) : undefined,
 				lastCleaned: at(state === "dirty" ? -1 : 0, 9 + (n % 5), 15),
-				attendant: ["Grace Okafor", "Kemi Adebayo", "Lola Eze", "Mariam Bello"][n % 4],
-				note: n === 12 ? "Held for Ifeoma Nwachukwu · arrives 3:30pm" : undefined,
+				attendant: ["Ebere Nwagbo", "Yewande Ajibola", "Nkiru Onwudiwe", "Rukayat Oyelade"][n % 4],
+				note: n === 12 ? "Held for Chinwe Anyanwu · arrives 3:30pm" : undefined,
 			});
 		}
 	}
@@ -133,24 +135,24 @@ export const demoRooms: RoomRow[] = (() => {
 })();
 
 export const demoStaff: StaffRow[] = [
-	{ id: "u-owner", fullName: "Godwin Kwin", email: "godwin@royalsuites.ng", phone: "+234 801 000 0001", role: "OWNER", level: "FULL", department: "Management", jobTitle: "Owner", status: "ACTIVE", shift: "—", startedOn: "2024-01-10", lastSignIn: at(0, 7, 10), hotelId: HOTEL_ID },
-	{ id: "u-manager", fullName: "Tunde Bakare", email: "tunde@simpashotels.com", phone: "+234 801 000 0002", role: "MANAGER", level: "FULL", department: "Management", jobTitle: "General manager", status: "ACTIVE", shift: "Morning", startedOn: "2024-02-01", lastSignIn: at(0, 6, 55), hotelId: HOTEL_ID },
-	{ id: "u-victor", fullName: "Victor Adeyemi", email: "victor@simpashotels.com", phone: "+234 801 000 0011", role: "FRONT_OFFICE", level: "FULL", department: "Front office", jobTitle: "Front desk lead", status: "ACTIVE", shift: "Morning", startedOn: "2024-03-12", lastSignIn: at(0, 6, 58), hotelId: HOTEL_ID },
-	{ id: "u-toyin", fullName: "Toyin Balogun", email: "toyin@simpashotels.com", phone: "+234 801 000 0020", role: "FRONT_OFFICE", level: "EDIT", department: "Front office", jobTitle: "Receptionist", status: "ACTIVE", shift: "Morning", startedOn: "2024-06-03", lastSignIn: at(0, 7, 2), hotelId: HOTEL_ID },
-	{ id: "u-bisi", fullName: "Bisi Adekunle", email: "bisi@simpashotels.com", phone: "+234 801 000 0021", role: "FRONT_OFFICE", level: "EDIT", department: "Front office", jobTitle: "Night receptionist", status: "ON_LEAVE", shift: "Night", startedOn: "2024-08-19", lastSignIn: at(-1, 22, 5), hotelId: HOTEL_ID },
-	{ id: "u-grace", fullName: "Grace Okafor", email: "grace@simpashotels.com", phone: "+234 801 000 0012", role: "HOUSEKEEPING", level: "FULL", department: "Housekeeping", jobTitle: "Housekeeping supervisor", status: "ACTIVE", shift: "Morning", startedOn: "2024-03-12", lastSignIn: at(0, 6, 40), hotelId: HOTEL_ID },
-	{ id: "u-kemi", fullName: "Kemi Adebayo", email: "kemi@simpashotels.com", phone: "+234 801 000 0013", role: "HOUSEKEEPING", level: "EDIT", department: "Housekeeping", jobTitle: "Room attendant", status: "ACTIVE", shift: "Morning", startedOn: "2024-05-20", lastSignIn: at(0, 6, 44), hotelId: HOTEL_ID },
-	{ id: "u-lola", fullName: "Lola Eze", email: "lola@simpashotels.com", phone: "+234 801 000 0014", role: "LAUNDRY", level: "FULL", department: "Laundry", jobTitle: "Laundry lead", status: "ACTIVE", shift: "Morning", startedOn: "2024-04-02", lastSignIn: at(0, 7, 20), hotelId: HOTEL_ID },
-	{ id: "u-chinedu", fullName: "Chinedu Obi", email: "chinedu@simpashotels.com", phone: "+234 801 000 0015", role: "MAINTENANCE", level: "FULL", department: "Maintenance", jobTitle: "Technician", status: "ACTIVE", shift: "Morning", startedOn: "2024-02-14", lastSignIn: at(0, 7, 30), hotelId: HOTEL_ID },
-	{ id: "u-mariam", fullName: "Mariam Bello", email: "mariam@simpashotels.com", phone: "+234 801 000 0016", role: "KITCHEN", level: "FULL", department: "Kitchen", jobTitle: "Head chef", status: "ACTIVE", shift: "Morning", startedOn: "2024-02-14", lastSignIn: at(0, 6, 30), hotelId: HOTEL_ID },
-	{ id: "u-segun", fullName: "Segun Ajayi", email: "segun@simpashotels.com", phone: "+234 801 000 0017", role: "BAR", level: "FULL", department: "Bar", jobTitle: "Bar lead", status: "ACTIVE", shift: "Afternoon", startedOn: "2024-07-01", lastSignIn: at(-1, 23, 40), hotelId: HOTEL_ID },
-	{ id: "u-jide", fullName: "Jide Alabi", email: "jide@simpashotels.com", phone: "+234 801 000 0018", role: "INVENTORY", level: "FULL", department: "Store", jobTitle: "Storekeeper", status: "ACTIVE", shift: "Morning", startedOn: "2024-03-01", lastSignIn: at(0, 7, 5), hotelId: HOTEL_ID },
-	{ id: "u-femi", fullName: "Femi Ojo", email: "femi@simpashotels.com", phone: "+234 801 000 0019", role: "FINANCE", level: "FULL", department: "Finance", jobTitle: "Accountant", status: "ACTIVE", shift: "Morning", startedOn: "2024-02-20", lastSignIn: at(0, 8, 1), hotelId: HOTEL_ID },
-	{ id: "u-ada", fullName: "Ada Okeke", email: "ada@simpashotels.com", phone: "+234 801 000 0022", role: "HOUSEKEEPING", level: "VIEW", department: "Housekeeping", jobTitle: "Room attendant", status: "PAUSED", shift: "Afternoon", startedOn: "2025-09-01", hotelId: HOTEL_ID },
-	{ id: "u-emeka", fullName: "Emeka Nwankwo", email: "emeka.n@simpashotels.com", phone: "+234 801 000 0023", role: "KITCHEN", level: "EDIT", department: "Kitchen", jobTitle: "Cook", status: "ACTIVE", shift: "Afternoon", startedOn: "2025-03-15", lastSignIn: at(-1, 14, 2), hotelId: HOTEL_ID },
-	{ id: "u-sade", fullName: "Sade Williams", email: "sade@simpashotels.com", phone: "+234 801 000 0024", role: "FRONT_OFFICE", level: "VIEW", department: "Front office", jobTitle: "Trainee", status: "ACTIVE", shift: "Afternoon", startedOn: "2025-10-01", lastSignIn: at(-1, 15, 20), hotelId: HOTEL_ID },
-	{ id: "u-ibrahim", fullName: "Ibrahim Danjuma", email: "ibrahim.d@simpashotels.com", phone: "+234 801 000 0025", role: "MAINTENANCE", level: "EDIT", department: "Maintenance", jobTitle: "Electrician", status: "ACTIVE", shift: "Afternoon", startedOn: "2025-01-08", lastSignIn: at(-1, 16, 45), hotelId: HOTEL_ID },
-	{ id: "u-ruth", fullName: "Ruth Eze", email: "ruth@simpashotels.com", phone: "+234 801 000 0026", role: "HOUSEKEEPING", level: "EDIT", department: "Housekeeping", jobTitle: "Room attendant", status: "ACTIVE", shift: "Morning", startedOn: "2025-02-11", lastSignIn: at(0, 6, 50), hotelId: HOTEL_ID },
+	{ id: "u-owner", fullName: "Kayode Ashiru", email: "kayode@ivorycourt.example.ng", phone: "0800 000 0003", role: "OWNER", level: "FULL", department: "Management", jobTitle: "Owner", status: "ACTIVE", shift: "—", startedOn: "2024-01-10", lastSignIn: at(0, 7, 10), hotelId: HOTEL_ID },
+	{ id: "u-manager", fullName: "Dotun Alabede", email: "dotun@ivorycourt.example.ng", phone: "0800 000 0004", role: "MANAGER", level: "FULL", department: "Management", jobTitle: "General manager", status: "ACTIVE", shift: "Morning", startedOn: "2024-02-01", lastSignIn: at(0, 6, 55), hotelId: HOTEL_ID },
+	{ id: "u-victor", fullName: "Tosin Adewole", email: "tosin@ivorycourt.example.ng", phone: "0800 000 0007", role: "FRONT_OFFICE", level: "FULL", department: "Front office", jobTitle: "Front desk lead", status: "ACTIVE", shift: "Morning", startedOn: "2024-03-12", lastSignIn: at(0, 6, 58), hotelId: HOTEL_ID },
+	{ id: "u-toyin", fullName: "Bukola Oladiran", email: "bukola@ivorycourt.example.ng", phone: "0800 000 0016", role: "FRONT_OFFICE", level: "EDIT", department: "Front office", jobTitle: "Receptionist", status: "ACTIVE", shift: "Morning", startedOn: "2024-06-03", lastSignIn: at(0, 7, 2), hotelId: HOTEL_ID },
+	{ id: "u-bisi", fullName: "Morenike Adio", email: "morenike@ivorycourt.example.ng", phone: "0800 000 0017", role: "FRONT_OFFICE", level: "EDIT", department: "Front office", jobTitle: "Night receptionist", status: "ON_LEAVE", shift: "Night", startedOn: "2024-08-19", lastSignIn: at(-1, 22, 5), hotelId: HOTEL_ID },
+	{ id: "u-grace", fullName: "Ebere Nwagbo", email: "ebere@ivorycourt.example.ng", phone: "0800 000 0008", role: "HOUSEKEEPING", level: "FULL", department: "Housekeeping", jobTitle: "Housekeeping supervisor", status: "ACTIVE", shift: "Morning", startedOn: "2024-03-12", lastSignIn: at(0, 6, 40), hotelId: HOTEL_ID },
+	{ id: "u-kemi", fullName: "Yewande Ajibola", email: "yewande@ivorycourt.example.ng", phone: "0800 000 0009", role: "HOUSEKEEPING", level: "EDIT", department: "Housekeeping", jobTitle: "Room attendant", status: "ACTIVE", shift: "Morning", startedOn: "2024-05-20", lastSignIn: at(0, 6, 44), hotelId: HOTEL_ID },
+	{ id: "u-lola", fullName: "Nkiru Onwudiwe", email: "nkiru@ivorycourt.example.ng", phone: "0800 000 0010", role: "LAUNDRY", level: "FULL", department: "Laundry", jobTitle: "Laundry lead", status: "ACTIVE", shift: "Morning", startedOn: "2024-04-02", lastSignIn: at(0, 7, 20), hotelId: HOTEL_ID },
+	{ id: "u-chinedu", fullName: "Obinna Ezeugo", email: "obinna@ivorycourt.example.ng", phone: "0800 000 0011", role: "MAINTENANCE", level: "FULL", department: "Maintenance", jobTitle: "Technician", status: "ACTIVE", shift: "Morning", startedOn: "2024-02-14", lastSignIn: at(0, 7, 30), hotelId: HOTEL_ID },
+	{ id: "u-mariam", fullName: "Rukayat Oyelade", email: "rukayat@ivorycourt.example.ng", phone: "0800 000 0012", role: "KITCHEN", level: "FULL", department: "Kitchen", jobTitle: "Head chef", status: "ACTIVE", shift: "Morning", startedOn: "2024-02-14", lastSignIn: at(0, 6, 30), hotelId: HOTEL_ID },
+	{ id: "u-segun", fullName: "Lanre Odukoya", email: "lanre@ivorycourt.example.ng", phone: "0800 000 0013", role: "BAR", level: "FULL", department: "Bar", jobTitle: "Bar lead", status: "ACTIVE", shift: "Afternoon", startedOn: "2024-07-01", lastSignIn: at(-1, 23, 40), hotelId: HOTEL_ID },
+	{ id: "u-jide", fullName: "Bolaji Fasanmi", email: "bolaji@ivorycourt.example.ng", phone: "0800 000 0014", role: "INVENTORY", level: "FULL", department: "Store", jobTitle: "Storekeeper", status: "ACTIVE", shift: "Morning", startedOn: "2024-03-01", lastSignIn: at(0, 7, 5), hotelId: HOTEL_ID },
+	{ id: "u-femi", fullName: "Wale Akinbode", email: "wale@ivorycourt.example.ng", phone: "0800 000 0015", role: "FINANCE", level: "FULL", department: "Finance", jobTitle: "Accountant", status: "ACTIVE", shift: "Morning", startedOn: "2024-02-20", lastSignIn: at(0, 8, 1), hotelId: HOTEL_ID },
+	{ id: "u-ada", fullName: "Ijeoma Nwabueze", email: "ijeoma@ivorycourt.example.ng", phone: "0800 000 0018", role: "HOUSEKEEPING", level: "VIEW", department: "Housekeeping", jobTitle: "Room attendant", status: "PAUSED", shift: "Afternoon", startedOn: "2025-09-01", hotelId: HOTEL_ID },
+	{ id: "u-emeka", fullName: "Chibuzor Okolie", email: "chibuzor@ivorycourt.example.ng", phone: "0800 000 0019", role: "KITCHEN", level: "EDIT", department: "Kitchen", jobTitle: "Cook", status: "ACTIVE", shift: "Afternoon", startedOn: "2025-03-15", lastSignIn: at(-1, 14, 2), hotelId: HOTEL_ID },
+	{ id: "u-sade", fullName: "Abisola Coker", email: "abisola@ivorycourt.example.ng", phone: "0800 000 0020", role: "FRONT_OFFICE", level: "VIEW", department: "Front office", jobTitle: "Trainee", status: "ACTIVE", shift: "Afternoon", startedOn: "2025-10-01", lastSignIn: at(-1, 15, 20), hotelId: HOTEL_ID },
+	{ id: "u-ibrahim", fullName: "Usman Garkuwa", email: "usman@ivorycourt.example.ng", phone: "0800 000 0021", role: "MAINTENANCE", level: "EDIT", department: "Maintenance", jobTitle: "Electrician", status: "ACTIVE", shift: "Afternoon", startedOn: "2025-01-08", lastSignIn: at(-1, 16, 45), hotelId: HOTEL_ID },
+	{ id: "u-ruth", fullName: "Esther Nwafor", email: "esther@ivorycourt.example.ng", phone: "0800 000 0022", role: "HOUSEKEEPING", level: "EDIT", department: "Housekeeping", jobTitle: "Room attendant", status: "ACTIVE", shift: "Morning", startedOn: "2025-02-11", lastSignIn: at(0, 6, 50), hotelId: HOTEL_ID },
 ];
 
 const shiftTimes = { Morning: ["06:00", "14:00"], Afternoon: ["14:00", "22:00"], Night: ["22:00", "06:00"] } as const;
@@ -173,13 +175,13 @@ export const demoShifts: ShiftRow[] = demoStaff
 	);
 
 export const demoLeave: LeaveRow[] = [
-	{ id: "leave-1", staffId: "u-kemi", staffName: "Kemi Adebayo", role: "HOUSEKEEPING", from: day(6), to: day(10), days: 5, reason: "Sister's wedding in Enugu", status: "PENDING" },
-	{ id: "leave-2", staffId: "u-bisi", staffName: "Bisi Adekunle", role: "FRONT_OFFICE", from: day(-2), to: day(1), days: 4, reason: "Sick leave", status: "APPROVED", note: "Get well soon" },
-	{ id: "leave-3", staffId: "u-segun", staffName: "Segun Ajayi", role: "BAR", from: day(14), to: day(21), days: 8, reason: "Annual leave", status: "CHANGE_REQUESTED", note: "Can you move it a week later? Detty December prep." },
-	{ id: "leave-4", staffId: "u-jide", staffName: "Jide Alabi", role: "INVENTORY", from: day(-20), to: day(-16), days: 5, reason: "Annual leave", status: "APPROVED" },
+	{ id: "leave-1", staffId: "u-kemi", staffName: "Yewande Ajibola", role: "HOUSEKEEPING", from: day(6), to: day(10), days: 5, reason: "Sister's wedding in Enugu", status: "PENDING" },
+	{ id: "leave-2", staffId: "u-bisi", staffName: "Morenike Adio", role: "FRONT_OFFICE", from: day(-2), to: day(1), days: 4, reason: "Sick leave", status: "APPROVED", note: "Get well soon" },
+	{ id: "leave-3", staffId: "u-segun", staffName: "Lanre Odukoya", role: "BAR", from: day(14), to: day(21), days: 8, reason: "Annual leave", status: "CHANGE_REQUESTED", note: "Can you move it a week later? Detty December prep." },
+	{ id: "leave-4", staffId: "u-jide", staffName: "Bolaji Fasanmi", role: "INVENTORY", from: day(-20), to: day(-16), days: 5, reason: "Annual leave", status: "APPROVED" },
 ];
 
 export const demoShiftRequests: ShiftRequestRow[] = [
-	{ id: "sr-1", staffName: "Toyin Balogun", role: "FRONT_OFFICE", kind: "SWAP", date: day(2), shift: "Morning", withName: "Sade Williams", reason: "Hospital appointment", status: "PENDING" },
-	{ id: "sr-2", staffName: "Ruth Eze", role: "HOUSEKEEPING", kind: "COVER", date: day(0), shift: "Night", reason: "Bisi is out sick", status: "APPROVED" },
+	{ id: "sr-1", staffName: "Bukola Oladiran", role: "FRONT_OFFICE", kind: "SWAP", date: day(2), shift: "Morning", withName: "Abisola Coker", reason: "Hospital appointment", status: "PENDING" },
+	{ id: "sr-2", staffName: "Esther Nwafor", role: "HOUSEKEEPING", kind: "COVER", date: day(0), shift: "Night", reason: "Morenike is out sick", status: "APPROVED" },
 ];

@@ -228,7 +228,7 @@ export function NewOrganizationPanel({
 							label="Phone"
 							value={phone}
 							onChange={setPhone}
-							placeholder="+234 803 555 0192"
+							placeholder="0800 000 0036"
 							required
 							error={phone.trim() ? errors.phone : undefined}
 						/>
@@ -663,7 +663,7 @@ export function AddStaffPanel({
 						label="Staff ID / ref"
 						value={ref}
 						onChange={setRef}
-						placeholder="JB-10021"
+						placeholder="IC-10021"
 					/>
 					<TextField
 						label="Phone"
@@ -760,7 +760,7 @@ export function ImportStaffModal({
 					value={text}
 					onChange={setText}
 					rows={6}
-					placeholder="Chidinma Obi, JB-10021, +234 809 666 7777, chidinma@company.com"
+					placeholder="Ogechi Nnadozie, IC-10021, 0800 000 0051, ogechi@company.com"
 					hint="Copy the columns from the company's sheet · staff ID, phone and email are optional"
 				/>
 				{rows.length > 0 && (

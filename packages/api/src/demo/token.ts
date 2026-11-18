@@ -25,10 +25,10 @@ export function mintDemoToken(email: string, name: string, businessId: string, h
 	return `${base64url(JSON.stringify({ alg: "none", typ: "JWT" }))}.${base64url(JSON.stringify(claims))}.`;
 }
 
-/** "tunde.bakare@simpashotels.com" → "Tunde Bakare"; anything unreadable → "Tunde Bakare". */
+/** "dotun.alabede@ivorycourt.example.ng" → "Dotun Alabede"; anything unreadable → "Dotun Alabede". */
 export function nameFromEmail(email: string) {
 	const local = email.split("@")[0] ?? "";
 	const words = local.split(/[._\-+]/).filter((w) => /^[a-z]+$/i.test(w));
-	if (words.length === 0) return "Tunde Bakare";
+	if (words.length === 0) return "Dotun Alabede";
 	return words.map((w) => w[0].toUpperCase() + w.slice(1).toLowerCase()).join(" ");
 }

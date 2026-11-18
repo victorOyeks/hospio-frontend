@@ -21,9 +21,9 @@ export const demoMachines: MachineLoadRow[] = [
 
 export type LinenMoveRow = { id: string; at: string; direction: "IN" | "OUT"; from: string; items: { name: string; qty: number }[]; by: string };
 export const demoLinenMoves: LinenMoveRow[] = [
-	{ id: "lm-1", at: at(0, 8, 15), direction: "IN", from: "Floor 1 · dirty", items: [{ name: "Bath towel", qty: 32 }, { name: "Bed sheet · double", qty: 18 }], by: "Lola Eze" },
-	{ id: "lm-2", at: at(0, 10, 10), direction: "OUT", from: "Floor 2 · clean", items: [{ name: "Bath towel", qty: 40 }, { name: "Pillowcase", qty: 30 }], by: "Lola Eze" },
-	{ id: "lm-3", at: at(-1, 16, 0), direction: "OUT", from: "Floor 3 · clean", items: [{ name: "Duvet cover", qty: 12 }], by: "Lola Eze" },
+	{ id: "lm-1", at: at(0, 8, 15), direction: "IN", from: "Floor 1 · dirty", items: [{ name: "Bath towel", qty: 32 }, { name: "Bed sheet · double", qty: 18 }], by: "Nkiru Onwudiwe" },
+	{ id: "lm-2", at: at(0, 10, 10), direction: "OUT", from: "Floor 2 · clean", items: [{ name: "Bath towel", qty: 40 }, { name: "Pillowcase", qty: 30 }], by: "Nkiru Onwudiwe" },
+	{ id: "lm-3", at: at(-1, 16, 0), direction: "OUT", from: "Floor 3 · clean", items: [{ name: "Duvet cover", qty: 12 }], by: "Nkiru Onwudiwe" },
 ];
 
 export const laundryPriceList = [

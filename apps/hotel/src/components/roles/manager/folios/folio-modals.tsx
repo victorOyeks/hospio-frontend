@@ -117,7 +117,7 @@ function SplitModal({ f, onClose, onPatch }: { f: FolioRow; onClose: () => void;
 			footer={<><Button variant="outline" className={btn.secondary} onClick={onClose}>Cancel</Button><Button className={btn.primary} disabled={pending || picked.length === 0 || !payer} onClick={() => run(() => moveLines(f.id, picked, {}, { ...f, lines: f.lines.filter((l) => !picked.includes(l.id)), charges: f.charges - charges.filter((l) => picked.includes(l.id)).reduce((s, l) => s + l.amount, 0), tax: f.tax - charges.filter((l) => picked.includes(l.id)).reduce((s, l) => s + l.tax, 0), balance: f.balance - total }), `New folio opened for ${payer} · ${naira(total)}`, (updated) => { onPatch(f.id, () => updated); onClose(); })}>Split</Button></>}
 		>
 			<div className="flex flex-col gap-4">
-				<TextField label="Second folio is paid by" value={payer} onChange={setPayer} placeholder="e.g. Shell Nigeria or a second guest" required />
+				<TextField label="Second folio is paid by" value={payer} onChange={setPayer} placeholder="e.g. Deltaline Energy Ltd or a second guest" required />
 				<ul className="divide-y divide-line rounded-xl border border-line">
 					{charges.map((l) => { const on = picked.includes(l.id); return (
 						<li key={l.id}><button type="button" onClick={() => setPicked((p) => (on ? p.filter((x) => x !== l.id) : [...p, l.id]))} className={cn("flex w-full items-center gap-3 px-3 py-2 text-left text-[13px]", on && "bg-brand-soft/40")}>

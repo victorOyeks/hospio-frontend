@@ -579,7 +579,7 @@ function AddPersonPanel({
 						label="Full name"
 						value={fullName}
 						onChange={setName}
-						placeholder="Grace Okafor"
+						placeholder="Ebere Nwagbo"
 						required
 					/>
 					<FieldRow>
@@ -588,7 +588,7 @@ function AddPersonPanel({
 							type="email"
 							value={email}
 							onChange={setEmail}
-							placeholder="grace@abujapalms.ng"
+							placeholder="ebere@zumaheights.example.ng"
 							required
 							error={
 								email && !emailOk
@@ -758,7 +758,7 @@ function ImportPeopleModal({
 					value={text}
 					onChange={setText}
 					rows={8}
-					placeholder={`Grace Okafor, grace@abujapalms.ng, +2348030000000, Manager, ${hotels[0]?.name ?? "Abuja Palms Wuse"}\nEmeka Nwosu, emeka@abujapalms.ng, , Front office, ${hotels[0]?.name ?? "Abuja Palms Wuse"}`}
+					placeholder={`Ebere Nwagbo, ebere@zumaheights.example.ng, +2348030000000, Manager, ${hotels[0]?.name ?? "Zuma Heights Wuse"}\nIkenna Uzoigwe, ikenna@zumaheights.example.ng, , Front office, ${hotels[0]?.name ?? "Zuma Heights Wuse"}`}
 					hint="Commas or tabs. The hotel column can be left out when there is only one hotel."
 				/>
 				{bad.length > 0 && (

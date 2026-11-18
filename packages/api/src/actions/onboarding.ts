@@ -151,7 +151,7 @@ export async function checkReferralCode(code: string): Promise<
 	if (!c) return { ok: false, error: "Enter a referral code" };
 	if (DEMO_AUTH) {
 		await demoDelay(200);
-		return { ok: true, data: { code: c, valid: true, referrerFirstName: "Kunle" } };
+		return { ok: true, data: { code: c, valid: true, referrerFirstName: "Olumide" } };
 	}
 	const { data, error } = await api("@get/platform/public/referral-codes/:code", {
 		params: { code: c },
@@ -272,11 +272,11 @@ export async function getInvite(token: string): Promise<ActionResult<Invite>> {
 		return {
 			ok: true,
 			data: {
-				fullName: "Tunde Bakare",
-				email: "tunde@simpashotels.com",
+				fullName: "Dotun Alabede",
+				email: "dotun@ivorycourt.example.ng",
 				role: "MANAGER",
-				businessName: "Royal Suites Ltd",
-				hotelName: "Simpas Ikeja",
+				businessName: "Ivory Court Hotels Ltd",
+				hotelName: "Ivory Court Ikeja",
 				expiresAt: new Date(Date.now() + 6 * 86_400_000).toISOString(),
 				accepted: false,
 			},
@@ -305,8 +305,8 @@ export async function acceptInvite(input: {
 	if (DEMO_AUTH) {
 		await demoDelay(500);
 		const token = mintDemoToken(
-			"tunde@simpashotels.com",
-			"Tunde Bakare",
+			"dotun@ivorycourt.example.ng",
+			"Dotun Alabede",
 			BUSINESS_ID,
 			[demoHotels[0].id],
 			APP_ROLES.includes("MANAGER") ? ["MANAGER"] : APP_ROLES,

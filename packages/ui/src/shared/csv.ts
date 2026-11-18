@@ -12,7 +12,7 @@ export function toCsv(rows: CsvCell[][]): string {
 	return rows.map((r) => r.map(cell).join(",")).join("\r\n");
 }
 
-/** A file name from words and the date: "Staff · Simpas Ikeja" → staff-simpas-ikeja-2026-11-10.csv. */
+/** A file name from words and the date: "Staff · Ivory Court Ikeja" → staff-ivory-court-ikeja-2026-11-10.csv. */
 export function csvName(
 	what: string,
 	day = new Date().toISOString().slice(0, 10),

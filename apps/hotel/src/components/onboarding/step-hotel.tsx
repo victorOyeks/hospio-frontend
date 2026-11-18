@@ -215,7 +215,7 @@ export function HotelStep({
 						label={`${Word} name`}
 						value={form.name}
 						onChange={(v) => set("name", v)}
-						placeholder="Simpas Ikeja"
+						placeholder="Ivory Court Ikeja"
 						required
 						error={errors.name}
 						hint={`Guests see this with your trading name: "${trading} · ${form.name.trim() || Word}"`}
@@ -253,7 +253,7 @@ export function HotelStep({
 							type="email"
 							value={form.email}
 							onChange={(v) => set("email", v)}
-							placeholder="ikeja@simpashotels.com"
+							placeholder="ikeja@ivorycourt.example.ng"
 							error={errors.email}
 							hint="Optional"
 						/>

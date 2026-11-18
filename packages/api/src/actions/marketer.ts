@@ -137,11 +137,11 @@ export async function loadCommissionStatement(
 			ok: true,
 			data: {
 				month,
-				marketerName: "Kunle Oshodi",
+				marketerName: "Olumide Ogunmola",
 				gross: 124200,
 				wht: 6210,
 				net: 117990,
-				text: `Hospio360 · Commission statement · ${month}\n\nMarketer: Kunle Oshodi\nGross commission: ₦124,200\nWithholding tax (5%): -₦6,210\nNet paid: ₦117,990\n\nThis is a demo statement.`,
+				text: `Hospio360 · Commission statement · ${month}\n\nMarketer: Olumide Ogunmola\nGross commission: ₦124,200\nWithholding tax (5%): -₦6,210\nNet paid: ₦117,990\n\nThis is a demo statement.`,
 			},
 		};
 	}
