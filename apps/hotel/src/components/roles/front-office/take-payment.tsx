@@ -462,7 +462,7 @@ export function usePaymentSteps(
 				: "Payment recorded",
 	}[step];
 	const subtitle = guestName
-		? `${guestName}${folio?.roomNumber ? ` · Room ${folio.roomNumber}` : tgt?.roomNumber ? ` · Room ${tgt.roomNumber}` : ""} · ${naira(amt)}`
+		? `${guestName}${folio?.roomNumber ? ` · Room ${folio.roomNumber}` : tgt?.roomNumber ? ` · Room ${tgt.roomNumber}` : ""} · ${nairaExact(amt + tipN)}`
 		: "Choose who is paying";
 
 	async function finish(choice: "EMAIL" | "NONE" | "WHATSAPP" = receipt) {
@@ -547,11 +547,11 @@ export function usePaymentSteps(
 					? "by transfer"
 					: "in cash";
 		if (payment.status === "APPROVED")
-			toast.success(`${naira(amt)} ${label} recorded`, {
+			toast.success(`${nairaExact(amt + tipN)} ${label} recorded`, {
 				description: receiptNote,
 			});
 		else
-			toast.info(`${naira(amt)} ${label} is processing`, {
+			toast.info(`${nairaExact(amt + tipN)} ${label} is processing`, {
 				description: "The POS confirms it; see My payments",
 			});
 		onDone?.(payment);
@@ -572,7 +572,7 @@ export function usePaymentSteps(
 							disabled={!guestName || amt <= 0}
 							onClick={() => setStep("method")}
 						>
-							Continue · {naira(amt)}
+							Continue · {nairaExact(amt + tipN)}
 						</button>
 					</>
 				);
@@ -939,9 +939,9 @@ export function usePaymentSteps(
 								: card === "paying"
 									? "Processing on the terminal…"
 									: card === "approved"
-										? `${naira(amt)} approved`
+										? `${nairaExact(amt + tipN)} approved`
 										: card === "sent"
-											? `${naira(amt)} sent to ${posName}`
+											? `${nairaExact(amt + tipN)} sent to ${posName}`
 											: card === "stalled"
 												? `${posName} hasn't answered yet`
 											: card === "declined"
@@ -1046,7 +1046,7 @@ export function usePaymentSteps(
 				<div className="flex flex-col gap-4">
 					<TotalsList
 						rows={[
-							{ label: "Paid", value: naira(amt) },
+							{ label: "Paid", value: nairaExact(amt + tipN) },
 							{
 								label: "Method",
 								value:
@@ -1116,7 +1116,7 @@ export function usePaymentSteps(
 				<div className="flex flex-col items-center gap-3 py-8 text-center">
 					<CheckCircle2Icon className="size-16 text-success" />
 					<p className="text-lg font-bold text-ink">
-						{naira(amt)}{" "}
+						{nairaExact(amt + tipN)}{" "}
 						{recorded && recorded.status !== "APPROVED"
 							? "processing"
 							: "recorded"}
