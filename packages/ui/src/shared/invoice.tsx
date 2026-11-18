@@ -188,7 +188,7 @@ function LineRow({ l, multi, onDays }: { l: InvoiceLineView; multi: boolean; onD
 		<li className="flex items-start justify-between gap-3 py-[10px]">
 			<div className="min-w-0">
 				<p className="text-[13px] font-medium text-ink">
-					{multi && l.hotelName && l.section !== "PLATFORM" ? `${l.hotelName} · ` : ""}
+					{multi && l.hotelName && l.section !== "PLATFORM" && !l.label.includes(l.hotelName) ? `${l.hotelName} · ` : ""}
 					{l.section === "PLATFORM" && l.hotelName ? l.hotelName : l.label}
 				</p>
 				{platform && (
@@ -196,7 +196,8 @@ function LineRow({ l, multi, onDays }: { l: InvoiceLineView; multi: boolean; onD
 						Sales {money(l.baseAmount)} × {l.rate}% = {money(l.amount)}
 					</p>
 				)}
-				{l.detail && <p className="text-[12px] text-ink-3">{l.detail}</p>}
+				{l.detail && !platform && <p className="text-[12px] text-ink-3">{l.detail}</p>}
+				{l.detail && platform && <p className="text-[12px] text-ink-3">{l.detail.split(" · ")[0]}</p>}
 				{l.section === "ADJUSTMENT" && l.createdByName && (
 					<p className="text-[11px] text-ink-3">
 						Added by {l.createdByName}
