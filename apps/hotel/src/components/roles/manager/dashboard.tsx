@@ -38,6 +38,10 @@ import type {
 import { GuestsTable } from "./guests-table";
 import { OutletSalesCard } from "./outlet-sales";
 import { hasAccommodation } from "@hospio/api/venue";
+import {
+	type VenueLocationToday,
+	VenueTodaySection,
+} from "@/components/venue/venue-today";
 
 export type DashboardData = {
 	buckets: ReturnType<typeof bookingBuckets>;
@@ -95,14 +99,23 @@ const quickActions: { label: string; href: string; icon: typeof FlagIcon; stay?:
 	{ label: "Report issue", href: "/dashboard/tasks?new=issue", icon: FlagIcon },
 ];
 
+/** The venue dashboard's data at a lounge, bar or restaurant (hospio-backend docs/plan-venue-type.md phase 2). */
+export type ManagerVenue = {
+	today: VenueLocationToday;
+	/** Stock counts submitted and waiting for a manager's approval. */
+	countsWaiting: { id: string; storeName: string; startedBy: string }[];
+};
+
 export function ManagerDashboard({
 	user,
 	hotel,
 	data,
+	venue = null,
 }: {
 	user: Me;
 	hotel: Hotel | null;
 	data: DashboardData;
+	venue?: ManagerVenue | null;
 }) {
 	const firstName = user.fullName.split(" ")[0];
 	// A lounge, bar or restaurant (hospio-backend docs/plan-venue-type.md): no rooms, arrivals or folios; sales and tills instead.
@@ -199,6 +212,69 @@ export function ManagerDashboard({
 				href: `/dashboard/folios?open=${f.id}`,
 			})),
 	];
+	// At a venue: old tabs, unpaid sales, price changes, counts to approve and low stock join the list (phase 2).
+	const vt = venue?.today.today ?? null;
+	const lowAll = items.filter((i) => i.minLevel > 0 && i.quantity <= i.minLevel);
+	if (venue) {
+		const today = vt?.date ?? "";
+		for (const tab of vt?.openTabs.stale.slice(0, 3) ?? [])
+			actions.unshift({
+				key: `tab-${tab.orderId}`,
+				title: `Tab ${tab.number} open since ${format(new Date(tab.openedAt ?? Date.now()), "EEE HH:mm")}`,
+				detail: `${tab.outletName ?? "Outlet"}${tab.guestName ? ` · ${tab.guestName}` : ""} · ${naira(tab.balance)} to pay · ${tab.openedBy ?? "opened by someone"}`,
+				tone: "danger",
+				cta: "Open sales",
+				href: `/dashboard/financials/sales?status=IN_PROGRESS&from=${(tab.openedAt ?? "").slice(0, 10) || today}&to=${today}`,
+			});
+		if (vt && vt.openTabs.staleCount > 3)
+			actions.push({
+				key: "tabs-more",
+				title: `${vt.openTabs.staleCount - 3} more tabs open over ${vt.openTabs.staleHours} hours`,
+				detail: `${plural(vt.openTabs.count, "tab")} open in all · ${naira(vt.openTabs.value)} to pay`,
+				tone: "warning",
+				cta: "Open sales",
+				href: `/dashboard/financials/sales?status=IN_PROGRESS&to=${today}`,
+			});
+		if (vt && vt.unpaid.count > 0)
+			actions.push({
+				key: "unpaid",
+				title: `${plural(vt.unpaid.count, "sale")} still to pay`,
+				detail: `${naira(vt.unpaid.amount)} owed at the outlets`,
+				tone: "warning",
+				cta: "Collect",
+				href: `/dashboard/financials/sales?status=UNPAID&from=${today}&to=${today}`,
+			});
+		if (vt && vt.priceChangesWaiting > 0)
+			actions.push({
+				key: "prices",
+				title: `${plural(vt.priceChangesWaiting, "price change")} waiting for approval`,
+				detail: "Menu prices change once approved",
+				tone: "info",
+				cta: "Review",
+				href: "/dashboard/approvals",
+			});
+		for (const c of venue.countsWaiting.slice(0, 2))
+			actions.push({
+				key: `count-${c.id}`,
+				title: `Stock count of ${c.storeName} waiting for approval`,
+				detail: `Counted by ${c.startedBy}`,
+				tone: "info",
+				cta: "Approve",
+				href: "/dashboard/inventory?screen=counts",
+			});
+		if (lowAll.length > 0)
+			actions.push({
+				key: "low",
+				title: `${plural(lowAll.length, "item")} running low`,
+				detail: lowAll
+					.slice(0, 3)
+					.map((i) => `${i.name} ${i.quantity} left`)
+					.join(" · "),
+				tone: "warning",
+				cta: "Inventory",
+				href: "/dashboard/inventory?screen=stock",
+			});
+	}
 	const toneBg = {
 		danger: "bg-danger-soft text-danger",
 		warning: "bg-warning-soft text-warning",
@@ -249,7 +325,10 @@ export function ManagerDashboard({
 			</div>
 
 			{/* KPI row */}
-			{!stays && (
+			{venue && (
+				<VenueTodaySection locations={[venue.today]} initial={venue.today.hotelId} />
+			)}
+			{!stays && !venue && (
 				<div className="grid grid-cols-2 gap-4 md:grid-cols-4">
 					<KpiCard
 						label="Sales today"
@@ -333,7 +412,7 @@ export function ManagerDashboard({
 			)}
 
 			{/* Needs your action + Room status */}
-			<div className="grid gap-4 xl:grid-cols-[1fr_420px]">
+			<div className={venue ? "grid gap-4" : "grid gap-4 xl:grid-cols-[1fr_420px]"}>
 				<SectionCard
 					title="Needs your action"
 					subtitle={`${hotel?.name ?? "This hotel"} · sorted by urgency`}
@@ -377,7 +456,7 @@ export function ManagerDashboard({
 					)}
 				</SectionCard>
 
-				{!stays && <OutletSalesCard sales={outletSales} rooms={false} />}
+				{!stays && !venue && <OutletSalesCard sales={outletSales} rooms={false} />}
 				{stays && (
 				<SectionCard
 					title="Room status"
@@ -446,6 +525,7 @@ export function ManagerDashboard({
 			</div>
 
 			{/* Today's guests + Staff on shift */}
+			{!venue && (
 			<div className={stays ? "grid gap-4 xl:grid-cols-[1fr_420px]" : "grid gap-4"}>
 				{stays && <GuestsTable buckets={buckets} />}
 
@@ -478,9 +558,10 @@ export function ManagerDashboard({
 					)}
 				</SectionCard>
 			</div>
+			)}
 
 			{/* Tasks, money, stock */}
-			<div className="grid gap-4 md:grid-cols-3">
+			<div className={venue ? "grid gap-4 md:grid-cols-2" : "grid gap-4 md:grid-cols-3"}>
 				<SectionCard
 					title="Tasks & maintenance"
 					subtitle={`${openRepairs.length} open · ${urgent} urgent`}
@@ -536,6 +617,7 @@ export function ManagerDashboard({
 					)}
 				</SectionCard>
 
+				{!venue && (
 				<SectionCard
 					title="Money today"
 					subtitle={`Payments taken at ${hotel?.name ?? "this hotel"}`}
@@ -565,6 +647,7 @@ export function ManagerDashboard({
 						cash in hand
 					</p>
 				</SectionCard>
+				)}
 
 				<SectionCard
 					title="Stock alerts"

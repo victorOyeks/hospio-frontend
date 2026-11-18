@@ -5,6 +5,11 @@ import { atHotel } from "@hospio/api/api/server";
 import { getHotels } from "@hospio/api/dal";
 import { data } from "@hospio/api/data";
 import { withCategoryLabels } from "@hospio/api/data/mappers/finance";
+import {
+	buildVenueReport,
+	isVenueReport,
+	type VenueReportKind,
+} from "./venue-reports";
 
 /**
  * Owner portal · Reports (docs/owner-portal.md): a report built from live data for a period and one hotel or every hotel.
@@ -18,7 +23,8 @@ export type ReportKind =
 	| "REVENUE"
 	| "PAYMENTS"
 	| "EXPENSES"
-	| "GUESTS";
+	| "GUESTS"
+	| VenueReportKind;
 export type BuiltReport = {
 	columns: string[];
 	rows: (string | number)[][];
@@ -75,6 +81,14 @@ export async function buildReport(input: {
 		: all;
 	if (input.hotelId && hotels.length === 0)
 		return { ok: false, error: "That hotel is not one of yours" };
+	// The outlet reports for lounges, bars and restaurants (and hotels' outlets): hospio-backend docs/plan-venue-type.md phase 2.
+	if (isVenueReport(kind))
+		return buildVenueReport(
+			kind,
+			from,
+			to,
+			hotels.map((h) => ({ id: h.id, name: h.name })),
+		);
 	const each = <T>(load: () => Promise<T>) =>
 		Promise.all(
 			hotels.map((h) => atHotel(h.id, load).then((v) => ({ hotel: h, v }))),
