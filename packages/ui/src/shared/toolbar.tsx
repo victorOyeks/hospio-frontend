@@ -30,8 +30,8 @@ export function Toolbar({
 				className,
 			)}
 		>
-			<div className="flex flex-wrap items-center gap-2">{left}</div>
-			<div className="flex flex-wrap items-center gap-2">{right}</div>
+			<div className="flex min-w-0 max-w-full flex-wrap items-center gap-2">{left}</div>
+			<div className="flex min-w-0 max-w-full flex-wrap items-center gap-2">{right}</div>
 		</div>
 	);
 }
