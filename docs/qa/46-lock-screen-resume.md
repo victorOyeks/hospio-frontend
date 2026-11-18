@@ -35,13 +35,16 @@ Password for every account: `Hospio123!`
 | Role | Name | Email |
 |---|---|---|
 | Manager | Tunde Bakare | `tunde@royalsuites.ng` (sets up the tablet) |
-| Bar | QA PIN Kemi l184h | `qa.pin.kemi.l184h@hospio-qa.test` |
-| Bar | QA PIN Ada l184h | `qa.pin.ada.l184h@hospio-qa.test` |
-| Kitchen (Full access) | Mariam Bello | `mariam@royalsuites.ng` |
+| Bar | QA PIN Bar | `qa.pin.bar@hospio-qa.test` · PIN **482916** |
+| Kitchen | QA PIN Kitchen | `qa.pin.kitchen@hospio-qa.test` · PIN **691347** |
+| Front office | QA PIN Front | `qa.pin.front@hospio-qa.test` · PIN **735184** |
+| Kitchen (Full access) | Mariam Bello | `mariam@royalsuites.ng` (email unlock only) |
 | Front office | Victor Adeyemi | `victor@royalsuites.ng` |
 
-To "unlock" use the person's PIN if you know it, or **Sign in with email instead** on the lock screen: both go to the
-same place. Don't guess PINs on shared accounts (five wrong tries lock that PIN for 15 minutes). Use people with **one**
+Unlock with the **QA PIN** people's PINs above (made 18 Nov 2026 for this; see 06-shared-devices.md). The PINs once
+documented for Segun, Mariam, QA PIN Kemi l184h and QA PIN Ada l184h are **not reliable**: for them use **Sign in with
+email instead** on the lock screen (it goes to the same place). Don't guess PINs (five wrong tries lock that PIN for 15
+minutes). Use people with **one**
 role for the "same page" checks: someone with two roles (Segun: Bar and Front office) who signs in with email is asked
 to choose a role and then starts on that role's home page (a PIN unlock picks the device's role and does go back).
 
@@ -50,52 +53,52 @@ Name test guests and orders "QA 46 …" and cancel them when you finish. Never c
 ## 1 · Set up a shared tablet (Tunde)
 
 1. **Do:** sign in as Tunde, account menu → **Use this device as a shared device**: name "QA 46 tablet <initials>", roles
-   **Bar** and **Kitchen**, Lock after **1 minute** → **Set up device**. **Expect:** the lock screen with QA PIN Kemi, QA PIN
-   Ada and Mariam among the tiles.
+   **Bar** and **Kitchen**, Lock after **1 minute** → **Set up device**. **Expect:** the lock screen with QA PIN Bar, QA PIN
+   Kitchen and Mariam among the tiles.
 
-## 2 · The same person goes back to the same page (Kemi)
+## 2 · The same person goes back to the same page (QA PIN Bar)
 
-1. **Do:** unlock as Kemi. Open **Sales** and search for something so the address has a query (e.g. `?q=qa46`).
+1. **Do:** unlock as QA PIN Bar. Open **Sales** and search for something so the address has a query (e.g. `?q=qa46`).
    **Lock**. **Expect:** the lock screen.
-2. **Do:** unlock as Kemi again. **Expect:** Sales with the same search, not Today.
+2. **Do:** unlock as QA PIN Bar again. **Expect:** Sales with the same search, not Today.
 3. **Do:** stay on Sales and don't touch the tablet for a minute. **Expect:** the 30-second warning ("What you are typing
    comes back when you unlock"), then the lock screen with "Locked after 1 minute without use. Unlock with your PIN to
    carry on where you were."
-4. **Do:** unlock as Kemi. **Expect:** back on Sales.
+4. **Do:** unlock as QA PIN Bar. **Expect:** back on Sales.
 
-## 3 · Someone else goes to their own home page (Kemi → Ada)
+## 3 · Someone else goes to their own home page (QA PIN Bar → QA PIN Kitchen)
 
-1. **Do:** as Kemi, open **Sales** → **Lock**. Unlock as **QA PIN Ada**. **Expect:** Bar today (Ada's home), not
+1. **Do:** as QA PIN Bar, open **Sales** → **Lock**. Unlock as **QA PIN Kitchen**. **Expect:** the kitchen's home page (QA PIN Kitchen's dashboard), not
    Sales.
-2. **Do:** Lock, unlock as Kemi. **Expect:** Bar today too: Ada was the last person, so Kemi's page is forgotten.
+2. **Do:** Lock, unlock as QA PIN Bar. **Expect:** Bar today (their home): QA PIN Kitchen was the last person, so QA PIN Bar's page is forgotten.
 
-## 4 · Bar: the sale being built comes back (Kemi)
+## 4 · Bar: the sale being built comes back (QA PIN Bar)
 
-1. **Do:** unlock as Kemi → **New sale** → add 2 drinks (one with a choice, one with a note), pick a seat, type a name
+1. **Do:** unlock as QA PIN Bar → **New sale** → add 2 drinks (one with a choice, one with a note), pick a seat, type a name
    "QA 46", choose **Open a tab**. Don't press the button. **Lock**.
-2. **Do:** unlock as Kemi. **Expect:** the New sale panel open with the same seat, name, drinks (choices, notes,
+2. **Do:** unlock as QA PIN Bar. **Expect:** the New sale panel open with the same seat, name, drinks (choices, notes,
    quantities) and **Open a tab**; a small line at the top: "Restored what you were typing · Clear". Prices are today's
    menu prices.
-3. **Do:** press **Clear**. **Expect:** the cart and fields empty; the line goes. Add a drink again, Lock, unlock as Kemi:
+3. **Do:** press **Clear**. **Expect:** the cart and fields empty; the line goes. Add a drink again, Lock, unlock as QA PIN Bar:
    the drink is back.
-4. **Do:** press **Cancel**, Lock, unlock as Kemi. **Expect:** Today with no New sale panel (cancelled = draft gone).
-5. **Do:** New sale → a drink → **Open a tab** → **Open a tab**. **Expect:** "Tab opened". Lock, unlock as Kemi, open
+4. **Do:** press **Cancel**, Lock, unlock as QA PIN Bar. **Expect:** Today with no New sale panel (cancelled = draft gone).
+5. **Do:** New sale → a drink → **Open a tab** → **Open a tab**. **Expect:** "Tab opened". Lock, unlock as QA PIN Bar, open
    New sale. **Expect:** an empty cart, no "Restored" line (sent = draft gone). Cancel the QA tab afterwards.
-6. **Do:** New sale → a drink → **Pay now** → **Take payment**, and Lock while the payment step shows. Unlock as Kemi.
+6. **Do:** New sale → a drink → **Pay now** → **Take payment**, and Lock while the payment step shows. Unlock as QA PIN Bar.
    **Expect:** the payment step is **not** shown again and nothing is restored; the sale is under Recent sales / Sales,
    unpaid. Cancel it (don't take a card payment).
 
-## 5 · Another person never sees the draft (Kemi → Ada)
+## 5 · Another person never sees the draft (QA PIN Bar → QA PIN Kitchen)
 
-1. **Do:** as Kemi, New sale → add a drink, type "QA 46 Kemi" → **Lock**. Unlock as **Ada**. **Expect:** Bar today; open
-   **New sale**: an empty cart, no "Restored" line.
-2. **Do:** Lock, unlock as Kemi → New sale. **Expect:** empty too (Ada unlocking cleared Kemi's draft).
+1. **Do:** as QA PIN Bar, New sale → add a drink, type "QA 46 Bar" → **Lock**. Unlock as **QA PIN Kitchen**. **Expect:** QA PIN Kitchen's home;
+   the bar's New sale is not open, and no "Restored" line.
+2. **Do:** Lock, unlock as QA PIN Bar → New sale. **Expect:** empty too (QA PIN Kitchen unlocking cleared QA PIN Bar's draft).
 
-## 6 · Kitchen order (Mariam)
+## 6 · Kitchen order (QA PIN Kitchen)
 
-1. **Do:** unlock as Mariam, **Orders** → **New order** → Takeaway, two items, name "QA 46" → **Lock** → unlock
-   as Mariam. **Expect:** New order open with the same items, Takeaway and name, and the "Restored" line.
-2. **Do:** **Cancel**, Lock, unlock as Mariam. **Expect:** no New order panel.
+1. **Do:** unlock as QA PIN Kitchen, **Orders** → **New order** → Takeaway, two items, name "QA 46" → **Lock** → unlock
+   as QA PIN Kitchen. **Expect:** New order open with the same items, Takeaway and name, and the "Restored" line.
+2. **Do:** **Cancel**, Lock, unlock as QA PIN Kitchen. **Expect:** no New order panel.
 
 ## 7 · Signing in again after the session ends (Victor, no shared device)
 

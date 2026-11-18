@@ -19,7 +19,7 @@ allow-listed number 09035911994, so sign-up and phone codes for any other number
 | 03 | `03-operating-day.md` | A full hotel day across desks, tills and night audit | Ready |
 | 04 | `04-restaurant-bar.md` | Kitchen and bar orders, tabs, room charges, stock drawn | Ready |
 | 05 | `05-sales-history.md` | Bar/kitchen sales list, sale details, collecting unpaid sales | Ready |
-| 06 | `06-shared-devices.md` | Shared tablets, PIN switching, auto-lock, device removal | Ready |
+| 06 | `06-shared-devices.md` | Shared tablets, PIN switching, auto-lock, device removal; PIN test staff with known PINs (QA PIN Bar, QA PIN Front, QA PIN Kitchen, 18 Nov 2026; the older documented PINs are not reliable) | Ready |
 | 07 | `07-roles-permissions.md` | Giving, changing, pausing and removing roles | Ready |
 | 08 | `08-inventory-stores.md` | Stores, requests, purchase orders, deliveries, counts | Ready |
 | 09 | `09-laundry-maintenance.md` | Work orders, out-of-order rooms, guest laundry, linen | Ready |
@@ -66,6 +66,7 @@ allow-listed number 09035911994, so sign-up and phone codes for any other number
 | 50 | `50-screen-and-access-fixes.md` | Lounge run fixes: Manager → Departments from real data (board, rota, clock, open work; only the teams the hotel runs; bar orders on the Bar card), onboarding People level choice (staff Can edit, managers Full) and the bar person's price change approved/declined by the manager, price fields replace the prefilled amount and ask above 10×, Category required with inline add, 1 seat, item vs drink, room service only with rooms, account manager's name, no-rooms handover line | Ready |
 | 51 | `51-email-whatsapp-sms.md` | Messaging end to end: Connection checks, staff emails (temporary password, invite, reset), guest emails with Guest messages on (confirmation, receipt, stay summary, message), the four WhatsApp templates to the allow-listed number with Infobip's report, SMS only for the phone code (OE Alert, exact text), a hotel with a bad saved email still sends (Reply-To skipped) | Ready |
 | 52 | `52-messaging-fixes.md` | Fixes from the 18 Nov messaging audit: WhatsApp only where an approved template exists (no WhatsApp stay summary at check-out, no WhatsApp choice for folio, typed guest or staff messages, *Skipped* not *Failed*), receipts really go on WhatsApp to a phone-only guest, no phone code in identity's log, business and hotel emails must be addresses (staging's three bad ones cleared), Brevo bounce/delivery webhook, Termii reports, last outcomes in Connection checks, handover acceptance tells the account manager, super admins and owner | Ready |
+| 53 | `53-default-stores.md` | Default stores for a new hotel: onboarding's Hotels step (and an owner adding a hotel) gives it Main, Kitchen, Bar and Housekeeping stores, only when it has none (older hotels untouched); Add outlet starts on the store of its kind (kitchen/restaurant → Kitchen store, bar → Bar store) and follows the kind until one is picked by hand | Ready |
 
 ## Before you start
 
