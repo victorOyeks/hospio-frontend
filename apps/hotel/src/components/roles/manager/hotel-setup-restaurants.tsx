@@ -72,6 +72,15 @@ export function RestaurantsSection({
 	const [table, setTable] = useState<TableDraft | null>(null);
 	const { run, pending } = useAction();
 	const storeName = (id?: string) => stores.find((s) => s.id === id)?.name;
+	/** A new outlet starts on the store of its kind (a kitchen or restaurant the Kitchen store, a bar the Bar store; else the Main store). */
+	const storeFor = (kind: OutletKind) => {
+		const want = kind === "BAR" ? "BAR" : "KITCHEN";
+		return (
+			stores.find((s) => s.kind === want)?.id ??
+			stores.find((s) => s.kind === "MAIN")?.id ??
+			""
+		);
+	};
 	const terminalName = (id?: string) =>
 		terminals.find((t) => t.id === id)?.name;
 
@@ -154,7 +163,7 @@ export function RestaurantsSection({
 							setOutlet({
 							name: "",
 							kind: "KITCHEN",
-							storeId: "",
+							storeId: storeFor("KITCHEN"),
 							terminalId: ROLE_TERMINAL,
 							open: true,
 						})
@@ -317,7 +326,17 @@ export function RestaurantsSection({
 						<SelectField
 							label="Kind"
 							value={outlet.kind}
-							onChange={(v) => setOutlet({ ...outlet, kind: v as OutletKind })}
+							onChange={(v) => {
+								const kind = v as OutletKind;
+								// A new outlet still on its kind's store follows the kind; a store picked by hand stays.
+								const follows =
+									!outlet.id && outlet.storeId === storeFor(outlet.kind);
+								setOutlet({
+									...outlet,
+									kind,
+									storeId: follows ? storeFor(kind) : outlet.storeId,
+								});
+							}}
 							options={KINDS}
 						/>
 						<SelectField
