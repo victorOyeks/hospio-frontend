@@ -35,10 +35,10 @@ const levels = [
 ];
 
 const log = [
-	{ time: "2:41pm", who: "Victor Eze", what: "Took payment · ₦52,200 · card" },
+	{ time: "2:41pm", who: "Tosin Adewole", what: "Took payment · ₦52,200 · card" },
 	{
 		time: "1:12pm",
-		who: "Tunde Bakare",
+		who: "Dotun Alabede",
 		what: "Approved discount · folio F-7015",
 	},
 	{

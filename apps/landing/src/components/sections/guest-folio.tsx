@@ -127,7 +127,7 @@ function FolioMock() {
 			<div className="flex flex-wrap items-center justify-between gap-3 p-4 sm:p-6">
 				<div className="flex flex-col gap-1">
 					<p className="text-[18px] font-bold text-ink">
-						Folio A · Chidinma Obi
+						Folio A · Ogechi Nnadozie
 					</p>
 					<p className="text-[13px] text-ink-2">
 						A214 Deluxe · 27 Sep → 1 Oct · 4 nights

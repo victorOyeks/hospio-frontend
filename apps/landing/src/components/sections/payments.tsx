@@ -97,7 +97,7 @@ function TakePaymentMock() {
 				<div className="flex flex-col gap-1">
 					<p className="text-[20px] font-bold text-ink">Take payment</p>
 					<p className="text-[13px] text-ink-2">
-						Chidinma Obi · Folio A · A214
+						Ogechi Nnadozie · Folio A · A214
 					</p>
 				</div>
 				<XIcon className="size-5 shrink-0 text-ink" />

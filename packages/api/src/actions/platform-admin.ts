@@ -162,8 +162,8 @@ export async function generateStatements(input: {
 				created: 3,
 				skipped: 2,
 				notes: [
-					"Royal Suites Ltd already had a statement",
-					"Eko Garden Hotels already had a statement",
+					"Ivory Court Hotels Ltd already had a statement",
+					"Ferncrest Hotels already had a statement",
 				],
 			},
 		};

@@ -90,7 +90,7 @@ const hasFigures = (h: OwnerHotelRow) =>
 	h.revenueMonth > 0 || h.expensesMonth > 0;
 const initialsOf = (name: string) =>
 	name
-		.replace(/^Simpas /, "")
+		.replace(/^(Simpas|Ivory Court) /, "")
 		.slice(0, 2)
 		.toUpperCase();
 
@@ -833,7 +833,7 @@ export function AddHotelWizard({
 									label="Hotel name"
 									value={name}
 									onChange={setName}
-									placeholder="e.g. Simpas Yaba"
+									placeholder="e.g. Ivory Court Yaba"
 									required
 								/>
 								<FieldRow>
@@ -877,7 +877,7 @@ export function AddHotelWizard({
 										type="email"
 										value={email}
 										onChange={setEmail}
-										placeholder="yaba@simpashotels.com"
+										placeholder="yaba@ivorycourt.example.ng"
 									/>
 								</FieldRow>
 								<FieldRow>
@@ -948,7 +948,7 @@ export function AddHotelWizard({
 												type="email"
 												value={managerEmail}
 												onChange={setManagerEmail}
-												placeholder="name@simpashotels.com"
+												placeholder="name@ivorycourt.example.ng"
 												required
 											/>
 											<TextField

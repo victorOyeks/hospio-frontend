@@ -35,8 +35,8 @@ const themes: Theme[] = [
 
 const rail = ["Today", "Rooms", "Guests", "Till"];
 const arrivals = [
-	{ name: "Adebayo Ogunleye", room: "A204 · Deluxe" },
-	{ name: "Ifeoma Nwachukwu", room: "A302 · Suite" },
+	{ name: "Olusegun Fadipe", room: "A204 · Deluxe" },
+	{ name: "Chinwe Anyanwu", room: "A302 · Suite" },
 ];
 
 export function YourBrand() {
@@ -113,8 +113,8 @@ function TabletPreview({ theme }: { theme: Theme }) {
 				))}
 			</div>
 			<div className="flex min-w-0 flex-1 flex-col gap-[14px] p-4 sm:p-5">
-				<p className="text-[18px] font-bold text-ink">Good morning, Victor</p>
-				<p className="-mt-2 text-xs text-ink-2">Front desk · Simpas Ikeja</p>
+				<p className="text-[18px] font-bold text-ink">Good morning, Tosin</p>
+				<p className="-mt-2 text-xs text-ink-2">Front desk · Ivory Court Ikeja</p>
 				<div className="flex flex-col gap-[10px] rounded-[14px] border border-line bg-card p-[14px]">
 					<p className="text-[13px] font-bold text-ink">Arriving today</p>
 					{arrivals.map((a) => (

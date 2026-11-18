@@ -238,7 +238,7 @@ export function BusinessStep({
 							label="Trading name (what guests see)"
 							value={form.name}
 							onChange={(v) => set("name", v)}
-							placeholder="Simpas Hotels"
+							placeholder="Ivory Court Hotels"
 							required
 							error={errors.name}
 						/>
@@ -246,7 +246,7 @@ export function BusinessStep({
 							label="Registered company name"
 							value={form.legalName}
 							onChange={(v) => set("legalName", v)}
-							placeholder="Royal Suites Ltd"
+							placeholder="Ivory Court Hotels Ltd"
 							error={errors.legalName}
 							hint="Optional"
 						/>
@@ -296,7 +296,7 @@ export function BusinessStep({
 							type="email"
 							value={form.email}
 							onChange={(v) => set("email", v)}
-							placeholder="hello@simpashotels.com"
+							placeholder="hello@ivorycourt.example.ng"
 							required
 							error={errors.email}
 							hint="On receipts and invoices"

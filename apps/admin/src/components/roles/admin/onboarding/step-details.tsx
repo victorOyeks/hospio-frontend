@@ -235,7 +235,7 @@ export function BusinessStep({ ctx }: { ctx: WizardCtx }) {
 						label="Trading name"
 						value={name}
 						onChange={edit(setName, "name")}
-						placeholder="e.g. Abuja Palms"
+						placeholder="e.g. Zuma Heights"
 						required
 						error={errors.name}
 					/>
@@ -243,7 +243,7 @@ export function BusinessStep({ ctx }: { ctx: WizardCtx }) {
 						label="Registered name"
 						value={legalName}
 						onChange={edit(setLegalName, "legalName")}
-						placeholder="e.g. Abuja Palms Hotels Ltd"
+						placeholder="e.g. Zuma Heights Hotels Ltd"
 						hint="As on the CAC certificate"
 						error={errors.legalName}
 					/>
@@ -299,7 +299,7 @@ export function BusinessStep({ ctx }: { ctx: WizardCtx }) {
 						type="email"
 						value={email}
 						onChange={edit(setEmail, "email")}
-						placeholder="e.g. accounts@abujapalms.ng"
+						placeholder="e.g. accounts@zumaheights.example.ng"
 						error={errors.email}
 					/>
 					<TextField
@@ -407,7 +407,7 @@ export function OwnerStep({ ctx }: { ctx: WizardCtx }) {
 					label="Full name"
 					value={ownerName}
 					onChange={edit(setOwnerName, "ownerName")}
-					placeholder="e.g. Musa Danladi"
+					placeholder="e.g. Haruna Dauda"
 					required
 					error={errors.ownerName}
 				/>
@@ -417,7 +417,7 @@ export function OwnerStep({ ctx }: { ctx: WizardCtx }) {
 						type="email"
 						value={ownerEmail}
 						onChange={edit(setOwnerEmail, "ownerEmail")}
-						placeholder="e.g. musa@abujapalms.ng"
+						placeholder="e.g. haruna@zumaheights.example.ng"
 						required
 						error={errors.ownerEmail}
 					/>
@@ -444,7 +444,7 @@ export function OwnerStep({ ctx }: { ctx: WizardCtx }) {
 					label="Full name"
 					value={contactName}
 					onChange={edit(setContactName, "contactName")}
-					placeholder="e.g. Hauwa Danladi"
+					placeholder="e.g. Hadiza Jibrin"
 					error={errors.contactName}
 				/>
 				<FieldRow>
@@ -453,7 +453,7 @@ export function OwnerStep({ ctx }: { ctx: WizardCtx }) {
 						type="email"
 						value={contactEmail}
 						onChange={edit(setContactEmail, "contactEmail")}
-						placeholder="e.g. hauwa@abujapalms.ng"
+						placeholder="e.g. hadiza@zumaheights.example.ng"
 						error={errors.contactEmail}
 					/>
 					<TextField

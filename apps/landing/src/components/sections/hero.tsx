@@ -59,7 +59,7 @@ const worthALook: {
 	{
 		icon: TriangleAlertIcon,
 		iconTone: "red",
-		title: "Simpas Yaba is losing money",
+		title: "Ivory Court Yaba is losing money",
 		detail: "−₦19.5M this month · occupancy only 41%",
 		tag: "Financials",
 		tagTone: "red",
@@ -91,12 +91,12 @@ const worthALook: {
 ];
 
 const branches = [
-	{ name: "Simpas V.I.", pct: 90, value: "₦110M" },
-	{ name: "Simpas Ikoyi", pct: 80, value: "₦88.5M" },
-	{ name: "Simpas Ajah", pct: 72, value: "₦78.0M" },
-	{ name: "Simpas Ikeja", pct: 66, value: "₦67.5M" },
-	{ name: "Simpas Lekki Phase 1", pct: 50, value: "₦52.5M" },
-	{ name: "Simpas Yaba", pct: 8, value: "−₦19.5M", negative: true },
+	{ name: "Ivory Court V.I.", pct: 90, value: "₦110M" },
+	{ name: "Ivory Court Ikoyi", pct: 80, value: "₦88.5M" },
+	{ name: "Ivory Court Ajah", pct: 72, value: "₦78.0M" },
+	{ name: "Ivory Court Ikeja", pct: 66, value: "₦67.5M" },
+	{ name: "Ivory Court Lekki Phase 1", pct: 50, value: "₦52.5M" },
+	{ name: "Ivory Court Yaba", pct: 8, value: "−₦19.5M", negative: true },
 ];
 
 export function Hero() {
@@ -205,10 +205,10 @@ function OwnerDashboardShot() {
 				<div className="flex flex-wrap items-start justify-between gap-3">
 					<div className="flex flex-col gap-1">
 						<p className="text-[20px] font-bold text-ink sm:text-[24px]">
-							Good morning, Godwin
+							Good morning, Kayode
 						</p>
 						<p className="text-[13px] text-ink-2">
-							Royal Suites Ltd · 10 hotels · 1,130 rooms · Tuesday, 30 Sep
+							Ivory Court Hotels Ltd · 10 hotels · 1,130 rooms · Tuesday, 30 Sep
 						</p>
 					</div>
 					<div className="flex flex-wrap items-center gap-[10px]">

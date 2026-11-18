@@ -898,8 +898,8 @@ function TemplatesTable({
 }
 
 const SAMPLE: Record<string, string> = {
-	guest: "Ifeoma Okafor",
-	first_name: "Ifeoma",
+	guest: "Chinwe Anyanwu",
+	first_name: "Chinwe",
 	room: "A325",
 	room_type: "Deluxe",
 	check_in: "Sat 14 Nov 2026",

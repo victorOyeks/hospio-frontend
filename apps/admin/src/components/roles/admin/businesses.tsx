@@ -404,7 +404,7 @@ export function NewBusinessPanel({
 						label="Owner's full name"
 						value={owner}
 						onChange={edit(setOwner, "owner")}
-						placeholder="e.g. Musa Danladi"
+						placeholder="e.g. Haruna Dauda"
 						required
 						error={errors.owner}
 					/>
@@ -433,7 +433,7 @@ export function NewBusinessPanel({
 						label="Business name"
 						value={name}
 						onChange={edit(setName, "name")}
-						placeholder="e.g. Abuja Palms Hotels Ltd"
+						placeholder="e.g. Zuma Heights Hotels Ltd"
 						required
 						error={errors.name}
 					/>

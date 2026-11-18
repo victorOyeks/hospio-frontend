@@ -540,7 +540,7 @@ const demoStatements: FeeStatementItem[] = platform.demoFeeStatements.map(
 							amount: f.paid,
 							paidOn: `${f.month}-04`,
 							reference: "Bank transfer",
-							recordedBy: "Bode Fashola",
+							recordedBy: "Gbolahan Ajose",
 						},
 					]
 				: [],
@@ -745,7 +745,7 @@ const demoTeam: TeamMemberRow[] = platform.demoAdminUsers.map((u) => ({
 	mustChangePassword: false,
 }));
 
-/** The demo marketer: whoever signs in walks through Kunle Oshodi's portal. */
+/** The demo marketer: whoever signs in walks through Olumide Ogunmola's portal. */
 const demoMe = demoMarketers[0];
 
 // Demo statements: a few days of collected fees per business, each line at the marketer's share less 5% WHT.
@@ -865,20 +865,20 @@ function demoStatement(
 	};
 }
 const demoStatementSet = (() => {
-	const [kunle, amaka] = demoMarketers;
+	const [olumide, adanna] = demoMarketers;
 	const last = demoMonth(1);
 	const before = demoMonth(2);
-	const kunleBiz = [
-		{ name: "Royal Suites Ltd", fee: 15800 },
-		{ name: "Eko Garden Hotels", fee: 4800 },
+	const olumideBiz = [
+		{ name: "Ivory Court Hotels Ltd", fee: 15800 },
+		{ name: "Ferncrest Hotels", fee: 4800 },
 	];
 	return [
 		demoStatement(
 			"st-1",
-			kunle,
+			olumide,
 			last,
-			demoLines(last, kunleBiz, kunle.sharePct, "ON_STATEMENT", {
-				name: "Eko Garden Hotels",
+			demoLines(last, olumideBiz, olumide.sharePct, "ON_STATEMENT", {
+				name: "Ferncrest Hotels",
 				amount: 2400,
 			}),
 			"DRAFT",
@@ -890,26 +890,26 @@ const demoStatementSet = (() => {
 		),
 		demoStatement(
 			"st-2",
-			kunle,
+			olumide,
 			before,
-			demoLines(before, kunleBiz, kunle.sharePct, "PAID"),
+			demoLines(before, olumideBiz, olumide.sharePct, "PAID"),
 			"PAID",
 			{
 				approvedAt: `${demoMonth(1)}-12T10:00:00Z`,
-				approvedByName: "Ngozi Umeh",
+				approvedByName: "Chiamaka Ugwoke",
 				paidReference: "GTB-778120",
 				paidOn: `${demoMonth(1)}-14`,
-				paidRecordedName: "Ngozi Umeh",
+				paidRecordedName: "Chiamaka Ugwoke",
 			},
 		),
 		demoStatement(
 			"st-3",
-			amaka,
+			adanna,
 			last,
 			demoLines(
 				last,
-				[{ name: "Pearl Inn Enugu", fee: 1100 }],
-				amaka.sharePct,
+				[{ name: "Coalcrest Inn Enugu", fee: 1100 }],
+				adanna.sharePct,
 				"ON_STATEMENT",
 			),
 			"CARRIED_OVER",
@@ -947,8 +947,8 @@ const demoStatementDetail = (id: string): MarketerStatementDetail | null => {
 const demoNextStatement = demoLines(
 	demoMonth(0),
 	[
-		{ name: "Royal Suites Ltd", fee: 16200 },
-		{ name: "Eko Garden Hotels", fee: 5100 },
+		{ name: "Ivory Court Hotels Ltd", fee: 16200 },
+		{ name: "Ferncrest Hotels", fee: 5100 },
 	],
 	demoMe.sharePct,
 	"ACCRUED",
@@ -1661,7 +1661,7 @@ export const adminData = {
 						agreementAcceptedName: demoMe.fullName,
 						agreementAccepted: true,
 						bankCheckedAt: "2026-11-03T10:00:00Z",
-						bankCheckedByName: "Ngozi Umeh",
+						bankCheckedByName: "Chiamaka Ugwoke",
 						bankChecked: true,
 					},
 					totals: {

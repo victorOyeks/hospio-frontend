@@ -80,7 +80,7 @@ export function MarketerRefer({
 							label="Hotel or business name"
 							value={hotel}
 							onChange={setHotel}
-							placeholder="Lagoon Breeze Suites"
+							placeholder="Mangrove Point Suites"
 							required
 						/>
 						<TextField
@@ -95,7 +95,7 @@ export function MarketerRefer({
 							label="Owner's name"
 							value={owner}
 							onChange={setOwner}
-							placeholder="Mr Dele Oni"
+							placeholder="Mr Sola Ilori"
 						/>
 						<TextField
 							label="Phone (WhatsApp)"

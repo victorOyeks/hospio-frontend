@@ -382,7 +382,7 @@ function HotelForm({
 					label="Name"
 					value={name}
 					onChange={edit(setName, "name")}
-					placeholder="e.g. Abuja Palms Wuse"
+					placeholder="e.g. Zuma Heights Wuse"
 					required
 					error={errors.name}
 				/>
@@ -418,7 +418,7 @@ function HotelForm({
 						type="email"
 						value={email}
 						onChange={edit(setEmail, "email")}
-						placeholder="e.g. wuse@abujapalms.ng"
+						placeholder="e.g. wuse@zumaheights.example.ng"
 						error={errors.email}
 					/>
 				</FieldRow>

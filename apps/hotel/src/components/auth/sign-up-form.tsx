@@ -198,7 +198,7 @@ export function SignUpForm({
 								<Input
 									{...field}
 									autoComplete="name"
-									placeholder="Godwin Kwin"
+									placeholder="Kayode Ashiru"
 									className={input}
 								/>
 							</FormControl>
@@ -217,7 +217,7 @@ export function SignUpForm({
 									{...field}
 									type="email"
 									autoComplete="email"
-									placeholder="godwin@royalsuites.ng"
+									placeholder="kayode@ivorycourt.example.ng"
 									className={input}
 								/>
 							</FormControl>
@@ -292,7 +292,7 @@ export function SignUpForm({
 									<Input
 										{...field}
 										autoComplete="organization"
-										placeholder="Royal Suites Ltd"
+										placeholder="Ivory Court Hotels Ltd"
 										className={input}
 									/>
 								</FormControl>
