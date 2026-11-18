@@ -15,6 +15,7 @@ import {
 	ClipboardListIcon,
 	CoinsIcon,
 	CreditCardIcon,
+	FileTextIcon,
 	FolderIcon,
 	HandshakeIcon,
 	HeadsetIcon,
@@ -80,6 +81,7 @@ export const managerLinks: NavLink[] = [
 	{ title: "Financials", url: "/dashboard/financials", icon: BarChart3Icon },
 	{ title: "Payments", url: "/dashboard/payments", icon: CreditCardIcon },
 	{ title: "Hospio fees", url: "/dashboard/hospio-fees", icon: ReceiptIcon },
+	{ title: "Billing & invoices", url: "/dashboard/billing", icon: FileTextIcon },
 	{
 		title: "Organizations",
 		url: "/dashboard/organizations",
@@ -111,6 +113,7 @@ export const ownerLinks: NavLink[] = [
 	{ title: "Financials", url: "/dashboard/financials", icon: BarChart3Icon },
 	{ title: "Payments", url: "/dashboard/payments", icon: WalletIcon },
 	{ title: "Hospio fees", url: "/dashboard/hospio-fees", icon: ReceiptIcon },
+	{ title: "Billing & invoices", url: "/dashboard/billing", icon: FileTextIcon },
 	{ title: "Reports", url: "/dashboard/reports", icon: FolderIcon },
 	{ title: "Users", url: "/dashboard/users", icon: UsersIcon },
 	{
