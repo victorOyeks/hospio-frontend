@@ -44,7 +44,10 @@ const input =
 	"h-auto rounded-control border-line px-[14px] py-3 text-sm focus-visible:border-brand focus-visible:ring-0";
 const label = "text-[13px] font-medium text-ink-2";
 
-/** Set up your account (Figma 3167:16201): who the invite is for, then a password; accepting signs them in. */
+/**
+ * Set up your account (Figma 3167:16201): who the invite is for, then a password; accepting signs them in.
+ * Both apps use it: /dashboard then lands on the role's home (a marketer on /marketer, platform staff on /admin).
+ */
 export function AcceptInviteForm({
 	token,
 	invite,
@@ -101,7 +104,11 @@ export function AcceptInviteForm({
 						<p className="text-xs text-ink-3">
 							{invite.hotelName
 								? "More hotels can be added to your account later"
-								: "Business-wide access"}
+								: invite.role === "MARKETER"
+									? "The Hospio360 marketer portal"
+									: invite.businessName
+										? "Business-wide access"
+										: "The Hospio360 admin portal"}
 						</p>
 					</div>
 				</div>
