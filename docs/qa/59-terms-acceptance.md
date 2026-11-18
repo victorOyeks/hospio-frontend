@@ -6,7 +6,8 @@ Customers accept the Hospio360 terms **online by ticking boxes**; every acceptan
 
 - **Owners** tick two boxes: (1) "I agree to the Terms of Service, Privacy Policy and Data Processing Terms on behalf of my business";
   (2) "I authorise Hospio360 (a product of Oyeks Global Limited) to debit 1.5% of my business's daily sales from my business account
-  each day at 06:00". At **self sign-up**, or at the **handover** screen when Hospio360 onboarded them. The admin never ticks for
+  each day at 06:00". The rate in box 2 is **that business's rate**: 1.5% (the platform default) unless it has a signed addendum
+  rate (then e.g. "debit 1.2% …"), and the record keeps the rate shown. At **self sign-up**, or at the **handover** screen when Hospio360 onboarded them. The admin never ticks for
   them: in the handover step the admin records **how the links were shared** (channel + date).
 - **Staff** tick "I agree to the Staff terms of use" at their first sign-in. **Marketers** tick the Referral partner terms.
 - **Device packages**: the owner ticks the Devices & equipment terms (Hospio fees → Devices & internet) before Hospio360 can mark
@@ -35,7 +36,15 @@ those, only check that the modal appears, then sign out.
 1. **Do:** open https://hospio360.com/legal. **Expect:** 8 documents with version and "effective 18 November 2026"; footer has
    a Legal column (Legal, Terms of Service, Privacy Policy, Fees).
 2. **Do:** open Terms of Service. **Expect:** title, version TOS-2026-11, contents, sections, "Oyeks Global Limited (RC 10001123),
-   Lagos, Nigeria · hello@oyeksglobal.com"; no "[ ]" placeholders. https://hospio360.com/terms goes to /legal/terms.
+   registered office 9 Remi Omoniyi Crescent, Ikorodu, Lagos State, Nigeria · hello@oyeksglobal.com"; no "[ ]" placeholders.
+   https://hospio360.com/terms goes to /legal/terms.
+3. **Do:** Terms → 17. Notices. **Expect:** "…by hand or courier to our registered office at 9 Remi Omoniyi Crescent, Ikorodu, Lagos
+   State, Nigeria." (no "full address on request"). The version stays TOS-2026-11 and nobody is asked to accept again (an address
+   is not a material change; the text lives on this site, the version in the platform).
+4. **Do:** Terms → 5.6 and Fees → 4.4. **Expect:** fees for days before automatic debit is switched on are not collected unless
+   agreed in writing.
+5. **Do:** the footer of any page. **Expect:** "9 Remi Omoniyi Crescent, Ikorodu, Lagos State, Nigeria" and **hello@oyeksglobal.com**
+   (also the Contact, Support, demo and pricing links).
 
 ## 2 · Self sign-up
 
@@ -54,6 +63,17 @@ those, only check that the modal appears, then sign out.
 3. **Do (owner):** sign in with the temporary password, choose a password. **Expect:** the handover screen shows the two boxes;
    "Accept and go to my dashboard" stays off until both boxes and the handover box are ticked.
 4. **Do:** tick and accept. **Expect:** dashboard, no modal. Acceptance tab: four rows "Ticked · Handover" by the owner.
+
+## 3b · The debit box states the business's rate
+
+1. **Do (admin):** on a **QA business you created** whose owner hasn't accepted yet, Fee rate → Different rate (signed addendum):
+   1.2%, reference `ADD-QA-1`.
+2. **Do (owner):** sign in (handover screen, or the modal on first sign-in). **Expect:** box 2 reads "…to debit **1.2%** of my
+   business's daily sales…". Tick and accept. Acceptance tab: "Daily debit authority (1.2%)".
+3. **Do:** a business at the default. **Expect:** "1.5%"; `/sign-up` always shows the platform default.
+4. **Expect:** if the rate changes while the box is open, accepting is refused ("Your business's daily fee is …% of daily sales,
+   not …%. Reload the page and read it") and nothing is recorded.
+5. **Do (admin):** put the QA business back to 1.5%.
 
 ## 4 · Staff first sign-in
 

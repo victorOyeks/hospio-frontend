@@ -71,7 +71,7 @@ const schema = z.object({
 		.optional(),
 	// The two required boxes (hospio-backend docs/legal-acceptance.md).
 	acceptTerms: z.boolean().refine((v) => v, "Tick this box to agree to the Terms, Privacy Policy and Data Processing Terms"),
-	acceptDebit: z.boolean().refine((v) => v, "Tick this box to authorise the daily 1.5% debit"),
+	acceptDebit: z.boolean().refine((v) => v, "Tick this box to authorise the daily debit"),
 });
 
 /** The referral code's check (GET /platform/public/referral-codes/{code}): who referred them, or why it doesn't work. */
@@ -89,7 +89,14 @@ const label = "text-[13px] font-medium text-ink-2";
  * Create your hotel account (Figma 3163:16114): the owner's details and the business they own, and the referral code of
  * the marketer who sent them (prefilled from `?ref=`, optional).
  */
-export function SignUpForm({ referralCode = "" }: { referralCode?: string }) {
+export function SignUpForm({
+	referralCode = "",
+	debitRatePct,
+}: {
+	referralCode?: string;
+	/** The platform default rate the debit box states (public legal documents, DEBIT); 1.5 when unknown. */
+	debitRatePct?: number | null;
+}) {
 	const router = useRouter();
 	const [show, setShow] = useState(false);
 	const [pending, startTransition] = useTransition();
@@ -381,7 +388,7 @@ export function SignUpForm({ referralCode = "" }: { referralCode?: string }) {
 					render={({ field }) => (
 						<FormItem className="gap-[6px]">
 							<TickBox id="debit" checked={field.value} onChange={field.onChange}>
-								<DebitLabel />
+								<DebitLabel ratePct={debitRatePct} />
 							</TickBox>
 							<FormMessage />
 						</FormItem>

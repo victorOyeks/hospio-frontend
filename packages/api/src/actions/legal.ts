@@ -45,7 +45,7 @@ export async function loadLegalDocuments(): Promise<LegalDoc[]> {
 
 /** Accept the given versions: `method` SELF_SIGN_UP (sign-up), HANDOVER (handover review) or PORTAL (marketer); else the server decides. */
 export async function acceptLegal(input: {
-	documents: { key: string; version: string }[];
+	documents: { key: string; version: string; ratePct?: number }[];
 	method?: "SELF_SIGN_UP" | "HANDOVER" | "PORTAL";
 }): Promise<ActionResult<MyLegal>> {
 	const parsed = AcceptLegalInput.safeParse(input);

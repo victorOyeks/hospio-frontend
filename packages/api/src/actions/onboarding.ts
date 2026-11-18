@@ -2,6 +2,7 @@
 
 import { clientAgentHeaders, clientMetaHeaders } from "@hospio/api/client-agent";
 import { loadLegalDocuments } from "@hospio/api/actions/legal";
+import { acceptItem } from "@hospio/api/api/routes-legal";
 import { askForPin } from "@hospio/api/device";
 import { revalidatePath } from "next/cache";
 import { cookies } from "next/headers";
@@ -72,7 +73,7 @@ export type SignUpInput = {
 	city?: string;
 	/** The marketer's code from the sign-up link (?ref=); identity refuses an unknown or inactive one. */
 	referralCode?: string;
-	/** The two required boxes: Terms, Privacy Policy and Data Processing Terms; the 1.5% daily debit authority. */
+	/** The two required boxes: Terms, Privacy Policy and Data Processing Terms; the daily debit authority (platform default rate). */
 	acceptTerms: boolean;
 	acceptDebit: boolean;
 };
@@ -85,7 +86,7 @@ async function recordSignUpAcceptance(token: string) {
 	await api("@post/platform/legal/accept", {
 		auth: { type: "Bearer", token },
 		headers: await clientMetaHeaders(),
-		body: { documents: owner.map((d) => ({ key: d.key, version: d.version })), method: "SELF_SIGN_UP" },
+		body: { documents: owner.map(acceptItem), method: "SELF_SIGN_UP" },
 	});
 }
 
