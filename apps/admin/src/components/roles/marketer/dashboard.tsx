@@ -5,9 +5,13 @@ import {
 	CalendarIcon,
 	CoinsIcon,
 	MegaphoneIcon,
+	RotateCwIcon,
+	Share2Icon,
 	WalletIcon,
 } from "lucide-react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 import type {
 	CommissionLine,
 	MarketerBusinessItem,
@@ -27,12 +31,24 @@ import { SectionCard } from "@hospio/ui/shared/section-card";
 import { StatusPill } from "@hospio/ui/shared/status-pill";
 import { btn } from "@hospio/ui/shared/ui";
 import { cn } from "@hospio/ui/utils";
-import { monthsLeft, ReferralLinkBox, stageLabel, stageTone } from "./shared";
+import { AgreementCard, acceptedLine } from "./agreement";
+import { BankDetailsCard } from "./bank";
+import {
+	byStageLine,
+	earningLine,
+	ReferralLinkBox,
+	stageLabel,
+	stageTone,
+	whatsappShare,
+} from "./shared";
 
-/** Marketer — F2 · My dashboard: GET /platform/marketer/me, /businesses, /commissions, /referrals. */
+/**
+ * Marketer — F2 · My dashboard: GET /platform/marketer/me, /businesses, /commissions, /referrals. Until the Referral
+ * Partner Agreement is accepted the agreement card replaces the referral link.
+ */
 export function MarketerDashboard({
 	firstName,
-	me,
+	me: initialMe,
 	businesses,
 	ledger,
 	referrals,
@@ -43,13 +59,12 @@ export function MarketerDashboard({
 	ledger: CommissionLine[];
 	referrals: ReferralItem[];
 }) {
+	const router = useRouter();
+	const [me, setMe] = useState(initialMe);
+	useEffect(() => setMe(initialMe), [initialMe]);
 	const p = me.profile;
-	const dueNow = ledger
-		.filter((c) => c.status === "DUE")
-		.reduce((a, c) => a + c.net, 0);
-	const waiting = ledger
-		.filter((c) => c.status === "WAITING")
-		.reduce((a, c) => a + c.net, 0);
+	const accepted = me.agreementAccepted;
+	const stages = byStageLine(me.totals.byStage);
 	const months = [...new Set(ledger.map((c) => c.month))].sort().slice(-6);
 	const byMonth = months.map((m) => ({
 		month: m,
@@ -64,52 +79,66 @@ export function MarketerDashboard({
 		<>
 			<PageHeader
 				title={`Hello ${firstName}`}
-				subtitle={`Marketer since ${fmtLongDate(p.joined)} · you earn ${p.sharePct}% of the Hospio360 share for ${p.months} months on every business you bring${p.status === "PENDING" ? " · your account is waiting for approval" : ""}`}
+				subtitle={`Marketer since ${fmtLongDate(p.joined)} · you earn ${p.sharePct}% of the Hospio360 platform fee collected from each business you refer, for ${p.months} months from its first collected fee${p.status === "PENDING" ? " · your account is waiting for approval" : ""}`}
 			>
-				<Link
-					href="/dashboard/refer"
-					className={cn(btn.primary, "flex items-center gap-2")}
-				>
-					<MegaphoneIcon className="size-4" /> Refer a hotel
-				</Link>
+				{accepted && (
+					<Link
+						href="/dashboard/refer"
+						className={cn(btn.primary, "flex items-center gap-2")}
+					>
+						<MegaphoneIcon className="size-4" /> Refer a hotel
+					</Link>
+				)}
 			</PageHeader>
+
+			{!accepted && (
+				<AgreementCard
+					me={me}
+					onAccepted={(profile) => {
+						setMe({ ...me, profile, agreementAccepted: true });
+						router.refresh();
+					}}
+				/>
+			)}
 
 			<div className="grid grid-cols-2 gap-4 md:grid-cols-4">
 				<KpiCard
-					label="Businesses you brought"
+					label="Businesses referred"
 					value={me.totals.businesses}
 					icon={BuildingIcon}
-					hint={`${businesses.reduce((a, b) => a + b.hotels, 0)} hotels`}
+					hint={stages || "Every business that named you, at any stage"}
 				/>
 				<KpiCard
-					label="Due to you now"
-					value={nairaShort(me.totals.due || dueNow)}
-					icon={CoinsIcon}
-					pill={
-						(me.totals.due || dueNow) > 0 ? (
-							<StatusPill tone="warning">next payout 5th</StatusPill>
-						) : undefined
-					}
-					hint="After 5% WHT"
-				/>
-				<KpiCard
-					label="Waiting on hotels"
-					value={nairaShort(waiting)}
+					label="Next statement so far"
+					value={nairaShort(me.totals.nextStatement)}
 					icon={CalendarIcon}
-					hint={waiting > 0 ? "Paid once they pay Hospio360" : "Nothing waiting"}
+					hint={`After ${me.whtPct}% WHT · statement on the 5th`}
 				/>
 				<KpiCard
-					label="Paid to you so far"
+					label="Due to you"
+					value={nairaShort(me.totals.due)}
+					icon={CoinsIcon}
+					hint="Approved statements are paid by the 15th"
+				/>
+				<KpiCard
+					label="Paid so far"
 					value={nairaShort(me.totals.paid)}
 					icon={WalletIcon}
 					hint={`Earned ${nairaShort(me.totals.earnedTotal)} since ${fmtLongDate(p.joined)}`}
 				/>
 			</div>
+			{me.totals.carried > 0 && (
+				<p className="flex items-center gap-2 text-[13px] text-ink-2">
+					<RotateCwIcon className="size-4 text-ink-3" />
+					{naira(me.totals.carried)} carried over: statements under{" "}
+					{naira(me.minimumPayout)} roll into your next statement.
+				</p>
+			)}
 
 			<div className="grid gap-4 xl:grid-cols-[1fr_420px]">
 				<SectionCard
 					title="Your businesses"
-					subtitle={`Each one pays you for ${p.months} months from the month it went live`}
+					subtitle={`Each one earns you ${p.sharePct}% of the fee collected for ${p.months} months from its first collected fee`}
 					action={{ label: "All", href: "/dashboard/businesses" }}
 				>
 					{businesses.length === 0 ? (
@@ -120,7 +149,6 @@ export function MarketerDashboard({
 					) : (
 						<ul>
 							{businesses.map((b, i) => {
-								const left = monthsLeft(b.since, p.months);
 								return (
 									<li
 										key={b.id}
@@ -135,16 +163,14 @@ export function MarketerDashboard({
 											</p>
 											<p className="text-xs text-ink-3">
 												{plural(b.hotels, "hotel")} · {b.city || "—"} ·{" "}
-												{left > 0
-													? `your share ends in ${plural(left, "month")}`
-													: "share ended"}
+												{earningLine(b, p.months)}
 											</p>
 										</div>
 										<span className="text-[13px] font-semibold text-ink">
-											{naira(b.lastMonthShare)}
+											{naira(b.earnedNet)}
 											<span className="text-xs font-normal text-ink-3">
 												{" "}
-												{b.lastMonth ? `· ${b.lastMonth}` : "/ month"}
+												earned
 											</span>
 										</span>
 										<StatusPill tone={stageTone[b.stage] ?? "grey"}>
@@ -157,32 +183,62 @@ export function MarketerDashboard({
 					)}
 				</SectionCard>
 
-				<SectionCard
-					title="Refer a new business"
-					subtitle="Share your link or add their details — we contact them and set them up"
-					bodyClassName="gap-3 pt-2"
-				>
-					<ReferralLinkBox me={p} />
-					<Link href="/dashboard/refer" className={cn(btn.primary, "w-fit")}>
-						Refer a hotel
-					</Link>
-					<p className="text-xs text-ink-3">
-						{plural(inProgress, "referral")} in progress · {referrals.length}{" "}
-						sent in all
-					</p>
-				</SectionCard>
+				<div className="flex flex-col gap-4">
+					<SectionCard
+						title="Refer a new business"
+						subtitle="Share your link or add their details — we contact them and set them up"
+						bodyClassName="gap-3 pt-2"
+					>
+						{accepted ? (
+							<>
+								<ReferralLinkBox me={p} />
+								<div className="flex flex-wrap gap-2">
+									<Link
+										href="/dashboard/refer"
+										className={cn(btn.primary, "w-fit")}
+									>
+										Refer a hotel
+									</Link>
+									<a
+										href={whatsappShare(p)}
+										target="_blank"
+										rel="noreferrer"
+										className={cn(btn.secondary, "flex w-fit items-center gap-2")}
+									>
+										<Share2Icon className="size-4" /> Share on WhatsApp
+									</a>
+								</div>
+								<p className="text-xs text-ink-3">
+									Agreement {acceptedLine(p, me.currentAgreementVersion)}
+								</p>
+							</>
+						) : (
+							<p className="rounded-control bg-subtle px-3 py-[10px] text-[13px] text-ink-2">
+								Accept the agreement to get your referral link.
+							</p>
+						)}
+						<p className="text-xs text-ink-3">
+							{plural(inProgress, "referral")} in progress · {referrals.length}{" "}
+							sent in all
+						</p>
+					</SectionCard>
+					<BankDetailsCard
+						profile={p}
+						onSaved={(profile) => setMe({ ...me, profile })}
+					/>
+				</div>
 			</div>
 
 			<SectionCard
 				title="What you earned"
-				subtitle="Net after 5% WHT, by month"
+				subtitle={`Net after ${me.whtPct}% WHT, by the month it was earned`}
 				action={{ label: "Commissions", href: "/dashboard/commissions" }}
 				bodyClassName="pt-2"
 			>
 				{byMonth.length === 0 ? (
 					<EmptyState
 						title="Nothing earned yet"
-						hint="Your first commission appears the month a referred hotel pays its fee."
+						hint="Commission starts with the first fee Hospio360 collects from a business you referred."
 					/>
 				) : (
 					<div className="flex h-36 items-end gap-3">

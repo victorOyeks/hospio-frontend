@@ -20,6 +20,7 @@ import { SectionCard } from "@hospio/ui/shared/section-card";
 import { StatusPill } from "@hospio/ui/shared/status-pill";
 import { btn } from "@hospio/ui/shared/ui";
 import { cn } from "@hospio/ui/utils";
+import { AgreementCard, acceptedLine } from "./agreement";
 import {
 	ReferralLinkBox,
 	stageLabel,
@@ -31,7 +32,7 @@ const steps = ["LEAD", "CONTACTED", "ONBOARDING", "LIVE"] as const;
 
 /** Marketer — F3 · Refer a business: POST /platform/marketer/referrals and GET /platform/marketer/referrals a page at a time (`?page=`). */
 export function MarketerRefer({
-	me,
+	me: initialMe,
 	result,
 }: {
 	me: MarketerMeData;
@@ -39,6 +40,8 @@ export function MarketerRefer({
 }) {
 	const router = useRouter();
 	const list = useListParams();
+	const [me, setMe] = useState(initialMe);
+	useEffect(() => setMe(initialMe), [initialMe]);
 	const { run, pending } = useAction();
 	const [referrals, setReferrals] = useState(result.data.content);
 	// A new page from the server replaces what is on screen.
@@ -55,8 +58,17 @@ export function MarketerRefer({
 		<>
 			<PageHeader
 				title="Refer a hotel"
-				subtitle="Tell us who to call, or share your link. We contact them, set them up, and you earn from the month they go live."
+				subtitle="Tell us who to call, or share your link. We contact them and set them up; you earn on the platform fee collected from them."
 			/>
+			{!me.agreementAccepted && (
+				<AgreementCard
+					me={me}
+					onAccepted={(profile) => {
+						setMe({ ...me, profile, agreementAccepted: true });
+						router.refresh();
+					}}
+				/>
+			)}
 			<div className="grid gap-4 xl:grid-cols-[1fr_420px]">
 				<SectionCard
 					title="Their details"
@@ -145,20 +157,30 @@ export function MarketerRefer({
 					subtitle="Anyone who signs up through it is yours"
 					bodyClassName="gap-3 pt-2"
 				>
-					<ReferralLinkBox me={p} />
-					<a
-						href={whatsappShare(p)}
-						target="_blank"
-						rel="noreferrer"
-						className={cn(btn.secondary, "flex w-fit items-center gap-2")}
-					>
-						<Share2Icon className="size-4" /> Share on WhatsApp
-					</a>
-					<p className="text-xs text-ink-3">
-						You earn {p.sharePct}% of the Hospio360 share for {p.months} months on
-						every business that goes live.
-						{p.referralCode ? ` Your code: ${p.referralCode}.` : ""}
-					</p>
+					{me.agreementAccepted ? (
+						<>
+							<ReferralLinkBox me={p} />
+							<a
+								href={whatsappShare(p)}
+								target="_blank"
+								rel="noreferrer"
+								className={cn(btn.secondary, "flex w-fit items-center gap-2")}
+							>
+								<Share2Icon className="size-4" /> Share on WhatsApp
+							</a>
+							<p className="text-xs text-ink-3">
+								You earn {p.sharePct}% of the platform fee collected from each
+								business you refer, for {p.months} months from its first
+								collected fee.
+								{p.referralCode ? ` Your code: ${p.referralCode}.` : ""} Agreement{" "}
+								{acceptedLine(p, me.currentAgreementVersion)}.
+							</p>
+						</>
+					) : (
+						<p className="rounded-control bg-subtle px-3 py-[10px] text-[13px] text-ink-2">
+							Accept the agreement to get your referral link.
+						</p>
+					)}
 				</SectionCard>
 			</div>
 

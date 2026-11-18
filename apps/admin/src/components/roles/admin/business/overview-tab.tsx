@@ -7,6 +7,7 @@ import { fmtAgo, naira, nairaShort } from "@hospio/ui/shared/format";
 import { KpiCard } from "@hospio/ui/shared/kpi-card";
 import { SectionCard } from "@hospio/ui/shared/section-card";
 import { HealthBar } from "../shared";
+import { ReferredByValue } from "./referred-by";
 
 /** "% of daily sales · 1.5%" or "Per room night · ₦500": the fee as one line. */
 export function feeLineOf(business: BusinessRow) {
@@ -19,9 +20,15 @@ export function feeLineOf(business: BusinessRow) {
 export function OverviewTab({
 	business,
 	hotels,
+	editable = false,
+	onBusiness,
 }: {
 	business: BusinessRow;
 	hotels: HotelSummary[];
+	/** Support or Super admin: may change who referred the business. */
+	editable?: boolean;
+	/** The business after a change made here (its new marketer). */
+	onBusiness?: (b: BusinessRow) => void;
 }) {
 	const feeLine = feeLineOf(business);
 	return (
@@ -94,9 +101,16 @@ export function OverviewTab({
 							},
 							{
 								label: "Referred by",
-								value:
-									business.marketer ??
-									(business.marketerId ? "Marketer" : "Direct"),
+								value: (
+									<ReferredByValue
+										businessId={business.id}
+										marketerId={business.marketerId}
+										editable={editable}
+										onChanged={(marketerId) =>
+											onBusiness?.({ ...business, marketerId, marketer: undefined })
+										}
+									/>
+								),
 							},
 							{ label: "Fee", value: feeLine },
 							{

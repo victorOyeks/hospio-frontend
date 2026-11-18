@@ -2,7 +2,9 @@
 
 import { useState } from "react";
 import { toast } from "sonner";
+import { changeBusinessMarketer } from "@hospio/api/actions/marketer-admin";
 import { updateBusiness } from "@hospio/api/actions/tenant";
+import { useAction } from "@hospio/api/actions/use-action";
 import type { BusinessRequest } from "@hospio/api/api/schema";
 import { feeModelLabels } from "@hospio/api/data/mappers/tenant";
 import {
@@ -22,6 +24,14 @@ import {
 	checkRegistration,
 	only,
 } from "@hospio/ui/shared/validate";
+import { btn } from "@hospio/ui/shared/ui";
+import { cn } from "@hospio/ui/utils";
+import {
+	changeMessage,
+	NOBODY,
+	referrerOptions,
+	useReferrers,
+} from "../business/referred-by";
 import type { WizardCtx } from "./wizard";
 import {
 	nextStep,
@@ -455,6 +465,26 @@ export function FeeStep({ ctx }: { ctx: WizardCtx }) {
 	);
 	const [error, setError] = useState<string | undefined>();
 	const { pending, busy } = useWizardSave();
+	// Referred by changes through platform-service at once (with a reason), never through the draft or the business PUT.
+	const referrers = useReferrers();
+	const [referrer, setReferrer] = useState(business.marketerId ?? NOBODY);
+	const [reason, setReason] = useState("");
+	const changing = (referrer === NOBODY ? undefined : referrer) !== business.marketerId;
+	const referral = useAction();
+	const referrerList = referrers ?? [];
+	// The business's own marketer stays pickable even when the list doesn't have it (ended, or still loading).
+	const pickable =
+		business.marketerId &&
+		!referrerList.some((m) => m.id === business.marketerId)
+			? [
+					...referrerOptions(referrerList),
+					{
+						value: business.marketerId,
+						label: business.marketer ?? "Current marketer",
+						hint: "",
+					},
+				]
+			: referrerOptions(referrerList);
 
 	const save = () =>
 		busy(async () => {
@@ -520,23 +550,65 @@ export function FeeStep({ ctx }: { ctx: WizardCtx }) {
 					/>
 					<SelectField
 						label="Referred by"
-						value={business.marketerId ?? ""}
-						onChange={() => undefined}
-						options={
-							business.marketerId
-								? [
-										{
-											value: business.marketerId,
-											label: business.marketer ?? "Marketer",
-										},
-									]
-								: []
+						value={referrer}
+						onChange={(v) => {
+							setReferrer(v);
+							setReason("");
+						}}
+						options={pickable}
+						placeholder={referrers ? "Nobody · direct" : "Loading marketers…"}
+						disabled={!ctx.editable}
+						hint={
+							changing
+								? "Give a reason and press Change: it applies at once"
+								: "Changes are audit-logged; the marketer's agreement follows"
 						}
-						placeholder="Nobody · direct"
-						disabled
-						hint="Set when the business was created"
 					/>
 				</FieldRow>
+				{changing && ctx.editable && (
+					<div className="flex items-end gap-2">
+						<TextField
+							label="Why is Referred by changing?"
+							value={reason}
+							onChange={setReason}
+							placeholder="Introduced by another marketer"
+							className="flex-1"
+						/>
+						<button
+							type="button"
+							className={cn(btn.secondary, "mb-[1px]")}
+							disabled={referral.pending || reason.trim().length < 5}
+							onClick={() =>
+								referral.run(
+									() =>
+										changeBusinessMarketer(
+											business.id,
+											referrer === NOBODY ? null : referrer,
+											reason,
+										),
+									changeMessage,
+									(r) => {
+										ctx.setBusiness({
+											...business,
+											marketerId: r.toProfileId,
+											marketer: r.toName,
+										});
+										setReason("");
+									},
+								)
+							}
+						>
+							Change
+						</button>
+						<button
+							type="button"
+							className={cn(btn.ghost, "mb-[1px]")}
+							onClick={() => setReferrer(business.marketerId ?? NOBODY)}
+						>
+							Undo
+						</button>
+					</div>
+				)}
 				<TextareaField
 					label="Contract notes"
 					value={contractNotes}

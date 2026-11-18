@@ -469,7 +469,7 @@ export function NewBusinessPanel({
 								label: m.fullName,
 								hint: `${m.sharePct}% for ${m.months} months`,
 							}))}
-						hint="The marketer earns a share of the Hospio360 fee for the agreed months."
+						hint="The marketer earns a share of the platform fee collected from this business, for the agreed months from its first collected fee."
 					/>
 				</PanelSection>
 			</div>

@@ -18,10 +18,22 @@ export default async function MarketersPage({
 	const sp = await searchParams;
 	const tab = param(sp, "tab") ?? "marketers";
 	const page = pageParam(sp);
-	const [role, user, marketers, commissions, referrals] = await Promise.all([
-		getActiveRole(),
+	const activeRole = adminRole(await getActiveRole());
+	// Statements are money (Super admin and Finance admin): others never ask for them.
+	const money = activeRole === "SUPER_ADMIN" || activeRole === "FINANCE_ADMIN";
+	const [user, marketers, statements, commissions, referrals] = await Promise.all([
 		getUser(),
 		adminData.marketers.list(),
+		money
+			? adminData.marketers.statements({
+					month: param(sp, "smonth"),
+					status: param(sp, "sstatus"),
+					profileId: param(sp, "sprofile"),
+				})
+			: Promise.resolve({
+					ok: true as const,
+					data: { statements: [], counts: {}, totals: {} },
+				}),
 		adminData.marketers.commissions({
 			status: param(sp, "cstatus"),
 			month: param(sp, "month"),
@@ -35,9 +47,10 @@ export default async function MarketersPage({
 	]);
 	return (
 		<MarketersScreen
-			role={adminRole(role)}
+			role={activeRole}
 			marketers={marketers}
 			commissions={commissions}
+			statements={statements}
 			referrals={referrals}
 			inviterName={user?.fullName ?? "Hospio360"}
 		/>

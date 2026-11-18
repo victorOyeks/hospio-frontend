@@ -172,7 +172,15 @@ export function BusinessPage({
 			/>
 
 			{current === "overview" && (
-				<OverviewTab business={business} hotels={hotels} />
+				<OverviewTab
+					business={business}
+					hotels={hotels}
+					editable={editable}
+					onBusiness={(b) => {
+						setBusiness(b);
+						router.refresh();
+					}}
+				/>
 			)}
 			{current === "hotels" && (
 				<HotelsTab business={business} hotels={hotels} role={role} />
