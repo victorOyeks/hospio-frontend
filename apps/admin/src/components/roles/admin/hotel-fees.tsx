@@ -171,7 +171,7 @@ export function HotelFeesPanel({ businessId, hotelId, role }: { businessId: stri
 								const y = new Date(Date.now() - 864e5).toISOString().slice(0, 10);
 								const r = await runFeeDay(y);
 								if (r.ok) {
-									toast.success(`${r.data.date}: ${r.data.worked} worked out, ${r.data.statements} statements${r.data.notes.length ? ` · ${r.data.notes.join("; ")}` : ""}`);
+									toast.success(`${r.data.date}: ${r.data.worked} worked out, ${r.data.skipped} already done or skipped${r.data.notes.length ? ` · ${r.data.notes.join("; ")}` : ""}`);
 									void load();
 								} else toast.error(r.error);
 							}}
@@ -350,7 +350,7 @@ export function FeeDayModal({
 						{ label: "Paid", value: naira(day.collected ?? 0) },
 						...((day.refunded ?? 0) > 0 ? [{ label: "Refunded", value: <span className="text-danger">{naira(day.refunded)}</span> }] : []),
 						{ label: "Status", value: feeStatus(day.status) },
-						{ label: "Statement sent", value: day.statementSentAt ? fmtWhen(day.statementSentAt) : "—" },
+						...(day.statementSentAt ? [{ label: "Statement sent", value: fmtWhen(day.statementSentAt) }] : []),
 					]}
 				/>
 				{day.refundNote && <Note tone="info">Refund: {day.refundNote}</Note>}

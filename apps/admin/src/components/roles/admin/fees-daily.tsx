@@ -122,7 +122,7 @@ export function DailyFeesTab({
 									const r = await runFeeDay(y);
 									setBusy(false);
 									if (r.ok) {
-										toast.success(`${r.data.date}: ${r.data.worked} worked out, ${r.data.statements} statements${r.data.notes.length ? ` · ${r.data.notes.join("; ")}` : ""}`);
+										toast.success(`${r.data.date}: ${r.data.worked} worked out, ${r.data.skipped} already done or skipped${r.data.notes.length ? ` · ${r.data.notes.join("; ")}` : ""}`);
 										void load();
 									} else toast.error(r.error);
 								}}

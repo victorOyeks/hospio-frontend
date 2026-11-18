@@ -249,7 +249,7 @@ export function HospioFees({
 			)}
 			<SectionCard title="Days" subtitle="Open a day for what was sold and the fee on it" flush>
 				{days.length === 0 ? (
-					<EmptyState title="No days yet" hint="Each day appears after midnight, with its statement in the owner's email." className="m-5" />
+					<EmptyState title="No days yet" hint="Each day appears here after midnight. The month's days go on one Hospio360 invoice, issued on the 1st." className="m-5" />
 				) : (
 					<div className="overflow-x-auto">
 						<table className="w-full text-left">
@@ -311,7 +311,7 @@ export function HospioFees({
 									: []),
 								{ label: "Status", value: status(open.status) },
 								{ label: "Billed on", value: `${monthOf(open.date)} invoice` },
-								{ label: "Statement emailed", value: open.statementSentAt ? fmtWhen(open.statementSentAt) : "—" },
+								...(open.statementSentAt ? [{ label: "Statement emailed", value: fmtWhen(open.statementSentAt) }] : []),
 							]}
 						/>
 						<Note tone="info">
