@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { acceptHandover } from "@hospio/api/actions/onboarding";
 import { acceptLegal } from "@hospio/api/actions/legal";
-import type { LegalDoc } from "@hospio/api/api/routes-legal";
+import { acceptItem, type LegalDoc } from "@hospio/api/api/routes-legal";
 import { boxesFor, TickBox } from "@hospio/ui/shared/legal";
 import { useAction } from "@hospio/api/actions/use-action";
 import type { Business } from "@hospio/api/api/schema";
@@ -200,7 +200,7 @@ export function HandoverReview({
 								// The owner's own acceptance first (who, version, when, IP, browser; method HANDOVER), then the handover.
 								if (legal.length) {
 									const r = await acceptLegal({
-										documents: legal.map((d) => ({ key: d.key, version: d.version })),
+										documents: legal.map(acceptItem),
 										method: "HANDOVER",
 									});
 									if (!r.ok) return r;

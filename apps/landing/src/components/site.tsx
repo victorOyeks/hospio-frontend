@@ -11,9 +11,15 @@ export const HOTEL_APP_URL = (
 ).replace(/\/+$/, "");
 export const SIGN_UP_URL = `${HOTEL_APP_URL}/sign-up`;
 export const SIGN_IN_URL = `${HOTEL_APP_URL}/auth`;
-/** Where demo requests, sales and support questions go. Set NEXT_PUBLIC_CONTACT_EMAIL to the real inbox. */
+/**
+ * Where demo requests, sales and support questions go: Oyeks Global's inbox, the same address the legal pages give for notices
+ * (NEXT_PUBLIC_CONTACT_EMAIL overrides it).
+ */
 export const CONTACT_EMAIL =
-	process.env.NEXT_PUBLIC_CONTACT_EMAIL ?? "hello@hospio360.com";
+	process.env.NEXT_PUBLIC_CONTACT_EMAIL ?? "hello@oyeksglobal.com";
+
+/** Oyeks Global Ltd's registered office (footer, legal pages, notices clause of the Terms). */
+export const REGISTERED_OFFICE = "9 Remi Omoniyi Crescent, Ikorodu, Lagos State, Nigeria";
 export const DEMO_MAILTO = `mailto:${CONTACT_EMAIL}?subject=${encodeURIComponent("Hospio360 demo request")}&body=${encodeURIComponent("Hotel name:\nCity:\nNumber of rooms:\nBest phone number:\n")}`;
 /** The public site's own address (canonical links, Open Graph, robots). */
 export const SITE_URL = (
@@ -216,7 +222,7 @@ export function SiteFooter() {
 						<p>
 							© {new Date().getFullYear()} Hospio360, a product of Oyeks Global Ltd (RC 10001123)
 						</p>
-						<p>9 Remi Omoniyi Crescent, Ikorodu, Lagos State, Nigeria</p>
+						<p>{REGISTERED_OFFICE}</p>
 					</div>
 					<a href={`mailto:${CONTACT_EMAIL}`} className="hover:text-ink">
 						{CONTACT_EMAIL}

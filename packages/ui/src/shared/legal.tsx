@@ -3,7 +3,7 @@
 import { useRouter } from "next/navigation";
 import { type ReactNode, useState } from "react";
 import { acceptLegal } from "@hospio/api/actions/legal";
-import type { LegalDoc } from "@hospio/api/api/routes-legal";
+import { acceptItem, type LegalDoc } from "@hospio/api/api/routes-legal";
 import { Button } from "@hospio/ui/primitives/button";
 import { Checkbox } from "@hospio/ui/primitives/checkbox";
 
@@ -47,11 +47,24 @@ export function OwnerTermsLabel({ docs }: { docs: Pick<LegalDoc, "key" | "url" |
 	);
 }
 
-export function DebitLabel({ doc }: { doc?: Pick<LegalDoc, "url" | "slug" | "title"> }) {
+/** The platform default share of daily sales, when the server didn't say (docs/plan-daily-fees.md, Fee lock). */
+export const DEFAULT_DEBIT_PCT = 1.5;
+
+/** 1.2 → "1.2%", 2 → "2%". */
+export function formatRatePct(rate: number | null | undefined): string {
+	return `${Number((rate ?? DEFAULT_DEBIT_PCT).toFixed(3))}%`;
+}
+
+/**
+ * The debit box. It states the rate this business is debited: `doc.ratePct` from the server (the owner's agreed rate under a signed
+ * addendum, else the platform default); the acceptance records the same rate (acceptItem).
+ */
+export function DebitLabel({ doc, ratePct }: { doc?: Pick<LegalDoc, "url" | "slug" | "title" | "ratePct">; ratePct?: number | null }) {
 	return (
 		<>
-			I authorise Hospio360 (a product of Oyeks Global Limited) to debit 1.5% of my business&apos;s daily sales from my business account
-			each day at 06:00.{" "}
+			I authorise Hospio360 (a product of Oyeks Global Limited) to debit{" "}
+			<span data-testid="debit-rate">{formatRatePct(doc?.ratePct ?? ratePct)}</span> of my business&apos;s daily sales from my business
+			account each day at 06:00.{" "}
 			<DocLink doc={doc ?? { url: legalUrl("fees"), slug: "fees", title: "Fees" }}>How the fee works</DocLink>
 		</>
 	);
@@ -136,7 +149,7 @@ export function LegalGate({
 		setSaving(true);
 		setError(null);
 		const result = await acceptLegal({
-			documents: pending.map((d) => ({ key: d.key, version: d.version })),
+			documents: pending.map(acceptItem),
 			method: marketer && firstTime ? "PORTAL" : undefined,
 		});
 		setSaving(false);

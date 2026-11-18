@@ -28,6 +28,8 @@ export const LegalDoc = z.object({
 	effectiveFrom: z.string(),
 	material: z.boolean(),
 	summary: str,
+	/** DEBIT only: the share of daily sales the box states — the business's own rate for its owner (signed addendum), else the default. */
+	ratePct: z.number().nullable().optional(),
 });
 export type LegalDoc = z.infer<typeof LegalDoc>;
 
@@ -54,6 +56,8 @@ export const LegalRecord = z.object({
 	userAgent: str,
 	recordedByName: str,
 	at: z.string(),
+	/** DEBIT: the rate the box stated when ticked (null on records from before 18 Nov 2026, whose box said 1.5%). */
+	ratePct: z.number().nullable().optional(),
 });
 export type LegalRecord = z.infer<typeof LegalRecord>;
 
@@ -81,9 +85,15 @@ export const LegalVersion = z.object({
 export type LegalVersion = z.infer<typeof LegalVersion>;
 
 export const AcceptLegalInput = z.object({
-	documents: z.array(z.object({ key: z.string(), version: z.string() })).min(1),
+	/** `ratePct`: for DEBIT, the rate the box showed; the server refuses (409) if it isn't the business's rate. */
+	documents: z.array(z.object({ key: z.string(), version: z.string(), ratePct: z.number().optional() })).min(1),
 	method: z.enum(["SELF_SIGN_UP", "HANDOVER", "PORTAL"]).optional(),
 });
+
+/** What to send for a ticked document: its key and version, and for DEBIT the rate its box stated. */
+export function acceptItem(d: Pick<LegalDoc, "key" | "version" | "ratePct">): { key: string; version: string; ratePct?: number } {
+	return d.key === "DEBIT" && d.ratePct != null ? { key: d.key, version: d.version, ratePct: d.ratePct } : { key: d.key, version: d.version };
+}
 
 export const SHARE_CHANNELS = ["WHATSAPP", "EMAIL", "SMS", "IN_PERSON", "PHONE_CALL", "OTHER"] as const;
 export const LinksSharedInput = z.object({

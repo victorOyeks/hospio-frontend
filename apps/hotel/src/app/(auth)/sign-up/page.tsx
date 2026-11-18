@@ -1,3 +1,4 @@
+import { loadLegalDocuments } from "@hospio/api/actions/legal";
 import { SignUpForm } from "@/components/auth/sign-up-form";
 
 /**
@@ -11,5 +12,6 @@ export default async function SignUpPage({
 }) {
 	const ref = (await searchParams).ref;
 	const code = (Array.isArray(ref) ? ref[0] : ref)?.trim().toUpperCase();
-	return <SignUpForm referralCode={code ? code.slice(0, 20) : undefined} />;
+	const debit = (await loadLegalDocuments()).find((d) => d.key === "DEBIT");
+	return <SignUpForm referralCode={code ? code.slice(0, 20) : undefined} debitRatePct={debit?.ratePct} />;
 }
