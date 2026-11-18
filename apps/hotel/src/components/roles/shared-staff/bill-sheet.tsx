@@ -223,6 +223,10 @@ export function BillSheet({
 		o && ((o.billDiscountPct ?? 0) > 0 || (o.billDiscountAmount ?? 0) > 0)
 			? live.reduce((n, l) => n + (l.billDiscount ?? 0), 0)
 			: 0;
+	/** The items at their menu prices; VAT is a line of its own only where prices don't include it. */
+	const itemsGross = live.reduce((n, l) => n + l.unitPrice * l.quantity, 0);
+	const vatOnTop =
+		!!o && (o.tax ?? 0) > 0 && Math.abs(o.total - (itemsGross - (o.discount ?? 0) + (o.serviceCharge ?? 0) + (o.tax ?? 0))) < 0.02;
 	const pendingFor = (lineId?: string | null) =>
 		bill?.requests.find((r) => r.status === "PENDING" && (r.lineId ?? null) === (lineId ?? null));
 
@@ -296,14 +300,18 @@ export function BillSheet({
 
 						<TotalsList
 							rows={[
-								{ label: "Items", value: nairaExact(o.subtotal ?? o.total) },
+								{ label: "Items", value: nairaExact(itemsGross) },
 								...((o.discount ?? 0) > 0
 									? [{ label: "Discounts", value: `- ${nairaExact(o.discount)}`, tone: "success" as const }]
 									: []),
 								...((o.serviceCharge ?? 0) > 0
 									? [{ label: "Service charge", value: nairaExact(o.serviceCharge) }]
 									: []),
-								{ label: (o.tax ?? 0) > 0 ? `Total (VAT ${nairaExact(o.tax)})` : "Total", value: nairaExact(o.total) },
+								...(vatOnTop ? [{ label: "VAT", value: nairaExact(o.tax) }] : []),
+								{
+									label: (o.tax ?? 0) > 0 && !vatOnTop ? `Total (includes VAT ${nairaExact(o.tax)})` : "Total",
+									value: nairaExact(o.total),
+								},
 								...(paidSoFar > 0 ? [{ label: "Paid so far", value: nairaExact(paidSoFar) }] : []),
 								...(onRooms > 0 ? [{ label: "On rooms", value: nairaExact(onRooms) }] : []),
 								...(bill.tipsTotal > 0
