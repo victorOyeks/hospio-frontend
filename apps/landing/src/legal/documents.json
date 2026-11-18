@@ -274,7 +274,7 @@
       {
         "heading": "7. How long we keep it",
         "paragraphs": [
-          "7.1 Venue data is kept for as long as the venue uses Hospio360 and then returned or deleted as agreed with the venue (normally within **90 days** after the end of the contract, with backups overwritten in their normal cycle). Some items are deleted automatically sooner: in-app notifications after 30 days, chat conversations 30 days after the last message, and activity logs after six months.",
+          "7.1 Venue data is kept for as long as the venue uses Hospio360 and then returned or deleted as agreed with the venue (you can ask for an export for **30 days** after the contract ends; the data is then deleted within **60 days**, with backups overwritten in their normal cycle). Some items are deleted automatically sooner: in-app notifications after 30 days, chat conversations 30 days after the last message, and activity logs after six months.",
           "7.2 Our own customer, billing, acceptance and commission records are kept for **6 years** after the relationship ends, to meet tax and accounting law and to show what was agreed. Marketing contacts are kept until you opt out or for **2 years** without contact."
         ]
       },
@@ -584,7 +584,7 @@
         "heading": "3. Data Plan",
         "paragraphs": [
           "3.1 The Data Plan is a recurring service, not a purchase: it is invoiced monthly at the price in the Device Schedule (debited automatically as in clause 2.1(b)) for as long as you use it, and is never \"paid off\".",
-          "3.2 You may stop the Data Plan by telling Hospio360 support at least **7 days** before the next monthly invoice date, and may restart it later at the then-current price. Stopping the Data Plan does not affect the Devices or your Hospio360 subscription.",
+          "3.2 You may stop the Data Plan by telling Hospio360 support at least **7 days** before the next monthly invoice date, and may restart it later at the then-current price. Stopping the Data Plan does not affect the Devices or your use of Hospio360.",
           "3.3 Data allowances, speeds and coverage depend on the mobile network operator. We do not guarantee network coverage or speed at the Venue."
         ]
       },
@@ -795,7 +795,7 @@
           "5.4 Once a Statement is approved by Oyeks Global's finance team, the net commission is paid by **manual bank transfer** to the Partner's verified bank account by the **15th** day of the month the Statement is issued. Oyeks Global records the payment reference and emails the Partner when payment is made. If a query is still open, Oyeks Global may hold the queried lines and pay them with the next payment after the query is resolved.",
           "5.5 The Partner must keep its bank name, account number and account name up to date in the Partner Portal. The account name must match the Partner. Any change of bank details is re-checked by Oyeks Global before a payment is made to the new account, and Oyeks Global is not responsible for a payment made to the details the Partner provided.",
           "5.6 The **minimum payout is ₦5,000**. If the net commission due is less than ₦5,000, it rolls over to the next Statement and is paid once the total due reaches the minimum.",
-          "5.7 **Final Statement.** When this Agreement ends, any carried-over balance (after any clawback) is included on the Partner's final Statement and paid with it, **regardless of the ₦5,000 minimum**. Where commission continues after the end under clause 8.3(a), each later Statement is likewise paid regardless of the minimum."
+          "5.7 **Final Statement.** When this Agreement ends, any carried-over balance (after any clawback) is included on the Partner's final Statement and paid with it, **regardless of the ₦5,000 minimum**. Commission on fee days up to the end date that are collected afterwards is paid on a later Statement, likewise regardless of the minimum."
         ]
       },
       {
@@ -821,7 +821,7 @@
         "paragraphs": [
           "8.1 This Agreement starts when the Partner accepts it in the Partner Portal (or, if earlier, signs a Partner Schedule) and continues until ended by either party on **30 days'** written notice.",
           "8.2 Oyeks Global may end it immediately by written notice if the Partner breaches clause 6 or 7, acts dishonestly, or brings Oyeks Global or Hospio360 into disrepute.",
-          "8.3 When this Agreement ends: (a) for an ending under clause 8.1, commission continues on Referred Businesses attributed to the Partner before the end until the end of their Commission Windows, and Statements and payments continue under clause 5; (b) for an ending under clause 8.2, commission stops on fees for days after the end, and Oyeks Global may withhold commission related to the breach; (c) the final Statement is paid under clause 5.7; and (d) the Partner must stop presenting itself as a Hospio360 partner and return or delete Oyeks Global materials and confidential information."
+          "8.3 When this Agreement ends, for any reason: (a) commission stops on Platform Fees for days after the end date, while fees for days up to the end date (inside the Commission Window) still earn commission when they are collected, even after the end; (b) for an ending under clause 8.2, Oyeks Global may withhold commission related to the breach; (c) the final Statement is paid under clause 5.7; and (d) the Partner must stop presenting itself as a Hospio360 partner and return or delete Oyeks Global materials and confidential information."
         ]
       },
       {
