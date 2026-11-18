@@ -251,9 +251,9 @@ export const ownerHelp: HelpModule = {
 			goodToKnow: [
 				"The fee is 1.5 % of what was sold that day, VAT excluded. A sale charged to a room counts once, on the folio.",
 				"Room nights count one night per day of the stay, not all at check-in.",
-				"After midnight you get the day's statement by email. Nothing is taken from any account: the month's fees go on one Hospio360 invoice, issued on the 1st.",
+				"Each day shows here after midnight; no daily email is sent. Nothing is taken from any account: the month's fees go on one Hospio360 invoice, issued on the 1st.",
 				"Pay that invoice under “Billing & invoices”.",
-				"Something looks wrong? Reply to the statement email or contact Hospio360 support.",
+				"Something looks wrong? Contact Hospio360 support.",
 			],
 			route: "/dashboard/hospio-fees",
 			screen: "Hospio fees",
@@ -272,7 +272,7 @@ export const ownerHelp: HelpModule = {
 			goodToKnow: [
 				"One invoice a month for the whole business, issued on the 1st at 07:00 for the month before, due 7 days later (the 8th).",
 				"Reminders come by email on the 6th, 7th, 8th, 9th and 10th, with a final notice on the 11th.",
-				"If it is still unpaid, from 06:00 on the 12th card/transfer POS payments, new sales and new bookings pause. Signing in, check-out, cash on existing bills and tabs, reports and paying the invoice still work. Everything resumes within a minute of paying.",
+				"If it is still unpaid, from 06:00 on the 12th card/transfer POS payments, new sales (bar, kitchen and new laundry orders) and new bookings pause. Signing in, check-out, laundry already taken, cash on existing bills and tabs, reports and paying the invoice still work. Everything resumes within a minute of paying.",
 				"A month under ₦1,000 isn't charged: it is carried into the next month's invoice. No VAT is charged.",
 				"Managers see the invoice for their locations but can't pay it. Only the owner pays.",
 				"Paid by bank transfer instead? Tell Hospio360 support with the reference; they record it and send the receipt.",

@@ -101,7 +101,6 @@ export const DayRun = z.object({
 	date: z.string(),
 	worked: z.number(),
 	skipped: z.number(),
-	statements: z.number(),
 	notes: z.array(z.string()),
 });
 

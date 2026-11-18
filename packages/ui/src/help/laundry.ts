@@ -24,6 +24,7 @@ export const laundryHelp: HelpModule = {
 				"Only checked-in guests can be picked. A walk-in or a guest who has left can't place an order here.",
 				"Prices come from the laundry price list. Only a manager can change it. If there is no price list, “New guest order” stays grey.",
 				"If you leave “Promised back” blank, it is 24 hours from now, or 6 hours for express.",
+				"If it says new laundry orders are paused, the Hospio360 invoice is unpaid: ask the owner to pay it under Billing & invoices. Orders already taken can still be washed, handed back, charged to the room, paid in cash or cancelled.",
 				"On a shared tablet, tap “Lock” when you walk away so the next person's orders aren't recorded under your name.",
 			],
 			route: "/dashboard",

@@ -291,7 +291,7 @@ export const platformHelp: HelpModule = {
 				"Wrong altogether: tap “Void”, say why and keep “Reissue” ticked to make a fresh invoice for the same month.",
 			],
 			goodToKnow: [
-				"Invoices are issued on the 1st at 07:00 for the month before, due on the 8th; the last day is the 11th, and from 06:00 on the 12th an unpaid business is paused (card/transfer POS payments, new sales, new bookings).",
+				"Invoices are issued on the 1st at 07:00 for the month before, due on the 8th; the last day is the 11th, and from 06:00 on the 12th an unpaid business is paused (card/transfer POS payments, new sales including new laundry orders, new bookings).",
 				"Recording a full payment, extending or voiding lifts the pause within a minute.",
 				"A month under the invoice minimum (₦1,000) is carried forward to the next month. VAT is only added when Settings → Fee defaults says so.",
 				"Only a Finance admin or a Super admin can record payments, extend, adjust or void. Support can look.",

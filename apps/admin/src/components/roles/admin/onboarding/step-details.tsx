@@ -556,7 +556,7 @@ export function FeeStep({ ctx }: { ctx: WizardCtx }) {
 		>
 			<StepCard
 				title="Hospio360 fee"
-				subtitle={`${feeModelLabels.PERCENT_OF_SALES}: a share of each day's sales, billed on one Hospio360 invoice each month (issued on the 1st, due 7 days later). Nothing is debited; a statement for each day is emailed to the owner.`}
+				subtitle={`${feeModelLabels.PERCENT_OF_SALES}: a share of each day's sales, billed on one Hospio360 invoice each month (issued on the 1st, due 7 days later). Nothing is debited; the owner sees each day under Hospio fees.`}
 			>
 				<FeeLockField lock={lock} disabled={!ctx.editable} />
 			</StepCard>
