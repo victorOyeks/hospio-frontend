@@ -10,6 +10,8 @@ import Link from "next/link";
 import { btn } from "@hospio/ui/shared/ui";
 import { cn } from "@hospio/ui/utils";
 import { btnLg, CONTACT_EMAIL, Section } from "@/components/site";
+import { VideoEmbed } from "@/components/video-embed";
+import { VIDEOS } from "@/config/videos";
 import { IconTile } from "./shared";
 
 const models = [
@@ -93,30 +95,29 @@ export function Pricing() {
 			</div>
 			<div
 				id="partners"
-				className="flex scroll-mt-[88px] flex-col gap-6 rounded-[16px] bg-brand-soft p-6 md:flex-row md:items-center md:p-8"
+				className="grid scroll-mt-[88px] items-center gap-6 rounded-[16px] bg-brand-soft p-6 md:p-8 lg:grid-cols-2 lg:gap-10"
 			>
-				<IconTile icon={MegaphoneIcon} tone="brand" size="lg" />
-				<div className="flex flex-1 flex-col gap-[6px]">
-					<h3 className="text-[22px] font-bold text-ink">
-						Know owners of hotels, lounges, bars or restaurants? Become a
-						Hospio360 partner.
-					</h3>
-					<p className="text-[15px] leading-[1.5] text-ink-2">
-						Earn 20% of Hospio360’s fee from every business you bring on, for
-						12 months — paid monthly on what Hospio360 actually receives (5%
-						WHT applies).
-					</p>
+				<div className="flex min-w-0 flex-col items-start gap-5">
+					<IconTile icon={MegaphoneIcon} tone="brand" size="lg" />
+					<div className="flex flex-col gap-[6px]">
+						<h3 className="text-[22px] font-bold text-ink">
+							Know owners of hotels, lounges, bars or restaurants? Become a
+							Hospio360 partner.
+						</h3>
+						<p className="text-[15px] leading-[1.5] text-ink-2">
+							Earn 20% of Hospio360’s fee from every business you bring on, for
+							12 months — paid monthly on what Hospio360 actually receives (5%
+							WHT applies).
+						</p>
+					</div>
+					<Link
+						href="/partners/apply"
+						className={cn(btn.primary, btnLg, "inline-flex items-center")}
+					>
+						Apply to be a partner
+					</Link>
 				</div>
-				<Link
-					href="/partners/apply"
-					className={cn(
-						btn.primary,
-						btnLg,
-						"inline-flex items-center self-start md:self-center",
-					)}
-				>
-					Apply to be a partner
-				</Link>
+				<VideoEmbed video={VIDEOS.partner} />
 			</div>
 		</Section>
 	);

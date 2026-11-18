@@ -9,9 +9,12 @@ import { Onboarding } from "@/components/sections/onboarding";
 import { Payments } from "@/components/sections/payments";
 import { Pricing } from "@/components/sections/pricing";
 import { RolesStrip } from "@/components/sections/roles-strip";
+import { SeeItInAction } from "@/components/sections/see-it-in-action";
 import { ThreeApps } from "@/components/sections/three-apps";
 import { YourBrand } from "@/components/sections/your-brand";
 import { SiteFooter, SiteHeader } from "@/components/site";
+import { VideoJsonLd } from "@/components/video-json-ld";
+import { VIDEOS } from "@/config/videos";
 
 export const metadata: Metadata = { alternates: { canonical: "/" } };
 
@@ -22,6 +25,7 @@ export default function HomePage() {
 			<SiteHeader />
 			<main className="bg-page">
 				<Hero />
+				<SeeItInAction />
 				<RolesStrip />
 				<ThreeApps />
 				<GuestFolio />
@@ -35,6 +39,7 @@ export default function HomePage() {
 				<ClosingCta />
 			</main>
 			<SiteFooter />
+			<VideoJsonLd videos={[VIDEOS.overview, VIDEOS.partner]} />
 		</>
 	);
 }
