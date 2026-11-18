@@ -173,13 +173,22 @@ const footerColumns: {
 			},
 		],
 	},
+	{
+		title: "Legal",
+		links: [
+			{ href: "/legal", label: "Legal" },
+			{ href: "/legal/terms", label: "Terms of Service" },
+			{ href: "/legal/privacy", label: "Privacy Policy" },
+			{ href: "/legal/fees", label: "Fees" },
+		],
+	},
 ];
 
 export function SiteFooter() {
 	return (
 		<footer className="border-t border-line bg-page">
 			<div className={cn(container, "flex flex-col gap-12 pt-16 pb-10")}>
-				<div className="grid gap-10 sm:grid-cols-2 md:grid-cols-[minmax(0,360px)_repeat(3,minmax(0,1fr))] md:gap-12">
+				<div className="grid gap-10 sm:grid-cols-2 md:grid-cols-[minmax(0,320px)_repeat(4,minmax(0,1fr))] md:gap-12">
 					<div className="flex flex-col gap-[14px] sm:col-span-2 md:col-span-1">
 						<Wordmark />
 						<p className="text-sm leading-[1.55] text-ink-2">
@@ -319,38 +328,5 @@ export function Section({
 				{children}
 			</div>
 		</section>
-	);
-}
-
-/** Static legal pages share this frame. */
-export function LegalPage({
-	title,
-	updated,
-	children,
-}: {
-	title: string;
-	updated?: string;
-	children: ReactNode;
-}) {
-	return (
-		<>
-			<SiteHeader />
-			<main className="bg-page">
-				<div className="mx-auto w-full max-w-[760px] px-4 py-16">
-					<h1 className="text-[34px] font-bold leading-[1.1] tracking-[-0.02em] text-ink md:text-[48px]">
-						{title}
-					</h1>
-					{updated && (
-						<p className="mt-3 text-[13px] text-ink-3">
-							Last updated {updated}
-						</p>
-					)}
-					<div className="mt-8 flex flex-col gap-5 text-[15px] leading-[1.6] text-ink-2 [&_h2]:mt-4 [&_h2]:text-lg [&_h2]:font-bold [&_h2]:text-ink">
-						{children}
-					</div>
-				</div>
-			</main>
-			<SiteFooter />
-		</>
 	);
 }
