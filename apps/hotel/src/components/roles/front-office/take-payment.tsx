@@ -25,7 +25,12 @@ import { SidePanel } from "@hospio/ui/shared/side-panel";
 import { StatusPill } from "@hospio/ui/shared/status-pill";
 import { btn } from "@hospio/ui/shared/ui";
 import { useHotelActions } from "@hospio/api/actions/hotel-scope";
-import { paymentStatus, verifyPayment } from "@hospio/api/actions/payment";
+import {
+	cashTill,
+	paymentStatus,
+	verifyPayment,
+} from "@hospio/api/actions/payment";
+import { openTill } from "@hospio/api/actions/finance";
 import { emailReceipt } from "@hospio/api/actions/ml";
 import { withDeliveries } from "@hospio/ui/shared/deliveries-store";
 import type {
@@ -141,6 +146,17 @@ function defaultTerminal(
 	)?.id ?? "";
 }
 
+/** Each till desk's Till page. */
+const TILL_PAGE: Record<string, string> = {
+	FRONT_OFFICE: "/front-desk/till",
+	BAR: "/bar/till",
+	KITCHEN: "/kitchen/till",
+};
+
+function deskLabel(role: string) {
+	return role === "FRONT_OFFICE" ? "Front office" : role.charAt(0) + role.slice(1).toLowerCase();
+}
+
 export function usePaymentSteps(
 	{
 		target,
@@ -187,6 +203,16 @@ export function usePaymentSteps(
 	const sent = useRef<string | null>(null);
 	const live = useRef<string | null>(null);
 	const [cardError, setCardError] = useState<string | null>(null);
+	// Cash at the front office, bar or kitchen goes into that desk's till: it must be open first (payment-service refuses otherwise).
+	const [till, setTill] = useState<{
+		role: string;
+		needed: boolean;
+		open: boolean;
+		message?: string | null;
+	} | null>(null);
+	const [tillFloat, setTillFloat] = useState<number | "">("");
+	const [openingTill, setOpeningTill] = useState(false);
+	const tillBlocked = method === "CASH" && !!till?.needed && !till.open;
 
 	/** Restart the steps for a new target (or the "who" step when there is none). */
 	function begin(t?: PaymentTarget | null) {
@@ -206,6 +232,45 @@ export function usePaymentSteps(
 		setContact(t?.guestEmail ?? "");
 		setRecorded(null);
 		setCardError(null);
+		setTill(null);
+		setTillFloat("");
+	}
+
+	// Picking cash asks whether this desk's till is open; an unreadable answer lets the desk carry on (payment-service checks too).
+	useEffect(() => {
+		if (step !== "method" || method !== "CASH") return;
+		let stale = false;
+		cashTill(tgt?.role)
+			.then((r) => {
+				if (!stale) setTill(r.ok ? r.data : null);
+			})
+			.catch(() => !stale && setTill(null));
+		return () => {
+			stale = true;
+		};
+	}, [step, method, tgt?.role]);
+
+	async function openMyTill() {
+		if (!till) return;
+		setOpeningTill(true);
+		const r = await openTill({
+			role: till.role,
+			openingFloat: typeof tillFloat === "number" ? tillFloat : undefined,
+		}).catch(() => null);
+		setOpeningTill(false);
+		if (!r?.ok) {
+			const again = await cashTill(tgt?.role).catch(() => null);
+			if (again?.ok && again.data.open) {
+				setTill(again.data);
+				return;
+			}
+			toast.error(r && !r.ok ? r.error : "The till could not be opened");
+			return;
+		}
+		toast.success(`${deskLabel(till.role)} till opened`, {
+			description: `Float ${naira(r.data.openingFloat)} · now take the cash`,
+		});
+		setTill({ ...till, open: true, message: null });
 	}
 
 	// Card: send the request to payment-service and show what the terminal answered. Each attempt is sent exactly once
@@ -424,6 +489,12 @@ export function usePaymentSteps(
 			if (!r.ok) {
 				setSending(false);
 				toast.error(r.error);
+				// The till was closed meanwhile: back to the method step, which offers to open it.
+				if (method === "CASH" && r.error.startsWith("Open your till first")) {
+					const again = await cashTill(tgt?.role).catch(() => null);
+					if (again?.ok) setTill(again.data);
+					setStep("method");
+				}
 				return;
 			}
 			payment = {
@@ -496,7 +567,8 @@ export function usePaymentSteps(
 						<button
 							type="button"
 							className={btn.primary}
-							disabled={amt <= 0 || (toPos && !terminal)}
+							disabled={amt <= 0 || (toPos && !terminal) || tillBlocked}
+							title={tillBlocked ? "Open your till first" : undefined}
 							onClick={() => setStep(toPos ? "card" : "cash")}
 						>
 							{toPos ? "Send to POS" : "Count cash"}
@@ -737,6 +809,40 @@ export function usePaymentSteps(
 							},
 						]}
 					/>
+					{tillBlocked && till && (
+						<Note tone="warning">
+							<p className="font-semibold text-ink">Open your till first</p>
+							<p className="mt-1">
+								Cash taken at the {deskLabel(till.role).toLowerCase()} goes into the{" "}
+								{deskLabel(till.role).toLowerCase()} till, and it isn't open. Count the float
+								in the drawer and open it here, or take card or transfer instead.
+							</p>
+							<div className="mt-3 flex flex-wrap items-end gap-2">
+								<div className="min-w-[160px] flex-1">
+									<MoneyField
+										label="Opening float"
+										value={tillFloat}
+										onChange={setTillFloat}
+										hint="Leave blank for the hotel's usual float"
+									/>
+								</div>
+								<button
+									type="button"
+									className={btn.primary}
+									disabled={openingTill}
+									onClick={() => void openMyTill()}
+								>
+									{openingTill ? "Opening…" : `Open the ${deskLabel(till.role).toLowerCase()} till`}
+								</button>
+							</div>
+							<a
+								href={TILL_PAGE[till.role] ?? "/front-desk/till"}
+								className="mt-2 inline-block text-[13px] font-semibold text-brand underline"
+							>
+								Go to the Till page
+							</a>
+						</Note>
+					)}
 					{toPos && (
 						<SelectField
 							label="Terminal"

@@ -77,7 +77,19 @@ const Ticket = z.object({
 	status: z.string().nullable().optional(),
 });
 
+/** Before the desk takes cash: does cash here go into a till (`needed`), and is that till open? */
+export const CashTill = z.object({
+	role: z.string(),
+	needed: z.boolean(),
+	open: z.boolean(),
+	message: str,
+});
+
 export const paymentRoutes = {
+	"@get/payment/payments/cash-till": {
+		query: z.object({ role: z.string().optional() }),
+		output: envelope(CashTill),
+	},
 	"@get/payment/terminals/assignments": {
 		output: envelope(z.array(Assignment)),
 	},
