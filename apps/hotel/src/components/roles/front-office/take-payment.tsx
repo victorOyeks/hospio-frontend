@@ -11,6 +11,7 @@ import {
 	ClockIcon,
 } from "lucide-react";
 import { type ReactNode, useEffect, useRef, useState } from "react";
+import { useWhatsAppKinds } from "@/lib/use-whatsapp-kinds";
 import { toast } from "sonner";
 import {
 	ChoiceCards,
@@ -28,6 +29,7 @@ import { useHotelActions } from "@hospio/api/actions/hotel-scope";
 import {
 	cashTill,
 	paymentStatus,
+	resendReceipt,
 	verifyPayment,
 } from "@hospio/api/actions/payment";
 import { openTill } from "@hospio/api/actions/finance";
@@ -188,10 +190,14 @@ export function usePaymentSteps(
 	const [card, setCard] = useState<CardState>("waiting");
 	const [attempt, setAttempt] = useState(0);
 	const [tendered, setTendered] = useState<number | "">("");
-	// Email is the receipt that is sent for real; without the guest's email the desk prints it (WhatsApp is coming soon).
-	const [receipt, setReceipt] = useState<"EMAIL" | "NONE">(
+	// By email when the guest has one; a guest with a phone and no email can get it on WhatsApp (the approved receipt
+	// template, when RECEIPT is in the backend's WhatsApp list), as the automatic receipt does; else the desk prints it.
+	const waKinds = useWhatsAppKinds();
+	const [receipt, setReceipt] = useState<"EMAIL" | "NONE" | "WHATSAPP">(
 		target?.guestEmail ? "EMAIL" : "NONE",
 	);
+	const waReceipt =
+		waKinds.includes("RECEIPT") && !!tgt?.guestPhone && !tgt?.guestEmail;
 	const [contact, setContact] = useState(target?.guestEmail ?? "");
 	const [sending, setSending] = useState(false);
 	const [recorded, setRecorded] = useState<TakenPayment | null>(null);
@@ -451,7 +457,7 @@ export function usePaymentSteps(
 		? `${guestName}${folio?.roomNumber ? ` · Room ${folio.roomNumber}` : tgt?.roomNumber ? ` · Room ${tgt.roomNumber}` : ""} · ${naira(amt)}`
 		: "Choose who is paying";
 
-	async function finish(choice: "EMAIL" | "NONE" = receipt) {
+	async function finish(choice: "EMAIL" | "NONE" | "WHATSAPP" = receipt) {
 		setSending(true);
 		let payment = recorded;
 		if (!payment) {
@@ -512,6 +518,16 @@ export function usePaymentSteps(
 				: `The receipt wasn't emailed${sent && !sent.ok ? `: ${sent.error}` : ""} · print it or email it from the receipt page`;
 		} else if (choice === "EMAIL") {
 			receiptNote = "Email the receipt from My payments once it is approved";
+		} else if (choice === "WHATSAPP" && payment.status === "APPROVED") {
+			const sent = await withDeliveries(
+				resendReceipt(payment.id),
+				`Receipt for ${guestName}`,
+			).catch(() => null);
+			receiptNote = sent?.ok
+				? `Receipt sent on WhatsApp to ${sent.data.sentTo}`
+				: `The receipt wasn't sent${sent && !sent.ok ? `: ${sent.error}` : ""} · print it from the next screen`;
+		} else if (choice === "WHATSAPP") {
+			receiptNote = "Send the receipt from My payments once it is approved";
 		}
 		setSending(false);
 		const label =
@@ -687,6 +703,8 @@ export function usePaymentSteps(
 								<Loader2Icon className="size-4 animate-spin" />
 							) : receipt === "NONE" ? (
 								"Record payment"
+							) : receipt === "WHATSAPP" ? (
+								"Send on WhatsApp & record"
 							) : (
 								"Email receipt & record"
 							)}
@@ -1010,26 +1028,29 @@ export function usePaymentSteps(
 						<div className="grid grid-cols-3 gap-2">
 							{(
 								[
-									["EMAIL", "Email", MailIcon, false],
-									["NONE", "Print", PrinterIcon, false],
+									["EMAIL", "Email", MailIcon, false, undefined],
+									["NONE", "Print", PrinterIcon, false, undefined],
 									[
 										"WHATSAPP",
-										"WhatsApp · coming soon",
+										"WhatsApp",
 										MessageCircleIcon,
-										true,
+										!waReceipt,
+										waReceipt
+											? `Sent to ${tgt?.guestPhone} with the receipt template`
+											: tgt?.guestEmail
+												? "This guest has an email: the receipt goes by email"
+												: !tgt?.guestPhone
+													? "Add the guest's phone to send it on WhatsApp"
+													: "WhatsApp receipts can't be sent right now",
 									],
 								] as const
-							).map(([key, label, Icon, soon]) => (
+							).map(([key, label, Icon, soon, why]) => (
 								<button
 									key={key}
 									type="button"
 									disabled={soon}
-									title={
-										soon
-											? `${label.split(" ·")[0]} receipts are coming soon`
-											: undefined
-									}
-									onClick={() => !soon && setReceipt(key as "EMAIL" | "NONE")}
+									title={why}
+									onClick={() => !soon && setReceipt(key)}
 									className={cn(
 										"flex flex-col items-center gap-2 rounded-control border px-3 py-3 text-center text-[13px] font-semibold",
 										soon

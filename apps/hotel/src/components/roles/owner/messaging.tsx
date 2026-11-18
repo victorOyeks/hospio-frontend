@@ -9,6 +9,7 @@ import {
 	useQueryStates,
 } from "nuqs";
 import { useState } from "react";
+import { useWhatsAppKinds } from "@/lib/use-whatsapp-kinds";
 import { messageAllManagers, startThread } from "@hospio/api/actions/owner";
 import { useAction } from "@hospio/api/actions/use-action";
 import type { PageResult } from "@hospio/api/data/paging";
@@ -141,6 +142,8 @@ function NewMessagePanel({
 	const [subject, setSubject] = useState("");
 	const [body, setBody] = useState("");
 	const [whatsapp, setWhatsapp] = useState(false);
+	// Staff messages have no approved WhatsApp template: the copy is offered only once NOTICE can go (docs/sms-whatsapp.md).
+	const waKinds = useWhatsAppKinds();
 	const options = [
 		...managers.map((m) => ({
 			value: `person:${m.userId}:${m.hotelId}`,
@@ -237,12 +240,14 @@ function NewMessagePanel({
 					onChange={setBody}
 					rows={6}
 				/>
-				<ToggleField
-					label="WhatsApp copy (coming soon)"
-					hint="WhatsApp isn't connected yet: the text is shown on screen to copy to their phone"
-					checked={whatsapp}
-					onChange={setWhatsapp}
-				/>
+				{waKinds.includes("NOTICE") && (
+					<ToggleField
+						label="WhatsApp copy"
+						hint="Also sent to their phone on WhatsApp"
+						checked={whatsapp}
+						onChange={setWhatsapp}
+					/>
+				)}
 			</div>
 		</SidePanel>
 	);
@@ -262,6 +267,8 @@ function MessageAllModal({
 	const [subject, setSubject] = useState("");
 	const [body, setBody] = useState("");
 	const [whatsapp, setWhatsapp] = useState(false);
+	// Staff messages have no approved WhatsApp template: the copy is offered only once NOTICE can go (docs/sms-whatsapp.md).
+	const waKinds = useWhatsAppKinds();
 	return (
 		<Modal
 			open={open}
@@ -319,12 +326,14 @@ function MessageAllModal({
 					rows={5}
 					placeholder="e.g. December rate proposals by Friday please"
 				/>
-				<ToggleField
-					label="WhatsApp copy (coming soon)"
-					hint="WhatsApp isn't connected yet: the text is shown on screen to copy to their phone"
-					checked={whatsapp}
-					onChange={setWhatsapp}
-				/>
+				{waKinds.includes("NOTICE") && (
+					<ToggleField
+						label="WhatsApp copy"
+						hint="Also sent to their phone on WhatsApp"
+						checked={whatsapp}
+						onChange={setWhatsapp}
+					/>
+				)}
 				<WhatHappens
 					items={[
 						"Each manager gets it as a separate conversation",

@@ -329,8 +329,8 @@ export type GuestMessageInput = {
 };
 
 /**
- * A message to a guest from the hotel's inbox (at the hotel in scope). Email is sent for real; WhatsApp is saved
- * and shown on screen (coming soon). `note` is the service's line ("Email sent to …", "Saved · WhatsApp is coming soon …").
+ * A message to a guest from the hotel's inbox (at the hotel in scope), by email (a typed message has no WhatsApp
+ * template). `note` is the service's line ("Email sent to …").
  */
 export async function messageGuest(
 	input: GuestMessageInput,

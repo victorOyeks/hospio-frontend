@@ -3,6 +3,7 @@
 import { MessageSquareIcon, PencilIcon } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import { useWhatsAppKinds } from "@/lib/use-whatsapp-kinds";
 import {
 	pauseStaff,
 	reinstateStaff,
@@ -361,6 +362,8 @@ export function MessageStaffModal({
 	const { run, pending } = useAction();
 	const [body, setBody] = useState("");
 	const [whatsapp, setWhatsapp] = useState(false);
+	// Staff messages have no approved WhatsApp template: the copy is offered only once NOTICE can go (docs/sms-whatsapp.md).
+	const waKinds = useWhatsAppKinds();
 	if (!staff) return null;
 	return (
 		<Modal
@@ -415,16 +418,18 @@ export function MessageStaffModal({
 					rows={4}
 					placeholder="Please come 30 minutes early tomorrow…"
 				/>
-				<ToggleField
-					label="WhatsApp copy (coming soon)"
-					hint={
-						staff.phone
-							? `${staff.phone} · not connected yet: the text is shown on screen to copy`
-							: "No phone on file: in the app only"
-					}
-					checked={whatsapp && !!staff.phone}
-					onChange={(v) => setWhatsapp(v && !!staff.phone)}
-				/>
+				{waKinds.includes("NOTICE") && (
+					<ToggleField
+						label="WhatsApp copy"
+						hint={
+							staff.phone
+								? `Also sent on WhatsApp to ${staff.phone}`
+								: "No phone on file: in the app only"
+						}
+						checked={whatsapp && !!staff.phone}
+						onChange={(v) => setWhatsapp(v && !!staff.phone)}
+					/>
+				)}
 				<Note tone="info">
 					They get it in the app (Inbox) and can reply there.
 				</Note>

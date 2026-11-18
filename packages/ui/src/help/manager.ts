@@ -315,7 +315,7 @@ export const managerHelp: HelpModule = {
 				"To write to everyone on today's rota, tap “Message everyone on shift”, then “Send to everyone”.",
 			],
 			goodToKnow: [
-				"Only email is really sent, in the hotel's name. WhatsApp is coming soon: the message is saved for you to copy.",
+				"Messages you type go by email, in the hotel's name. WhatsApp only carries approved templates (booking messages and receipts), so a typed message can't go on WhatsApp.",
 				"Templates save time: open “Templates” to add your own.",
 				"Messages to your team arrive as a notice in the app.",
 				"A conversation is deleted 30 days after its last message.",

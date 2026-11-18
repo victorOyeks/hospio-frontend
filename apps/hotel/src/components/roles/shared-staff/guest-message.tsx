@@ -2,6 +2,7 @@
 
 import { FileTextIcon, MessageSquareIcon, SendIcon } from "lucide-react";
 import { useEffect, useState } from "react";
+import { useWhatsAppKinds } from "@/lib/use-whatsapp-kinds";
 import { toast } from "sonner";
 import {
 	useHotelActions,
@@ -33,23 +34,42 @@ export type GuestToMessage = {
 	reference?: string;
 };
 
-/** The channel choices: email is sent; WhatsApp is saved and shown on screen (coming soon). */
-export function channelOptions(email?: string | null, phone?: string | null) {
-	return [
+/**
+ * The channel choices: email always; WhatsApp only once a typed message can go on it (`MESSAGE` in the backend's
+ * WhatsApp list, `useWhatsAppKinds`). WhatsApp carries approved templates only and a typed message has none, so today
+ * it is email only (hospio-backend docs/sms-whatsapp.md).
+ */
+export function channelOptions(
+	email?: string | null,
+	phone?: string | null,
+	whatsAppKinds: string[] = [],
+) {
+	const options: {
+		value: GuestChannel;
+		label: string;
+		hint: string;
+		disabled: boolean;
+	}[] = [
 		{
-			value: "EMAIL" as GuestChannel,
+			value: "EMAIL",
 			label: "Email",
 			hint: email ? email : "No email on file",
 			disabled: !email,
 		},
-		{
-			value: "WHATSAPP" as GuestChannel,
-			label: "WhatsApp · coming soon",
-			hint: phone ? "Shown on screen to copy" : "No phone on file",
-			disabled: !phone,
-		},
 	];
+	if (whatsAppKinds.includes("MESSAGE"))
+		options.push({
+			value: "WHATSAPP",
+			label: "WhatsApp",
+			hint: phone ? phone : "No phone on file",
+			disabled: !phone,
+		});
+	return options;
 }
+
+/** Why a guest with only a phone can't get a typed message: shown instead of a WhatsApp choice. */
+export const NO_WHATSAPP_MESSAGES =
+	"A typed message can't go on WhatsApp: WhatsApp only carries approved templates (booking messages and receipts). Add the guest's email, or call them and log their reply.";
 
 /**
  * Message a guest about their booking (Front office and Manager · Bookings, Owner · Bookings through HotelScope). The
@@ -65,6 +85,7 @@ export function GuestMessageModal({
 	const { run, pending } = useAction();
 	const { messageGuest, messageTemplates, fillTemplate } = useHotelActions();
 	const { hotelName } = useHotelScope();
+	const waKinds = useWhatsAppKinds();
 	const [channel, setChannel] = useState<GuestChannel>("EMAIL");
 	const [templates, setTemplates] = useState<MessageTemplateRow[]>([]);
 	const [template, setTemplate] = useState("");
@@ -75,9 +96,7 @@ export function GuestMessageModal({
 
 	useEffect(() => {
 		if (!guest) return;
-		setChannel(
-			guest.guestEmail ? "EMAIL" : guest.guestPhone ? "WHATSAPP" : "EMAIL",
-		);
+		setChannel("EMAIL");
 		setTemplate("");
 		setBody("");
 		setMissing([]);
@@ -163,13 +182,10 @@ export function GuestMessageModal({
 					value={channel}
 					onChange={setChannel}
 					columns={2}
-					options={channelOptions(guest.guestEmail, guest.guestPhone)}
+					options={channelOptions(guest.guestEmail, guest.guestPhone, waKinds)}
 				/>
-				{!connected && (
-					<Note tone="warning">
-						WhatsApp is coming soon. The message is saved in the conversation
-						and shown on screen so you can copy it to the guest.
-					</Note>
+				{!guest.guestEmail && !waKinds.includes("MESSAGE") && (
+					<Note tone="warning">{NO_WHATSAPP_MESSAGES}</Note>
 				)}
 				<SelectField
 					label="Start from a template"

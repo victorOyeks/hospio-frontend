@@ -78,7 +78,7 @@ export async function recordPayment(
 			guestPhone: input.guestPhone ?? null,
 			guestEmail: input.guestEmail ?? null,
 			description: input.description ?? "Room charges",
-			// Email when the guest has one (sent for real); "NONE" sends nothing. WhatsApp is coming soon.
+			// Email when the guest has one, else WhatsApp (the receipt template) when they have a phone; "NONE" sends nothing.
 			receiptPreference: input.receipt ?? "EMAIL",
 			orderId: input.orderId ?? null,
 			role: input.role ?? null,
@@ -535,8 +535,9 @@ export async function openSupportTicket(input: {
 }
 
 /**
- * Resend receipt: payment-service sends the approved payment's receipt to the guest again (WhatsApp when
- * the payment has a phone, otherwise email). On staging the delivery comes back for the deliveries panel.
+ * Resend receipt: payment-service sends the approved payment's receipt to the guest again, by email when the payment has
+ * one, else on WhatsApp (the approved receipt template) when it has a phone, as the automatic receipt does. On staging the
+ * delivery comes back for the deliveries panel.
  */
 export async function resendReceipt(paymentId: string): Promise<
 	ActionResult<{

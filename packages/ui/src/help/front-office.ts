@@ -191,7 +191,7 @@ export const frontOfficeHelp: HelpModule = {
 			goodToKnow: [
 				"Only an approved payment has a receipt to print.",
 				"Right after you take a payment, the last step also has “Print receipt”.",
-				"The folio window is “Print or email the folio”: “Email” and “Email folio” send it for real to the guest's email. WhatsApp is coming soon and greyed out.",
+				"The folio window is “Print or email the folio”: “Email” and “Email folio” send it for real to the guest's email. The folio has no WhatsApp template, so there is no WhatsApp choice: print it for a guest without an email.",
 			],
 		},
 		{
@@ -310,7 +310,7 @@ export const frontOfficeHelp: HelpModule = {
 				"In “Messages”, reply in the guest's conversation (“Use a template” helps), then tap “Mark done” when it is handled.",
 			],
 			goodToKnow: [
-				"Only email is really sent, in the hotel's name. WhatsApp is coming soon: the text is saved and shown for you to copy.",
+				"Messages you type go by email, in the hotel's name. WhatsApp only carries approved templates (booking confirmations, changes, cancellations, arrival reminders and receipts), so a typed message can't go on WhatsApp: add the guest's email or call them.",
 				"If the guest answered by phone or at the desk, tap “Add what the guest said” so the conversation is complete.",
 				"The “Unanswered” tab shows guests still waiting for a reply.",
 				"A conversation is deleted 30 days after its last message.",

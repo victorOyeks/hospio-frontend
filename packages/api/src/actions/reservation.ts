@@ -222,9 +222,10 @@ export async function checkOut(
 			body: {
 				folioBalance: balance,
 				allowPendingPayment: input.allowPendingPayment ?? balance > 0,
+				// The stay summary goes by email: it has no approved WhatsApp template (hospio-backend
+				// docs/sms-whatsapp.md), so asking for WhatsApp only ever recorded a failure.
 				summaryChannels:
-					input.summaryChannels ??
-					(b.guestEmail ? ["WHATSAPP", "EMAIL"] : ["WHATSAPP"]),
+					input.summaryChannels ?? (b.guestEmail ? ["EMAIL"] : []),
 			},
 		},
 	);
@@ -238,7 +239,7 @@ export async function checkOut(
 	};
 }
 
-/** PUT /reservation/bookings/{id}: new dates; the guest is emailed (WhatsApp coming soon); what went out comes back as `deliveries` on staging. */
+/** PUT /reservation/bookings/{id}: new dates; the guest is emailed, or told on WhatsApp when they have only a phone; what went out comes back as `deliveries` on staging. */
 export async function changeBookingDates(
 	b: BookingRow,
 	checkInDate: string,
