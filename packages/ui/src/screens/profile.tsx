@@ -41,6 +41,8 @@ import {
 } from "@hospio/api/actions";
 import { useAction } from "@hospio/api/actions/use-action";
 import type { Me } from "@hospio/api/api/schema";
+import type { LegalRecord, MyLegal } from "@hospio/api/api/routes-legal";
+import { LegalRecordsTable, MyDocuments } from "@hospio/ui/shared/legal-records";
 import {
 	EMAIL_CATEGORIES,
 	type EmailPrefs,
@@ -114,16 +116,22 @@ export function ProfileScreen({
 	sessions,
 	twoStep,
 	emailPrefs,
+	legal = null,
+	businessRecords = null,
 }: {
 	user: Me;
 	role: HotelRole | null;
 	sessions: ProfileSession[];
 	twoStep: TwoStepState | null;
 	emailPrefs: EmailPrefs;
+	/** The documents this person accepts and their records (hospio-backend docs/legal-acceptance.md). */
+	legal?: MyLegal | null;
+	/** Owner only: every acceptance record of the business (staff, device terms, links shared). */
+	businessRecords?: LegalRecord[] | null;
 }) {
 	const router = useRouter();
 	const [tab, setTab] = useQueryState("tab");
-	const active = (tab ?? "profile") as "profile" | "security" | "notifications";
+	const active = (tab ?? "profile") as "profile" | "security" | "notifications" | "legal";
 	const { run, pending } = useAction();
 
 	// profile
@@ -265,6 +273,9 @@ export function ProfileScreen({
 					{ key: "profile", label: "My profile" },
 					{ key: "security", label: "Security" },
 					{ key: "notifications", label: "Notification settings" },
+					...(legal && (legal.required.length > 0 || legal.records.length > 0)
+						? [{ key: "legal", label: "Terms & acceptances" }]
+						: []),
 				]}
 				value={active}
 				onChange={(k) => void setTab(k === "profile" ? null : k)}
@@ -685,6 +696,21 @@ export function ProfileScreen({
 						</div>
 					</div>
 				</SectionCard>
+			)}
+
+			{active === "legal" && legal && (
+				<div className="flex flex-col gap-4">
+					<SectionCard title="Your documents" subtitle="The version in force of each document you accept, and any new version announced" flush>
+						<MyDocuments required={legal.required} pending={legal.pending} upcoming={legal.upcoming} />
+					</SectionCard>
+					<SectionCard
+						title={businessRecords ? "Acceptances for your business" : "What you accepted"}
+						subtitle="Kept as a record: who, which version, when, from which address and browser, and how. Records are never changed."
+						flush
+					>
+						<LegalRecordsTable records={businessRecords ?? legal.records} />
+					</SectionCard>
+				</div>
 			)}
 
 			{/* Change password */}

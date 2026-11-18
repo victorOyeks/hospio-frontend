@@ -12,6 +12,8 @@ import { useState } from "react";
 import { toast } from "sonner";
 import { resetPassword } from "@hospio/api/actions/identity";
 import { sendHandover } from "@hospio/api/actions/tenant";
+import { recordLinksShared } from "@hospio/api/actions/legal";
+import { emptyLinksShared, LinksSharedFields, linksSharedReady } from "@hospio/ui/shared/links-shared";
 import type { Handover, UserCreated } from "@hospio/api/api/schema";
 import { isHotelRole, roleLabels } from "@hospio/api/roles";
 import type { OnboardingLogin } from "@hospio/api/types";
@@ -63,6 +65,7 @@ export function HandoverStep({ ctx }: { ctx: WizardCtx }) {
 	const open = checks.filter((c) => !c.done);
 	const [confirm, setConfirm] = useState(false);
 	const [message, setMessage] = useState("");
+	const [shared, setShared] = useState(emptyLinksShared);
 	const [pack, setPack] = useState(false);
 	const [reset, setReset] = useState(false);
 	const [owner, setOwner] = useState<OwnerLogin | null>(null);
@@ -76,6 +79,16 @@ export function HandoverStep({ ctx }: { ctx: WizardCtx }) {
 	const send = () =>
 		busy(async () => {
 			// Step 10 is saved first (READY_FOR_HANDOVER) so the draft carries the owner it was sent to.
+			// How the legal links reached the owner (not an acceptance: the owner ticks the boxes at first sign-in).
+			const note = await recordLinksShared(business.id, {
+				channel: shared.channel,
+				sharedOn: shared.sharedOn,
+				note: shared.note.trim() || undefined,
+			});
+			if (!note.ok) {
+				toast.error(note.error);
+				return;
+			}
 			const row = await ctx.saveStep("handover", {
 				ownerEmail: business.ownerEmail,
 			});
@@ -413,6 +426,7 @@ export function HandoverStep({ ctx }: { ctx: WizardCtx }) {
 				subtitle={`The owner login is made for ${business.ownerEmail}`}
 				confirmLabel="Send handover"
 				pending={pending}
+				confirmDisabled={!linksSharedReady(shared)}
 				onConfirm={send}
 			>
 				<div className="flex flex-col gap-3">
@@ -422,8 +436,10 @@ export function HandoverStep({ ctx }: { ctx: WizardCtx }) {
 							"The stage changes to Handed over until the owner accepts",
 							`${hotels.length} ${hotels.length === 1 ? "hotel" : "hotels"}, ${logins.length} ${logins.length === 1 ? "login" : "logins"} and the settings go in the handover pack`,
 							"No email is sent yet: share the pack and the password with the owner yourself",
+							"The owner accepts the Terms and the daily debit authority themselves, by ticking two boxes at first sign-in",
 						]}
 					/>
+					<LinksSharedFields value={shared} onChange={setShared} />
 					<TextareaField
 						label="Note to the owner (kept on the pack)"
 						value={message}

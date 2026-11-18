@@ -5,7 +5,7 @@ import { PageHeader } from "@hospio/ui/shared/page-header";
 import { cn } from "@hospio/ui/utils";
 import { Crumbs } from "../shared";
 
-export type BusinessTabKey = "usage" | "money" | "support" | "activity";
+export type BusinessTabKey = "usage" | "money" | "support" | "activity" | "acceptance";
 /** Tabs drawn on the business page itself (`?tab=`); the rest are their own routes. */
 export type BusinessLocalTab = "overview" | "hotels" | "users";
 
@@ -19,6 +19,7 @@ const ROUTES: { key: BusinessTabKey; label: string }[] = [
 	{ key: "money", label: "Money" },
 	{ key: "support", label: "Support" },
 	{ key: "activity", label: "Contract & activity" },
+	{ key: "acceptance", label: "Acceptance" },
 ];
 
 const tabClass = (active: boolean) =>

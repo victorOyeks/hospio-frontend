@@ -75,11 +75,16 @@ export async function saveDevicePackage(
 	return error || !data ? fail(error, "The device package could not be saved") : { ok: true, data: data.data };
 }
 
-export async function installDevicePackage(id: string, installedOn: string | null): Promise<ActionResult<DevicePackageView>> {
+/** `signedScheduleRef`: when the owner hasn't ticked the device terms in the app, the reference of the signed device schedule instead. */
+export async function installDevicePackage(
+	id: string,
+	installedOn: string | null,
+	signedScheduleRef?: string | null,
+): Promise<ActionResult<DevicePackageView>> {
 	const { data, error } = await api("@post/platform/admin/device-packages/:id/install", {
 		...(await withSession()),
 		params: { id },
-		body: { installedOn },
+		body: { installedOn, signedScheduleRef: signedScheduleRef?.trim() || null },
 	});
 	return error || !data ? fail(error, "The devices could not be marked installed") : { ok: true, data: data.data };
 }

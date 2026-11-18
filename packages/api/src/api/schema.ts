@@ -9,6 +9,7 @@ import { mlRoutes } from "./routes-ml";
 import { opsRoutes } from "./routes-ops";
 import { ownerRoutes } from "./routes-owner";
 import { devicePackageRoutes } from "./routes-device-packages";
+import { legalRoutes } from "./routes-legal";
 import { feeRoutes } from "./routes-fees";
 import { paymentRoutes } from "./routes-payments";
 import { profileRoutes } from "./routes-profile";
@@ -1123,6 +1124,7 @@ export const schema = createSchema({
 	...ownerRoutes,
 	...feeRoutes,
 	...devicePackageRoutes,
+	...legalRoutes,
 	...mlRoutes,
 	...adminRoutes,
 	...opsRoutes,
@@ -1147,6 +1149,9 @@ export const schema = createSchema({
 			businessName: z.string(),
 			city: z.string().nullable().optional(),
 			referralCode: z.string().nullable().optional(),
+			/** The two required boxes (hospio-backend docs/legal-acceptance.md); identity refuses a sign-up without them. */
+			acceptTerms: z.boolean(),
+			acceptDebit: z.boolean(),
 		}),
 		output: envelope(AuthResponse),
 	},

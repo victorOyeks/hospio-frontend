@@ -1,6 +1,7 @@
 "use server";
 
-import { clientAgentHeaders } from "@hospio/api/client-agent";
+import { clientAgentHeaders, clientMetaHeaders } from "@hospio/api/client-agent";
+import { loadLegalDocuments } from "@hospio/api/actions/legal";
 import { askForPin } from "@hospio/api/device";
 import { revalidatePath } from "next/cache";
 import { cookies } from "next/headers";
@@ -71,9 +72,23 @@ export type SignUpInput = {
 	city?: string;
 	/** The marketer's code from the sign-up link (?ref=); identity refuses an unknown or inactive one. */
 	referralCode?: string;
+	/** The two required boxes: Terms, Privacy Policy and Data Processing Terms; the 1.5% daily debit authority. */
+	acceptTerms: boolean;
+	acceptDebit: boolean;
 };
 
 /** POST /identity/auth/sign-up: the owner account and business are created and the owner is signed in. */
+async function recordSignUpAcceptance(token: string) {
+	const docs = await loadLegalDocuments();
+	const owner = docs.filter((d) => ["TERMS", "PRIVACY", "DPA", "DEBIT"].includes(d.key));
+	if (!owner.length) return;
+	await api("@post/platform/legal/accept", {
+		auth: { type: "Bearer", token },
+		headers: await clientMetaHeaders(),
+		body: { documents: owner.map((d) => ({ key: d.key, version: d.version })), method: "SELF_SIGN_UP" },
+	});
+}
+
 export async function signUp(
 	input: SignUpInput,
 ): Promise<ActionResult<{ roles: string[]; deliveries?: Delivery[] | null }>> {
@@ -110,6 +125,9 @@ export async function signUp(
 			),
 		};
 	await settleSession(data.data.accessToken, data.data.refreshToken);
+	// The two boxes become the owner's acceptance records (method SELF_SIGN_UP, with IP and browser). If this fails the owner is
+	// simply asked again at their first sign-in to the dashboard (the legal gate), so sign-up never fails on it.
+	await recordSignUpAcceptance(data.data.accessToken).catch(() => undefined);
 	return {
 		ok: true,
 		data: { roles: data.data.roles, deliveries: data.data.deliveries },

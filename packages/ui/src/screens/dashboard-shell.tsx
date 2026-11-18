@@ -8,6 +8,9 @@ import { AppSidebar } from "@hospio/ui/shared/app-sidebar";
 import { Header } from "@hospio/ui/shared/header";
 import { SidebarInset, SidebarProvider } from "@hospio/ui/primitives/sidebar";
 import { SupportBar } from "@hospio/ui/shared/support-bar";
+import { LegalGate } from "@hospio/ui/shared/legal";
+import { loadMyLegal } from "@hospio/api/actions/legal";
+import { logout } from "@hospio/api/actions/auth";
 import { APP } from "@hospio/api/app";
 import { data } from "@hospio/api/data";
 import {
@@ -97,6 +100,7 @@ export async function DashboardShell({ children }: PropsWithChildren) {
 		approvals,
 		brand,
 		desk,
+		legal,
 	] = await Promise.all([
 		// getBusiness answers from the fixture (LIVE) in demo mode, so nothing changes there.
 		ownerHotel ? getBusiness() : Promise.resolve(null),
@@ -128,6 +132,8 @@ export async function DashboardShell({ children }: PropsWithChildren) {
 					.desk(role, seesAllOutlets(session, role))
 					.catch(() => null)
 			: Promise.resolve(null),
+		// The legal documents this person still has to accept (hospio-backend docs/legal-acceptance.md); never while support views as the owner.
+		support ? Promise.resolve(null) : loadMyLegal().catch(() => null),
 	]);
 	if (ownerHotel) {
 		// A self-serve owner still in the wizard goes back to it; one handed over by Hospio360 reviews the
@@ -180,6 +186,14 @@ export async function DashboardShell({ children }: PropsWithChildren) {
 					<RememberBrand value={encodeBrandCookie(brand, activeHotel.name)} />
 				)}
 				{support && <SupportBar endsAt={support.endsAt} />}
+				{legal?.canAccept && legal.pending.length > 0 && (
+					<LegalGate
+						pending={legal.pending}
+						firstTime={!legal.records.some((r) => r.event === "ACCEPTED")}
+						marketer={user.roles.includes("MARKETER")}
+						signOut={logout}
+					/>
+				)}
 				<SidebarProvider
 					className={cn(
 						support &&

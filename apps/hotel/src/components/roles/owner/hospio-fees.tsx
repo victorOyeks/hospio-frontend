@@ -6,6 +6,10 @@ import { Suspense, useState } from "react";
 import type { DailyFeeRow } from "@hospio/api/actions/daily-fees";
 import type { DevicePackageView } from "@hospio/api/actions/device-packages";
 import { OwnerDeviceInvoices } from "./device-invoices";
+import { acceptDeviceTerms } from "@hospio/api/actions/legal";
+import { useAction } from "@hospio/api/actions/use-action";
+import { Button } from "@hospio/ui/primitives/button";
+import { TickBox, legalUrl } from "@hospio/ui/shared/legal";
 import { DetailList, Note } from "@hospio/ui/shared/detail-list";
 import { EmptyState } from "@hospio/ui/shared/empty-state";
 import { fmtWhen, naira } from "@hospio/ui/shared/format";
@@ -84,6 +88,47 @@ function status(s: string) {
 		default:
 			return <StatusPill tone="grey">{s}</StatusPill>;
 	}
+}
+
+/**
+ * The owner accepts the device terms for a package before it is installed (hospio-backend docs/legal-acceptance.md); the admin can't
+ * mark it installed until then (or enters a signed schedule's reference). Once accepted it says who and when.
+ */
+function DeviceTerms({ p, owner }: { p: DevicePackageView; owner: boolean }) {
+	const router = useRouter();
+	const [ticked, setTicked] = useState(false);
+	const { run, pending } = useAction();
+	if (p.termsAcceptedAt)
+		return (
+			<p className="text-[12px] text-ink-3">
+				Device terms accepted by {p.termsAcceptedName ?? "the owner"} on {fmtWhen(p.termsAcceptedAt)} ({p.termsVersion})
+			</p>
+		);
+	if (p.status !== "DRAFT") return null;
+	if (!owner)
+		return <p className="text-[12px] text-ink-3">Waiting for the owner to accept the device terms before installation.</p>;
+	return (
+		<div className="flex flex-col gap-2 rounded-lg border border-line bg-subtle/40 p-3" data-testid="device-terms">
+			<p className="text-[13px] font-medium text-ink">Before Hospio360 installs these devices</p>
+			<TickBox id={`devices-${p.id}`} checked={ticked} onChange={setTicked}>
+				I agree to the{" "}
+				<a href={legalUrl("devices")} target="_blank" rel="noopener noreferrer" className="font-medium text-primary underline underline-offset-2">
+					Devices &amp; equipment terms
+				</a>{" "}
+				for this package, including how it is paid for and that Hospio360 owns the devices until they are paid off.
+			</TickBox>
+			<div>
+				<Button
+					type="button"
+					size="sm"
+					disabled={!ticked || pending}
+					onClick={() => run(() => acceptDeviceTerms(p.id), "Device terms accepted", () => router.refresh())}
+				>
+					Accept device terms
+				</Button>
+			</div>
+		</div>
+	);
 }
 
 export function HospioFees({
@@ -198,6 +243,7 @@ export function HospioFees({
 											Last payment {naira(p.payments[0].amount)} on {day(p.payments[0].paidOn)}
 										</p>
 									)}
+									<DeviceTerms p={p} owner={audience === "owner"} />
 								</li>
 							);
 						})}
