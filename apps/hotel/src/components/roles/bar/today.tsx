@@ -127,6 +127,8 @@ export function BarTodayScreen({
 	const [saleId, setSaleId] = useQueryState("sale", parseAsString);
 	const [panel, setPanel] = useState<Panel>(null);
 	const [lines, setLines] = useState<CartLine[]>([]);
+	// A bar that also sells the kitchen's food speaks of items, not drinks.
+	const sellsFood = menu.some((m) => m.preparedAt);
 	const [tableId, setTableId] = useState("");
 	const [settle, setSettle] = useState<"NOW" | "TAB" | "ROOM">("NOW");
 	const [roomId, setRoomId] = useState("");
@@ -473,8 +475,8 @@ export function BarTodayScreen({
 				title={several ? `New sale at ${outletName}` : "New sale"}
 				subtitle={
 					table
-						? `${table.number} · pick the drinks`
-						: "Pick the drinks, then how they pay"
+						? `${table.number} · pick the ${sellsFood ? "items" : "drinks"}`
+						: `Pick the ${sellsFood ? "items" : "drinks"}, then how they pay`
 				}
 				icon={WineIcon}
 				width="lg"
