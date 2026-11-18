@@ -22,7 +22,7 @@ import { AdminSearch } from "@hospio/ui/shared/admin-search";
 import { cn } from "@hospio/ui/utils";
 import { type DeviceSetupHotel, LockButton, SetupDeviceModal } from "@hospio/ui/shared/shared-device";
 import { forgetEverything, rememberPage } from "@hospio/ui/shared/draft";
-import { InstallBanner, InstallMenuItem } from "@hospio/ui/shared/pwa";
+import { InstallBanner, InstallMenuItem, OpenInAppBanner } from "@hospio/ui/shared/pwa";
 
 function initials(name: string) {
 	return name.split(" ").filter(Boolean).map((w) => w[0]).slice(0, 2).join("").toUpperCase();
@@ -133,6 +133,7 @@ export function Header({
 					</DropdownMenuContent>
 				</DropdownMenu>
 				<InstallBanner />
+				<OpenInAppBanner />
 				{setupHotels.length > 0 && (
 					<SetupDeviceModal open={setupOpen} onOpenChange={setSetupOpen} hotels={setupHotels} activeHotelId={activeHotelId} activeRole={role} />
 				)}

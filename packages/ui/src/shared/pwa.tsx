@@ -1,6 +1,6 @@
 "use client";
 
-import { DownloadIcon, ShareIcon, SquarePlusIcon, XIcon } from "lucide-react";
+import { AppWindowIcon, ArrowUpRightIcon, DownloadIcon, ShareIcon, SquarePlusIcon, XIcon } from "lucide-react";
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { APP_NAME } from "@hospio/api/app";
@@ -194,5 +194,95 @@ export function InstallBanner() {
 			)}
 			<IosTip open={tip} onOpenChange={setTip} />
 		</>
+	);
+}
+
+const OPEN_IN_APP_HIDDEN = "hospio.open-in-app.hidden-until";
+const WEEK = 7 * 86_400_000;
+
+function hiddenUntil() {
+	try {
+		return Number(window.localStorage.getItem(OPEN_IN_APP_HIDDEN) ?? 0);
+	} catch {
+		return 0;
+	}
+}
+
+type RelatedAppsNavigator = Navigator & { getInstalledRelatedApps?: () => Promise<{ platform: string; url?: string }[]> };
+
+/**
+ * "Hospio360 is installed on this device." in a normal browser tab when the app is installed here (Chrome/Edge on
+ * Android and computers: navigator.getInstalledRelatedApps, with the manifest naming itself in related_applications).
+ * A website cannot switch itself into the installed app, so "Open the app" shows where the browser's own button is.
+ * iOS and Firefox cannot tell; nothing shows there. "Continue in browser" hides it for 7 days on this device.
+ */
+export function OpenInAppBanner() {
+	const { standalone } = useInstallPrompt();
+	const [installed, setInstalled] = useState(false);
+	const [hint, setHint] = useState(false);
+	const [android, setAndroid] = useState(false);
+
+	useEffect(() => {
+		if (standalone) return;
+		const nav = navigator as RelatedAppsNavigator;
+		if (typeof nav.getInstalledRelatedApps !== "function" || hiddenUntil() > Date.now()) return;
+		setAndroid(/Android/i.test(navigator.userAgent));
+		nav
+			.getInstalledRelatedApps()
+			.then((apps) => setInstalled(apps.some((a) => a.platform === "webapp")))
+			.catch(() => {
+				// not allowed here (e.g. not https): no banner
+			});
+	}, [standalone]);
+
+	if (standalone || !installed) return null;
+	const keepBrowsing = () => {
+		setInstalled(false);
+		try {
+			window.localStorage.setItem(OPEN_IN_APP_HIDDEN, String(Date.now() + WEEK));
+		} catch {
+			// blocked storage: hidden for this visit only
+		}
+	};
+	return createPortal(
+		<section
+			aria-label={`${APP_NAME} is installed`}
+			data-open-in-app-banner
+			className="fixed inset-x-3 bottom-3 z-50 mx-auto flex max-w-[560px] flex-wrap items-center gap-3 rounded-xl border border-brand/20 bg-card px-4 py-3 pb-[max(12px,env(safe-area-inset-bottom))] shadow-lg"
+		>
+			<span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-brand text-white">
+				<AppWindowIcon className="size-5" />
+			</span>
+			<div className="min-w-0 flex-1 text-[13px]">
+				<p className="font-semibold text-ink">{APP_NAME} is installed on this device.</p>
+				{hint ? (
+					<p className="flex items-center gap-1 text-ink-2" data-open-in-app-hint>
+						{android ? (
+							<>
+								Tap <b>⋮</b> then <b>&lsquo;Open in {APP_NAME}&rsquo;</b>.
+							</>
+						) : (
+							<>
+								Click <b>&lsquo;Open in app&rsquo;</b> in the address bar
+								<ArrowUpRightIcon className="size-4 shrink-0 text-brand" />
+							</>
+						)}
+					</p>
+				) : (
+					<p className="text-ink-2">Open it in its own window, or carry on here.</p>
+				)}
+			</div>
+			<div className="flex shrink-0 items-center gap-2">
+				{!hint && (
+					<button type="button" className={btn.primary} onClick={() => setHint(true)}>
+						Open the app
+					</button>
+				)}
+				<button type="button" className={btn.secondary} onClick={keepBrowsing}>
+					Continue in browser
+				</button>
+			</div>
+		</section>,
+		document.body,
 	);
 }
