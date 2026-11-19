@@ -41,6 +41,11 @@ export function useAction() {
 			if (!result.ok) {
 				toast.error(readable(result.error), { duration: 8000 });
 				// The person's roles changed since they signed in: pick up a token with the current ones.
+				// The business was suspended while this person was working: the one screen they can use now.
+				if (/account is suspended/i.test(result.error)) {
+					window.location.assign("/suspended");
+					return;
+				}
 				if (/access has changed/i.test(result.error)) {
 					window.location.assign(`/api/session/refresh?from=${encodeURIComponent(window.location.pathname + window.location.search)}`);
 				}

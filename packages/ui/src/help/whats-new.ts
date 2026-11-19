@@ -10,6 +10,11 @@ export const whatsNew: WhatsNewItem[] = [
 		audience: ["MANAGER", "OWNER"],
 	},
 	{
+		title: "Suspension is now real",
+		body: "A suspended business is locked out: everyone there sees “This account is suspended”, and only the owner can sign in to see and pay what is owed. Fees & billing → Invoices has “Suspension candidates” (an invoice 30 or more days overdue) with “Send notice” (the 7 days' notice by email) and “Suspend”. A suspension for unpaid invoices lifts by itself when every overdue invoice is paid; “Reactivate” on the business page puts the previous stage back. You can still open the business and view as the owner.",
+		audience: ["PLATFORM"],
+	},
+	{
 		title: "One monthly invoice",
 		body: "Nothing is debited from your account any more. On the 1st Hospio360 sends one invoice for the month before: the platform fee for each location, guest messages and devices & internet. Pay it within 7 days under “Billing & invoices” with “Pay now”, and download the invoice and receipts there. If it is still unpaid after the 11th, card/transfer POS payments, new sales and new bookings pause until it is paid; check-out and cash on existing bills keep working. Hospio fees still shows this month so far.",
 		audience: ["OWNER", "MANAGER"],

@@ -1,3 +1,5 @@
+import { mySuspension } from "@hospio/api/actions/suspension";
+import { SuspensionWatch } from "./suspended";
 import { SetupLinks } from "@hospio/ui/shared/field";
 import { NotUsedHere } from "@hospio/ui/shared/not-used-here";
 import { isStayOnlyPath } from "@hospio/ui/links";
@@ -92,6 +94,18 @@ export async function DashboardShell({ children }: PropsWithChildren) {
 	if (!user) redirect("/auth");
 	if (!user.changedPassword) redirect("/reset-password");
 	if (!role) redirect("/select-role");
+
+	// Real suspension (hospio-backend docs/suspension.md): everyone at a suspended business gets the one screen, whatever page
+	// they asked for; the services refuse everything else anyway. Support viewing as the owner still sees the business.
+	if (APP === "hotel" && user.businessId && !support && !DEMO_AUTH) {
+		const suspension = await mySuspension().catch(() => null);
+		if (suspension?.suspended) {
+			// Back from Paystack through an old link: keep the payment reference so it is confirmed there.
+			const asked = (await headers()).get("x-hospio-path") ?? "";
+			const reference = new URLSearchParams(asked.split("?")[1] ?? "").get("reference");
+			redirect(reference ? `/suspended?reference=${encodeURIComponent(reference)}` : "/suspended");
+		}
+	}
 
 	// Everything below depends only on who is signed in and the role: one round of calls, not five in a row.
 	const ownerHotel = APP === "hotel" && role === "OWNER";
@@ -257,6 +271,7 @@ export async function DashboardShell({ children }: PropsWithChildren) {
 							setupHotels={setupHotels}
 							activeHotelId={activeHotel?.id}
 						/>
+						{APP === "hotel" && user.businessId && !support && !DEMO_AUTH && <SuspensionWatch />}
 						{device && <IdleLock minutes={device.autoLockMinutes} />}
 						{pinPrompt && !legalGate && <PinPrompt onDevice={!!device} />}
 						<div className="flex flex-1 flex-col gap-5 px-5 py-6 lg:px-8">

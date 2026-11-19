@@ -1,4 +1,6 @@
 import type { Metadata } from "next";
+import { redirect } from "next/navigation";
+import { mySuspension } from "@hospio/api/actions/suspension";
 import { ReceiptView } from "@/components/receipt/receipt-view";
 import { buildReceipt } from "@hospio/api/data/receipt-doc";
 
@@ -15,6 +17,8 @@ export default async function ReceiptPage({
 	searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
 	const sp = await searchParams;
+	// A suspended business has the one screen (hospio-backend docs/suspension.md).
+	if ((await mySuspension()).suspended) redirect("/suspended");
 	const one = (k: string) =>
 		typeof sp[k] === "string" ? (sp[k] as string) : undefined;
 	const doc = await buildReceipt({
