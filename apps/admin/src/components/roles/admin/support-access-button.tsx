@@ -77,7 +77,7 @@ export function SupportAccessButton({
 										if (!grant.ok) return grant;
 										return mintSupportToken(grant.data.grantId);
 									},
-									"Opening the hotel app as the owner",
+									"Opening the business's app as the owner",
 									(t) => {
 										const url = `${HOTEL_APP}/auth/support?token=${encodeURIComponent(t.accessToken)}`;
 										if (tab) tab.location.href = url;
@@ -113,7 +113,7 @@ export function SupportAccessButton({
 					/>
 					<WhatHappens
 						items={[
-							"You see the hotel app exactly as the owner does, read only",
+							"You see the app exactly as the owner does, read only",
 							"Every page you open is logged with your name and this reason",
 							"The access ends when the time is up or you close the tab",
 						]}

@@ -32,8 +32,8 @@ import {
 
 /** The POS providers payments go through today (docs/pos-providers.md); the test terminal moves no money. */
 const PROVIDERS = [
-	{ value: "moniepoint", label: "Moniepoint", hint: "The hotel's own Moniepoint POS" },
-	{ value: "opay", label: "OPay", hint: "The hotel's own OPay POS" },
+	{ value: "moniepoint", label: "Moniepoint", hint: "The location's own Moniepoint POS" },
+	{ value: "opay", label: "OPay", hint: "The location's own OPay POS" },
 	{ value: "logging", label: "Test terminal", hint: "No card machine: records payments, moves no money" },
 ];
 
@@ -171,15 +171,15 @@ export function ConnectionsStep({ ctx }: { ctx: WizardCtx }) {
 				onBack={() => ctx.goTo(prevStep("connections"))}
 			>
 				<EmptyState
-					title="Add a hotel first"
-					hint="Connections belong to a hotel."
+					title="Add a location first"
+					hint="Connections belong to a location."
 				>
 					<button
 						type="button"
 						className={cn(btn.secondary, btn.small, "mt-2")}
 						onClick={() => ctx.goTo("hotels")}
 					>
-						Back to hotels
+						Back to locations
 					</button>
 				</EmptyState>
 			</StepFrame>
@@ -193,7 +193,7 @@ export function ConnectionsStep({ ctx }: { ctx: WizardCtx }) {
 			onBack={() => ctx.goTo(prevStep("connections"))}
 			onContinue={ctx.editable ? save : undefined}
 			pending={pending}
-			footerNote="WhatsApp numbers are saved for every hotel when you continue. Email is set up later in Hotel setup → Guest messaging."
+			footerNote="WhatsApp numbers are saved for every location when you continue. Email is set up later in its setup → Guest messaging."
 		>
 			{hotels.length > 1 && (
 				<PillTabs
@@ -312,14 +312,14 @@ export function ConnectionsStep({ ctx }: { ctx: WizardCtx }) {
 						{form.provider !== "logging" && keys && (
 							keys[hotelId]?.includes(form.provider.toUpperCase()) ? (
 								<p className="mt-2 text-[12px] text-success">
-									{providerLabel(form.provider)} keys are saved for {hotel?.name ?? "this hotel"}: payments can go to this terminal.
+									{providerLabel(form.provider)} keys are saved for {hotel?.name ?? "this location"}: payments can go to this terminal.
 								</p>
 							) : (
 								<p className="mt-2 text-[12px] text-warning">
-									{hotel?.name ?? "This hotel"} has no {providerLabel(form.provider)} keys yet, so payments can't reach this terminal until a Super
+									{hotel?.name ?? "This location"} has no {providerLabel(form.provider)} keys yet, so payments can't reach this terminal until a Super
 									admin adds them in{" "}
 									<Link href={`/dashboard/hotels?hotel=${hotelId}&htab=fees`} className="font-semibold underline">
-										the hotel's POS & Hospio fees
+										the location's POS & Hospio fees
 									</Link>
 									.
 								</p>
@@ -340,7 +340,7 @@ export function ConnectionsStep({ ctx }: { ctx: WizardCtx }) {
 			</StepCard>
 			<StepCard
 				title="Devices & internet"
-				subtitle="What Hospio360 supplies to each hotel (tablets, router, data plan) and how it is paid for: own devices, from transactions, monthly or one time"
+				subtitle="What Hospio360 supplies to each location (tablets, router, data plan) and how it is paid for: own devices, from transactions, monthly or one time"
 			>
 				{ctx.hotels.length === 0 ? (
 					<p className="text-[13px] text-ink-3">Add the hotels first.</p>

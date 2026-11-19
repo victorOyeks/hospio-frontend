@@ -178,7 +178,7 @@ export function PaymentsScreen({
 		},
 		{
 			accessorKey: "net",
-			header: "To the hotel",
+			header: "To the business",
 			cell: ({ row }) => (
 				<span className="font-semibold">{naira(row.original.net)}</span>
 			),
@@ -349,7 +349,7 @@ export function PaymentsScreen({
 				(hotels ? (
 					<PosCollectionTab role={role} hotels={hotels} />
 				) : (
-					<Loading label="Loading every hotel…" />
+					<Loading label="Loading every location…" />
 				))}
 			{section !== "pos" && (
 				<>
@@ -520,7 +520,7 @@ export function PaymentsScreen({
 					{active === "failed" && (
 						<SectionCard
 							title="Failed payouts"
-							subtitle="Money we hold for the hotel until the bank details are fixed"
+							subtitle="Money we hold for the business until the bank details are fixed"
 							count={failed.total}
 						>
 							{failed.content.length === 0 ? (
@@ -638,7 +638,7 @@ export function PaymentsScreen({
 										value: `-${naira(selected.hmsShare)}`,
 									},
 									{
-										label: "Paid to the hotel",
+										label: "Paid to the business",
 										value: naira(selected.net),
 										strong: true,
 									},

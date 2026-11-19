@@ -31,7 +31,7 @@ const stageHint: Record<BusinessStage, string> = {
 	LEAD: "Talking, nothing set up yet",
 	ONBOARDING: "Hospio360 or the owner is setting it up",
 	HANDED_OVER: "Waiting for the owner to accept",
-	LIVE: "Hotels in daily use",
+	LIVE: "In daily use",
 	AT_RISK: "Fees overdue or usage dropping",
 	SUSPENDED: "Everyone at the business is locked out until reactivated",
 	CHURNED: "Left Hospio360",

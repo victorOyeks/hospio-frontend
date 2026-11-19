@@ -7,6 +7,7 @@ import * as sidebar from "@hospio/ui/primitives/sidebar";
 import { linksByRole, type NavLink } from "@hospio/ui/links";
 import type { HotelRole } from "@hospio/api/roles";
 import { cn } from "@hospio/ui/utils";
+import { useBizText } from "@hospio/ui/shared/wording";
 
 function LinkIcon({ icon: Icon }: { icon: NavLink["icon"] }) {
 	const { pending } = useLinkStatus();
@@ -45,6 +46,8 @@ export function NavMain({
 	);
 	const pathname = usePathname();
 	const active = activeUrl(pathname, items);
+	// "Hotels" and "Hotel setup" read "Locations" and "Lounge setup" where that is what they are (docs/plan-venue-type.md).
+	const t = useBizText();
 	// Menus with groups (the admin portal) get a small heading per group; the others stay one flat list as before.
 	const groups: { title?: string; items: NavLink[] }[] = [];
 	for (const item of items) {
@@ -67,7 +70,7 @@ export function NavMain({
 					return (
 						<sidebar.SidebarMenuItem key={item.url}>
 							<sidebar.SidebarMenuButton
-								tooltip={item.title}
+								tooltip={t(item.title)}
 								asChild
 								isActive={isActive}
 								className={cn(
@@ -80,7 +83,7 @@ export function NavMain({
 							>
 								<Link href={item.url} prefetch={false} className="flex w-full items-center gap-2">
 									<LinkIcon icon={item.icon} />
-									<span className="truncate">{item.title}</span>
+									<span className="truncate">{t(item.title)}</span>
 									{count > 0 && (
 										<span
 											className={cn(

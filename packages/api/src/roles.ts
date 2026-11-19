@@ -97,10 +97,28 @@ export const roleDescriptions: Record<HotelRole, string> = {
 	WAITER: "Take orders, open tabs and serve tables",
 	CASHIER: "Take payments, keep the till and print receipts",
 	SUPER_ADMIN: "Everything on the platform",
-	SUPPORT: "Onboarding, support and hotel setup",
+	SUPPORT: "Onboarding, support and business setup",
 	FINANCE_ADMIN: "Fees, statements and marketer commissions",
 	MARKETER: "Businesses you referred and your commissions",
 };
+
+/**
+ * The role's name and one-line description in the words of the place (hospio-backend docs/plan-venue-type.md, phase 5). A hotel
+ * reads `roleLabels` / `roleDescriptions` unchanged; a lounge, bar or restaurant has an "Owner" and a manager who runs "this
+ * lounge: sales, tabs, staff, money". `place`: the active location's noun; `hotelsOnly`: the business is hotels only.
+ */
+export function roleLabel(role: HotelRole, hotelsOnly = true): string {
+	return role === "OWNER" && !hotelsOnly ? "Owner" : roleLabels[role];
+}
+
+export function roleDescription(role: HotelRole, place = "hotel", hotelsOnly = true): string {
+	if (role === "OWNER" && !hotelsOnly) return "Every location in your business, approvals and reports";
+	if (place !== "hotel") {
+		if (role === "MANAGER") return `Run this ${place}: sales, tabs, staff, money`;
+		if (role === "LAUNDRY") return "Guest laundry and linen";
+	}
+	return roleDescriptions[role];
+}
 
 export const roleIcons: Record<HotelRole, LucideIcon> = {
 	OWNER: BriefcaseIcon,

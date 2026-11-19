@@ -18,6 +18,7 @@ import { fmtWhen, naira, nairaShort, plural } from "@hospio/ui/shared/format";
 import { KpiCard } from "@hospio/ui/shared/kpi-card";
 import { PageHeader } from "@hospio/ui/shared/page-header";
 import { PillTabs, useTabParam } from "@hospio/ui/shared/pill-tabs";
+import { venueLabel } from "@hospio/api/venue";
 import { ProgressBar } from "@hospio/ui/shared/progress-bar";
 import { SectionCard } from "@hospio/ui/shared/section-card";
 import { StatusPill } from "@hospio/ui/shared/status-pill";
@@ -26,6 +27,7 @@ import type { RoomRow, RoomTypeRow, StaffRow } from "@hospio/api/data/types";
 import type { OwnerHotelFinance } from "@hospio/api/demo/fixtures/owner";
 import { ContactManagerPanel, EditHotelPanel } from "./hotels";
 import { DownloadModal, hotelStatusLabel, hotelStatusTone } from "./common";
+import { useBizText } from "@hospio/ui/shared/wording";
 
 const stateLabel: Record<
 	RoomRow["state"],
@@ -53,6 +55,9 @@ export function OwnerHotelDetail({
 	types: RoomTypeRow[];
 	staff: StaffRow[];
 }) {
+	const tb = useBizText();
+	// A lounge, bar or restaurant has no rooms tab, occupancy or "Rooms tonight" (docs/plan-venue-type.md).
+	const stays = hotel.hasAccommodation !== false;
 	const [edit, setEdit] = useState(false);
 	const [contact, setContact] = useState(false);
 	const [download, setDownload] = useState(false);
@@ -146,9 +151,9 @@ export function OwnerHotelDetail({
 							href="/dashboard/hotels"
 							className="text-brand hover:underline"
 						>
-							Hotels
+							{tb("Hotels")}
 						</Link>{" "}
-						/ {hotel.code} · {hotel.city} · {hotel.rooms} rooms · managed by{" "}
+						/ {hotel.code} · {hotel.city} · {stays ? `${hotel.rooms} rooms` : venueLabel(hotel.venueType)} · managed by{" "}
 						{hotel.manager}{" "}
 						<StatusPill tone={hotelStatusTone[hotel.status]}>
 							{hotelStatusLabel[hotel.status]}
@@ -177,7 +182,7 @@ export function OwnerHotelDetail({
 
 			<div className="grid grid-cols-2 gap-4 xl:grid-cols-4">
 				<KpiCard
-					label="Revenue · month to date"
+					label="Money received · month to date"
 					value={nairaShort(hotel.revenueMonth)}
 					icon={TrendingUpIcon}
 					hint={`${nairaShort(hotel.revenueLastMonth)} last month`}
@@ -207,12 +212,14 @@ export function OwnerHotelDetail({
 					}
 					hint={`${nairaShort(hotel.expensesMonth)} expenses`}
 				/>
-				<KpiCard
-					label="Occupancy tonight"
-					value={`${hotel.occupancy}%`}
-					icon={BedDoubleIcon}
-					hint={`${Math.round((hotel.rooms * hotel.occupancy) / 100)} of ${hotel.rooms} rooms`}
-				/>
+				{stays && (
+					<KpiCard
+						label="Occupancy tonight"
+						value={`${hotel.occupancy}%`}
+						icon={BedDoubleIcon}
+						hint={`${Math.round((hotel.rooms * hotel.occupancy) / 100)} of ${hotel.rooms} rooms`}
+					/>
+				)}
 				<KpiCard
 					label="Staff on shift"
 					value={hotel.onShift}
@@ -225,7 +232,7 @@ export function OwnerHotelDetail({
 				param="tab"
 				tabs={[
 					{ key: "overview", label: "Overview" },
-					{ key: "rooms", label: "Rooms", count: rooms.length },
+					...(stays ? [{ key: "rooms", label: "Rooms", count: rooms.length }] : []),
 					{ key: "staff", label: "Staff", count: staff.length },
 					{ key: "money", label: "Money" },
 				]}
@@ -254,7 +261,7 @@ export function OwnerHotelDetail({
 				what={`${hotel.name} · this month`}
 				rows={() => [
 					[
-						"Hotel",
+						tb("Hotel"),
 						"Rooms",
 						"Occupancy %",
 						"Revenue this month (NGN)",
@@ -300,10 +307,12 @@ function TabBody({
 	staffCols: ColumnDef<StaffRow, unknown>[];
 	count: (s: RoomRow["state"]) => number;
 }) {
+	const tb = useBizText();
+	const stays = hotel.hasAccommodation !== false;
 	const [tab] = useTabParam<"overview" | "rooms" | "staff" | "money">(
 		"overview",
 	);
-	if (tab === "rooms") {
+	if (tab === "rooms" && stays) {
 		return (
 			<>
 				<div className="grid gap-3 md:grid-cols-4">
@@ -367,7 +376,7 @@ function TabBody({
 					subtitle="What the POS providers collected and paid out"
 				>
 					<p className="text-[13px] text-ink-2">
-						Settlements are by business and provider, every hotel together.
+						{tb("Settlements are by business and provider, every hotel together.")}
 					</p>
 					<Link
 						href="/dashboard/payments"
@@ -380,7 +389,8 @@ function TabBody({
 		);
 	}
 	return (
-		<div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_420px]">
+		<div className={stays ? "grid gap-4 xl:grid-cols-[minmax(0,1fr)_420px]" : "grid gap-4"}>
+			{stays && (
 			<SectionCard
 				title="Rooms tonight"
 				subtitle={`${hotel.rooms} rooms`}
@@ -408,7 +418,8 @@ function TabBody({
 					</div>
 				))}
 			</SectionCard>
-			<SectionCard title="Hotel" subtitle="Contacts and status">
+			)}
+			<SectionCard title={stays ? "Hotel" : venueLabel(hotel.venueType)} subtitle="Contacts and status">
 				<DetailList
 					items={[
 						{ label: "Manager", value: hotel.manager },

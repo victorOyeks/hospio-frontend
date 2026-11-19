@@ -30,6 +30,7 @@ import { SidePanel, WhatHappens } from "@hospio/ui/shared/side-panel";
 import { btn as btnStyle } from "@hospio/ui/shared/ui";
 import { ThreadsView } from "../shared-staff/threads";
 import { HotelFilter } from "./common";
+import { useBizText } from "@hospio/ui/shared/wording";
 
 type Hotel = { hotelId: string; name: string };
 export type ManagerContact = {
@@ -53,6 +54,7 @@ export function OwnerMessaging({
 	hotels: Hotel[];
 	managers: ManagerContact[];
 }) {
+	const tb = useBizText();
 	const [open, setOpen] = useQueryState("open", parseAsString);
 	// The hotel filter goes to the server (that hotel's threads), so a change reads the list again from page 1.
 	const [{ hotel }, setFilter] = useQueryStates(
@@ -93,7 +95,7 @@ export function OwnerMessaging({
 				onClearFilters={() => setHotel(null)}
 				openId={open}
 				onOpen={(id) => void setOpen(id)}
-				emptyTitle={hotel ? "No messages at this hotel" : "No messages yet"}
+				emptyTitle={hotel ? tb("No messages at this hotel") : "No messages yet"}
 				emptyHint="Start one with New message"
 				toolbar={
 					<HotelFilter
@@ -136,6 +138,7 @@ function NewMessagePanel({
 	onClose: () => void;
 	onSent: (threadId: string) => void;
 }) {
+	const tb = useBizText();
 	const router = useRouter();
 	const { run, pending } = useAction();
 	const [to, setTo] = useState("");
@@ -153,7 +156,7 @@ function NewMessagePanel({
 		...hotels.map((h) => ({
 			value: `hotel:${h.hotelId}`,
 			label: `${h.name} · managers`,
-			hint: "Every manager of the hotel",
+			hint: tb("Every manager of the hotel"),
 		})),
 	];
 	const choice =
@@ -172,7 +175,7 @@ function NewMessagePanel({
 			open={open}
 			onOpenChange={(o) => !o && onClose()}
 			title="New message"
-			subtitle="To a manager, or to every manager of a hotel"
+			subtitle={tb("To a manager, or to every manager of a hotel")}
 			icon={MessageSquareIcon}
 			footerInfo="They see it in the app (Inbox) and reply there"
 			footer={
@@ -225,7 +228,7 @@ function NewMessagePanel({
 				/>
 				{options.length === hotels.length && (
 					<Note tone="info">
-						None of your hotels has a manager yet. Add one on Staff.
+						{tb("None of your hotels has a manager yet. Add one on Staff.")}
 					</Note>
 				)}
 				<TextField

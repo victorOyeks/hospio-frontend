@@ -57,7 +57,7 @@ export function checkEmail(v: string, required = true) {
 	const t = v.trim();
 	if (!t) return required ? "Enter the email address" : undefined;
 	if (t.length > 160 || !/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(t))
-		return "Enter a valid email, like name@hotel.com";
+		return "Enter a valid email, like name@example.com";
 	return undefined;
 }
 

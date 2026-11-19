@@ -7,7 +7,9 @@ import { REFRESHED_COOKIE, refreshUrl, tokenIsStale } from "@hospio/api/session-
 import { AutoSelectRole } from "./auto-select-role";
 import { logout, selectRole } from "@hospio/api/actions";
 import { isAppRole } from "@hospio/api/app";
-import { roleDescriptions, roleIcons, roleLabels } from "@hospio/api/roles";
+import { roleDescription, roleIcons, roleLabel } from "@hospio/api/roles";
+import { getActiveHotel } from "@hospio/api/dal";
+import { wording } from "@hospio/api/venue";
 import { Button } from "@hospio/ui/primitives/button";
 
 /** Staff · Shared 1.5 · Choose a role, for people who hold more than one. */
@@ -27,7 +29,7 @@ export async function SelectRoleScreen() {
 		return (
 			<main className="flex min-h-screen flex-col items-center justify-center gap-4 bg-page p-6 text-center">
 				<h1 className="text-xl font-bold text-ink">No role yet</h1>
-				<p className="max-w-sm text-sm text-ink-2">Your login works, but nobody has given you a role at a hotel. Ask your manager.</p>
+				<p className="max-w-sm text-sm text-ink-2">Your login works, but nobody has given you a role yet. Ask your manager.</p>
 				<form action={logout}>
 					<Button variant="outline" className="rounded-control">Sign out</Button>
 				</form>
@@ -35,6 +37,8 @@ export async function SelectRoleScreen() {
 		);
 	}
 
+	// The roles read in the words of the place they are held at ("Run this lounge: sales, tabs…").
+	const w = wording(await getActiveHotel().catch(() => null));
 	return (
 		<main className="flex min-h-screen flex-col items-center justify-center bg-page p-6">
 			<div className="w-full max-w-2xl space-y-6">
@@ -55,8 +59,8 @@ export async function SelectRoleScreen() {
 										<Icon className="size-5" />
 									</span>
 									<span className="min-w-0">
-										<span className="block text-sm font-semibold text-ink">{roleLabels[role]}</span>
-										<span className="block text-xs text-ink-3">{roleDescriptions[role]}</span>
+										<span className="block text-sm font-semibold text-ink">{roleLabel(role, w.hotel)}</span>
+										<span className="block text-xs text-ink-3">{roleDescription(role, w.place, w.hotel)}</span>
 									</span>
 								</button>
 							</form>

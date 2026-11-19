@@ -50,6 +50,7 @@ import {
 	hotelStatusTone,
 	useParam,
 } from "./common";
+import { useBizText } from "@hospio/ui/shared/wording";
 
 function greeting() {
 	const h = new Date().getHours();
@@ -92,6 +93,7 @@ export function OwnerDashboard({
 	/** Voids, discounts and complimentary items staff asked for from an outlet screen, still waiting, at every location (phase 4). */
 	floorRequests?: (SaleRequestView & { hotelName?: string })[];
 }) {
+	const tb = useBizText();
 	const [open, setOpen] = useParam("open");
 	const [download, setDownload] = useState(false);
 	const now = new Date();
@@ -161,7 +163,7 @@ export function OwnerDashboard({
 
 			<div className="grid grid-cols-2 gap-4 md:grid-cols-3 xl:grid-cols-5">
 				<KpiCard
-					label="Revenue · month to date"
+					label="Money received · month to date"
 					value={nairaShort(revenueMonth)}
 					icon={TrendingUpIcon}
 					pill={
@@ -253,13 +255,13 @@ export function OwnerDashboard({
 			<div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_420px]">
 				<SectionCard
 					title="Worth a look"
-					subtitle="Things across your hotels that need your eye today"
+					subtitle={tb("Things across your hotels that need your eye today")}
 					count={worth.length}
 				>
 					{worth.length === 0 && (
 						<EmptyState
 							title="Nothing needs your eye"
-							hint="Approvals, losses and empty hotels show here when they happen."
+							hint={tb("Approvals, losses and empty hotels show here when they happen.")}
 						/>
 					)}
 					<ul>
@@ -357,7 +359,7 @@ export function OwnerDashboard({
 			<SectionCard
 				title="Your branches"
 				subtitle="Live · ranked by revenue this month"
-				action={{ label: "All hotels", href: "/dashboard/hotels" }}
+				action={{ label: tb("All hotels"), href: "/dashboard/hotels" }}
 				bodyClassName="pt-3"
 			>
 				<div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
@@ -460,7 +462,7 @@ export function OwnerDashboard({
 
 				<SectionCard
 					title="Recent activity"
-					subtitle="Across your hotels"
+					subtitle={tb("Across your hotels")}
 					action={{
 						label: "Activity log",
 						href: "/dashboard/operations?tab=activity",
@@ -502,10 +504,10 @@ export function OwnerDashboard({
 			<DownloadModal
 				open={download}
 				onOpenChange={setDownload}
-				what="Monthly summary · every hotel"
+				what={tb("Monthly summary · every hotel")}
 				rows={() => [
 					[
-						"Hotel",
+						tb("Hotel"),
 						"Revenue today (NGN)",
 						"Revenue this month (NGN)",
 						"Expenses this month (NGN)",

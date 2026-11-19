@@ -59,6 +59,7 @@ import {
 	ShiftPill,
 	Stepper,
 } from "../shared-staff/tablet";
+import { useWording } from "@hospio/ui/shared/wording";
 
 type Panel =
 	| { kind: "task"; id: string }
@@ -107,6 +108,7 @@ export function MyRoomsScreen({
 	/** The hotel's public areas (property areas and Hotel setup → Public areas) for "Report a problem → Where". */
 	areas?: string[];
 }) {
+	const { place: w } = useWording();
 	const minibar = minibarPrices.filter((m) => m.active);
 	const [list, setList] = useState(tasks);
 	useEffect(() => setList(tasks), [tasks]);
@@ -537,7 +539,7 @@ export function MyRoomsScreen({
 			>
 				{minibar.length === 0 && (
 					<Note tone="info">
-						No minibar prices yet. A manager adds them in Hotel setup →
+						No minibar prices yet. A manager adds them in {w.setup} →
 						Housekeeping → Minibar prices; then they show here.
 					</Note>
 				)}

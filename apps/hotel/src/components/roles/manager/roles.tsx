@@ -23,7 +23,8 @@ import { searchStaffAccess } from "@hospio/api/actions/staff-lists";
 import { useAction } from "@hospio/api/actions/use-action";
 import type { PageResult } from "@hospio/api/data/paging";
 import type { GrantRow, RolesAccessRow } from "@hospio/api/data/types";
-import { type HotelRole, MANAGER_ONLY_ACTIONS, ROLE_PERMISSIONS, roleDescriptions, roleIcons, roleLabels } from "@hospio/api/roles";
+import { type HotelRole, MANAGER_ONLY_ACTIONS, ROLE_PERMISSIONS, roleDescription, roleIcons, roleLabels } from "@hospio/api/roles";
+import { usePlaceText, useWording } from "@hospio/ui/shared/wording";
 
 type Level = "FULL" | "EDIT" | "VIEW";
 const levelLabel: Record<Level, string> = { FULL: "Full", EDIT: "Can edit", VIEW: "View only" };
@@ -75,6 +76,8 @@ export function RolesScreen({
 	/** False at a lounge, bar or restaurant (hospio-backend docs/plan-venue-type.md): no Front office role to give or list. */
 	accommodation?: boolean;
 }) {
+	const { place: w } = useWording();
+	const t = usePlaceText();
 	const router = useRouter();
 	const GIVABLE = accommodation ? GIVABLE_ALL : GIVABLE_ALL.filter((r) => r !== "FRONT_OFFICE");
 	const list = useListParams({ extra: ["holds"] });
@@ -225,7 +228,7 @@ export function RolesScreen({
 									<span className="flex-1 text-[15px] font-bold text-ink">{roleLabels[role]}</span>
 									<StatusPill dot={false} tone="grey">{n} {n === 1 ? "person" : "people"}</StatusPill>
 								</div>
-								<p className="text-[13px] text-ink-2">{roleDescriptions[role]}</p>
+								<p className="text-[13px] text-ink-2">{roleDescription(role, w.place)}</p>
 								<ul className="flex flex-col gap-[2px] text-xs text-ink-3">
 									{role === "MANAGER"
 										? MANAGER_ONLY_ACTIONS.slice(0, 3).map((m) => <li key={m} className="flex items-center gap-[6px]"><CheckIcon className="size-3 text-success" /> {m}</li>)
@@ -255,7 +258,7 @@ export function RolesScreen({
 			)}
 
 			{/* What a role allows */}
-			<SidePanel open={!!currentRole} onOpenChange={(o) => !o && void setOpenRole(null)} title={currentRole ? roleLabels[currentRole] : ""} subtitle={currentRole ? roleDescriptions[currentRole] : undefined} icon={currentRole ? roleIcons[currentRole] : undefined} width="lg"
+			<SidePanel open={!!currentRole} onOpenChange={(o) => !o && void setOpenRole(null)} title={currentRole ? roleLabels[currentRole] : ""} subtitle={currentRole ? roleDescription(currentRole, w.place) : undefined} icon={currentRole ? roleIcons[currentRole] : undefined} width="lg"
 				footerInfo="Levels are fixed by Hospio360 · each level includes the one before it"
 				footer={currentRole && <Button className={btn.primary} onClick={() => { void setOpenRole(null); void setTab("access"); list.set({ holds: currentRole }); }}>Who holds it ({holders(currentRole)})</Button>}>
 				{currentRole && (
@@ -347,13 +350,13 @@ export function RolesScreen({
 				<div className="flex flex-col gap-5">
 					{!givePerson && <TextField label="Find a person" value={find} onChange={setFind} placeholder="Name, email or phone" />}
 					<SelectField label="Person" value={giveTo} onChange={(v) => { setGiveTo(v); setGivePerson(found.find((a) => a.id === v) ?? null); setNewRole(""); }} placeholder={found.length || givePerson ? "Choose a person" : "No one matches"} options={[...(givePerson && !found.some((a) => a.id === givePerson.id) ? [givePerson] : []), ...found].map((a) => ({ value: a.id, label: a.fullName, hint: a.grants.map((g) => label(g.role)).join(", ") }))} />
-					<SelectField label="Role" value={newRole} onChange={setNewRole} disabled={!giveRow} placeholder={giveRow ? "Choose a role" : "Choose a person first"} options={givable(giveRow ?? undefined).map((r) => ({ value: r, label: roleLabels[r], hint: roleDescriptions[r] }))} />
+					<SelectField label="Role" value={newRole} onChange={setNewRole} disabled={!giveRow} placeholder={giveRow ? "Choose a role" : "Choose a person first"} options={givable(giveRow ?? undefined).map((r) => ({ value: r, label: roleLabels[r], hint: roleDescription(r, w.place) }))} />
 					<ChoiceCards label="Level" value={newLevel} onChange={setNewLevel} options={LEVEL_OPTIONS} />
 					<TextField label="Last day (optional)" type="date" value={newUntil} onChange={setNewUntil} hint="Leave empty for a role with no end. It ends at midnight after this day, Lagos time" />
 					{newRole && newRole !== "MANAGER" && (
 						<WhatHappens items={(ROLE_PERMISSIONS[newRole as HotelRole] ?? []).map((m) => `${m.name}: ${[...m.view, ...(newLevel !== "VIEW" ? m.edit : []), ...(newLevel === "FULL" ? m.full : [])].join(", ") || "nothing at this level"}`)} />
 					)}
-					{newRole === "MANAGER" && <Note tone="warning">A manager can open every screen at this hotel and change other people's roles.</Note>}
+					{newRole === "MANAGER" && <Note tone="warning">{t("A manager can open every screen at this hotel and change other people's roles.")}</Note>}
 				</div>
 			</SidePanel>
 

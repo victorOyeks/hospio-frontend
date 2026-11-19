@@ -43,6 +43,7 @@ import type {
 	SupplierRow,
 } from "@hospio/api/data/types";
 import { useInvHref, useInvPerms } from "./nav";
+import { useWording } from "@hospio/ui/shared/wording";
 
 export const poTone: Record<
 	PurchaseOrderRow["status"],
@@ -81,6 +82,7 @@ export function OrdersScreen({
 	suppliers: SupplierRow[];
 	stores: StoreRow[];
 }) {
+	const { place: w } = useWording();
 	const router = useRouter();
 	const list$ = useListParams({ extra: ["tab", "supplier"] });
 	const page = result.data;
@@ -194,7 +196,7 @@ export function OrdersScreen({
 		<>
 			<PageHeader
 				title="Purchase orders"
-				subtitle={`${plural(count("SENT", "PARTIAL"), "order")} on the way · ${plural(count("PENDING_APPROVAL"), "order")} waiting for approval · over the hotel's approval limit an order needs the manager (or the owner when a manager raises it)`}
+				subtitle={`${plural(count("SENT", "PARTIAL"), "order")} on the way · ${plural(count("PENDING_APPROVAL"), "order")} waiting for approval · over the ${w.place}'s approval limit an order needs the manager (or the owner when a manager raises it)`}
 			>
 				{perms.store && (
 					<button

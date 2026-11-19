@@ -42,7 +42,7 @@ async function mine(hotelId: string): Promise<string | null> {
 	const hotels = await getHotels();
 	return hotels.some((h) => h.id === hotelId)
 		? null
-		: "That hotel is not one of yours";
+		: "That location is not one of yours";
 }
 
 const business = <T>(work: () => Promise<T>) => atHotel(null, work);

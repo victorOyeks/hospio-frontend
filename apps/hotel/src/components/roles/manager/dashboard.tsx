@@ -432,7 +432,7 @@ export function ManagerDashboard({
 			<div className={venue ? "grid gap-4" : "grid gap-4 xl:grid-cols-[1fr_420px]"}>
 				<SectionCard
 					title="Needs your action"
-					subtitle={`${hotel?.name ?? "This hotel"} · sorted by urgency`}
+					subtitle={`${hotel?.name ?? "This location"} · sorted by urgency`}
 					count={actions.length}
 					action={{ label: "All approvals", href: "/dashboard/approvals" }}
 				>

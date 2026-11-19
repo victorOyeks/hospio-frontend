@@ -66,6 +66,7 @@ import { PosKeysCard } from "./hotel-setup-pos-keys";
 import { MinibarPricesSection } from "./hotel-setup-minibar";
 import { RestaurantsSection } from "./hotel-setup-restaurants";
 import { cn } from "@hospio/ui/utils";
+import { usePlaceText, useWording } from "@hospio/ui/shared/wording";
 
 const icons: Record<string, LucideIcon> = {
 	building: BuildingIcon,
@@ -139,6 +140,8 @@ export function HotelSetupScreen({
 	/** The hotel's POS terminals: an outlet may take payment on its own one. */
 	terminals?: TerminalRow[];
 }) {
+	const t = usePlaceText();
+	const { place: w } = useWording();
 	const section = sections.find((s) => s.key === activeKey) ?? sections[0];
 	const locked = !!section.ownerOnly && !isOwner;
 	const ownerSections = sections.filter((s) => s.ownerOnly);
@@ -147,8 +150,8 @@ export function HotelSetupScreen({
 	return (
 		<>
 			<PageHeader
-				title="Hotel setup"
-				subtitle={`${hotelName} · your hotel's own lists, times and rules · changes apply to this hotel only`}
+				title={w.setup}
+				subtitle={`${hotelName}${t(" · your hotel's own lists, times and rules · changes apply to this hotel only")}`}
 			>
 				<ManagerMark />
 			</PageHeader>
@@ -188,7 +191,7 @@ export function HotelSetupScreen({
 							key={section.key}
 							section={section}
 							locked={locked}
-							why={why[section.key]}
+							why={why[section.key] ? t(why[section.key]) : undefined}
 							hotelId={hotelId}
 						/>
 						<PosKeysCard />
@@ -200,7 +203,7 @@ export function HotelSetupScreen({
 							key={section.key}
 							section={section}
 							locked={locked}
-							why={why[section.key]}
+							why={why[section.key] ? t(why[section.key]) : undefined}
 							hotelId={hotelId}
 						/>
 						<MinibarPricesSection hotelId={hotelId} locked={locked} />
@@ -211,7 +214,7 @@ export function HotelSetupScreen({
 						key={section.key}
 						section={section}
 						locked={locked}
-						why={why[section.key]}
+						why={why[section.key] ? t(why[section.key]) : undefined}
 						hotelId={hotelId}
 					/>
 				)}
@@ -229,6 +232,7 @@ function SetupLink({
 	active: boolean;
 	locked?: boolean;
 }) {
+	const t = usePlaceText();
 	const Icon = icons[s.icon] ?? ListIcon;
 	return (
 		<Link
@@ -241,7 +245,7 @@ function SetupLink({
 			)}
 		>
 			<Icon className="size-4 shrink-0" />
-			<span className="flex-1 truncate">{s.title}</span>
+			<span className="flex-1 truncate">{t(s.title)}</span>
 			{locked && <LockIcon className="size-3 text-ink-3" />}
 		</Link>
 	);
@@ -261,6 +265,8 @@ function SectionForm({
 	/** Owner-only fields (who pays the Hospio fee) are read-only for anyone else. */
 	isOwner?: boolean;
 }) {
+	const words = useWording();
+	const t = usePlaceText();
 	const router = useRouter();
 	const [values, setValues] = useState<Record<string, unknown>>(() =>
 		Object.fromEntries(section.fields.map((f) => [f.key, shown(f)])),
@@ -281,8 +287,8 @@ function SectionForm({
 	return (
 		<section className="flex flex-col rounded-card border border-line bg-card">
 			<header className="border-b border-line px-6 py-5">
-				<h2 className="text-lg font-bold text-ink">{section.title}</h2>
-				<p className="text-[13px] text-ink-3">{section.description}</p>
+				<h2 className="text-lg font-bold text-ink">{t(section.title)}</h2>
+				<p className="text-[13px] text-ink-3">{t(section.description)}</p>
 			</header>
 			<div className="flex flex-col gap-5 px-6 py-5">
 				{locked && (
@@ -326,7 +332,7 @@ function SectionForm({
 									disabled={locked}
 									onClick={() => setDanger("ACTIVE")}
 								>
-									Reopen this hotel
+									{t("Reopen this hotel")}
 								</button>
 							)}
 							<button
@@ -335,7 +341,7 @@ function SectionForm({
 								disabled={locked || values.status === "PAUSED"}
 								onClick={() => setDanger("PAUSED")}
 							>
-								Pause this hotel
+								{t("Pause this hotel")}
 							</button>
 							<button
 								type="button"
@@ -343,7 +349,7 @@ function SectionForm({
 								disabled={locked || values.status === "CLOSED"}
 								onClick={() => setDanger("CLOSED")}
 							>
-								Close this hotel
+								{t("Close this hotel")}
 							</button>
 						</div>
 					</div>
@@ -381,7 +387,7 @@ function SectionForm({
 										saved(section, values),
 										hotelId,
 									),
-								`${section.title} saved`,
+								`${t(section.title)} saved`,
 								() => {
 									setDirty(false);
 									// The brand lives in the shell (sidebar, buttons): re-render it with the saved colours.
@@ -399,29 +405,31 @@ function SectionForm({
 				onOpenChange={(o) => !o && setDanger(null)}
 				title={
 					danger === "ACTIVE"
-						? "Reopen this hotel?"
+						? t("Reopen this hotel?")
 						: danger === "PAUSED"
-							? "Pause this hotel?"
-							: "Close this hotel?"
+							? t("Pause this hotel?")
+							: t("Close this hotel?")
 				}
 				subtitle={
-					danger === "CLOSED"
+					danger === "CLOSED" && words.stays
 						? "Guests in house finish their stay first"
 						: undefined
 				}
 				tone={danger === "ACTIVE" ? "default" : "danger"}
 				confirmLabel={
 					danger === "ACTIVE"
-						? "Reopen hotel"
+						? t("Reopen hotel")
 						: danger === "PAUSED"
-							? "Pause new bookings"
-							: "Close hotel"
+							? words.stays
+								? "Pause new bookings"
+								: t("Pause hotel")
+							: t("Close hotel")
 				}
 				pending={pending}
 				alternative={
 					danger === "CLOSED"
 						? {
-								label: "Pause new bookings instead",
+								label: words.stays ? "Pause new bookings instead" : "Pause instead",
 								onClick: () => setDanger("PAUSED"),
 							}
 						: undefined
@@ -432,10 +440,10 @@ function SectionForm({
 					run(
 						() => setHotelStatus(hotelId, next),
 						next === "ACTIVE"
-							? "Hotel reopened"
+							? t("Hotel reopened")
 							: next === "PAUSED"
-								? "Hotel paused"
-								: "Hotel closed",
+								? t("Hotel paused")
+								: t("Hotel closed"),
 						() => {
 							setDanger(null);
 							set("status", next);
@@ -449,16 +457,18 @@ function SectionForm({
 					tone={danger === "ACTIVE" ? "info" : "danger"}
 					items={
 						danger === "ACTIVE"
-							? ["Bookings open again at once", "Staff access returns"]
+							? [words.stays ? "Bookings open again at once" : "Sales open again at once", "Staff access returns"]
 							: danger === "PAUSED"
-								? [
-										"No new bookings can be made",
-										"Guests in house finish their stay",
-										"Staff keep their access",
-									]
+								? words.stays
+									? [
+											"No new bookings can be made",
+											"Guests in house finish their stay",
+											"Staff keep their access",
+										]
+									: ["It shows as paused to Hospio360 and on your reports", "Staff keep their access"]
 								: [
-										"Staff cannot sign in to this hotel",
-										"Guests in house finish their stay",
+										t("Staff cannot sign in to this hotel"),
+										...(words.stays ? ["Guests in house finish their stay"] : []),
 										"Reports and history are kept",
 									]
 					}
@@ -469,7 +479,7 @@ function SectionForm({
 }
 
 export function SetupField({
-	field,
+	field: raw,
 	value,
 	onChange,
 	disabled,
@@ -481,7 +491,10 @@ export function SetupField({
 	disabled: boolean;
 	wide?: boolean;
 }) {
+	const t = usePlaceText();
 	const cls = wide ? "md:col-span-2" : undefined;
+	// Labels and hints name the place ("Hotel status" → "Lounge status" at a lounge).
+	const field = { ...raw, label: t(raw.label), help: raw.help ? t(raw.help) : raw.help };
 	switch (field.type) {
 		case "text":
 			return (
@@ -733,6 +746,8 @@ function BrandPreview({
 	disabled: boolean;
 	onPick: (hex: string) => void;
 }) {
+	const words = useWording();
+	const t = usePlaceText();
 	const typed = String(values.primary ?? "");
 	const hex = normalizeHex(typed);
 	const brand: Brand = {
@@ -871,9 +886,9 @@ function BrandPreview({
 			)}
 			{warning && <Note tone="warning">{warning}</Note>}
 			<p className="text-[11px] text-ink-3">
-				Saved colours are used everywhere this hotel appears: this app for every
-				role, the guest&apos;s booking page, booking emails and the banner on
-				WhatsApp messages.
+				{words.stays
+					? "Saved colours are used everywhere this hotel appears: this app for every role, the guest's booking page, booking emails and the banner on WhatsApp messages."
+					: t("Saved colours are used everywhere this hotel appears: this app for every role, receipts and emails to guests, and the banner on WhatsApp messages.")}
 			</p>
 		</div>
 	);
@@ -902,7 +917,7 @@ function saved(
 	return out;
 }
 
-/** A percentage outside 0–100 (a deposit of "15000" meant as naira): said under the field, and Save stays disabled. */
+/** A percentage outside 0–100 (a deposit of "15000" meant as naira): said under the field, and Save words.stays disabled. */
 function percentError(value: unknown): string | undefined {
 	return typeof value === "number" && (value < 0 || value > 100) ? "Between 0 and 100 %" : undefined;
 }

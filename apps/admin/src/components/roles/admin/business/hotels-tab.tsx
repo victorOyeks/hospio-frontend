@@ -83,8 +83,8 @@ export function HotelsTab({
 						),
 					},
 				]}
-				emptyTitle="No hotels yet"
-				emptyHint="Hotels are added during onboarding. Continue onboarding from the button at the top."
+				emptyTitle="No locations yet"
+				emptyHint="Locations are added during onboarding. Continue onboarding from the button at the top."
 			/>
 			<HotelDrawer hotels={refs} role={role} />
 		</>

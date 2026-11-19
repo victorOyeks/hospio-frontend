@@ -52,7 +52,8 @@ import {
 	photoUrl,
 	type TwoStepState,
 } from "@hospio/api/profile-options";
-import { type HotelRole, isHotelRole, roleLabels } from "@hospio/api/roles";
+import { type HotelRole, isHotelRole, roleLabel } from "@hospio/api/roles";
+import { useBizText, useWording } from "@hospio/ui/shared/wording";
 
 type Setup = { secret: string; otpauthUri: string; qrSvg: string };
 
@@ -129,6 +130,8 @@ export function ProfileScreen({
 	/** Owner only: every acceptance record of the business (staff, device terms, links shared). */
 	businessRecords?: LegalRecord[] | null;
 }) {
+	const { biz } = useWording();
+	const tb = useBizText();
 	const router = useRouter();
 	const [tab, setTab] = useQueryState("tab");
 	const active = (tab ?? "profile") as "profile" | "security" | "notifications" | "legal";
@@ -266,7 +269,7 @@ export function ProfileScreen({
 		<>
 			<PageHeader
 				title="My profile & security"
-				subtitle={`${me.email}${role ? ` · signed in as ${roleLabels[role]}` : ""}`}
+				subtitle={`${me.email}${role ? ` · signed in as ${roleLabel(role, biz.hotel)}` : ""}`}
 			/>
 			<PillTabs
 				tabs={[
@@ -403,7 +406,7 @@ export function ProfileScreen({
 					</SectionCard>
 					<SectionCard
 						title="Your access"
-						subtitle="Roles and hotels you can work in"
+						subtitle={tb("Roles and hotels you can work in")}
 						bodyClassName="gap-3 pt-3"
 					>
 						<DetailList
@@ -418,15 +421,15 @@ export function ProfileScreen({
 													dot={false}
 													tone={r === role ? "brand" : "grey"}
 												>
-													{isHotelRole(r) ? roleLabels[r] : r}
+													{isHotelRole(r) ? roleLabel(r, biz.hotel) : r}
 												</StatusPill>
 											))}
 										</span>
 									),
 								},
 								{
-									label: "Hotels",
-									value: `${me.hotelIds.length} ${me.hotelIds.length === 1 ? "hotel" : "hotels"}`,
+									label: tb("Hotels"),
+									value: `${me.hotelIds.length} ${me.hotelIds.length === 1 ? biz.place : biz.places}`,
 								},
 								{
 									label: "Member since",

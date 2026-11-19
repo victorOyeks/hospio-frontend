@@ -27,6 +27,7 @@ import { PanelSection, SidePanel } from "@hospio/ui/shared/side-panel";
 import { SearchBox } from "@hospio/ui/shared/toolbar";
 import { btn } from "@hospio/ui/shared/ui";
 import { cn } from "@hospio/ui/utils";
+import { usePlaceText } from "@hospio/ui/shared/wording";
 
 type Guide = HelpGuide & { open: boolean };
 
@@ -188,12 +189,12 @@ export function HelpScreen({
 						</SectionCard>
 					) : (
 						<SectionCard
-							title="Hotel tickets"
-							subtitle="Questions from hotels arrive in Support"
+							title="Business tickets"
+							subtitle="Questions from businesses arrive in Support"
 							bodyClassName="gap-3 pt-2"
 						>
 							<p className="text-[13px] text-ink-2">
-								Every ticket a hotel sends from its Help page lands in the
+								Every ticket a business sends from its Help page lands in the
 								Support queue, with the business and the person who sent it.
 							</p>
 							<Link
@@ -309,6 +310,7 @@ function ContactPanel({
 	open: boolean;
 	onOpenChange: (open: boolean) => void;
 }) {
+	const t = usePlaceText();
 	const [subject, setSubject] = useState("");
 	const [body, setBody] = useState("");
 	const [priority, setPriority] = useState<
@@ -392,8 +394,7 @@ function ContactPanel({
 				/>
 				<PanelSection title="Sent with your ticket">
 					<p className="text-xs text-ink-3">
-						Your business, your hotel and your name, so support knows who to
-						answer.
+						{t("Your business, your hotel and your name, so support knows who to answer.")}
 					</p>
 				</PanelSection>
 			</div>

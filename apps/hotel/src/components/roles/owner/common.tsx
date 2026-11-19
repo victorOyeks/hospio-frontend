@@ -12,6 +12,7 @@ import { btn } from "@hospio/ui/shared/ui";
 import { toast } from "sonner";
 import type { OwnerHotelFinance } from "@hospio/api/demo/fixtures/owner";
 import { cn } from "@hospio/ui/utils";
+import { useBizText, useWording } from "@hospio/ui/shared/wording";
 
 /** `?open=<id>` style URL state with a null-clearing setter. */
 export function useParam(key: string) {
@@ -23,18 +24,19 @@ export function HotelFilter({
 	hotels,
 	value,
 	onChange,
-	all = "All hotels",
+	all,
 }: {
 	hotels: Pick<OwnerHotelFinance, "hotelId" | "name">[];
 	value: string;
 	onChange: (v: string) => void;
 	all?: string;
 }) {
+	const tb = useBizText();
 	return (
 		<FilterSelect
 			value={value}
 			onChange={onChange}
-			all={all}
+			all={all ?? tb("All hotels")}
 			options={hotels.map((h) => ({ value: h.hotelId, label: h.name }))}
 		/>
 	);
@@ -139,6 +141,7 @@ export function DownloadModal({
 	>;
 	total?: number;
 }) {
+	const { biz } = useWording();
 	const [busy, setBusy] = useState(false);
 	const count = load
 		? (total ?? 0)
@@ -201,8 +204,8 @@ export function DownloadModal({
 				{count === 0
 					? "There is nothing to download with these filters."
 					: load
-						? `${count === 1 ? "1 row" : `${count.toLocaleString("en-NG")} rows`}: every page of the list with these filters (tab, hotel and search).`
-						: `${count === 1 ? "1 row" : `${count.toLocaleString("en-NG")} rows`}, as you see them on screen (tab, hotel and search).`}
+						? `${count === 1 ? "1 row" : `${count.toLocaleString("en-NG")} rows`}: every page of the list with these filters (tab, ${biz.place} and search).`
+						: `${count === 1 ? "1 row" : `${count.toLocaleString("en-NG")} rows`}, as you see them on screen (tab, ${biz.place} and search).`}
 			</p>
 		</Modal>
 	);

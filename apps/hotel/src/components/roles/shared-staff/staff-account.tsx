@@ -27,6 +27,7 @@ import { ConfirmModal, Modal } from "@hospio/ui/shared/modal";
 import { WhatHappens } from "@hospio/ui/shared/side-panel";
 import { btn } from "@hospio/ui/shared/ui";
 import { saveStaffOutlets, StaffOutletsField, worksOutlets } from "@hospio/ui/shared/staff-outlets";
+import { useBizText } from "@hospio/ui/shared/wording";
 
 /**
  * A staff member's account, as the owner (every hotel) and the manager (their hotel) run it: details, a pause for some
@@ -193,6 +194,7 @@ export function PauseModal({
 	staff: Person | null;
 	onClose: () => void;
 }) {
+	const tb = useBizText();
 	const router = useRouter();
 	const { run, pending } = useAction();
 	const [days, setDays] = useState("7");
@@ -251,7 +253,7 @@ export function PauseModal({
 					items={[
 						"They are signed out of every device and can't sign in until the pause ends",
 						"Their access comes back by itself after the last day, or when you resume it",
-						"The managers of their hotels are told",
+						tb("The managers of their hotels are told"),
 					]}
 				/>
 			</div>
@@ -268,6 +270,7 @@ export function SuspendStaffModal({
 	onClose: () => void;
 	onPauseInstead?: () => void;
 }) {
+	const tb = useBizText();
 	const router = useRouter();
 	const { run, pending } = useAction();
 	const [reason, setReason] = useState("");
@@ -314,7 +317,7 @@ export function SuspendStaffModal({
 					items={[
 						"They are signed out of every device and can't sign in until reinstated",
 						"Their history (shifts, payments they took) is kept",
-						"The managers of their hotels are told",
+						tb("The managers of their hotels are told"),
 					]}
 				/>
 				<TextareaField
@@ -339,6 +342,7 @@ export function ReinstateModal({
 	until?: string | null;
 	onClose: () => void;
 }) {
+	const tb = useBizText();
 	const router = useRouter();
 	const { run, pending } = useAction();
 	return (
@@ -369,7 +373,7 @@ export function ReinstateModal({
 				items={[
 					"Every role they hold works again",
 					"They are told in the app",
-					"The managers of their hotels are told",
+					tb("The managers of their hotels are told"),
 				]}
 			/>
 		</ConfirmModal>

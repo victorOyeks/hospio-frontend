@@ -96,6 +96,11 @@ export const managerHelp: HelpModule = {
 		},
 		{
 			id: "mgr-shared-tablet",
+			venue: {
+				swap: [
+					["One tablet at the bar, kitchen or front desk", "One tablet at the bar, the kitchen or the cashier's point is used by several people in a shift."],
+				],
+			},
 			title: "Set up a shared tablet and PIN",
 			when: "One tablet at the bar, kitchen or front desk is used by several people in a shift.",
 			topic: "Team",
@@ -200,6 +205,12 @@ export const managerHelp: HelpModule = {
 		},
 		{
 			id: "mgr-print-receipt",
+			venue: {
+				when: "A guest asks for a receipt for a payment.",
+				swap: [
+					["For a whole stay", null],
+				],
+			},
 			title: "Print a receipt",
 			when: "A guest asks for a receipt for a payment or for their stay.",
 			topic: "Money",
@@ -240,6 +251,16 @@ export const managerHelp: HelpModule = {
 		},
 		{
 			id: "mgr-night-audit",
+			venue: {
+				when: "Once a night, after the last sale, when the tills are dealt with.",
+				steps: [
+					"Open “Night audit”.",
+					"Go through the checklist. Use the button on any open line, such as “Count the tills”.",
+					"When every till is closed, tap “Close the day”.",
+					"Add the “Cash counted in the safe (optional)” and any “Notes for the report”.",
+					"Tap “Close the day”. The audit report opens.",
+				],
+			},
 			title: "Close the day (night audit)",
 			when: "Once a night, after arrivals, departures and tills are dealt with.",
 			topic: "Money",
@@ -284,6 +305,13 @@ export const managerHelp: HelpModule = {
 		},
 		{
 			id: "mgr-outlet-sales",
+			venue: {
+				swap: [
+					["Open a sale. Tap “Take payment”", "Open a sale. Tap “Take payment” (or “Collect the balance”) or “Cancel sale”."],
+					["Sales include what went on rooms", "Sales include what is still unpaid, so they are not the same as money received."],
+					["A room charge only works", null],
+				],
+			},
 			title: "Check or collect a restaurant or bar sale",
 			when: "You want to see what the outlets sold, or a sale was left unpaid.",
 			topic: "Money",
@@ -304,6 +332,11 @@ export const managerHelp: HelpModule = {
 		},
 		{
 			id: "mgr-guest-messages",
+			venue: {
+				swap: [
+					["WhatsApp only carries approved templates", "Messages you type go by email, in the hotel's name. WhatsApp only carries approved templates (receipts), so a typed message can't go on WhatsApp."],
+				],
+			},
 			title: "Answer guest messages",
 			when: "A guest has written to the hotel, or you need to message your team on shift.",
 			topic: "Messaging",
@@ -325,6 +358,13 @@ export const managerHelp: HelpModule = {
 		},
 		{
 			id: "mgr-hotel-setup",
+			venue: {
+				when: "Opening hours, lists, restaurants, tabs or shared tablets need updating.",
+				swap: [
+					["Pick a section on the left", "Pick a section on the left, for example “Hotel basics”, “Restaurant & bar” or “Night audit”."],
+					["For kitchens, bars and tables", "For kitchens, bars and tables, use “Restaurants & tables”. For tablets, use “Shared devices”."],
+				],
+			},
 			title: "Change your hotel's settings",
 			when: "Check-in times, rooms rules, lists, restaurants or shared tablets need updating.",
 			topic: "Hotel setup",
@@ -345,6 +385,7 @@ export const managerHelp: HelpModule = {
 		},
 		{
 			id: "mgr-minibar-prices",
+			stay: true,
 			title: "Set the minibar prices",
 			when: "Attendants need to post what guests took from the minibar, or a price changed.",
 			topic: "Hotel setup",
@@ -425,6 +466,11 @@ export const managerHelp: HelpModule = {
 		},
 		{
 			id: "mgr-activity-log",
+			venue: {
+				swap: [
+					["Search people, rooms, amounts", "Use the search box to find an entry."],
+				],
+			},
 			title: "See who did what",
 			when: "You need to check who changed something, and when.",
 			topic: "Team",
@@ -464,6 +510,20 @@ export const managerHelp: HelpModule = {
 		},
 		{
 			id: "mgr-guest-messaging",
+			venue: {
+				when: "Guests should reach your hotel on WhatsApp, or you want to change which messages they get.",
+				steps: [
+					"Open “Hotel setup” and pick “Guest messaging”.",
+					"Type “Your hotel's WhatsApp number”. Guests then see “Chat with the hotel on WhatsApp” in emails.",
+					"Turn “Send receipts automatically” on or off.",
+					"Tap “Save changes”.",
+				],
+				goodToKnow: [
+					"With receipts off, no receipt goes after a payment. Staff can still send one from the payment.",
+					"Add the hotel's phone in Hotel setup → “Hotel basics” so messages give it.",
+					"Guest replies to the Hospio360 WhatsApp don't reach you, so set your own WhatsApp number here.",
+				],
+			},
 			title: "Choose what guests are sent",
 			when: "Guests should reach your hotel on WhatsApp, or you want to change which messages they get.",
 			topic: "Hotel setup",
@@ -488,6 +548,13 @@ export const managerHelp: HelpModule = {
 		},
 		{
 			id: "mgr-brand-colours",
+			venue: {
+				when: "You want the app and guest messages to look like your hotel.",
+				swap: [
+					["It shows on the sign-in screen and the guest's booking page", "Type a “Short name” if you want one. It shows on the sign-in screen. Left empty, the hotel's name is used."],
+					["Within a minute of saving", "Within a minute of saving, the colour is used everywhere: the app for every role, emails to guests and the banner on WhatsApp messages."],
+				],
+			},
 			title: "Put your hotel's colour, name and logo on Hospio360",
 			when: "You want the app, the guest's booking page and guest messages to look like your hotel.",
 			topic: "Hotel setup",
@@ -511,6 +578,11 @@ export const managerHelp: HelpModule = {
 		},
 		{
 			id: "mgr-card-waiting",
+			venue: {
+				swap: [
+					["and on the folio", "If the guest paid, the payment appears in “Payments” as soon as the POS confirms."],
+				],
+			},
 			title: "Wait for a card payment on the POS",
 			when: "You sent a card payment to the terminal and the guest is paying.",
 			topic: "Money",

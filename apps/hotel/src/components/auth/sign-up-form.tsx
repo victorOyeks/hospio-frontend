@@ -181,10 +181,10 @@ export function SignUpForm({
 			>
 				<div>
 					<h1 className="text-[28px] font-bold text-ink">
-						Create your hotel account
+						Create your account
 					</h1>
 					<p className="mt-2 text-sm text-ink-3">
-						For hotel owners. Your managers and staff are invited later.
+						For owners of hotels, lounges, bars and restaurants. Your managers and staff are invited later.
 					</p>
 				</div>
 

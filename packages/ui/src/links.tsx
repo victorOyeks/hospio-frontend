@@ -292,7 +292,7 @@ export const financeLinks: NavLink[] = [
 export const adminLinks: NavLink[] = [
 	{ title: "Dashboard", url: "/dashboard", icon: HomeIcon, group: "Overview" },
 	{ title: "Businesses", url: "/dashboard/businesses", icon: BuildingIcon, group: "Customers" },
-	{ title: "Hotels", url: "/dashboard/hotels", icon: BedDoubleIcon, group: "Customers" },
+	{ title: "Locations", url: "/dashboard/hotels", icon: BedDoubleIcon, group: "Customers" },
 	{
 		title: "Onboarding",
 		url: "/dashboard/onboarding",
@@ -320,7 +320,7 @@ export const marketerLinks: NavLink[] = [
 	{ title: "Dashboard", url: "/dashboard", icon: HomeIcon },
 	{ title: "My businesses", url: "/dashboard/businesses", icon: BuildingIcon },
 	{ title: "Commissions", url: "/dashboard/commissions", icon: CoinsIcon },
-	{ title: "Refer a hotel", url: "/dashboard/refer", icon: MegaphoneIcon },
+	{ title: "Refer a business", url: "/dashboard/refer", icon: MegaphoneIcon },
 	{ title: "Profile", url: "/dashboard/profile", icon: UserCircleIcon },
 ];
 

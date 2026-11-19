@@ -182,6 +182,6 @@ export function ReferralLinkBox({
 }
 
 export function whatsappShare(me: MarketerProfileRow) {
-	const text = `Hi! I work with Hospio360, the hotel management system. Sign your hotel up through my link and we'll set you up: ${referralLink(me)}`;
+	const text = `Hi! I work with Hospio360, the management system for hotels, lounges, bars and restaurants. Sign your business up through my link and we'll set you up: ${referralLink(me)}`;
 	return `https://wa.me/?text=${encodeURIComponent(text)}`;
 }

@@ -39,6 +39,7 @@ import type {
 	TillRow,
 } from "@hospio/api/data/types";
 import { cn } from "@hospio/ui/utils";
+import { usePlaceText, useWording } from "@hospio/ui/shared/wording";
 
 /** Front office 6.1–6.4 · Till & handover. Open with the hotel's default float, pay in and out, count and close, hand over to a named colleague. */
 export function TillScreen({
@@ -62,6 +63,8 @@ export function TillScreen({
 	demo: boolean;
 	role?: string;
 }) {
+	const t = usePlaceText();
+	const { place: w } = useWording();
 	const [open, setOpen] = useState<TillRow | null>(till);
 	const [entries, setEntries] = useState(initialEntries);
 	const [past, setPast] = useState(pastTills);
@@ -363,8 +366,8 @@ export function TillScreen({
 					onChange={setFloat}
 					hint={
 						defaultFloat > 0
-							? `Default float is ${naira(defaultFloat)} · set in Hotel setup → Money`
-							: "No default float is set in Hotel setup → Money"
+							? `Default float is ${naira(defaultFloat)} · set in ${w.setup} → Money`
+							: t("No default float is set in Hotel setup → Money")
 					}
 				/>
 			</Modal>

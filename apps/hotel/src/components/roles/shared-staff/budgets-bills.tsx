@@ -51,6 +51,7 @@ import type {
 } from "@hospio/api/data/ml-types";
 import type { PageResult } from "@hospio/api/data/paging";
 import { cn } from "@hospio/ui/utils";
+import { usePlaceText } from "@hospio/ui/shared/wording";
 
 const monthLabel = (m: string) =>
 	new Date(`${m}-15T12:00:00Z`).toLocaleDateString("en-GB", {
@@ -482,6 +483,7 @@ export function BillsTab({
 	result: PageResult<BillRow>;
 	onOpen: (b: BillRow) => void;
 }) {
+	const t = usePlaceText();
 	const router = useRouter();
 	const list$ = useListParams({ extra: ["tab"] });
 	const page = result.data;
@@ -527,7 +529,7 @@ export function BillsTab({
 				onRetry={() => router.refresh()}
 				onRowClick={onOpen}
 				emptyTitle="No bills"
-				emptyHint="Add the hotel's regular payables: power, internet, rent, suppliers."
+				emptyHint={t("Add the hotel's regular payables: power, internet, rent, suppliers.")}
 				columns={[
 					{
 						accessorKey: "payee",
@@ -580,6 +582,7 @@ export function BillPanel({
 	canWrite: boolean;
 	onClose: () => void;
 }) {
+	const t = usePlaceText();
 	const router = useRouter();
 	const { run, pending } = useAction();
 	const today = new Date().toLocaleDateString("en-CA", {
@@ -640,7 +643,7 @@ export function BillPanel({
 				title={adding ? "Add a bill" : (bill?.payee ?? "")}
 				subtitle={
 					adding
-						? "A supplier or utility the hotel pays, once or on repeat"
+						? t("A supplier or utility the hotel pays, once or on repeat")
 						: bill
 							? `${bill.categoryLabel} · ${REPEATS[bill.repeats]}`
 							: undefined

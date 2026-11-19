@@ -34,6 +34,7 @@ import type {
 	TeamRequests,
 } from "@hospio/api/data/types";
 import { BigButton, ShiftPill, Stepper } from "./tablet";
+import { usePlaceText } from "@hospio/ui/shared/wording";
 
 export type RequestLine = { item: StockItemRow; qty: number };
 
@@ -68,6 +69,7 @@ export function StoreScreen({
 	mark?: React.ReactNode;
 	children?: React.ReactNode;
 }) {
+	const t = usePlaceText();
 	const [rows, setRows] = useState(items);
 	useEffect(() => setRows(items), [items]);
 	const [q, setQ] = useState("");
@@ -149,7 +151,7 @@ export function StoreScreen({
 			{!storeId && (
 				<Note tone="warning">
 					{team === "KITCHEN" || team === "BAR"
-						? "This outlet is not linked to a store yet, so there is no stock to show or draw from. The manager links one in Hotel setup → Restaurants & tables."
+						? t("This outlet is not linked to a store yet, so there is no stock to show or draw from. The manager links one in Hotel setup → Restaurants & tables.")
 						: `There is no ${team.charAt(0) + team.slice(1).toLowerCase()} store yet, so issued stock has nowhere to go. The storekeeper adds one in Inventory → Stores.`}
 				</Note>
 			)}

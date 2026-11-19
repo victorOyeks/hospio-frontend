@@ -41,6 +41,23 @@ export type HelpGuide = {
 	route?: string;
 	/** The screen's name for the "Open …" button, as the sidebar shows it: "Bookings". */
 	screen?: string;
+	/**
+	 * True for a guide about rooms, bookings, stays or folios: left out at a lounge, bar or restaurant (a location without
+	 * rooms, hospio-backend docs/plan-venue-type.md). A guide whose `route` is a rooms-and-stays page is left out by itself.
+	 */
+	stay?: boolean;
+	/**
+	 * What the guide says at a lounge, bar or restaurant where it differs: a whole `when`, `steps` or `goodToKnow`, or `swap`
+	 * for single lines ([part of the line, the line to show instead, or null to leave it out]). Written in the hotel's words
+	 * like the rest ("hotel", "Hotel setup"); the place's own words are put in when it is shown.
+	 */
+	venue?: {
+		title?: string;
+		when?: string;
+		steps?: string[];
+		goodToKnow?: string[];
+		swap?: [string, string | null][];
+	};
 };
 
 export type HelpModule = {
@@ -57,4 +74,8 @@ export type WhatsNewItem = {
 	body: string;
 	/** Who sees it. EVERYONE shows to all hotel staff; PLATFORM only in the admin app. */
 	audience: HelpAudience[];
+	/** True for news about rooms, bookings or stays: not shown at a lounge, bar or restaurant. */
+	stay?: boolean;
+	/** The body at a lounge, bar or restaurant where it differs. */
+	venueBody?: string;
 };

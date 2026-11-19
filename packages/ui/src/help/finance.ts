@@ -105,6 +105,11 @@ export const financeHelp: HelpModule = {
 		},
 		{
 			id: "fin-outlet-sales",
+			venue: {
+				swap: [
+					["“On rooms”", "“Sold” is everything not cancelled and splits into “Paid” and “Unpaid”."],
+				],
+			},
 			title: "Check restaurant and bar sales",
 			when: "You need the outlet sales for a day or a range, or for the books.",
 			topic: "Reports",
@@ -163,6 +168,11 @@ export const financeHelp: HelpModule = {
 		},
 		{
 			id: "fin-night-audit",
+			venue: {
+				swap: [
+					["If arrivals are still waiting", null],
+				],
+			},
 			title: "Run the night audit",
 			when: "The business day is over and needs closing.",
 			topic: "Night audit",
@@ -185,6 +195,11 @@ export const financeHelp: HelpModule = {
 		},
 		{
 			id: "fin-past-audits",
+			venue: {
+				swap: [
+					["Read revenue, rooms, arrivals", "Read the sales, the money taken by method and the cash counted."],
+				],
+			},
 			title: "Read a past audit report",
 			when: "You or the accountant need a closed day's figures.",
 			topic: "Night audit",

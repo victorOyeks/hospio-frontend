@@ -41,6 +41,7 @@ import {
 	defaultSpendRules,
 	type SpendRules,
 } from "../manager/financials/panels";
+import { usePlaceText } from "@hospio/ui/shared/wording";
 
 export const expenseTone: Record<
 	ExpenseRow["status"],
@@ -527,6 +528,7 @@ export function RecordExpensePanel({
 	categories?: string[];
 	onSaved: (e: ExpenseRow) => void;
 }) {
+	const t = usePlaceText();
 	const [category, setCategory] = useState("");
 	const [desc, setDesc] = useState("");
 	const [amount, setAmount] = useState<number | "">("");
@@ -616,7 +618,7 @@ export function RecordExpensePanel({
 					value={category}
 					onChange={setCategory}
 					options={categories}
-					hint="The hotel's list · a manager keeps it in Financials"
+					hint={t("The hotel's list · a manager keeps it in Financials")}
 					required
 				/>
 				<TextField

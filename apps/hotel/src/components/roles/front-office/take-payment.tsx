@@ -40,6 +40,7 @@ import type {
 	TerminalRow,
 } from "@hospio/api/data/types";
 import { cn } from "@hospio/ui/utils";
+import { usePlaceText } from "@hospio/ui/shared/wording";
 
 export type PaymentTarget = {
 	guestName: string;
@@ -173,6 +174,7 @@ export function usePaymentSteps(
 	}: PaymentStepsOptions,
 	autoStart = true,
 ) {
+	const t = usePlaceText();
 	const { recordPayment, emailReceipt, resendReceipt } = useHotelActions();
 	const [tgt, setTgt] = useState<PaymentTarget | null>(target ?? null);
 	const [step, setStep] = useState<Step>(
@@ -866,7 +868,7 @@ export function usePaymentSteps(
 										label="Opening float"
 										value={tillFloat}
 										onChange={setTillFloat}
-										hint="Leave blank for the hotel's usual float"
+										hint={t("Leave blank for the hotel's usual float")}
 									/>
 								</div>
 								<button
@@ -900,7 +902,7 @@ export function usePaymentSteps(
 										: "Offline · last seen yesterday",
 							}))}
 							setupLink="terminals"
-							empty="No POS terminal at this hotel yet"
+							empty={t("No POS terminal at this hotel yet")}
 						/>
 					)}
 					{toPos && terminals.length === 0 && (

@@ -21,7 +21,7 @@ import { cn } from "@hospio/ui/utils";
 import { SideCard, StepCard, StepPage } from "./common";
 import { useInviteAccepted } from "./invite-status";
 import { forgetAllSteps } from "./persist";
-import { placeWord, stepHref } from "./steps";
+import { placeWord, setupWord, stepHref } from "./steps";
 
 /** All set (Figma 3165:16555): what is in, what is still open, then POST /tenant/onboarding/mine/complete → the dashboard. */
 export function DoneStep({
@@ -111,13 +111,13 @@ export function DoneStep({
 		},
 		{
 			label: accommodation ? "Add your other hotels" : "Add your other locations",
-			detail: "Each one takes about 2 minutes from Hotels → Add new hotel",
+			detail: accommodation && placeWord(kind) === "hotel" ? "Each one takes about 2 minutes from Hotels → Add new hotel" : "Each one takes about 2 minutes from Locations → Add a location",
 			done: false,
 		},
 		{
 			label: "Taxes, approval limits and brand colour",
 			detail:
-				"Hotel setup → Taxes & currency, Approval limits, Brand & colours",
+				`${accommodation ? "Hotel setup" : setupWord(kind)} → Taxes & currency, Approval limits, Brand & colours`,
 			done: false,
 		},
 	];

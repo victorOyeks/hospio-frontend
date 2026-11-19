@@ -113,7 +113,7 @@ export async function createHotel(
 	if (error || !data)
 		return {
 			ok: false,
-			error: errorMessage(error, "The hotel could not be created"),
+			error: errorMessage(error, "The location could not be created"),
 		};
 	if (!input.businessId) await refreshSession();
 	revalidate(
@@ -150,7 +150,7 @@ export async function updateHotel(
 	if (error || !data)
 		return {
 			ok: false,
-			error: errorMessage(error, "The hotel could not be saved"),
+			error: errorMessage(error, "The location could not be saved"),
 		};
 	revalidate(
 		OWNER_PATHS,
@@ -180,7 +180,7 @@ export async function setHotelStatus(
 	if (error || !data)
 		return {
 			ok: false,
-			error: errorMessage(error, "The hotel's status could not be changed"),
+			error: errorMessage(error, "The location's status could not be changed"),
 		};
 	revalidate(
 		OWNER_PATHS,

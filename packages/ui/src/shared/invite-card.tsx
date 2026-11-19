@@ -46,7 +46,7 @@ export function inviteMessage(input: {
 		`${input.inviterName} has invited you to ${where}.`,
 		"",
 		`Your role: ${input.roleLabel}`,
-		...(input.hotelName ? [`Your hotel: ${input.hotelName}`] : []),
+		...(input.hotelName ? [`Your location: ${input.hotelName}`] : []),
 		`Invited by: ${input.inviterName} · ${input.businessName}`,
 		"",
 		`Accept the invite and set your password: ${input.link}`,

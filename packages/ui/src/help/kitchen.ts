@@ -8,6 +8,20 @@ export const kitchenHelp: HelpModule = {
 	guides: [
 		{
 			id: "kit-new-order",
+			venue: {
+				when: "A table or a takeaway customer orders food.",
+				steps: [
+					"Open “Orders” and tap “New order”.",
+					"Pick “Dine-in” or “Takeaway”.",
+					"For dine-in pick the “Table”; for takeaway you can add a “Name (optional)”.",
+					"Tap the dishes to add them. If a dish has choices (like spice), pick one and tap “Add to order”.",
+					"Under “Payment” pick “Pay after” or “Pay now”.",
+					"Tap “Send to kitchen” (or “Send & take payment”).",
+				],
+				swap: [
+					["stays greyed out until you pick a table", "“Send to kitchen” stays greyed out until you pick a table for dine-in."],
+				],
+			},
 			title: "Take a new order",
 			when: "A table, a room or a takeaway customer orders food.",
 			topic: "Orders",
@@ -30,6 +44,11 @@ export const kitchenHelp: HelpModule = {
 		},
 		{
 			id: "kit-work-board",
+			venue: {
+				swap: [
+					["or “on room”", "Served cards show “to pay” or “paid”."],
+				],
+			},
 			title: "Move an order through the board",
 			when: "You are cooking and serving orders.",
 			topic: "Orders",
@@ -72,6 +91,7 @@ export const kitchenHelp: HelpModule = {
 		},
 		{
 			id: "kit-charge-room",
+			stay: true,
 			title: "Charge an order to a room",
 			when: "A hotel guest wants the food added to their room bill.",
 			topic: "Money",
@@ -110,6 +130,11 @@ export const kitchenHelp: HelpModule = {
 		},
 		{
 			id: "kit-collect-unpaid",
+			venue: {
+				swap: [
+					["Or tap “Charge to room”", null],
+				],
+			},
 			title: "Collect an unpaid sale",
 			when: "A sale was left “To pay” or “Part paid”, maybe from an earlier shift.",
 			topic: "Money",
@@ -296,6 +321,11 @@ export const kitchenHelp: HelpModule = {
 		},
 		{
 			id: "kit-card-waiting",
+			venue: {
+				swap: [
+					["and on the folio", "If the guest paid, the payment appears in “My payments” as soon as the POS confirms."],
+				],
+			},
 			title: "Wait for a card payment on the POS",
 			when: "You sent a card payment to the terminal and the guest is paying.",
 			topic: "Money",
@@ -330,6 +360,11 @@ export const kitchenHelp: HelpModule = {
 		},
 		{
 			id: "kit-split-bill",
+			venue: {
+				swap: [
+					["a part can go on a guest's room", null],
+				],
+			},
 			title: "Split a bill",
 			when: "Guests on one tab want to pay separately.",
 			topic: "Payments",

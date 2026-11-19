@@ -78,6 +78,7 @@ import {
 	worksOutlets,
 } from "@hospio/ui/shared/staff-outlets";
 import { DownloadModal, HotelFilter } from "./common";
+import { useBizText, useWording } from "@hospio/ui/shared/wording";
 
 type Hotel = { hotelId: string; name: string; hasAccommodation?: boolean };
 type Tab = "all" | "active" | "held" | "invited";
@@ -142,6 +143,8 @@ export function OwnerStaffScreen({
 	businessName: string;
 	ownerName: string;
 }) {
+	const { biz } = useWording();
+	const tb = useBizText();
 	const router = useRouter();
 	const list = useListParams({ extra: ["hotel", "tab"] });
 	const hotel = list.params.hotel || null;
@@ -300,7 +303,7 @@ export function OwnerStaffScreen({
 		<>
 			<PageHeader
 				title="Staff"
-				subtitle={`${plural(people, "person", "people")} across ${hotelName ?? plural(hotels.length, "hotel")}`}
+				subtitle={`${plural(people, "person", "people")} across ${hotelName ?? plural(hotels.length, biz.place)}`}
 			>
 				<ExportButton onClick={() => setExportOpen(true)} />
 				<Button
@@ -316,7 +319,7 @@ export function OwnerStaffScreen({
 					label="Total staff"
 					value={people}
 					icon={UsersIcon}
-					hint={`People at ${hotelName ?? "your hotels"}`}
+					hint={`People at ${hotelName ?? tb("your hotels")}`}
 				/>
 				<KpiCard
 					label="Active"
@@ -385,7 +388,7 @@ export function OwnerStaffScreen({
 				onRetry={() => router.refresh()}
 				onRowClick={(s) => void setOpen(s.key)}
 				emptyTitle="No staff here"
-				emptyHint="Try another tab or hotel, or add someone."
+				emptyHint={tb("Try another tab or hotel, or add someone.")}
 			/>
 
 			<SidePanel
@@ -514,7 +517,7 @@ export function OwnerStaffScreen({
 								>
 									Roles & permissions
 								</Link>{" "}
-								for the hotel picked in the sidebar.
+								for the {biz.place} picked in the sidebar.
 							</p>
 							<Button
 								variant="outline"
@@ -599,7 +602,7 @@ export function OwnerStaffScreen({
 				open={exportOpen}
 				onOpenChange={setExportOpen}
 				title="Export staff"
-				what={`Staff · ${hotelName ?? "All hotels"}`}
+				what={`Staff · ${hotelName ?? tb("All hotels")}`}
 				total={result.data.total}
 				load={async () => {
 					const r = await exportOwnerStaff({
@@ -615,7 +618,7 @@ export function OwnerStaffScreen({
 								"Name",
 								"Email",
 								"Phone",
-								"Hotel",
+								tb("Hotel"),
 								"Department",
 								"Role",
 								"Level",
@@ -650,6 +653,7 @@ function RemoveModal({
 	staff: OwnerStaffRow | null;
 	onClose: () => void;
 }) {
+	const tb = useBizText();
 	const { run, pending } = useAction();
 	return (
 		<ConfirmModal
@@ -660,7 +664,7 @@ function RemoveModal({
 			subtitle={
 				staff ? `${plural(staff.grantIdsHere.length, "role")} there` : undefined
 			}
-			confirmLabel="Remove from hotel"
+			confirmLabel={tb("Remove from hotel")}
 			pending={pending}
 			onConfirm={() =>
 				staff &&
@@ -681,8 +685,8 @@ function RemoveModal({
 			<WhatHappens
 				tone="danger"
 				items={[
-					`Every role they hold at ${staff?.hotelName ?? "this hotel"} ends now`,
-					"Roles at your other hotels stay",
+					`Every role they hold at ${staff?.hotelName ?? tb("this hotel")} ends now`,
+					tb("Roles at your other hotels stay"),
 					"Their history (shifts, payments they took) is kept",
 				]}
 			/>
@@ -706,6 +710,7 @@ function AddStaffPanel({
 	ownerName: string;
 	onClose: () => void;
 }) {
+	const tb = useBizText();
 	const { run, pending } = useAction();
 	const [created, setCreated] = useState<UserCreated | null>(null);
 	const blank = {
@@ -764,7 +769,7 @@ function AddStaffPanel({
 				}
 				return r;
 			},
-			`${form.fullName.trim()} added at ${hotelName ?? "the hotel"}`,
+			`${form.fullName.trim()} added at ${hotelName ?? tb("the hotel")}`,
 			setCreated,
 		);
 	return (

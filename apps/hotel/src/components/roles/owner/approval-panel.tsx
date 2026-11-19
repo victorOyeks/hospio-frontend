@@ -24,6 +24,7 @@ import { useAction } from "@hospio/api/actions/use-action";
 import { withDeliveries } from "@hospio/ui/shared/deliveries-store";
 import type { ApprovalRow } from "@hospio/api/data/types";
 import { approvalKindLabel, approvalSourceLabel } from "@/lib/approval-labels";
+import { useBizText } from "@hospio/ui/shared/wording";
 
 /** Owner · 01 Approvals waiting → approve spend / decline / ask manager. */
 export function ApprovalPanel({
@@ -35,6 +36,7 @@ export function ApprovalPanel({
 	limit?: number;
 	onClose: () => void;
 }) {
+	const tb = useBizText();
 	const [decline, setDecline] = useState(false);
 	const [ask, setAsk] = useState(false);
 	const [reason, setReason] = useState("");
@@ -74,7 +76,7 @@ export function ApprovalPanel({
 				title={a?.description ?? ""}
 				subtitle={
 					a
-						? `${approvalKindLabel(a.kind)} · ${a.hotelName ?? "This hotel"} · asked ${fmtWhen(a.createdAt)}`
+						? `${approvalKindLabel(a.kind)} · ${a.hotelName ?? tb("This hotel")} · asked ${fmtWhen(a.createdAt)}`
 						: undefined
 				}
 				icon={ShieldCheckIcon}

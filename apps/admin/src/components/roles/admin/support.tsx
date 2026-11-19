@@ -163,7 +163,7 @@ export function SupportScreen({
 		<>
 			<PageHeader
 				title="Support & alerts"
-				subtitle="Problems hotels told us about, and problems the system found"
+				subtitle="Problems businesses told us about, and problems the system found"
 			>
 				<button
 					type="button"
@@ -561,7 +561,7 @@ function TicketPanel({
 						<>
 							<PanelSection title="Reply">
 								<TextareaField
-									label={internal ? "Internal note" : "Message to the hotel"}
+									label={internal ? "Internal note" : "Message to the business"}
 									value={reply}
 									onChange={setReply}
 									placeholder={
@@ -572,7 +572,7 @@ function TicketPanel({
 								/>
 								<ToggleField
 									label="Internal note"
-									hint="Stays inside Hospio360; the hotel does not see it"
+									hint="Stays inside Hospio360; the business does not see it"
 									checked={internal}
 									onChange={setInternal}
 								/>
@@ -641,7 +641,7 @@ function NewTicketModal({
 				onOpenChange(o);
 			}}
 			title="New ticket"
-			subtitle="Log something a hotel told you on the phone or WhatsApp"
+			subtitle="Log something a business told you on the phone or WhatsApp"
 			icon={HeadsetIcon}
 			size="form"
 			footer={
@@ -697,7 +697,7 @@ function NewTicketModal({
 				/>
 				{hotels.length > 0 && (
 					<SelectField
-						label="Hotel (optional)"
+						label="Location (optional)"
 						value={hotelId}
 						onChange={setHotelId}
 						placeholder="Whole business"
@@ -715,7 +715,7 @@ function NewTicketModal({
 					label="Details"
 					value={body}
 					onChange={setBody}
-					placeholder="What the hotel said, which hotel, since when…"
+					placeholder="What they said, which location, since when…"
 				/>
 				<SelectField
 					label="Priority"

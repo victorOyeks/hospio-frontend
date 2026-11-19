@@ -76,6 +76,7 @@ import {
 	MiniBars,
 	useParam,
 } from "./common";
+import { useBizText } from "@hospio/ui/shared/wording";
 
 type OwnerHotelFinance = OwnerHotelRow;
 
@@ -132,6 +133,7 @@ export type FinancialsProps = {
 };
 
 export function OwnerFinancials(props: FinancialsProps) {
+	const tb = useBizText();
 	const { hotels, trend, demo } = props;
 	const [tab] = useTabParam<Tab>("overview");
 	const [download, setDownload] = useState(false);
@@ -497,10 +499,10 @@ export function OwnerFinancials(props: FinancialsProps) {
 			<DownloadModal
 				open={download}
 				onOpenChange={setDownload}
-				what="Financials · every hotel, month to date"
+				what={tb("Financials · every hotel, month to date")}
 				rows={() => [
 					[
-						"Hotel",
+						tb("Hotel"),
 						"Revenue this month (NGN)",
 						"Expenses this month (NGN)",
 						"Net (NGN)",
@@ -515,7 +517,7 @@ export function OwnerFinancials(props: FinancialsProps) {
 						h.revenueLastMonth,
 						h.occupancy,
 					]),
-					["All hotels", revenue, expenses, revenue - expenses, last, ""],
+					[tb("All hotels"), revenue, expenses, revenue - expenses, last, ""],
 				]}
 			/>
 		</>
@@ -803,6 +805,7 @@ function ExpensesTab({
 	hotelName: string;
 	limit: number;
 }) {
+	const tb = useBizText();
 	const [open, setOpen] = useParam("open");
 	const [view, setView] = useState<"requests" | "all" | "budgets">("requests");
 	const ownerApprovals = approvals.filter((a) => a.approverLevel === "OWNER");
@@ -881,7 +884,7 @@ function ExpensesTab({
 			{view === "requests" && (
 				<SectionCard
 					title="Spend over your approval limit"
-					subtitle={`${limit > 0 ? `Over ${naira(limit)}` : "Everything that needs the owner"} · ${demo ? "from every hotel" : hotelName}`}
+					subtitle={`${limit > 0 ? `Over ${naira(limit)}` : "Everything that needs the owner"} · ${demo ? tb("from every hotel") : hotelName}`}
 					flush
 				>
 					<ul className="divide-y divide-line">

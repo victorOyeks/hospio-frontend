@@ -65,7 +65,7 @@ export function DeviceCatalogueSettings({ editable }: { editable: boolean }) {
 	return (
 		<SectionCard
 			title="Device catalogue"
-			subtitle="Standard items and prices a hotel's devices & internet package starts from; prices can be changed per hotel"
+			subtitle="Standard items and prices a location's devices & internet package starts from; prices can be changed per location"
 			headerRight={
 				editable ? (
 					<button type="button" className={btn.secondary} onClick={() => open("new")}>
@@ -168,7 +168,7 @@ export function DevicesTab({ money = false, superAdmin = false }: { money?: bool
 		<div className="flex flex-col gap-4">
 			{error && <Note tone="danger">{error}</Note>}
 			<div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-				<KpiCard label="Devices supplied" value={nairaShort(total)} icon={MonitorSmartphoneIcon} hint={`${supplied.length} hotel package${supplied.length === 1 ? "" : "s"}`} />
+				<KpiCard label="Devices supplied" value={nairaShort(total)} icon={MonitorSmartphoneIcon} hint={`${supplied.length} location package${supplied.length === 1 ? "" : "s"}`} />
 				<KpiCard label="Collected" value={nairaShort(paid)} icon={WalletIcon} />
 				<KpiCard label="Left to collect" value={nairaShort(total - paid)} icon={BanknoteIcon} />
 			</div>
@@ -270,7 +270,7 @@ function DataPlanRenewals() {
 	return (
 		<SectionCard
 			title="Data plan renewals"
-			subtitle="Renew these hotels' data subscriptions with the provider (MTN, Airtel, Spectranet…), then record it here"
+			subtitle="Renew these locations' data subscriptions with the provider (MTN, Airtel, Spectranet…), then record it here"
 			headerRight={
 				<select value={days} onChange={(e) => setDays(Number(e.target.value))} className="h-9 rounded-control border border-line bg-card px-3 text-[13px]" aria-label="Within">
 					<option value={7}>Due within 7 days</option>

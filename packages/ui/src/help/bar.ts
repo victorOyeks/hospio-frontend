@@ -68,6 +68,11 @@ export const barHelp: HelpModule = {
 		},
 		{
 			id: "bar-close-tab",
+			venue: {
+				swap: [
+					["Charge the tab to a room instead", null],
+				],
+			},
 			title: "Close a tab",
 			when: "A guest on a tab is ready to pay.",
 			topic: "Tabs",
@@ -87,6 +92,7 @@ export const barHelp: HelpModule = {
 		},
 		{
 			id: "bar-charge-room",
+			stay: true,
 			title: "Charge drinks to a room",
 			when: "A hotel guest wants drinks added to their room bill.",
 			topic: "Sales",
@@ -106,6 +112,11 @@ export const barHelp: HelpModule = {
 		},
 		{
 			id: "bar-collect-unpaid",
+			venue: {
+				swap: [
+					["Or tap “Charge to room”", null],
+				],
+			},
 			title: "Collect an unpaid bar sale",
 			when: "A sale was left “To pay” or “Part paid”, maybe from an earlier shift.",
 			topic: "Sales",
@@ -290,6 +301,11 @@ export const barHelp: HelpModule = {
 		},
 		{
 			id: "bar-card-waiting",
+			venue: {
+				swap: [
+					["and on the folio", "If the guest paid, the payment appears in “My payments” as soon as the POS confirms."],
+				],
+			},
 			title: "Wait for a card payment on the POS",
 			when: "You sent a card payment to the terminal and the guest is paying.",
 			topic: "Sales",
@@ -324,6 +340,11 @@ export const barHelp: HelpModule = {
 		},
 		{
 			id: "bar-split-bill",
+			venue: {
+				swap: [
+					["a part can go on a guest's room", null],
+				],
+			},
 			title: "Split a bill",
 			when: "Guests on one tab want to pay separately.",
 			topic: "Payments",

@@ -21,6 +21,7 @@ import { StatusPill } from "@hospio/ui/shared/status-pill";
 import { SearchBox } from "@hospio/ui/shared/toolbar";
 import { btn, input } from "@hospio/ui/shared/ui";
 import { cn } from "@hospio/ui/utils";
+import { usePlaceText } from "@hospio/ui/shared/wording";
 
 /**
  * Staff threads (messaging-service /threads): the list on the left, the open thread on the right with a reply box.
@@ -47,6 +48,7 @@ export function ThreadsView({
 	filtered?: boolean;
 	onClearFilters?: () => void;
 }) {
+	const t = usePlaceText();
 	const router = useRouter();
 	const params = useListParams();
 	const threads = result.data.content;
@@ -238,7 +240,7 @@ export function ThreadsView({
 							/>
 							{active.audience === "MANAGERS" && (
 								<StatusPill tone="info" dot={false}>
-									Every manager of the hotel
+									{t("Every manager of the hotel")}
 								</StatusPill>
 							)}
 						</div>

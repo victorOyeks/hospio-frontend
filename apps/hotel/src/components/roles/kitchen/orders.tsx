@@ -83,6 +83,7 @@ import {
 	ShiftPill,
 	minutesSince,
 } from "../shared-staff/tablet";
+import { usePlaceText } from "@hospio/ui/shared/wording";
 
 type Col = "OPEN" | "SENT" | "READY" | "SERVED";
 const cols: {
@@ -150,6 +151,7 @@ export function KitchenOrdersScreen({
 	settings: OutletSettingsRow;
 	terminals: TerminalRow[];
 }) {
+	const t = usePlaceText();
 	const { rows, apply, put } = useOrderRows(orders);
 	const [open, setOpen] = useQueryState("open", parseAsString);
 	const [orderParam, setOrderParam] = useQueryState("order", parseAsString);
@@ -549,8 +551,7 @@ export function KitchenOrdersScreen({
 			</PageHeader>
 			{!outlet && (
 				<Note tone="warning">
-					No kitchen or restaurant is set up for this hotel yet. The manager
-					adds one in Hotel setup → Restaurants & tables.
+					{t("No kitchen or restaurant is set up for this hotel yet. The manager adds one in Hotel setup → Restaurants & tables.")}
 				</Note>
 			)}
 			{outlet?.status === "CLOSED" && (

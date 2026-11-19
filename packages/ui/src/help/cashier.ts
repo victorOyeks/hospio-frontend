@@ -56,6 +56,11 @@ export const cashierHelp: HelpModule = {
 		},
 		{
 			id: "cashier-split-bill",
+			venue: {
+				swap: [
+					["a part can go on a guest's room", null],
+				],
+			},
 			title: "Split a bill",
 			when: "Guests on one tab want to pay separately.",
 			topic: "Payments",

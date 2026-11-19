@@ -148,10 +148,10 @@ export function MoneyTab({
 				{daily ? (
 					<>
 						<KpiCard
-							label="Into the hotel's POS accounts"
+							label="Into the business's POS accounts"
 							value={nairaShort(pos)}
 							icon={BanknoteIcon}
-							hint="Card and transfer on Moniepoint or OPay · straight to the hotel"
+							hint="Card and transfer on Moniepoint or OPay · straight to the business"
 						/>
 						<KpiCard
 							label="Hospio360 invoices"
@@ -172,7 +172,7 @@ export function MoneyTab({
 				) : (
 					<>
 				<KpiCard
-					label="Settled to the hotel"
+					label="Settled to the business"
 					value={nairaShort(
 						settlements
 							.filter((s) => s.status === "SETTLED")
@@ -288,12 +288,12 @@ export function MoneyTab({
 				{daily ? (
 					<SectionCard
 						title="Where the money goes"
-						subtitle="This month · POS payments go straight to the hotel's own accounts"
+						subtitle="This month · POS payments go straight to the business's own accounts"
 						action={{ label: "Payments", href: `/dashboard/payments?businessId=${businessId}` }}
 						bodyClassName="pt-2"
 					>
 						<p className="mb-3 text-[13px] text-ink-2">
-							Card and transfer payments on the hotel's Moniepoint or OPay terminals land in the hotel's own account. Hospio360
+							Card and transfer payments on the business's Moniepoint or OPay terminals land in its own account. Hospio360
 							doesn't hold or settle them; its {feeRate ?? ""}% fee is billed on one Hospio360 invoice each month, nothing is debited.
 						</p>
 						{posProviders.length === 0 ? (
@@ -358,7 +358,7 @@ export function MoneyTab({
 				)}
 			</div>
 			{devicePackages.length > 0 && (
-				<SectionCard title="Devices & internet" subtitle="What Hospio360 supplied to each hotel and how it is being paid for" flush>
+				<SectionCard title="Devices & internet" subtitle="What Hospio360 supplied to each location and how it is being paid for" flush>
 					<ul className="divide-y divide-line">
 						{devicePackages.map((p) => (
 							<li key={p.id}>

@@ -103,7 +103,7 @@ export function AcceptInviteForm({
 						</p>
 						<p className="text-xs text-ink-3">
 							{invite.hotelName
-								? "More hotels can be added to your account later"
+								? "More locations can be added to your account later"
 								: invite.role === "MARKETER"
 									? "The Hospio360 marketer portal"
 									: invite.businessName

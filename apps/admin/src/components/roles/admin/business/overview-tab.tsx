@@ -48,7 +48,7 @@ export function OverviewTab({
 									.slice(0, 2)
 									.join(", ") +
 								(hotels.length > 2 ? ` +${hotels.length - 2}` : "")
-							: "No hotels yet"
+							: "No locations yet"
 					}
 				/>
 				<KpiCard

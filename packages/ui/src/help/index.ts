@@ -3,6 +3,8 @@
  * holds. To update a guide, edit its role file; to add a screen link, the path must be in ROUTES for that role.
  */
 import type { HotelRole } from "@hospio/api/roles";
+import { adaptText, HOTEL_WORDING, type Wording } from "@hospio/api/venue";
+import { isStayOnlyPath } from "@hospio/ui/links";
 import { barHelp } from "./bar";
 import { cashierHelp } from "./cashier";
 import { accountHelp, staffHelp } from "./everyone";
@@ -180,7 +182,40 @@ export function helpFor(
 	app: "hotel" | "admin",
 	roles: readonly string[],
 	activeRole: HotelRole | null,
+	/**
+	 * The words of the place (hospio-backend docs/plan-venue-type.md, phase 5): at a lounge the guides say "lounge" and "Lounge
+	 * setup", and the ones about rooms, bookings and stays are left out. Left out: everything reads as at a hotel.
+	 */
+	words: { place: Wording; biz: Wording; stays: boolean } = { place: HOTEL_WORDING, biz: HOTEL_WORDING, stays: true },
 ): HelpContent {
+	// The owner's guides are about the whole business ("your hotels" → "your locations"); everyone else's about the location.
+	const say = (a: string) => (text: string) =>
+		a === "OWNER" ? adaptText(text, words.biz, words.place.setup) : adaptText(text, words.place);
+	const fits = (g: HelpGuide, a: string) =>
+		words.stays ||
+		(!g.stay && !(g.route && a !== "EVERYONE" && a !== "STAFF" && a !== "ACCOUNT" && isStayOnlyPath(a as HotelRole, g.route)));
+	const worded = (g: HelpGuide, a: string): HelpGuide => {
+		if (words.stays && words.place.hotel && words.biz.hotel) return g;
+		const t = say(a);
+		const v = words.stays ? undefined : g.venue;
+		const lines = (own: string[], other?: string[]) =>
+			(other ?? own)
+				.map((line) => {
+					const swap = v?.swap?.find(([part]) => line.includes(part));
+					return swap ? swap[1] : line;
+				})
+				.filter((line): line is string => line !== null)
+				.map(t);
+		return {
+			...g,
+			title: t(v?.title ?? g.title),
+			when: t(v?.when ?? g.when),
+			topic: t(g.topic),
+			steps: lines(g.steps, v?.steps),
+			goodToKnow: lines(g.goodToKnow, v?.goodToKnow),
+			screen: g.screen ? t(g.screen) : g.screen,
+		};
+	};
 	const held = new Set<Exclude<HelpAudience, "EVERYONE">>();
 	for (const r of roles) {
 		const a = audienceOf(r as HotelRole);
@@ -201,22 +236,22 @@ export function helpFor(
 		const m = MODULES[a] as HelpModule;
 		return {
 			key: a,
-			label: m.label,
-			intro: m.intro,
+			label: say(a)(m.label),
+			intro: say(a)(m.intro),
 			current: a === active,
-			guides: m.guides.map((g) => ({
-				...g,
+			guides: m.guides.filter((g) => fits(g, a)).map((g) => ({
+				...worded(g, a),
 				open: a === active && !!g.route && canOpen(g.route, app, active),
 			})),
 		};
 	});
 	const withOpen = (m: HelpModule, key: string): HelpSection => ({
 		key,
-		label: m.label,
-		intro: m.intro,
+		label: say(key)(m.label),
+		intro: say(key)(m.intro),
 		current: false,
-		guides: m.guides.map((g) => ({
-			...g,
+		guides: m.guides.filter((g) => fits(g, key)).map((g) => ({
+			...worded(g, key),
 			open: !!g.route && canOpen(g.route, app, active),
 		})),
 	});
@@ -237,6 +272,12 @@ export function helpFor(
 
 	const audiences = new Set<HelpAudience>(held);
 	if (app === "hotel") audiences.add("EVERYONE");
-	const news = whatsNew.filter((n) => n.audience.some((x) => audiences.has(x)));
+	const news = whatsNew
+		.filter((n) => n.audience.some((x) => audiences.has(x)) && (words.stays || !n.stay))
+		.map((n) =>
+			words.place.hotel && words.stays
+				? n
+				: { ...n, title: say("")(n.title), body: say("")(words.stays ? n.body : (n.venueBody ?? n.body)) },
+		);
 	return { sections, whatsNew: news, whatsNewWeek };
 }

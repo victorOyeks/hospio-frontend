@@ -174,7 +174,7 @@ export function AdminSearch({ role }: { role: HotelRole }) {
 								}}
 								value={q}
 								onValueChange={setQ}
-								placeholder="Search businesses, hotels, tickets, pages…"
+								placeholder="Search businesses, locations, tickets, pages…"
 								className="h-14 min-w-0 flex-1 bg-transparent text-[15px] text-ink outline-none placeholder:text-ink-3"
 							/>
 							{(ticketsLoading || (open && !indexReady && !indexError)) && <Loader2Icon className="size-4 animate-spin text-ink-3" />}

@@ -76,7 +76,7 @@ export function DailyFeesTab({
 					<SearchBox
 						value={q}
 						onChange={setQ}
-						placeholder="Search a hotel…"
+						placeholder="Search a location…"
 					/>
 				}
 				right={
@@ -107,7 +107,7 @@ export function DailyFeesTab({
 				subtitle={
 					days
 						? `${rows.length} ${rows.length === 1 ? "day" : "days"} · ${naira(waiting)} waiting for this month's invoices`
-						: "Each hotel's sales and fee, newest first · billed on the monthly invoice"
+						: "Each location's sales and fee, newest first · billed on the monthly invoice"
 				}
 				headerRight={
 					<div className="flex flex-wrap gap-2">
@@ -149,8 +149,8 @@ export function DailyFeesTab({
 						title={days.length ? "No days match" : "No days worked out yet"}
 						hint={
 							days.length
-								? "Clear the filters to see every hotel."
-								: "The first day appears after midnight, once a hotel is on a % of daily sales fee. A Super admin can also use “Work out yesterday”."
+								? "Clear the filters to see every location."
+								: "The first day appears after midnight, once a location is on a % of daily sales fee. A Super admin can also use “Work out yesterday”."
 						}
 					/>
 				) : (

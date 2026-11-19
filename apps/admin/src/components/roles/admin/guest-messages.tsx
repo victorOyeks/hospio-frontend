@@ -73,7 +73,7 @@ export function GuestMessagePlans({
 	businessId,
 	hotels,
 	title = "Guest messages",
-	subtitle = "Paid service: booking emails and WhatsApp to the hotel's guests, invoiced monthly per hotel",
+	subtitle = "Paid service: booking emails and WhatsApp to the location's guests, invoiced monthly per location",
 }: {
 	businessId: string;
 	hotels: { id: string; name: string }[];
@@ -133,7 +133,7 @@ export function GuestMessagePlans({
 				<span className="font-semibold text-ink-2">Subscribed</span> is the hotel's choice to use the paid service (their manager
 				can change it in Hotel setup). <span className="font-semibold text-ink-2">On hold</span> is Hospio360 stopping it for
 				non-payment: added on its own when an invoice goes overdue and lifted on its own when it is paid. Messages go only when
-				a hotel is subscribed and not on hold.
+				a location is subscribed and not on hold.
 			</p>
 			{error && <Note tone="danger" className="mx-5 mb-4">{error}</Note>}
 			{!plans ? (
@@ -225,13 +225,13 @@ export function GuestMessagePlans({
 				onOpenChange={(o) => !o && setHolding(null)}
 				tone="danger"
 				title={holding ? `Put ${nameOf(holding)}'s guest messages on hold?` : ""}
-				subtitle="Booking emails and WhatsApp to guests stop until the hold is lifted. The hotel stays subscribed but can't lift the hold itself; it is lifted on its own when their unpaid invoices are paid, or by you here."
+				subtitle="Booking emails and WhatsApp to guests stop until the hold is lifted. The location stays subscribed but can't lift the hold itself; it is lifted on its own when their unpaid invoices are paid, or by you here."
 				confirmLabel="Put on hold"
 				pending={busy}
 				confirmDisabled={reason.trim().length < 5}
 				onConfirm={() => holding && void hold(holding, true, reason.trim())}
 			>
-				<TextField label="Reason (the hotel sees it)" value={reason} onChange={setReason} placeholder="e.g. Unpaid guest-message invoices" />
+				<TextField label="Reason (the business sees it)" value={reason} onChange={setReason} placeholder="e.g. Unpaid guest-message invoices" />
 			</ConfirmModal>
 			<ConfirmModal
 				open={!!lifting}
@@ -241,7 +241,7 @@ export function GuestMessagePlans({
 					lifting
 						? lifting.outstanding > 0
 							? `${naira(lifting.outstanding)} is still unpaid (${lifting.openInvoices} invoice${lifting.openInvoices === 1 ? "" : "s"}). Lifting the hold lets messages go before it is paid; the amount stays owed.`
-							: `Nothing is unpaid. ${lifting.enabled ? "Guest messages go again straight away." : "The hotel isn't subscribed, so nothing is sent until it subscribes."}`
+							: `Nothing is unpaid. ${lifting.enabled ? "Guest messages go again straight away." : "The location isn't subscribed, so nothing is sent until it subscribes."}`
 						: undefined
 				}
 				confirmLabel="Lift hold"
@@ -366,7 +366,7 @@ export function GuestMessageBilling() {
 		<div className="flex flex-col gap-4">
 			<SectionCard
 				title="Guest messages · default prices"
-				subtitle="What a hotel pays per message unless it has its own prices · applies to messages sent from now on"
+				subtitle="What a location pays per message unless it has its own prices · applies to messages sent from now on"
 				headerRight={
 					<Button
 						variant="outline"
@@ -397,7 +397,7 @@ export function GuestMessageBilling() {
 
 			<SectionCard
 				title="Guest-message invoices"
-				subtitle="One per hotel per month, made on the 1st · billed and paid on the business's Hospio360 monthly invoice (HIN-…)"
+				subtitle="One per location per month, made on the 1st · billed and paid on the business's Hospio360 monthly invoice (HIN-…)"
 				headerRight={
 					<div className="flex items-center gap-2">
 						<select
@@ -488,7 +488,7 @@ export function GuestMessageBilling() {
 					open
 					onOpenChange={(o) => !o && setEdit(null)}
 					title="Default prices per message"
-					subtitle="Hotels without their own prices pay these for every message sent from now on"
+					subtitle="Locations without their own prices pay these for every message sent from now on"
 					footer={
 						<>
 							<Button variant="outline" className={btn.secondary} onClick={() => setEdit(null)}>
@@ -530,7 +530,7 @@ export function GuestMessageBilling() {
 				open={issue}
 				onOpenChange={setIssue}
 				title="Issue last month's invoices now?"
-				subtitle="This normally happens on its own at 00:30 on the 1st. Hotels with billable messages last month get their invoice, an email and a notification."
+				subtitle="This normally happens on its own at 00:30 on the 1st. Locations with billable messages last month get their invoice, an email and a notification."
 				confirmLabel="Issue invoices"
 				onConfirm={() => void issueNow()}
 			/>

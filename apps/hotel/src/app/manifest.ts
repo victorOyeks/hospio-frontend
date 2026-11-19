@@ -12,7 +12,7 @@ export default async function manifest(): Promise<MetadataRoute.Manifest> {
 		id: "/",
 		name: "Hospio360",
 		short_name: "Hospio360",
-		description: "Run your hotels from one place",
+		description: "Run your business from one place",
 		start_url: "/dashboard",
 		scope: "/",
 		display: "standalone",

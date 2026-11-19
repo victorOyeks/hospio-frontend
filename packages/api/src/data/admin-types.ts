@@ -652,6 +652,9 @@ export type HotelDirectoryRow = {
 	city: string;
 	address: string;
 	rooms: number;
+	/** The location's kind (HOTEL, LOUNGE, BAR, RESTAURANT, CLUB) and whether it has rooms (docs/plan-venue-type.md). */
+	venueType: string;
+	hasAccommodation: boolean;
 	timezone: string;
 	status: string;
 	/** Null when not loaded (Support can't read fee collection) or the call failed. */

@@ -4,6 +4,7 @@ import { Note } from "@hospio/ui/shared/detail-list";
 import { PageHeader } from "@hospio/ui/shared/page-header";
 import { data } from "@hospio/api/data";
 import { cn } from "@hospio/ui/utils";
+import { getWords } from "@hospio/api/words";
 
 export const dynamic = "force-dynamic";
 
@@ -24,7 +25,7 @@ export default async function ManagerMenusPage({
 			<>
 				<PageHeader title="Menus" subtitle="Every restaurant and bar" />
 				<Note tone="info">
-					No restaurant or bar is set up yet. Add one in Hotel setup →
+					No restaurant or bar is set up yet. Add one in {(await getWords()).place.setup} →
 					Restaurants & tables.
 				</Note>
 			</>

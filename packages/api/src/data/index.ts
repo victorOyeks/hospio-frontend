@@ -1701,7 +1701,7 @@ export const data = {
 				getActiveHotel(),
 				getHotels(),
 			]);
-			if (!active) return failedPage("Choose a hotel first");
+			if (!active) return failedPage("Choose a location first");
 			const r = await usersPage({ ...query, hotelId: active.id });
 			if (!r.ok) return failedPage(r.error);
 			const names = hotelNameMap(hotels);
@@ -1762,7 +1762,7 @@ export const data = {
 					}),
 				};
 			}
-			if (!active) return failedPage("Choose a hotel first");
+			if (!active) return failedPage("Choose a location first");
 			const r = await usersPage({
 				...rest,
 				role: typeof holds === "string" && holds ? holds : undefined,

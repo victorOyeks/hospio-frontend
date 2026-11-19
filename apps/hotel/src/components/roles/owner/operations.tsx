@@ -38,6 +38,7 @@ import {
 } from "@hospio/ui/shared/toolbar";
 import { btn } from "@hospio/ui/shared/ui";
 import { DownloadModal, HotelFilter } from "./common";
+import { useBizText, useWording } from "@hospio/ui/shared/wording";
 
 type Tab = "hotels" | "departments" | "activity" | "changes";
 type Activity = ActivityRow & Partial<AtHotel>;
@@ -68,6 +69,8 @@ export function OwnerOperations({
 	activity: Activity[];
 	changes: OwnerChangeRow[];
 }) {
+	const { biz } = useWording();
+	const tb = useBizText();
 	const [tab] = useTabParam<Tab>("hotels");
 	const [open, setOpen] = useQueryState("open", parseAsString);
 	const [hotel, setHotel] = useQueryState("hotel", parseAsString);
@@ -131,7 +134,7 @@ export function OwnerOperations({
 		{ accessorKey: "actor", header: "Who" },
 		{
 			accessorKey: "hotelName",
-			header: "Hotel",
+			header: tb("Hotel"),
 			cell: ({ row }) => row.original.hotelName ?? "Business",
 		},
 		{
@@ -152,7 +155,7 @@ export function OwnerOperations({
 		<>
 			<PageHeader
 				title="Operations"
-				subtitle={`What is happening now across ${hotelName ?? plural(hotels.length, "hotel")}`}
+				subtitle={`What is happening now across ${hotelName ?? plural(hotels.length, biz.place)}`}
 			>
 				{tab === "activity" && (
 					<ExportButton onClick={() => setExportOpen(true)} />
@@ -185,7 +188,7 @@ export function OwnerOperations({
 
 			{tab === "hotels" &&
 				(live.length === 0 ? (
-					<EmptyState title="No hotels yet" />
+					<EmptyState title={tb("No hotels yet")} />
 				) : (
 					<div className="grid gap-4 md:grid-cols-2">
 						{live.map((h) => (
@@ -274,7 +277,7 @@ export function OwnerOperations({
 								</p>
 								<p className="text-[11px] text-ink-3" suppressHydrationWarning>
 									{d.lastAt ? fmtAgo(d.lastAt) : "—"} ·{" "}
-									{hotelName ?? `${plural(d.hotels, "hotel")}`}
+									{hotelName ?? plural(d.hotels, biz.place)}
 								</p>
 							</div>
 						))}
@@ -427,9 +430,9 @@ export function OwnerOperations({
 				open={exportOpen}
 				onOpenChange={setExportOpen}
 				title="Export activity"
-				what={`Activity log · ${hotelName ?? "All hotels"}`}
+				what={`Activity log · ${hotelName ?? tb("All hotels")}`}
 				rows={() => [
-					["When", "What happened", "Summary", "Who", "Hotel", "Department"],
+					["When", "What happened", "Summary", "Who", tb("Hotel"), "Department"],
 					...rows
 						.filter(
 							(a) =>

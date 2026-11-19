@@ -125,7 +125,7 @@ export function ChangesScreen({
 		<>
 			<PageHeader
 				title="Changes by Hospio360"
-				subtitle="Everything our team changed inside a hotel's account, with the reason given; marked undone within 7 days once support puts it back"
+				subtitle="Everything our team changed inside a business's account, with the reason given; marked undone within 7 days once support puts it back"
 			/>
 			<Toolbar
 				left={
@@ -133,7 +133,7 @@ export function ChangesScreen({
 						tabs={[
 							{
 								key: "changes",
-								label: "Changes in hotels",
+								label: "Changes in businesses",
 								count: initial.total,
 							},
 							{
