@@ -32,3 +32,47 @@ export function looksLikePhone(phone: string) {
 	const d = t.replace(/[^0-9]/g, "");
 	return /^\+?[0-9 ()-]{7,24}$/.test(t) && d.length >= 10 && d.length <= 15;
 }
+
+/** What became of a WhatsApp receipt (hospio-backend docs/whatsapp-receipts.md, "What the desk is told"). */
+export type ReceiptOutcomeInfo = {
+	outcome?: string | null;
+	reason?: string | null;
+	sentTo?: string | null;
+};
+
+/** Whether the receipt really went on its way (QUEUED, or UNKNOWN: handed over, messaging couldn't be asked). */
+export function receiptWentOut(outcome?: string | null) {
+	return !outcome || outcome === "QUEUED" || outcome === "UNKNOWN";
+}
+
+/** The hotel's guest messages are off (or suspended): the words for it, telling a manager where to turn them on. */
+export function guestMessagesOffText(canSetup: boolean, reason?: string | null) {
+	if (reason && /suspended/i.test(reason)) {
+		return `guest messages are on hold (${reason.replace(/^Not sent: /, "").replace(/^Guest messages are suspended: /, "")})`;
+	}
+	return canSetup
+		? "guest messages are off for this hotel. Turn them on in Hotel setup → Guest messages."
+		: "guest messages are off for this hotel. Ask your manager to turn them on.";
+}
+
+/**
+ * The words staff see after a WhatsApp receipt, by its outcome: "Receipt sent on WhatsApp to …" only when it really went.
+ * `canSetup`: the manager or owner (Hotel setup), else "ask your manager". Pass the result through `usePlaceText` for a lounge.
+ */
+export function receiptOutcomeText(r: ReceiptOutcomeInfo, canSetup: boolean): string {
+	const to = r.sentTo?.trim() || "the guest";
+	switch (r.outcome) {
+		case "SKIPPED":
+			if (r.reason && /automatic receipts are off/i.test(r.reason))
+				return "Receipt not sent: automatic receipts are off (Hotel setup → Guest messaging)";
+			return `Receipt not sent: ${guestMessagesOffText(canSetup, r.reason)}`;
+		case "HELD_BACK":
+			return `Receipt held back (test server): ${to} is not on this server's allow-list`;
+		case "NOT_CONNECTED":
+			return "Receipt not sent: WhatsApp is not connected";
+		case "NO_PHONE":
+			return "Receipt not sent: no phone number";
+		default:
+			return `Receipt sent on WhatsApp to ${to}`;
+	}
+}

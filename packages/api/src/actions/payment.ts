@@ -40,6 +40,27 @@ export type RecordedPayment = {
 	failureReason?: string | null;
 	/** The POS it was sent to ("Front desk POS"). */
 	terminalName?: string | null;
+	/** What becomes of the automatic WhatsApp receipt (null for Don't send): the toast says it honestly. */
+	receipt?: ReceiptOutlook | null;
+};
+
+/** What became of a WhatsApp receipt (hospio-backend docs/whatsapp-receipts.md, "What the desk is told"). */
+export type ReceiptOutcome = "QUEUED" | "SKIPPED" | "HELD_BACK" | "NOT_CONNECTED" | "NO_PHONE" | "UNKNOWN";
+
+export type ReceiptOutlook = {
+	outcome: ReceiptOutcome;
+	reason?: string | null;
+	/** The hotel's guest messages are on and not suspended (null when unknown). */
+	guestMessagesOn?: boolean | null;
+};
+
+/** A receipt handed over for WhatsApp, with its outcome. */
+export type SentReceipt = ReceiptOutlook & {
+	receiptNumber: string;
+	sentTo: string;
+	sentVia: string;
+	deliveries?: Delivery[] | null;
+	message?: string | null;
 };
 
 /**
@@ -121,6 +142,7 @@ export async function recordPayment(
 			method: data.data.method as PaymentMethod,
 			failureReason: data.data.failureReason,
 			terminalName: data.data.terminalName ?? null,
+			receipt: data.data.receipt ?? null,
 		},
 	};
 }
@@ -548,14 +570,7 @@ export async function openSupportTicket(input: {
 export async function sendReceipt(input: {
 	paymentId: string;
 	phone?: string | null;
-}): Promise<
-	ActionResult<{
-		receiptNumber: string;
-		sentTo: string;
-		sentVia: string;
-		deliveries?: Delivery[] | null;
-	}>
-> {
+}): Promise<ActionResult<SentReceipt>> {
 	if (!live("payment"))
 		return { ok: false, error: "Receipts are not connected in demo mode" };
 	const phone = input.phone?.trim();
@@ -573,7 +588,22 @@ export async function sendReceipt(input: {
 			error: errorMessage(error, "The receipt could not be sent"),
 		};
 	refreshPayments();
-	return { ok: true, data: data.data };
+	return { ok: true, data: { ...data.data, outcome: data.data.outcome ?? "UNKNOWN" } };
+}
+
+/**
+ * Before the receipt step sends: would a WhatsApp receipt go at this hotel (guest messages on and not suspended; with `phone`,
+ * also whether staging's allow-list holds the number back)? Null when it can't be told (demo mode, payment-service down).
+ */
+export async function receiptOutlook(phone?: string | null): Promise<ReceiptOutlook | null> {
+	if (!live("payment")) return null;
+	const p = phone?.trim();
+	const { data, error } = await api("@get/payment/receipts/outlook", {
+		...(await withSession()),
+		query: p ? { phone: p } : {},
+	}).catch(() => ({ data: null, error: true }));
+	if (error || !data) return null;
+	return data.data;
 }
 
 /**
@@ -581,14 +611,9 @@ export async function sendReceipt(input: {
  * WhatsApp (the approved receipt template) to the phone the payment has. On staging the delivery comes back for the
  * deliveries panel.
  */
-export async function resendReceipt(paymentId: string): Promise<
-	ActionResult<{
-		receiptNumber: string;
-		sentTo: string;
-		sentVia: string;
-		deliveries?: Delivery[] | null;
-	}>
-> {
+export async function resendReceipt(
+	paymentId: string,
+): Promise<ActionResult<SentReceipt>> {
 	if (!live("payment"))
 		return { ok: false, error: "Receipts are not connected in demo mode" };
 	const { data, error } = await api(
@@ -601,7 +626,7 @@ export async function resendReceipt(paymentId: string): Promise<
 			error: errorMessage(error, "The receipt could not be sent"),
 		};
 	refreshPayments();
-	return { ok: true, data: data.data };
+	return { ok: true, data: { ...data.data, outcome: data.data.outcome ?? "UNKNOWN" } };
 }
 
 /**

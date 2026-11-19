@@ -5,7 +5,7 @@ import { getHotels } from "@hospio/api/dal";
 import { folioById, folioForBooking, postCharge } from "./folio";
 import { fillTemplate, messageTemplates } from "./guest-messages";
 import { messageGuest } from "./owner";
-import { recordPayment, sendReceipt } from "./payment";
+import { receiptOutlook, recordPayment, sendReceipt } from "./payment";
 import {
 	cancelBooking,
 	changeBookingDates,
@@ -31,6 +31,8 @@ const SCOPED = {
 	recordPayment,
 	// The receipt step of the same panel (WhatsApp only), at the payment's own hotel (an owner's booking may be at another branch).
 	sendReceipt,
+	// Whether that hotel's guest messages are on: the receipt step's note before paying.
+	receiptOutlook,
 	messageGuest,
 	messageTemplates,
 	fillTemplate,

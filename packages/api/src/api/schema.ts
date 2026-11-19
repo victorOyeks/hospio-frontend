@@ -1017,6 +1017,22 @@ export const OrganizationStay = Folio.extend({
 	lines: z.array(FolioLine).nullable().optional(),
 });
 
+/**
+ * What became of a WhatsApp receipt as far as is known when it is sent (hospio-backend docs/whatsapp-receipts.md): QUEUED, SKIPPED
+ * (guest messages off or suspended: `reason`), HELD_BACK (staging allow-list), NOT_CONNECTED, NO_PHONE or UNKNOWN.
+ */
+export const ReceiptOutcome = z
+	.enum(["QUEUED", "SKIPPED", "HELD_BACK", "NOT_CONNECTED", "NO_PHONE", "UNKNOWN"])
+	// A value a newer backend adds reads as UNKNOWN (the receipt was handed over) rather than failing the payment screen.
+	.catch("UNKNOWN");
+
+export const ReceiptOutlook = z.object({
+	outcome: ReceiptOutcome,
+	reason: z.string().nullable().optional(),
+	/** The hotel's guest messages are on and not suspended (null when unknown). */
+	guestMessagesOn: z.boolean().nullable().optional(),
+});
+
 export const PaymentResponse = z.object({
 	id: z.string(),
 	folioId: z.string().nullable(),
@@ -1050,6 +1066,21 @@ export const PaymentResponse = z.object({
 	terminalName: z.string().nullable().optional(),
 	/** The guest's phone, for Send receipt on WhatsApp. */
 	guestPhone: z.string().nullable().optional(),
+	/** POST /payment/payments only: what becomes of the automatic WhatsApp receipt (null for Don't send). */
+	receipt: ReceiptOutlook.nullable().optional(),
+});
+
+/** A receipt sent on WhatsApp (send, send again): who to, and its outcome. */
+export const ReceiptSent = z.object({
+	receiptNumber: z.string(),
+	sentTo: z.string(),
+	sentVia: z.string(),
+	deliveries: Deliveries,
+	outcome: ReceiptOutcome.optional(),
+	reason: z.string().nullable().optional(),
+	guestMessagesOn: z.boolean().nullable().optional(),
+	/** The backend's words for it ("Receipt not sent: guest messages are off …"). */
+	message: z.string().nullable().optional(),
 });
 
 export const Notification = z.object({
@@ -1776,14 +1807,12 @@ export const schema = createSchema({
 	"@post/payment/payments/:id/verify": { output: envelope(PaymentResponse) },
 	"@post/payment/payments/:id/retry": { output: envelope(PaymentResponse) },
 	"@post/payment/payments/:id/receipt/resend": {
-		output: envelope(
-			z.object({
-				receiptNumber: z.string(),
-				sentTo: z.string(),
-				sentVia: z.string(),
-				deliveries: Deliveries,
-			}),
-		),
+		output: envelope(ReceiptSent),
+	},
+	/** Before sending: would a WhatsApp receipt go (guest messages on, the number not held back)? No phone: guest messages only. */
+	"@get/payment/receipts/outlook": {
+		query: z.object({ phone: z.string().optional() }),
+		output: envelope(ReceiptOutlook),
 	},
 	/** A payment's receipt on WhatsApp (the only way a payment receipt goes out): channel WHATSAPP, phone when the payment has none. */
 	"@post/payment/receipts/send": {
@@ -1792,14 +1821,7 @@ export const schema = createSchema({
 			channel: z.literal("WHATSAPP"),
 			phone: z.string().optional(),
 		}),
-		output: envelope(
-			z.object({
-				receiptNumber: z.string(),
-				sentTo: z.string(),
-				sentVia: z.string(),
-				deliveries: Deliveries,
-			}),
-		),
+		output: envelope(ReceiptSent),
 	},
 	"@post/payment/payments/:id/cancel": { output: envelope(PaymentResponse) },
 	"@get/payment/terminals": { output: envelope(z.array(Terminal)) },

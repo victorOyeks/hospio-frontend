@@ -30,11 +30,12 @@ function readable(error: string) {
  * screens that keep a copy of server data take it in (`useEffect(() => setRows(initial), [initial])`).
  *
  * `message` can be a function of the result when the answer decides what to say (a price change that is
- * applied at once or is waiting for approval).
+ * applied at once or is waiting for approval). It may answer `{ warning }` when the action went through but its point didn't
+ * (a WhatsApp receipt skipped because guest messages are off): a warning toast instead of a success.
  */
 export function useAction() {
 	const [pending, setPending] = useState(false);
-	const run = useCallback(async <T,>(action: () => Promise<ActionResult<T>>, message: string | ((data: T) => string), after?: (data: T) => void) => {
+	const run = useCallback(async <T,>(action: () => Promise<ActionResult<T>>, message: string | ((data: T) => string | { warning: string }), after?: (data: T) => void) => {
 		setPending(true);
 		try {
 			const result = await action();
@@ -51,7 +52,9 @@ export function useAction() {
 				}
 				return;
 			}
-			toast.success(typeof message === "function" ? message(result.data) : message);
+			const said = typeof message === "function" ? message(result.data) : message;
+			if (typeof said === "string") toast.success(said);
+			else toast.warning(said.warning, { duration: 10000 });
 			after?.(result.data);
 		} catch (e) {
 			toast.error(readable(e instanceof Error ? e.message : "Something went wrong"), { duration: 8000 });
