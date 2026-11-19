@@ -329,7 +329,7 @@ export function PeopleStep({ ctx }: { ctx: WizardCtx }) {
 						header: "Hotel",
 						cell: ({ row }) =>
 							row.original.hotelName ??
-							(row.original.role === "OWNER" ? "All hotels" : "—"),
+							(row.original.role === "OWNER" ? "All locations" : "—"),
 					},
 					{
 						accessorKey: "role",
@@ -551,7 +551,7 @@ function AddPersonPanel({
 			subtitle="The invite and temporary password are emailed to them"
 			icon={UserPlusIcon}
 			width="md"
-			footerInfo="Managers run a hotel; every other role is one department."
+			footerInfo="Managers run a location; every other role is one department."
 			footer={
 				<>
 					<button
@@ -722,7 +722,7 @@ function ImportPeopleModal({
 					: !role
 						? `unknown role "${c[3] ?? ""}"`
 						: !hotel
-							? `unknown hotel "${c[4] ?? ""}"`
+							? `unknown location "${c[4] ?? ""}"`
 							: !rolesFor(hotel).includes(role)
 								? `${hotel.name} has no rooms, so no ${roleLabels[role].toLowerCase()}`
 								: null,
@@ -738,7 +738,7 @@ function ImportPeopleModal({
 			open={open}
 			onOpenChange={onOpenChange}
 			title="Paste a staff list"
-			subtitle="One person per line: name, email, phone, role, hotel"
+			subtitle="One person per line: name, email, phone, role, location"
 			icon={ClipboardPasteIcon}
 			size="form"
 			footerInfo={
@@ -784,7 +784,7 @@ function ImportPeopleModal({
 					onChange={setText}
 					rows={8}
 					placeholder={`Ebere Nwagbo, ebere@zumaheights.example.ng, +2348030000000, Manager, ${hotels[0]?.name ?? "Zuma Heights Wuse"}\nIkenna Uzoigwe, ikenna@zumaheights.example.ng, , Front office, ${hotels[0]?.name ?? "Zuma Heights Wuse"}`}
-					hint="Commas or tabs. The hotel column can be left out when there is only one hotel."
+					hint="Commas or tabs. The location column can be left out when there is only one location."
 				/>
 				{bad.length > 0 && (
 					<Note tone="warning">

@@ -1,5 +1,7 @@
 "use server";
 
+import { adaptText } from "@hospio/api/venue";
+import { getWords } from "@hospio/api/words";
 import type { ActionResult } from "@hospio/api/actions/auth";
 import { atHotel } from "@hospio/api/api/server";
 import { getHotels } from "@hospio/api/dal";
@@ -57,7 +59,22 @@ function daysBetween(from: string, to: string): string[] {
 	return out;
 }
 
+/**
+ * The report's rows, its column names in the words of the business ("Hotel" for a hotels-only business, "Location" otherwise:
+ * hospio-backend docs/plan-venue-type.md, phase 5).
+ */
 export async function buildReport(input: {
+	kind: ReportKind;
+	from: string;
+	to: string;
+	hotelId?: string;
+}): Promise<ActionResult<BuiltReport>> {
+	const [built, words] = await Promise.all([build(input), getWords()]);
+	if (!built.ok || words.biz.hotel) return built;
+	return { ...built, data: { ...built.data, columns: built.data.columns.map((c) => adaptText(c, words.biz)) } };
+}
+
+async function build(input: {
 	kind: ReportKind;
 	from: string;
 	to: string;
@@ -80,7 +97,7 @@ export async function buildReport(input: {
 		? all.filter((h) => h.id === input.hotelId)
 		: all;
 	if (input.hotelId && hotels.length === 0)
-		return { ok: false, error: "That hotel is not one of yours" };
+		return { ok: false, error: "That location is not one of yours" };
 	// The outlet reports for lounges, bars and restaurants (and hotels' outlets): hospio-backend docs/plan-venue-type.md phase 2.
 	if (isVenueReport(kind))
 		return buildVenueReport(

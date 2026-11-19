@@ -3,7 +3,8 @@ import { SuspensionWatch } from "./suspended";
 import { SetupLinks } from "@hospio/ui/shared/field";
 import { NotUsedHere } from "@hospio/ui/shared/not-used-here";
 import { isStayOnlyPath } from "@hospio/ui/links";
-import { hasAccommodation, venueNoun } from "@hospio/api/venue";
+import { businessWording, hasAccommodation, venueNoun, wording } from "@hospio/api/venue";
+import { WordingProvider } from "@hospio/ui/shared/wording";
 import { cookies, headers } from "next/headers";
 import { redirect } from "next/navigation";
 import type { PropsWithChildren } from "react";
@@ -204,6 +205,12 @@ export async function DashboardShell({ children }: PropsWithChildren) {
 			    not kept while support views as the owner. */}
 			<DraftUser userId={support ? null : user.id}>
 			<JotaiProvider>
+			{/* The words every screen uses for the active location and the business (docs/plan-venue-type.md, phase 5). */}
+			<WordingProvider
+				place={APP === "hotel" ? wording(activeHotel) : wording(null)}
+				biz={APP === "hotel" ? businessWording(hotels, business?.venueKind) : wording(null)}
+				stays={accommodation}
+			>
 				{/* Always the hotel's own brand, Hospio360 maroon included, so it replaces a look this browser remembered. */}
 				{brand && (
 					<style
@@ -279,7 +286,7 @@ export async function DashboardShell({ children }: PropsWithChildren) {
 							{/* "Manage … in Hotel setup" links only where Hotel setup exists (manager, owner). */}
 							<SetupLinks allowed={role === "MANAGER" || role === "OWNER"}>
 								{notUsedHere ? (
-									<NotUsedHere place={venueNoun(activeHotel)} locationName={activeHotel?.name} />
+									<NotUsedHere place={venueNoun(activeHotel)} locationName={activeHotel?.name} setup={wording(activeHotel).setup} />
 								) : (
 									children
 								)}
@@ -287,6 +294,7 @@ export async function DashboardShell({ children }: PropsWithChildren) {
 						</div>
 					</SidebarInset>
 				</SidebarProvider>
+			</WordingProvider>
 			</JotaiProvider>
 			</DraftUser>
 		</NuqsAdapter>

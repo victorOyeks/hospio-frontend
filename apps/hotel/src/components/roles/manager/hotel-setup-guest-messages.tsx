@@ -34,6 +34,7 @@ import { PanelSection, SidePanel } from "@hospio/ui/shared/side-panel";
 import { StatusPill } from "@hospio/ui/shared/status-pill";
 import { btn, cell, tableHead, tableRow } from "@hospio/ui/shared/ui";
 import { cn } from "@hospio/ui/utils";
+import { usePlaceText, useWording } from "@hospio/ui/shared/wording";
 
 /**
  * Hotel setup → Guest messages (hospio-backend docs/guest-message-billing.md): booking emails and WhatsApp to guests
@@ -42,6 +43,8 @@ import { cn } from "@hospio/ui/utils";
  * under Billing & invoices; there is no separate payment here.
  */
 export function GuestMessagesSection({ isOwner }: { isOwner: boolean }) {
+	const words = useWording();
+	const t = usePlaceText();
 	const params = useSearchParams();
 	const [plan, setPlan] = useState<CommPlanView | null>(null);
 	const [invoices, setInvoices] = useState<Paged<CommInvoiceRow> | null>(null);
@@ -118,7 +121,7 @@ export function GuestMessagesSection({ isOwner }: { isOwner: boolean }) {
 									: "Off · nothing is sent to guests"}
 							</p>
 							<p className="mt-1 text-[13px] text-ink-2">
-								Each message is sent from your hotel's name and charged per
+								{t("Each message is sent from your hotel's name and charged per")}
 								message at the prices below. You get one invoice a month. Codes,
 								sign-in and staff messages are always free.
 							</p>
@@ -149,7 +152,7 @@ export function GuestMessagesSection({ isOwner }: { isOwner: boolean }) {
 					</div>
 					<p className="text-xs text-ink-3">
 						{plan.customPrices
-							? "Your hotel's own prices, agreed with Hospio360."
+							? t("Your hotel's own prices, agreed with Hospio360.")
 							: "Hospio360's standard prices."}{" "}
 						A message the network rejects costs nothing.
 					</p>
@@ -248,7 +251,7 @@ export function GuestMessagesSection({ isOwner }: { isOwner: boolean }) {
 				open={confirmOff}
 				onOpenChange={setConfirmOff}
 				title="Turn guest messages off?"
-				subtitle="Guests stop getting booking confirmations, receipts and other messages from your hotel by email and WhatsApp. Codes and sign-in still work. You can turn it back on any time."
+				subtitle={words.stays ? "Guests stop getting booking confirmations, receipts and other messages from your hotel by email and WhatsApp. Codes and sign-in still work. You can turn it back on any time." : t("Guests stop getting receipts and other messages from your hotel by email and WhatsApp. Codes and sign-in still work. You can turn it back on any time.")}
 				confirmLabel="Turn off"
 				tone="danger"
 				onConfirm={() => void toggle(false)}
@@ -464,6 +467,7 @@ function MessagesPanel({
 	open: boolean;
 	onClose: () => void;
 }) {
+	const t = usePlaceText();
 	const [data, setData] = useState<Paged<CommMessageRow> | null>(null);
 	const [page, setPage] = useState(0);
 	useEffect(() => {
@@ -478,7 +482,7 @@ function MessagesPanel({
 			onOpenChange={(o) => !o && onClose()}
 			width="lg"
 			title="This month's messages"
-			subtitle="Each message your hotel has been charged for so far this month · invoiced on the 1st"
+			subtitle={t("Each message your hotel has been charged for so far this month · invoiced on the 1st")}
 			icon={MailIcon}
 			footer={
 				<Button variant="outline" className={btn.secondary} onClick={onClose}>

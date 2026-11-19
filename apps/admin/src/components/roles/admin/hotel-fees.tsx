@@ -94,7 +94,7 @@ export function HotelFeesPanel({ businessId, hotelId, role }: { businessId: stri
 			{superAdmin && (
 				<SectionCard
 					title="POS providers"
-					subtitle="The hotel's own Moniepoint and OPay keys, only for taking guest payments. Each card payment goes through its terminal's provider"
+					subtitle="The location's own Moniepoint and OPay keys, only for taking guest payments. Each card payment goes through its terminal's provider"
 				>
 					{!pos ? (
 						<p className="text-[13px] text-ink-3">Loading…</p>
@@ -123,7 +123,7 @@ export function HotelFeesPanel({ businessId, hotelId, role }: { businessId: stri
 														type="button"
 														className={`${btn.secondary} ${btn.small}`}
 														onClick={async () => {
-															if (!window.confirm(`Remove this hotel's ${providerLabel(provider)} keys? Payments on its ${providerLabel(provider)} terminals go back to the server's POS setting.`)) return;
+															if (!window.confirm(`Remove this location's ${providerLabel(provider)} keys? Payments on its ${providerLabel(provider)} terminals go back to the server's POS setting.`)) return;
 															const r = await removeAdminPosConfig(hotelId, provider);
 															if (r.ok) {
 																setPos(r.data);
@@ -186,7 +186,7 @@ export function HotelFeesPanel({ businessId, hotelId, role }: { businessId: stri
 				) : (
 					<div className="flex flex-col gap-3">
 						<p className="text-[13px] text-ink-2">
-							Nothing is taken from the hotel's accounts. Each month's fees go on the business's Hospio360 invoice, issued on the 1st and due 7
+							Nothing is taken from the business's accounts. Each month's fees go on the business's Hospio360 invoice, issued on the 1st and due 7
 							days later (Fees &amp; billing → Invoices).
 						</p>
 						{collection.posPaused && (
@@ -369,7 +369,7 @@ export function FeeDayModal({
 							hint={`Up to ${naira(refundable)} of the platform fee collected that day`}
 							required
 						/>
-						<TextField label="Reason" value={reason} onChange={setReason} placeholder="Charged twice; refunded to the hotel" required />
+						<TextField label="Reason" value={reason} onChange={setReason} placeholder="Charged twice; refunded to the business" required />
 						<Note tone="info">The referring marketer's commission on the refunded amount comes off their next statement.</Note>
 						<div className="flex justify-end gap-2">
 							<button type="button" className={btn.secondary} onClick={() => setRefunding(false)}>
@@ -426,7 +426,7 @@ function PosKeysModal({
 			open
 			onOpenChange={(o) => !o && onClose()}
 			title={`${providerLabel(provider)} keys`}
-			subtitle="Stored encrypted. Leave a field empty to keep the saved value; the hotel sees them masked."
+			subtitle="Stored encrypted. Leave a field empty to keep the saved value; the location sees them masked."
 		>
 			<div className="flex flex-col gap-4">
 				{FIELDS[provider].map((f) =>

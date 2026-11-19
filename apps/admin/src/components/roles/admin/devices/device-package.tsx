@@ -33,7 +33,7 @@ import { PackageInvoices } from "./device-invoices";
  */
 
 export const OPTIONS = [
-	{ value: "OWN_DEVICES", label: "Own devices", hint: "The hotel has its own tablets and internet: nothing supplied, nothing charged" },
+	{ value: "OWN_DEVICES", label: "Own devices", hint: "The business has its own tablets and internet: nothing supplied, nothing charged" },
 	{ value: "TRANSACTION", label: "From transactions", hint: "A share of each day's sales, billed with the Hospio fee on the monthly invoice until paid off" },
 	{ value: "MONTHLY", label: "Monthly", hint: "The total in 1 to 6 monthly instalments, each billed on that month's Hospio360 invoice" },
 	{ value: "ONE_TIME", label: "One time", hint: "Paid in full at installation (cash or transfer)" },
@@ -117,7 +117,7 @@ export function DevicePackagePanel({
 	const canEdit = !pkg || pkg.status === "DRAFT";
 	if (editing || !pkg) {
 		return (
-			<SectionCard title={heading} subtitle="What Hospio360 supplies to this hotel and how it is paid for">
+			<SectionCard title={heading} subtitle="What Hospio360 supplies to this location and how it is paid for">
 				<PackageEditor
 					businessId={businessId}
 					hotelId={hotelId}
@@ -220,7 +220,7 @@ function PackageEditor({
 
 	return (
 		<div className="flex flex-col gap-4 pt-2">
-			<ChoiceCards label="How the hotel pays for devices" value={option} onChange={setOption} columns={2} options={[...OPTIONS]} />
+			<ChoiceCards label="How the business pays for devices" value={option} onChange={setOption} columns={2} options={[...OPTIONS]} />
 			<div className="overflow-x-auto rounded-xl border border-line">
 				<table className="w-full min-w-[560px] text-[13px]">
 					<thead className={tableHead}>
@@ -302,7 +302,7 @@ function PackageEditor({
 				]}
 			/>
 			<Note tone="info">
-				Hospio360 owns the devices until they are paid off. If the hotel leaves before then, it pays what is left or returns them.
+				Hospio360 owns the devices until they are paid off. If the business leaves before then, it pays what is left or returns them.
 			</Note>
 			<div className="flex justify-end gap-2">
 				{onCancel && (
@@ -526,7 +526,7 @@ function PackageSummary({
 				open={paying}
 				onOpenChange={setPaying}
 				title="Record a device payment"
-				subtitle={`${naira(p.remaining)} left · cash or bank transfer received for ${p.hotelName ?? "this hotel"}'s devices`}
+				subtitle={`${naira(p.remaining)} left · cash or bank transfer received for ${p.hotelName ?? "this location"}'s devices`}
 				footer={
 					<>
 						<button type="button" className={btn.secondary} onClick={() => setPaying(false)}>
@@ -742,7 +742,7 @@ function DataPlanControls({
 				open={modal === "renewed"}
 				onOpenChange={(o) => !o && setModal(null)}
 				title="Renewed with the provider"
-				subtitle="Record that the hotel's data subscription (MTN, Airtel, Spectranet…) now runs to this day"
+				subtitle="Record that the location's data subscription (MTN, Airtel, Spectranet…) now runs to this day"
 				footer={
 					<>
 						<button type="button" className={btn.secondary} onClick={() => setModal(null)}>

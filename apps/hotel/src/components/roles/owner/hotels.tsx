@@ -63,12 +63,14 @@ import { StatusPill } from "@hospio/ui/shared/status-pill";
 import { ExportButton, SearchBox, Toolbar } from "@hospio/ui/shared/toolbar";
 import { btn } from "@hospio/ui/shared/ui";
 import { cn } from "@hospio/ui/utils";
+import { defaultVenueFor, VENUE_TYPE_OPTIONS, venueLabel, venueType as venueTypeOf } from "@hospio/api/venue";
 import {
 	DownloadModal,
 	hotelStatusLabel,
 	hotelStatusTone,
 	useParam,
 } from "./common";
+import { useBizText, useWording } from "@hospio/ui/shared/wording";
 
 type Tab = "all" | "active" | "paused" | "closed";
 const TAB_STATUSES: Record<Tab, OwnerHotelRow["status"][]> = {
@@ -98,12 +100,19 @@ const initialsOf = (name: string) =>
 export function OwnerHotels({
 	hotels,
 	businessName,
+	businessKind,
 	ownerName,
 }: {
 	hotels: OwnerHotelRow[];
 	businessName?: string;
+	/** The business's kind (docs/plan-venue-type.md): the kind a new location starts with. */
+	businessKind?: string;
 	ownerName?: string;
 }) {
+	const { biz } = useWording();
+	const tb = useBizText();
+	// Rooms and occupancy only where some location has rooms; the kind where the business is not hotels only.
+	const anyStay = hotels.some((h) => h.hasAccommodation !== false);
 	const router = useRouter();
 	const [tab, setTab] = useState<Tab>("all");
 	const [search, setSearch] = useState("");
@@ -141,12 +150,12 @@ export function OwnerHotels({
 
 	const actionsFor = (h: OwnerHotelRow) => [
 		{
-			label: "Details & rooms",
+			label: h.hasAccommodation !== false ? "Details & rooms" : "Details",
 			icon: BedDoubleIcon,
 			onClick: () => router.push(`/dashboard/hotels/${h.hotelId}`),
 		},
 		{
-			label: "Edit hotel",
+			label: tb("Edit hotel"),
 			icon: PencilIcon,
 			onClick: () => setEditId(h.hotelId),
 		},
@@ -157,19 +166,19 @@ export function OwnerHotels({
 		},
 		h.status === "ACTIVE"
 			? {
-					label: "Pause new bookings",
+					label: h.hasAccommodation !== false ? "Pause new bookings" : `Pause ${venueLabel(h.venueType).toLowerCase()}`,
 					icon: PauseCircleIcon,
 					separatorBefore: true,
 					onClick: () => setStatusChange({ id: h.hotelId, status: "PAUSED" }),
 				}
 			: {
-					label: "Reopen hotel",
+					label: tb("Reopen hotel"),
 					icon: PlayCircleIcon,
 					separatorBefore: true,
 					onClick: () => setStatusChange({ id: h.hotelId, status: "ACTIVE" }),
 				},
 		{
-			label: "Close hotel",
+			label: tb("Close hotel"),
 			icon: XCircleIcon,
 			tone: "danger" as const,
 			disabled: h.status === "CLOSED",
@@ -187,7 +196,7 @@ export function OwnerHotels({
 	const columns: ColumnDef<OwnerHotelRow, unknown>[] = [
 		{
 			accessorKey: "name",
-			header: "Hotel",
+			header: tb("Hotel"),
 			cell: ({ row }) => (
 				<div className="flex items-center gap-3">
 					<span className="flex size-9 items-center justify-center rounded-[10px] bg-brand-soft text-xs font-bold text-brand">
@@ -195,14 +204,14 @@ export function OwnerHotels({
 					</span>
 					<TwoLine
 						primary={row.original.name}
-						secondary={`${row.original.code} · ${row.original.manager === "—" ? "No manager yet" : row.original.manager}`}
+						secondary={`${biz.hotel ? "" : `${venueLabel(row.original.venueType)} · `}${row.original.code} · ${row.original.manager === "—" ? "No manager yet" : row.original.manager}`}
 					/>
 				</div>
 			),
 		},
 		{
 			accessorKey: "city",
-			header: "Location",
+			header: biz.hotel ? "Location" : "City",
 			cell: ({ row }) => (
 				<TwoLine
 					primary={row.original.city || "—"}
@@ -212,12 +221,19 @@ export function OwnerHotels({
 				/>
 			),
 		},
-		{ accessorKey: "rooms", header: "Rooms" },
+		...(anyStay
+			? ([
+		{
+			accessorKey: "rooms",
+			header: "Rooms",
+			cell: ({ row }) =>
+				row.original.hasAccommodation === false ? <span className="text-ink-3">—</span> : row.original.rooms,
+		},
 		{
 			accessorKey: "occupancy",
 			header: "Occupancy",
 			cell: ({ row }) =>
-				hasFigures(row.original) || row.original.occupancy > 0 ? (
+				row.original.hasAccommodation !== false && (hasFigures(row.original) || row.original.occupancy > 0) ? (
 					<div className="flex items-center gap-2">
 						<ProgressBar
 							value={row.original.occupancy}
@@ -231,6 +247,8 @@ export function OwnerHotels({
 					<span className="text-ink-3">—</span>
 				),
 		},
+			] as ColumnDef<OwnerHotelRow, unknown>[])
+			: []),
 		{
 			accessorKey: "revenueMonth",
 			header: "Revenue",
@@ -288,44 +306,50 @@ export function OwnerHotels({
 			!search || JSON.stringify(h).toLowerCase().includes(search.toLowerCase()),
 	);
 	const target = byId(statusChange?.id ?? null);
+	const targetStays = target?.hasAccommodation !== false;
+	const targetWord = venueLabel(target?.venueType).toLowerCase();
 	const statusCopy: Record<
 		HotelStatus,
 		{ title: string; label: string; items: string[] }
 	> = {
 		PAUSED: {
-			title: `Pause ${target?.name ?? "this hotel"}?`,
-			label: "Pause new bookings",
-			items: [
-				"No new bookings can be made",
-				"Guests in house finish their stay",
-				"Staff keep their access and reports keep running",
-			],
+			title: `Pause ${target?.name ?? tb("this hotel")}?`,
+			label: targetStays ? "Pause new bookings" : "Pause",
+			items: targetStays
+				? [
+						"No new bookings can be made",
+						"Guests in house finish their stay",
+						"Staff keep their access and reports keep running",
+					]
+				: ["It shows as paused on your list and reports", "Staff keep their access and reports keep running"],
 		},
 		CLOSED: {
-			title: `Close ${target?.name ?? "this hotel"}?`,
-			label: "Close hotel",
+			title: `Close ${target?.name ?? tb("this hotel")}?`,
+			label: tb("Close hotel"),
 			items: [
-				"The hotel leaves every screen after the last guest checks out",
-				"Staff lose access to this hotel",
+				targetStays
+					? "The hotel leaves every screen after the last guest checks out"
+					: `The ${targetWord} leaves every screen`,
+				targetStays ? "Staff lose access to this hotel" : `Staff lose access to this ${targetWord}`,
 				"History stays in reports and the activity log",
 			],
 		},
 		ACTIVE: {
-			title: `Reopen ${target?.name ?? "this hotel"}?`,
-			label: "Reopen hotel",
-			items: ["Bookings open again at once", "Staff access returns"],
+			title: `Reopen ${target?.name ?? tb("this hotel")}?`,
+			label: tb("Reopen hotel"),
+			items: [targetStays ? "Bookings open again at once" : "Sales open again at once", "Staff access returns"],
 		},
 	};
 
 	return (
 		<>
 			<PageHeader
-				title="Hotels"
-				subtitle={`${plural(hotels.length, "branch", "branches")} · ${rooms.toLocaleString()} rooms${cities.length ? ` across ${cities.join(", ")}` : ""}`}
+				title={tb("Hotels")}
+				subtitle={`${plural(hotels.length, "branch", "branches")}${anyStay ? ` · ${rooms.toLocaleString()} rooms` : ""}${cities.length ? ` across ${cities.join(", ")}` : ""}`}
 			>
 				<ExportButton onClick={() => setExportOpen(true)} />
 				<Button className={btn.primary} onClick={() => setNewHotel("1")}>
-					<PlusIcon className="size-4" /> Add new hotel
+					<PlusIcon className="size-4" /> {biz.hotel ? "Add new hotel" : "Add a location"}
 				</Button>
 			</PageHeader>
 
@@ -361,7 +385,7 @@ export function OwnerHotels({
 					</>
 				)}
 				<KpiCard
-					label="Revenue · month to date"
+					label="Money received · month to date"
 					value={anyFigures ? nairaShort(revenue) : "—"}
 					icon={TrendingUpIcon}
 					hint={
@@ -390,7 +414,7 @@ export function OwnerHotels({
 						<SearchBox
 							value={search}
 							onChange={setSearch}
-							placeholder="Search hotel, ID or manager"
+							placeholder={tb("Search hotel, ID or manager")}
 						/>
 						<div className="flex rounded-control border border-line bg-card p-[3px]">
 							{(["list", "grid"] as const).map((v) => (
@@ -424,16 +448,16 @@ export function OwnerHotels({
 					data={rows}
 					search={search}
 					onRowClick={(h) => router.push(`/dashboard/hotels/${h.hotelId}`)}
-					emptyTitle={hotels.length === 0 ? "No hotels yet" : "No hotels match"}
+					emptyTitle={hotels.length === 0 ? tb("No hotels yet") : tb("No hotels match")}
 					emptyHint={
 						hotels.length === 0
-							? "Add your first hotel; it takes about two minutes."
+							? tb("Add your first hotel; it takes about two minutes.")
 							: "Try another name, ID or manager."
 					}
 				/>
 			) : filteredGrid.length === 0 ? (
 				<EmptyState
-					title="No hotels match"
+					title={tb("No hotels match")}
 					hint="Try another name, ID or manager."
 					className="min-h-[240px]"
 				/>
@@ -463,8 +487,15 @@ export function OwnerHotels({
 							</div>
 							<div className="grid grid-cols-3 gap-2 text-center">
 								{[
-									["Rooms", h.rooms],
-									["Occupancy", hasFigures(h) ? `${h.occupancy}%` : "—"],
+									...(h.hasAccommodation !== false
+										? [
+												["Rooms", h.rooms],
+												["Occupancy", hasFigures(h) ? `${h.occupancy}%` : "—"],
+											]
+										: [
+												["Kind", venueLabel(h.venueType)],
+												["On shift", h.onShift],
+											]),
 									["Revenue", hasFigures(h) ? nairaShort(h.revenueMonth) : "—"],
 								].map(([l, v]) => (
 									<div
@@ -497,6 +528,7 @@ export function OwnerHotels({
 				onClose={() => setNewHotel(null)}
 				businessName={businessName}
 				ownerName={ownerName}
+				kind={businessKind}
 			/>
 			<EditHotelPanel hotel={byId(editId)} onClose={() => setEditId(null)} />
 			<ContactManagerPanel
@@ -519,7 +551,7 @@ export function OwnerHotels({
 					onConfirm={() =>
 						run(
 							() => setHotelStatus(statusChange.id, statusChange.status),
-							`${target?.name ?? "Hotel"} ${statusChange.status === "ACTIVE" ? "reopened" : statusChange.status === "PAUSED" ? "paused" : "closed"}`,
+							`${target?.name ?? tb("Hotel")} ${statusChange.status === "ACTIVE" ? "reopened" : statusChange.status === "PAUSED" ? "paused" : "closed"}`,
 							() => {
 								setStatusChange(null);
 							},
@@ -544,11 +576,11 @@ export function OwnerHotels({
 			<DownloadModal
 				open={exportOpen}
 				onOpenChange={setExportOpen}
-				title="Export hotels"
-				what="Hotels"
+				title={tb("Export hotels")}
+				what={tb("Hotels")}
 				rows={() => [
 					[
-						"Hotel",
+						tb("Hotel"),
 						"City",
 						"Status",
 						"Rooms",
@@ -595,13 +627,23 @@ export function AddHotelWizard({
 	onClose,
 	businessName,
 	ownerName,
+	kind,
 }: {
 	open: boolean;
 	onClose: () => void;
 	businessName?: string;
 	ownerName?: string;
+	/** The business's kind: a new location starts as this (a Mixed business as a hotel) and the owner may pick another. */
+	kind?: string;
 }) {
+	const { biz } = useWording();
 	const [step, setStep] = useState(0);
+	const [type, setType] = useState<string>(defaultVenueFor(kind));
+	// A lounge, bar or restaurant has no check-in times and no rooms step (docs/plan-venue-type.md).
+	const stay = venueTypeOf(type) === "HOTEL";
+	const word = biz.hotel ? "hotel" : venueLabel(type).toLowerCase();
+	const Word = word.charAt(0).toUpperCase() + word.slice(1);
+	const setupName = `${Word} setup`;
 	const [name, setName] = useState("");
 	const [city, setCity] = useState("Lagos");
 	const [address, setAddress] = useState("");
@@ -636,7 +678,7 @@ export function AddHotelWizard({
 	};
 
 	const roomCount = Number.parseInt(rooms, 10) || 0;
-	const wantsRooms = roomCount > 0 && price !== "" && price > 0;
+	const wantsRooms = stay && roomCount > 0 && price !== "" && price > 0;
 	const wantsManager =
 		invite && manager.trim().length > 1 && /^\S+@\S+\.\S+$/.test(managerEmail);
 
@@ -650,8 +692,10 @@ export function AddHotelWizard({
 					phone: phone.trim() || null,
 					email: email.trim() || null,
 					timezone,
-					checkInTime: checkIn || null,
-					checkOutTime: checkOut || null,
+					checkInTime: stay ? checkIn || null : null,
+					checkOutTime: stay ? checkOut || null : null,
+					// Left out for a hotels-only business, as before (the business's kind decides).
+					...(biz.hotel ? {} : { venueType: venueTypeOf(type) }),
 				});
 				if (!hotel.ok) return hotel;
 				const out: Outcome = {
@@ -710,7 +754,7 @@ export function AddHotelWizard({
 				}
 				return { ok: true as const, data: out };
 			},
-			`${name.trim() || "Hotel"} added`,
+			`${name.trim() || Word} added`,
 			setOutcome,
 		);
 	}
@@ -719,17 +763,19 @@ export function AddHotelWizard({
 		<SidePanel
 			open={open}
 			onOpenChange={(o) => !o && close()}
-			title={outcome ? `${outcome.hotelName} is ready` : "Add a hotel"}
+			title={outcome ? `${outcome.hotelName} is ready` : biz.hotel ? "Add a hotel" : "Add a location"}
 			subtitle={
 				outcome
-					? "Rooms and the manager's login are in"
+					? stay
+						? "Rooms and the manager's login are in"
+						: "Created with the manager's login, if you invited one"
 					: `Step ${step + 1} of ${steps.length} · ${steps[step]}`
 			}
 			icon={BuildingIcon}
 			width="md"
 			footerInfo={
 				outcome
-					? "Finish the rest in the hotel's Hotel setup"
+					? `Finish the rest in the ${word}'s ${setupName}`
 					: step < steps.length - 1
 						? "Nothing is saved until you finish"
 						: wantsManager
@@ -809,8 +855,9 @@ export function AddHotelWizard({
 						/>
 					)}
 					<Note tone="info">
-						Room types, prices, policies and the brand colour are finished in
-						the hotel's Hotel setup. Switch to the hotel from the sidebar.
+						{stay
+							? "Room types, prices, policies and the brand colour are finished in the hotel's Hotel setup. Switch to the hotel from the sidebar."
+							: `Outlets, menus, tables and the brand colour are finished in the ${word}'s ${setupName}. Switch to the ${word} from the sidebar.`}
 					</Note>
 				</div>
 			) : (
@@ -829,8 +876,17 @@ export function AddHotelWizard({
 					<div className="flex flex-col gap-4">
 						{step === 0 && (
 							<>
+								{!biz.hotel && (
+									<SelectField
+										label="Kind of location"
+										value={type}
+										onChange={setType}
+										options={VENUE_TYPE_OPTIONS}
+										hint="A hotel has rooms; a lounge, bar, restaurant or club sells at its outlets"
+									/>
+								)}
 								<TextField
-									label="Hotel name"
+									label={`${Word} name`}
 									value={name}
 									onChange={setName}
 									placeholder="e.g. Ivory Court Yaba"
@@ -844,7 +900,7 @@ export function AddHotelWizard({
 										placeholder="Lagos"
 									/>
 									<TextField
-										label="Front desk phone"
+										label={stay ? "Front desk phone" : "Phone"}
 										value={phone}
 										onChange={setPhone}
 										placeholder="+234…"
@@ -852,7 +908,7 @@ export function AddHotelWizard({
 								</FieldRow>
 								<Note tone="info">
 									{businessName ? `${businessName}'s` : "Your"} brand colours
-									apply to every hotel; change them in Hotel setup → Brand &
+									apply to every {biz.place}; change them in {setupName} → Brand &
 									colours.
 								</Note>
 							</>
@@ -873,13 +929,14 @@ export function AddHotelWizard({
 										options={TIMEZONES}
 									/>
 									<TextField
-										label="Front desk email"
+										label={stay ? "Front desk email" : "Email"}
 										type="email"
 										value={email}
 										onChange={setEmail}
 										placeholder="yaba@ivorycourt.example.ng"
 									/>
 								</FieldRow>
+								{stay && (
 								<FieldRow>
 									<TextField
 										label="Check-in from"
@@ -894,9 +951,16 @@ export function AddHotelWizard({
 										onChange={setCheckOut}
 									/>
 								</FieldRow>
+								)}
 							</>
 						)}
-						{step === 2 && (
+						{step === 2 && !stay && (
+							<Note tone="info">
+								A {word} has no rooms to add. Its outlets (bar, restaurant, kitchen), menus and tables are added after it
+								is created, in its {setupName} → Restaurants & tables. Tap Next.
+							</Note>
+						)}
+						{step === 2 && stay && (
 							<>
 								<FieldRow>
 									<TextField
@@ -968,19 +1032,23 @@ export function AddHotelWizard({
 								<DetailList
 									columns={2}
 									items={[
-										{ label: "Hotel", value: name || "—" },
+										{ label: Word, value: name || "—" },
 										{ label: "City", value: city || "—" },
 										{ label: "Address", value: address || "—" },
-										{
-											label: "Rooms",
-											value: wantsRooms
-												? `${roomCount} × ${typeName || "Standard"}`
-												: "Add later",
-										},
-										{
-											label: "Starting price",
-											value: price === "" ? "—" : nairaShort(price),
-										},
+										...(stay
+											? [
+													{
+														label: "Rooms",
+														value: wantsRooms
+															? `${roomCount} × ${typeName || "Standard"}`
+															: "Add later",
+													},
+													{
+														label: "Starting price",
+														value: price === "" ? "—" : nairaShort(price),
+													},
+												]
+											: [{ label: "Kind", value: venueLabel(type) }]),
 										{
 											label: "Manager",
 											value: wantsManager ? manager : "Invite later",
@@ -989,14 +1057,18 @@ export function AddHotelWizard({
 								/>
 								<WhatHappens
 									items={[
-										"The hotel appears in your list as Active with the default hotel settings",
-										wantsRooms
-											? `${roomCount} rooms are created and numbered from 101`
-											: "Rooms are added in Hotel setup",
+										stay
+											? "The hotel appears in your list as Active with the default hotel settings"
+											: `The ${word} appears in your list as Active with the lounge, bar and restaurant settings`,
+										stay
+											? wantsRooms
+												? `${roomCount} rooms are created and numbered from 101`
+												: "Rooms are added in Hotel setup"
+											: `Outlets are added in ${setupName} → Restaurants & tables`,
 										wantsManager
 											? "The manager's login is created; you send the invite link"
 											: "No manager is invited yet",
-										"Platform fees start when the hotel takes bookings",
+										stay ? "Platform fees start when the hotel takes bookings" : `Hospio360's fee starts with the ${word}'s first sales`,
 									]}
 								/>
 							</PanelSection>
@@ -1016,6 +1088,7 @@ export function EditHotelPanel({
 	hotel: OwnerHotelRow | null;
 	onClose: () => void;
 }) {
+	const tb = useBizText();
 	const blank = (h: OwnerHotelRow | null) => ({
 		name: h?.name ?? "",
 		city: h?.city ?? "",
@@ -1066,7 +1139,7 @@ export function EditHotelPanel({
 					return setHotelStatus(hotel.hotelId, form.status);
 				return r;
 			},
-			"Hotel updated",
+			tb("Hotel updated"),
 			onClose,
 		);
 	}
@@ -1075,7 +1148,7 @@ export function EditHotelPanel({
 		<SidePanel
 			open={!!hotel}
 			onOpenChange={(o) => !o && onClose()}
-			title="Edit hotel"
+			title={tb("Edit hotel")}
 			subtitle={hotel?.name}
 			icon={PencilIcon}
 			footer={
@@ -1100,7 +1173,7 @@ export function EditHotelPanel({
 		>
 			<div className="flex flex-col gap-4">
 				<TextField
-					label="Hotel name"
+					label={tb("Hotel name")}
 					value={form.name}
 					onChange={(v) => set("name", v)}
 					required
@@ -1136,6 +1209,7 @@ export function EditHotelPanel({
 						onChange={(v) => set("email", v)}
 					/>
 				</FieldRow>
+				{hotel?.hasAccommodation !== false && (
 				<FieldRow>
 					<TextField
 						label="Check-in from"
@@ -1150,6 +1224,7 @@ export function EditHotelPanel({
 						onChange={(v) => set("checkOutTime", v)}
 					/>
 				</FieldRow>
+				)}
 				<SelectField
 					label="Status"
 					value={form.status}
@@ -1169,7 +1244,9 @@ export function EditHotelPanel({
 					]}
 				/>
 				<Note tone="info">
-					Rooms, prices and policies are managed in the hotel's Hotel setup.
+					{hotel?.hasAccommodation !== false
+						? "Rooms, prices and policies are managed in the hotel's Hotel setup."
+						: `Outlets, menus and prices are managed in the ${venueLabel(hotel?.venueType).toLowerCase()}'s ${venueLabel(hotel?.venueType)} setup.`}
 				</Note>
 			</div>
 		</SidePanel>
@@ -1184,6 +1261,7 @@ export function ContactManagerPanel({
 	hotel: OwnerHotelRow | null;
 	onClose: () => void;
 }) {
+	const tb = useBizText();
 	const [msg, setMsg] = useState("");
 	const [whatsapp, setWhatsapp] = useState(false);
 	// Staff messages have no approved WhatsApp template: the copy is offered only once NOTICE can go (docs/sms-whatsapp.md).
@@ -1192,7 +1270,7 @@ export function ContactManagerPanel({
 	const named = !!hotel?.managerUserId && hotel.manager !== "—";
 	const who = named
 		? (hotel?.manager ?? "the manager")
-		: `${hotel?.name ?? "the hotel"}'s managers`;
+		: `${hotel?.name ?? tb("the hotel")}'s managers`;
 	return (
 		<SidePanel
 			open={!!hotel}
@@ -1241,8 +1319,8 @@ export function ContactManagerPanel({
 				<DetailList
 					columns={2}
 					items={[
-						{ label: "Hotel phone", value: hotel?.phone || "—" },
-						{ label: "Hotel email", value: hotel?.email || "—" },
+						{ label: tb("Hotel phone"), value: hotel?.phone || "—" },
+						{ label: tb("Hotel email"), value: hotel?.email || "—" },
 					]}
 				/>
 				<TextareaField

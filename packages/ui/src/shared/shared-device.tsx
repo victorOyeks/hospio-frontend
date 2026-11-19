@@ -37,6 +37,7 @@ import { rememberPage, useDraftUser } from "./draft";
  */
 
 import { DEVICE_ROLES, SHARED_DESK_ROLES } from "./shared-device-roles";
+import { usePlaceText } from "@hospio/ui/shared/wording";
 
 export { DEVICE_ROLES, SHARED_DESK_ROLES };
 
@@ -210,6 +211,7 @@ export function SetupDeviceModal({
 	activeHotelId?: string;
 	activeRole?: string;
 }) {
+	const t = usePlaceText();
 	const first = hotels.find((h) => h.id === activeHotelId) ?? hotels[0];
 	const [name, setName] = useState("");
 	const [hotelId, setHotelId] = useState(first?.id ?? "");
@@ -290,7 +292,7 @@ export function SetupDeviceModal({
 				)}
 				<Field
 					label="Who uses it"
-					hint="People with one of these roles at the hotel can unlock it"
+					hint={t("People with one of these roles at the hotel can unlock it")}
 				>
 					<div className="flex flex-wrap gap-2">
 						{allowed.map((r) => {
@@ -434,6 +436,7 @@ export function IdleLock({ minutes }: { minutes: number }) {
  * or "Not now", which comes back at the next sign-in on a shared device.
  */
 export function PinPrompt({ onDevice }: { onDevice: boolean }) {
+	const t = usePlaceText();
 	const [open, setOpen] = useState(true);
 	const pin = usePinPair();
 	const [pending, start] = useTransition();
@@ -451,7 +454,7 @@ export function PinPrompt({ onDevice }: { onDevice: boolean }) {
 			toast.success("PIN set", {
 				description: onDevice
 					? "Tap your name on the lock screen next time."
-					: "Use it to switch in on the hotel's shared tablets.",
+					: t("Use it to switch in on the hotel's shared tablets."),
 			});
 			setOpen(false);
 		});
@@ -493,8 +496,7 @@ export function PinPrompt({ onDevice }: { onDevice: boolean }) {
 			<div className="flex flex-col gap-4">
 				<PinPairFields pin={pin} onSecondComplete={(v) => save(v)} />
 				<p className="text-center text-xs text-ink-3">
-					Your PIN only works on shared devices at your hotel. Managers can
-					reset it, never see it.
+					{t("Your PIN only works on shared devices at your hotel. Managers can reset it, never see it.")}
 				</p>
 			</div>
 		</Modal>

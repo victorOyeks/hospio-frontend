@@ -48,7 +48,7 @@ export async function runAtHotel<K extends ScopedName>(
 ): Promise<Awaited<ReturnType<ScopedActions[K]>>> {
 	const hotels = await getHotels();
 	if (!hotels.some((h) => h.id === hotelId)) {
-		throw new Error("That hotel is not one of yours");
+		throw new Error("That location is not one of yours");
 	}
 	const action = SCOPED[name] as (
 		...a: unknown[]

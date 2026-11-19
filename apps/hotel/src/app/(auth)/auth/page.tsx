@@ -38,7 +38,7 @@ export default async function AuthPage({
 					href="/sign-up"
 					className="font-semibold text-brand hover:underline"
 				>
-					Create your hotel account
+					Create your account
 				</Link>
 			</p>
 			{DEMO_AUTH && (

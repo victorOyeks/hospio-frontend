@@ -45,7 +45,7 @@ const GROUPS: { key: IntegrationGroup; title: string; subtitle: string }[] = [
 	{ key: "EMAIL", title: "Email", subtitle: "Sign-in codes, invites, statements and guest booking emails" },
 	{ key: "MESSAGING", title: "Messaging", subtitle: "WhatsApp to guests and SMS phone checks" },
 	{ key: "PAYMENTS", title: "Payments", subtitle: "Online payments: owners paying their Hospio360 monthly invoice (Paystack)" },
-	{ key: "POS", title: "POS", subtitle: "The server's POS setting, used by hotels without their own keys" },
+	{ key: "POS", title: "POS", subtitle: "The server's POS setting, used by locations without their own keys" },
 	{ key: "FEE_DEBIT", title: "Fee debit (no longer used)", subtitle: "Nothing is debited any more: Hospio360 bills one invoice a month. Kept for reference" },
 ];
 

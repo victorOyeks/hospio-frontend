@@ -39,7 +39,7 @@ import {
 	useFeeLock,
 } from "./business/fee-lock";
 import { can, HealthBar, ReadOnlyNote, StagePill } from "./shared";
-import { venueLabel } from "@hospio/api/venue";
+import { BUSINESS_KIND_OPTIONS, type BusinessKindKey, venueLabel } from "@hospio/api/venue";
 
 const STAGES = [
 	"ALL",
@@ -287,6 +287,8 @@ export function NewBusinessPanel({
 	const [email, setEmail] = useState("");
 	const [phone, setPhone] = useState("");
 	const [city, setCity] = useState("");
+	// What kind of business (docs/plan-venue-type.md): a lounge, bar or restaurant starts without rooms and with its own setup.
+	const [kind, setKind] = useState<BusinessKindKey>("HOTEL");
 	// One fee model: a % of each day's sales, billed on the business's monthly invoice. Only the rate varies.
 	// Fee lock: the platform default unless a signed addendum says otherwise.
 	const lock = useFeeLock(null, null);
@@ -336,6 +338,7 @@ export function NewBusinessPanel({
 				feeAddendumRef: fee.feeAddendumRef,
 				marketerId: marketer || null,
 				source: "BACK_OFFICE",
+				venueKind: kind,
 			});
 			if (!result.ok) {
 				// The server's sentence goes under the field it is about (a duplicate email, phone or name).
@@ -414,7 +417,7 @@ export function NewBusinessPanel({
 							type="email"
 							value={email}
 							onChange={edit(setEmail, "email")}
-							placeholder="e.g. owner@hotel.com"
+							placeholder="e.g. owner@example.com"
 							required
 							error={errors.email}
 						/>
@@ -429,6 +432,13 @@ export function NewBusinessPanel({
 					</FieldRow>
 				</PanelSection>
 				<PanelSection title="Business">
+					<SelectField
+						label="What kind of business?"
+						value={kind}
+						onChange={(v) => setKind(v as BusinessKindKey)}
+						options={BUSINESS_KIND_OPTIONS}
+						hint="Sets how its locations start: a hotel with rooms; a lounge, bar or restaurant without. It can be changed in onboarding step 1."
+					/>
 					<TextField
 						label="Business name"
 						value={name}

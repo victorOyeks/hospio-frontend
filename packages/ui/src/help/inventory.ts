@@ -92,7 +92,7 @@ export const inventoryHelp: HelpModule = {
 		{
 			id: "inv-stores",
 			title: "Add or close a store",
-			when: "The hotel opens a new store room or outlet shelf, or stops using one.",
+			when: "The hotel opens a new storeroom or outlet shelf, or stops using one.",
 			topic: "Stock",
 			steps: [
 				"On “Stores & stock”, tap the “Add a store” card.",

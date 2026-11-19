@@ -60,6 +60,7 @@ import {
 	BoardColumn,
 	Stepper,
 } from "../shared-staff/tablet";
+import { useWording } from "@hospio/ui/shared/wording";
 
 type Status = GuestLaundryRow["status"];
 const NEXT: Partial<Record<Status, Status>> = {
@@ -111,6 +112,7 @@ export function LaundryJobsScreen({
 	terminals?: TerminalRow[];
 	desk: "LAUNDRY" | "FRONT_OFFICE";
 }) {
+	const words = useWording();
 	const [rows, setRows] = useState(orders);
 	useEffect(() => setRows(orders), [orders]);
 	const [openId, setOpenId] = useQueryState("open");
@@ -224,18 +226,21 @@ export function LaundryJobsScreen({
 					Laundry prices.
 				</Note>
 			)}
-			<div className="grid grid-cols-2 gap-4 md:grid-cols-4">
+			<div className={words.stays ? "grid grid-cols-2 gap-4 md:grid-cols-4" : "grid grid-cols-2 gap-4 md:grid-cols-3"}>
 				<KpiCard label="In progress" value={open.length} icon={ShirtIcon} />
 				<KpiCard
 					label="Due in the next 2 hours"
 					value={dueSoon.length}
 					icon={WashingMachineIcon}
 				/>
-				<KpiCard
-					label="Charged to rooms today"
-					value={naira(chargedToday)}
-					icon={BedDoubleIcon}
-				/>
+				{/* Only where there are rooms to charge to (docs/plan-venue-type.md). */}
+				{words.stays && (
+					<KpiCard
+						label="Charged to rooms today"
+						value={naira(chargedToday)}
+						icon={BedDoubleIcon}
+					/>
+				)}
 				<KpiCard
 					label="Paid at the desk today"
 					value={naira(paidToday)}

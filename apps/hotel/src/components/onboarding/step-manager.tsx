@@ -4,6 +4,7 @@ import { CheckIcon, MailIcon, ShieldIcon } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { placeWord, setupWord } from "./steps";
 import { useInviteAccepted } from "./invite-status";
 import { createUser } from "@hospio/api/actions/identity";
 import { withDeliveries } from "@hospio/ui/shared/deliveries-store";
@@ -52,7 +53,10 @@ export function ManagerStep({
 	const set = <K extends keyof typeof form>(k: K, v: string) =>
 		update({ [k]: v } as Partial<typeof form>);
 	const { run, pending } = useAction();
-	const hotelName = hotel?.name ?? "your hotel";
+	// The business's kind names the place: "hotel", "lounge"…, "location" for a mixed business (docs/plan-venue-type.md).
+	const place = placeWord(business?.venueKind);
+	const places = `${place}s`;
+	const hotelName = hotel?.name ?? `your ${place}`;
 	const inviter = user?.fullName ?? business?.ownerName ?? "The owner";
 
 	const check = () =>
@@ -118,11 +122,11 @@ export function ManagerStep({
 				<StepCard
 					step="manager"
 					title="Your first manager"
-					intro="A manager is given a hotel, so the hotel comes first."
+					intro={`A manager is given a ${place}, so the ${place} comes first.`}
 				>
 					<Note tone="info">Step 2 has not been saved yet.</Note>
 					<Link href={stepHref("hotel")} className={cn(btn.primary, "w-fit")}>
-						Go to Your first hotel
+						Go to Your first {place}
 					</Link>
 				</StepCard>
 			</StepPage>
@@ -135,7 +139,7 @@ export function ManagerStep({
 				<>
 					<SideCard
 						eyebrow={`The invite ${created?.fullName.split(" ")[0] ?? "they"} get${created ? "s" : ""}`}
-						title={`${inviter} invited you to ${business?.name ?? "your hotels"}`}
+						title={`${inviter} invited you to ${business?.name ?? `your ${places}`}`}
 						icon={MailIcon}
 					>
 						<p>
@@ -150,7 +154,7 @@ export function ManagerStep({
 					</SideCard>
 					<SideCard title="Only what they need" icon={ShieldIcon}>
 						<p>
-							A manager only sees the hotels you give them. Add or remove hotels
+							A manager only sees the {places} you give them. Add or remove {places}{" "}
 							any time from Users.
 						</p>
 					</SideCard>
@@ -234,20 +238,23 @@ export function ManagerStep({
 								{
 									value: "MANAGER",
 									label: "General manager",
-									hint: "Runs the hotels you give them: rooms, bookings, folios, staff, stock and branch money. Can't see other hotels or who has access.",
+									hint:
+										place === "hotel"
+											? "Runs the hotels you give them: rooms, bookings, folios, staff, stock and branch money. Can't see other hotels or who has access."
+											: `Runs the ${places} you give them: sales, tabs, tills, menus, staff, stock and branch money. Can't see other ${places} or who has access.`,
 								},
 							]}
 						/>
 						<div className="flex flex-col gap-2">
 							<span className="text-[13px] font-medium text-ink-2">
-								Hotels they'll run
+								{place === "hotel" ? "Hotels" : `${place.charAt(0).toUpperCase()}${places.slice(1)}`} they'll run
 							</span>
 							<div className="flex flex-wrap items-center gap-2">
 								<span className="inline-flex items-center gap-1 rounded-pill border border-brand bg-brand-soft px-3 py-1 text-xs font-semibold text-brand">
 									<CheckIcon className="size-3" /> {hotelName}
 								</span>
 								<span className="text-xs text-ink-3">
-									Your other hotels appear here once you add them
+									Your other {places} appear here once you add them
 								</span>
 							</div>
 						</div>
@@ -257,7 +264,7 @@ export function ManagerStep({
 									What needs your OK
 								</p>
 								<span className="text-xs text-ink-3">
-									Change later in Hotel setup → Approval limits
+									Change later in {setupWord(business?.venueKind)} → Approval limits
 								</span>
 							</div>
 							<ul className="mt-2 flex flex-col gap-1 text-xs text-ink-2">

@@ -52,6 +52,7 @@ export const laundryHelp: HelpModule = {
 		},
 		{
 			id: "lau-charge-room",
+			stay: true,
 			title: "Charge an order to the room",
 			when: "The guest wants the laundry added to their hotel bill.",
 			topic: "Guest laundry",

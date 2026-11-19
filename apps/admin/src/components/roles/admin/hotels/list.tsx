@@ -1,5 +1,6 @@
 "use client";
 
+import { VENUE_TYPE_OPTIONS, venueLabel } from "@hospio/api/venue";
 import type { ColumnDef } from "@tanstack/react-table";
 import { BedDoubleIcon, BuildingIcon, CreditCardIcon, PauseCircleIcon } from "lucide-react";
 import { parseAsString, useQueryState } from "nuqs";
@@ -26,6 +27,7 @@ export function HotelsScreen({ role, hotels: base }: { role: AdminRole; hotels: 
 	const [biz, setBiz] = useQueryState("businessId", opts);
 	const [stage, setStage] = useQueryState("stage", opts);
 	const [fee, setFee] = useQueryState("fee", opts);
+	const [kind, setKind] = useQueryState("kind", opts);
 	const [, setHotel] = useQueryState("hotel", parseAsString.withOptions({ history: "push", scroll: false }));
 	const money = can.money(role);
 	const { rows: hotels, loading: feesLoading, error: feesError } = useHotelFees(base, money);
@@ -43,20 +45,22 @@ export function HotelsScreen({ role, hotels: base }: { role: AdminRole; hotels: 
 				(!term || `${h.name} ${h.businessName} ${h.city}`.toLowerCase().includes(term)) &&
 				(!biz || h.businessId === biz) &&
 				(!stage || h.stage === stage) &&
+				(!kind || h.venueType === kind) &&
 				(!fee || feeFilterMatches(h, fee)),
 		);
-	}, [hotels, q, biz, stage, fee]);
+	}, [hotels, q, biz, stage, fee, kind]);
 
 	const withKeys = hotels.filter((h) => h.collection?.keysIn).length;
 	const paused = hotels.filter((h) => h.collection?.posPaused).length;
-	const filtered = !!(q || biz || stage || fee);
+	const filtered = !!(q || biz || stage || fee || kind);
 
 	const columns: ColumnDef<HotelDirectoryRow, unknown>[] = [
 		{
 			accessorKey: "name",
-			header: "Hotel",
+			header: "Location",
 			cell: ({ row }) => <TwoLine primary={row.original.name} secondary={row.original.city || "—"} />,
 		},
+		{ accessorKey: "venueType", header: "Kind", cell: ({ row }) => venueLabel(row.original.venueType) },
 		{
 			accessorKey: "businessName",
 			header: "Business",
@@ -67,7 +71,11 @@ export function HotelsScreen({ role, hotels: base }: { role: AdminRole; hotels: 
 				</span>
 			),
 		},
-		{ accessorKey: "rooms", header: "Rooms" },
+		{
+			accessorKey: "rooms",
+			header: "Rooms",
+			cell: ({ row }) => (row.original.hasAccommodation ? row.original.rooms : <span className="text-ink-3">—</span>),
+		},
 		...(money
 			? ([
 					{ id: "keys", header: "POS keys", cell: ({ row }) => (feesLoading ? <Pending /> : <KeysCell c={row.original.collection} />) },
@@ -80,21 +88,27 @@ export function HotelsScreen({ role, hotels: base }: { role: AdminRole; hotels: 
 	return (
 		<>
 			<PageHeader
-				title="Hotels"
-				subtitle={`Every hotel across ${businesses.length} ${businesses.length === 1 ? "business" : "businesses"}. Open one to see today's figures${money ? ", its POS keys and Hospio fees" : ""} and its guest messages.`}
+				title="Locations"
+				subtitle={`Every location across ${businesses.length} ${businesses.length === 1 ? "business" : "businesses"}. Open one to see today's figures${money ? ", its POS keys and Hospio fees" : ""} and its guest messages.`}
 			/>
 			<div className="grid grid-cols-2 gap-4 md:grid-cols-4">
-				<KpiCard label="Hotels" value={hotels.length} icon={BedDoubleIcon} hint={`${hotels.reduce((a, h) => a + h.rooms, 0)} rooms`} />
+				<KpiCard
+					label="Locations"
+					value={hotels.length}
+					icon={BedDoubleIcon}
+					hint={`${hotels.filter((h) => h.venueType === "HOTEL").length} hotels · ${hotels.filter((h) => h.venueType !== "HOTEL").length} lounges, bars and restaurants · ${hotels.reduce((a, h) => a + h.rooms, 0)} rooms`}
+				/>
 				<KpiCard label="Businesses" value={businesses.length} icon={BuildingIcon} />
 				{money && <KpiCard label="POS keys in" value={feesLoading ? "…" : withKeys} icon={CreditCardIcon} hint="For taking guest payments" />}
 				{money && <KpiCard label="POS paused" value={feesLoading ? "…" : paused} icon={PauseCircleIcon} hint="Unpaid Hospio360 invoice" />}
 			</div>
-			{feesError && <Note tone="warning">{feesError}. The hotels are listed; open one to see its fees.</Note>}
+			{feesError && <Note tone="warning">{feesError}. The locations are listed; open one to see its fees.</Note>}
 			<Toolbar
-				left={<SearchBox value={q} onChange={(v) => void setQ(v || null)} placeholder="Search hotel, business or city…" />}
+				left={<SearchBox value={q} onChange={(v) => void setQ(v || null)} placeholder="Search location, business or city…" />}
 				right={
 					<>
 						<FilterSelect value={biz} onChange={(v) => void setBiz(v || null)} all="All businesses" options={businesses} />
+						<FilterSelect value={kind} onChange={(v) => void setKind(v || null)} all="All kinds" options={VENUE_TYPE_OPTIONS} />
 						<FilterSelect
 							value={stage}
 							onChange={(v) => void setStage(v || null)}
@@ -115,9 +129,10 @@ export function HotelsScreen({ role, hotels: base }: { role: AdminRole; hotels: 
 					void setBiz(null);
 					void setStage(null);
 					void setFee(null);
+					void setKind(null);
 				}}
-				emptyTitle="No hotels yet"
-				emptyHint="Hotels are added while a business is onboarded. Start one from Businesses → Set up a business for them."
+				emptyTitle="No locations yet"
+				emptyHint="Locations are added while a business is onboarded. Start one from Businesses → Set up a business for them."
 			/>
 			<HotelDrawer hotels={hotels} role={role} />
 		</>

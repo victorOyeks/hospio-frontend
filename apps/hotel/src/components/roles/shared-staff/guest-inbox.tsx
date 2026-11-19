@@ -68,6 +68,7 @@ import {
 import { cn } from "@hospio/ui/utils";
 import { useWhatsAppKinds } from "@/lib/use-whatsapp-kinds";
 import { channelOptions, NO_WHATSAPP_MESSAGES } from "./guest-message";
+import { usePlaceText } from "@hospio/ui/shared/wording";
 
 type Tab = "waiting" | "open" | "mine" | "done" | "all";
 const TABS: Tab[] = ["waiting", "open", "mine", "done", "all"];
@@ -1040,6 +1041,7 @@ function NewMessagePanel({
 	onClose: () => void;
 	onSent: (id: string) => void;
 }) {
+	const t = usePlaceText();
 	const { run, pending } = useAction();
 	const [name, setName] = useState("");
 	const [email, setEmail] = useState("");
@@ -1065,7 +1067,7 @@ function NewMessagePanel({
 			icon={SendIcon}
 			footerInfo={
 				connected
-					? "The email goes out from the hotel's name; replies come to the front desk email"
+					? t("The email goes out from the hotel's name; replies come to the front desk email")
 					: "Sent on WhatsApp from Hospio360's number"
 			}
 			footer={

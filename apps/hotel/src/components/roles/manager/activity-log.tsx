@@ -29,6 +29,7 @@ import { exportActivity } from "@hospio/api/actions/ml";
 import { ACTIVITY_DEPARTMENTS } from "@hospio/api/data/activity-labels";
 import type { PageResult } from "@hospio/api/data/paging";
 import type { ActivityRow } from "@hospio/api/data/types";
+import { usePlaceText } from "@hospio/ui/shared/wording";
 
 const linkFor = (a: ActivityRow) => {
 	const t = a.eventType.toLowerCase();
@@ -99,6 +100,7 @@ export function ActivityLogScreen({
 	/** The entry in `?open=` when it is not on this page. */
 	opened?: ActivityRow | null;
 }) {
+	const t = usePlaceText();
 	const router = useRouter();
 	const list$ = useListParams({ extra: ["department"] });
 	const page = rows.data;
@@ -312,7 +314,7 @@ export function ActivityLogScreen({
 										label: "Source",
 										value: entry.byPlatform
 											? "Hospio360 support"
-											: "This hotel",
+											: t("This hotel"),
 									},
 								]}
 							/>

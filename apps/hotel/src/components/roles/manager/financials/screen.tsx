@@ -79,6 +79,7 @@ import {
 	expenseTone,
 } from "./panels";
 import { OutletSalesCard } from "../outlet-sales";
+import { useWording } from "@hospio/ui/shared/wording";
 
 type Tab =
 	| "overview"
@@ -127,6 +128,7 @@ function NotConnected({ what }: { what: string }) {
 }
 
 export function FinancialsScreen(p: FinancialsProps) {
+	const { place: w } = useWording();
 	const router = useRouter();
 	const list = useListParams({ extra: ["tab", "category"] });
 	const tab = list.params.tab;
@@ -985,7 +987,7 @@ export function FinancialsScreen(p: FinancialsProps) {
 							href="/dashboard/hotel-setup"
 							className="font-semibold text-brand"
 						>
-							Hotel setup → Money
+							{w.setup} → Money
 						</Link>
 						.
 					</p>

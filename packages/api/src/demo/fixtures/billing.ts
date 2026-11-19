@@ -78,7 +78,7 @@ export function demoInvoice(): Invoice {
 				hotelId: "demo-hotel-1",
 				hotelName: "Ivory Court Ikeja",
 				label: `Guest messages · MSG-${month.replace("-", "")}-0001`,
-				detail: "120 emails, 40 SMS, 60 WhatsApp",
+				detail: "120 emails, 60 WhatsApp",
 				baseAmount: null,
 				rate: null,
 				amount: messages,

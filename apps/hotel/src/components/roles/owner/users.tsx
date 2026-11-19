@@ -53,6 +53,7 @@ import { useListParams } from "@hospio/ui/shared/list-params";
 import { FilterSelect, SearchBox, Toolbar } from "@hospio/ui/shared/toolbar";
 import { btn } from "@hospio/ui/shared/ui";
 import { useParam } from "./common";
+import { useBizText, useWording } from "@hospio/ui/shared/wording";
 
 const PORTAL_ROLES = [
 	{ value: "MANAGER", label: "Manager", hint: "Runs one hotel end to end" },
@@ -88,8 +89,9 @@ const statusTone = (s: PortalUserRow["status"]) =>
 			: s === "SUSPENDED"
 				? "danger"
 				: "warning";
-const hotelsLabel = (u: PortalUserRow) =>
-	u.hotels.length ? u.hotels.join(", ") : "No hotel yet";
+/** `tb` words the two fixed labels ("All hotels", "No hotel yet"); the names are as typed. */
+const hotelsLabel = (u: PortalUserRow, tb: (text: string) => string) =>
+	u.hotels.length ? u.hotels.map((h) => (h === "All hotels" ? tb(h) : h)).join(", ") : tb("No hotel yet");
 
 /** Hotel Owner · 08 Users (Figma 3079:15815): portal logins, live on identity-service. */
 export function OwnerUsers({
@@ -107,6 +109,8 @@ export function OwnerUsers({
 	businessName: string;
 	ownerName: string;
 }) {
+	const { biz } = useWording();
+	const tb = useBizText();
 	const router = useRouter();
 	const list = useListParams();
 	const users = result.data.content;
@@ -145,7 +149,7 @@ export function OwnerUsers({
 			onClick: () => setOpen(u.id),
 		},
 		{
-			label: "Change role & hotels",
+			label: tb("Change role & hotels"),
 			icon: ShieldCheckIcon,
 			onClick: () => setChange(u),
 			disabled: u.role === "OWNER",
@@ -204,8 +208,8 @@ export function OwnerUsers({
 		},
 		{
 			accessorKey: "hotels",
-			header: "Hotels",
-			cell: ({ row }) => hotelsLabel(row.original),
+			header: tb("Hotels"),
+			cell: ({ row }) => hotelsLabel(row.original, tb),
 		},
 		{
 			accessorKey: "inviteStatus",
@@ -248,7 +252,7 @@ export function OwnerUsers({
 		<>
 			<PageHeader
 				title="Users"
-				subtitle="People who can sign in to this portal · staff on the tablets are managed by each hotel's manager under Staff"
+				subtitle={tb("People who can sign in to this portal · staff on the tablets are managed by each hotel's manager under Staff")}
 			>
 				<Button className={btn.primary} onClick={() => setInvite("1")}>
 					<MailPlusIcon className="size-4" /> Invite user
@@ -276,7 +280,7 @@ export function OwnerUsers({
 					label="Managers"
 					value={all.MANAGER ?? 0}
 					icon={ShieldCheckIcon}
-					hint={`for ${plural(hotels.length, "hotel")}`}
+					hint={`for ${plural(hotels.length, biz.place)}`}
 				/>
 			</div>
 			<Toolbar
@@ -328,7 +332,7 @@ export function OwnerUsers({
 				title={selected?.fullName ?? ""}
 				subtitle={
 					selected
-						? `${roleLabels[selected.role]} · ${hotelsLabel(selected)}`
+						? `${roleLabels[selected.role]} · ${hotelsLabel(selected, tb)}`
 						: undefined
 				}
 				icon={UserRoundIcon}
@@ -341,7 +345,7 @@ export function OwnerUsers({
 									className={btn.secondary}
 									onClick={() => setChange(selected)}
 								>
-									Change role & hotels
+									{tb("Change role & hotels")}
 								</Button>
 							)}
 							{(selected.inviteStatus === "PENDING" ||
@@ -579,6 +583,7 @@ function InvitePanel({
 	businessName: string;
 	ownerName: string;
 }) {
+	const tb = useBizText();
 	const [email, setEmail] = useState("");
 	const [name, setName] = useState("");
 	const [phone, setPhone] = useState("");
@@ -688,7 +693,7 @@ function InvitePanel({
 						label="Role"
 						value={role}
 						onChange={setRole}
-						options={PORTAL_ROLES}
+						options={PORTAL_ROLES.map((r) => ({ ...r, hint: tb(r.hint) }))}
 					/>
 					<SelectField
 						label="Hotel"
@@ -696,7 +701,7 @@ function InvitePanel({
 						onChange={setHotel}
 						options={hotels.map((h) => ({ value: h.hotelId, label: h.name }))}
 						required
-						hint="Every role is given per hotel; add more hotels afterwards from Change role & hotels"
+						hint={tb("Every role is given per hotel; add more hotels afterwards from Change role & hotels")}
 					/>
 					{hotels.length === 0 && (
 						<Note tone="warning">
@@ -719,6 +724,7 @@ function ChangeRolePanel({
 	hotels: OwnerHotelRow[];
 	onClose: () => void;
 }) {
+	const tb = useBizText();
 	const [role, setRole] = useState<string>(user?.role ?? "MANAGER");
 	const [sel, setSel] = useState<string[]>(user?.hotelIds ?? []);
 	const [last, setLast] = useState(user?.id);
@@ -757,7 +763,7 @@ function ChangeRolePanel({
 					if (keep.has(g.id) || g.role === "OWNER") continue;
 					const r = await changeAccess(user.userId, g.id, {
 						change: "REMOVE",
-						reason: "Role or hotels changed by the owner",
+						reason: tb("Role or hotels changed by the owner"),
 						allowLastRole: true,
 					});
 					if (!r.ok) return r;
@@ -773,7 +779,7 @@ function ChangeRolePanel({
 		<SidePanel
 			open={!!user}
 			onOpenChange={(o) => !o && onClose()}
-			title="Change role & hotels"
+			title={tb("Change role & hotels")}
 			subtitle={user?.fullName}
 			icon={ShieldCheckIcon}
 			footer={
@@ -824,7 +830,7 @@ function ChangeRolePanel({
 					))}
 					{sel.length === 0 && (
 						<p className="text-xs text-danger">
-							Pick at least one hotel, or use Remove access
+							{tb("Pick at least one hotel, or use Remove access")}
 						</p>
 					)}
 				</div>

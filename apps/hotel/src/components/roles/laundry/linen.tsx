@@ -34,6 +34,7 @@ import { useAction } from "@hospio/api/actions/use-action";
 import type { PageResult } from "@hospio/api/data/paging";
 import type { LinenBatchRow, StockItemRow } from "@hospio/api/data/types";
 import { BigButton, Stepper } from "../shared-staff/tablet";
+import { usePlaceText } from "@hospio/ui/shared/wording";
 
 export const BATCH_STATUS: Record<
 	LinenBatchRow["status"],
@@ -198,6 +199,7 @@ export function LaundryLinenScreen({
 	storeId?: string;
 	canClose: boolean;
 }) {
+	const t = usePlaceText();
 	const [batches, setBatches] = useState(b0);
 	useEffect(() => setBatches(b0), [b0]);
 	const [openId, setOpenId] = useQueryState("open");
@@ -234,7 +236,7 @@ export function LaundryLinenScreen({
 		<>
 			<PageHeader
 				title="Linen in & out"
-				subtitle="Hotel linen from housekeeping: count it in, send it back clean, write off what can't be used"
+				subtitle={t("Hotel linen from housekeeping: count it in, send it back clean, write off what can't be used")}
 			>
 				<BigButton
 					tone="secondary"

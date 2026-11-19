@@ -99,7 +99,7 @@ export function HandoverReview({
 				label: venues.length > 1 ? `Outlets · ${h.name}` : plural(names.length, "outlet"),
 				value: names.length
 					? names.join(", ")
-					: "Outlets are added in Hotel setup → Restaurants & tables",
+					: `Outlets are added in ${venueLabel(h.venueType)} setup → Restaurants & tables`,
 			};
 		}),
 		{
@@ -109,11 +109,11 @@ export function HandoverReview({
 				: "Logins come with your invite pack",
 		},
 		{
-			label: "Hotel setup",
+			label: allHotels ? "Hotel setup" : "Setup",
 			value:
 				setupCount > 0
 					? `${plural(setupCount, "section")} of defaults applied to every ${allHotels ? "hotel" : "location"}`
-					: "Default hotel settings",
+					: allHotels ? "Default hotel settings" : "Default settings",
 		},
 		{ label: "Fee", value: fee },
 		...devices

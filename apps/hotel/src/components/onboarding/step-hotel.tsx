@@ -17,7 +17,7 @@ import {
 } from "@hospio/api/venue";
 import { SideCard, StepCard, StepFooter, StepPage } from "./common";
 import { useFreshOnOpen, useSaveLater, useStepForm } from "./persist";
-import { placeWord, stepHref } from "./steps";
+import { placeWord, setupWord, stepHref } from "./steps";
 import {
 	checkAddress,
 	checkCity,
@@ -168,14 +168,14 @@ export function HotelStep({
 									Add another {word} later
 								</p>
 								<p className="text-[11px] text-white/70">
-									From Hotels in your dashboard
+									From {word === "hotel" ? "Hotels" : "Locations"} in your dashboard
 								</p>
 							</div>
 						</div>
 					</SideCard>
 					<SideCard title={`Several ${word === "hotel" ? "hotels" : "locations"}?`}>
 						<p>
-							Add the one you know best first. When setup is done, "Add hotel"
+							Add the one you know best first. When setup is done, {word === "hotel" ? '"Add hotel"' : '"Add a location"'}{" "}
 							in your dashboard takes about two minutes for each one.
 						</p>
 					</SideCard>
@@ -284,8 +284,8 @@ export function HotelStep({
 						onContinue={submit}
 						info={
 							rooms
-								? "You'll set room types next · photos and the brand colour live in Hotel setup"
-								: "You'll add your outlets next (bar, restaurant, kitchen) · the brand colour lives in Hotel setup"
+								? `You'll set room types next · photos and the brand colour live in ${mixed ? "Hotel setup" : setupWord(kind)}`
+								: `You'll add your outlets next (bar, restaurant, kitchen) · the brand colour lives in ${mixed ? `${Word} setup` : setupWord(kind)}`
 						}
 					/>
 				</form>

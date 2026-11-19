@@ -72,5 +72,14 @@ export function stepMeta(
 	};
 }
 
+/** The settings area as the app names it for this business: "Hotel setup", "Lounge setup"…, plain "Setup" for a mixed business. */
+export function setupWord(kind: string | null | undefined): string {
+	const place = placeWord(kind);
+	return place === "location" ? "Setup" : `${place.charAt(0).toUpperCase()}${place.slice(1)} setup`;
+}
+
+/** "hotels", "lounges", "locations": the plural of `placeWord`. */
+export const placesWord = (kind: string | null | undefined) => `${placeWord(kind)}s`;
+
 export const stepHref = (step: OwnerOnboardingStep | "done") =>
 	`/onboarding/${step}`;

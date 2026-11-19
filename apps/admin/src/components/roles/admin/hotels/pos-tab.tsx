@@ -36,7 +36,7 @@ export function PosCollectionTab({ role, hotels: base }: { role: AdminRole; hote
 		<>
 			{error && <Note tone="warning">{error}. Open a hotel to see its keys and fees.</Note>}
 			<Toolbar
-				left={<SearchBox value={q} onChange={setQ} placeholder="Search hotel or business…" />}
+				left={<SearchBox value={q} onChange={setQ} placeholder="Search location or business…" />}
 				right={<FilterSelect value={fee} onChange={(v) => void setFee(v || null)} all="Any fee state" options={FEE_FILTERS} />}
 			/>
 			<DataTable
@@ -49,8 +49,8 @@ export function PosCollectionTab({ role, hotels: base }: { role: AdminRole; hote
 				}}
 				filtered={!!fee}
 				onClearFilters={() => void setFee(null)}
-				emptyTitle="No hotels yet"
-				emptyHint="Hotels appear here once a business has one. Add POS keys from a hotel's panel."
+				emptyTitle="No locations yet"
+				emptyHint="Locations appear here once a business has one. Add POS keys from a location's panel."
 			/>
 			<HotelDrawer hotels={hotels} role={role} />
 		</>

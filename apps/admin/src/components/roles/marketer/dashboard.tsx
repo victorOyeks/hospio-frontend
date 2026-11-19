@@ -144,7 +144,7 @@ export function MarketerDashboard({
 					{businesses.length === 0 ? (
 						<EmptyState
 							title="No businesses yet"
-							hint="Refer a hotel to start earning."
+							hint="Refer a business to start earning."
 						/>
 					) : (
 						<ul>
@@ -197,7 +197,7 @@ export function MarketerDashboard({
 										href="/dashboard/refer"
 										className={cn(btn.primary, "w-fit")}
 									>
-										Refer a hotel
+										Refer a business
 									</Link>
 									<a
 										href={whatsappShare(p)}

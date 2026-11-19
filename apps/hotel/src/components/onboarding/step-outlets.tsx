@@ -14,7 +14,7 @@ import { btn, input as inputCls } from "@hospio/ui/shared/ui";
 import { cn } from "@hospio/ui/utils";
 import { SideCard, StepCard, StepFooter, StepPage, gridHead } from "./common";
 import { useFreshOnOpen } from "./persist";
-import { placeWord, stepHref } from "./steps";
+import { placeWord, setupWord, stepHref } from "./steps";
 
 type OutletKind = "BAR" | "RESTAURANT" | "KITCHEN";
 const KINDS: { value: OutletKind; label: string }[] = [
@@ -132,7 +132,7 @@ export function OutletsStep({
 			<StepCard
 				step="rooms"
 				title={`Outlets at ${place}`}
-				intro="Where do you sell? Add at least one outlet. Menus, tables and more outlets live in Hotel setup → Restaurants & tables."
+				intro={`Where do you sell? Add at least one outlet. Menus, tables and more outlets live in ${setupWord(kind)} → Restaurants & tables.`}
 			>
 				<form
 					className="flex flex-col gap-4"

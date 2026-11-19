@@ -67,6 +67,7 @@ import {
 	weekOf,
 	SwapShiftModal,
 } from "./rota";
+import { usePlaceText } from "@hospio/ui/shared/wording";
 
 type Tab = "all" | "rota" | "leave" | "requests";
 
@@ -110,6 +111,7 @@ export function StaffScreen({
 	inviterName?: string;
 	rotaSetup: RotaSetup;
 }) {
+	const t = usePlaceText();
 	const router = useRouter();
 	const list = useListParams({ extra: ["role"] });
 	// The tab reloads the page: the rota reads everyone, the list reads one page.
@@ -367,7 +369,7 @@ export function StaffScreen({
 											tone: "danger" as const,
 										},
 								{
-									label: "Remove from hotel",
+									label: t("Remove from hotel"),
 									icon: UserXIcon,
 									onClick: () => setModal({ kind: "remove", staff: s }),
 									managerOnly: true,

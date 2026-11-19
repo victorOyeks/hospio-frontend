@@ -63,6 +63,7 @@ import {
 	StaffOutletsLine,
 	worksOutlets,
 } from "@hospio/ui/shared/staff-outlets";
+import { usePlaceText } from "@hospio/ui/shared/wording";
 
 export const ROLE_OPTIONS = [
 	{ value: "MANAGER", label: "Manager" },
@@ -216,6 +217,7 @@ export function StaffProfilePanel({
 		staff: StaffRow,
 	) => void;
 }) {
+	const t = usePlaceText();
 	const [tab, setTab] = useState<"overview" | "shifts" | "access">("overview");
 	const mine = staff
 		? shifts
@@ -363,7 +365,7 @@ export function StaffProfilePanel({
 													manager: true,
 												},
 										{
-											label: "Remove from hotel",
+											label: t("Remove from hotel"),
 											icon: UserXIcon,
 											key: "remove" as const,
 											manager: true,
@@ -507,6 +509,7 @@ export function StaffFormPanel({
 	/** False at a lounge, bar or restaurant: no Front office role to give. */
 	accommodation?: boolean;
 }) {
+	const t = usePlaceText();
 	const router = useRouter();
 	const { run, pending: saving } = useAction();
 	const [created, setCreated] = useState<UserCreated | null>(null);
@@ -584,7 +587,7 @@ export function StaffFormPanel({
 			footerInfo={
 				!editing &&
 				!created &&
-				"Shifts, job titles and departments come from Hotel setup"
+				t("Shifts, job titles and departments come from Hotel setup")
 			}
 			footer={
 				created ? (
@@ -1000,6 +1003,7 @@ export function RemoveModal({
 	hotelName?: string;
 	onSuspend?: (s: StaffRow) => void;
 }) {
+	const t = usePlaceText();
 	const router = useRouter();
 	const { run, pending } = useAction();
 	const remove = () => {
@@ -1012,12 +1016,12 @@ export function RemoveModal({
 				if (here.length === 0)
 					return {
 						ok: false as const,
-						error: "No role on this hotel to remove",
+						error: t("No role on this hotel to remove"),
 					};
 				for (const g of here) {
 					const r = await changeAccess(staff.userId ?? staff.id, g.id, {
 						change: "REMOVE",
-						reason: "Removed from the hotel by the manager",
+						reason: t("Removed from the hotel by the manager"),
 						allowLastRole: true,
 					});
 					if (!r.ok) return r;
@@ -1036,9 +1040,9 @@ export function RemoveModal({
 			open={!!staff}
 			onOpenChange={(o) => !o && onClose()}
 			tone="danger"
-			title={`Remove ${staff?.fullName} from ${hotelName ?? "this hotel"}?`}
+			title={`Remove ${staff?.fullName} from ${hotelName ?? t("this hotel")}?`}
 			subtitle="Manager only · logged"
-			confirmLabel="Remove from hotel"
+			confirmLabel={t("Remove from hotel")}
 			pending={pending}
 			onConfirm={remove}
 			alternative={

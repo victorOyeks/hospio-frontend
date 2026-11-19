@@ -34,6 +34,7 @@ import type {
 	TillRow,
 } from "@hospio/api/data/types";
 import { withDeliveries } from "@hospio/ui/shared/deliveries-store";
+import { usePlaceText } from "@hospio/ui/shared/wording";
 
 /** Who decides what, from the hotel's own settings (Hotel setup → Approval limits). */
 export type SpendRules = { limits: ApprovalLimits; ownerName: string };
@@ -75,6 +76,7 @@ export function RecordExpensePanel({
 	rules: SpendRules;
 	onClose: () => void;
 }) {
+	const t = usePlaceText();
 	const { run, pending } = useAction();
 	const limit = rules.limits.managerExpenseLimit;
 	const [form, setForm] = useState({
@@ -97,7 +99,7 @@ export function RecordExpensePanel({
 			onOpenChange={(o) => !o && onClose()}
 			icon={ReceiptIcon}
 			title="Record expense"
-			subtitle="Money that left the hotel today"
+			subtitle={t("Money that left the hotel today")}
 			footerInfo={
 				level === "owner"
 					? `Over ${naira(limit)} · goes to ${rules.ownerName}`
@@ -164,7 +166,7 @@ export function RecordExpensePanel({
 					value={form.category}
 					onChange={(v) => set("category", v)}
 					options={categories}
-					hint="The hotel's list · a manager keeps it in Financials → Categories & budgets"
+					hint={t("The hotel's list · a manager keeps it in Financials → Categories & budgets")}
 					required
 				/>
 				<TextField
@@ -195,7 +197,7 @@ export function RecordExpensePanel({
 					columns={3}
 					options={[
 						{ value: "CASH", label: "Cash", hint: "From a till" },
-						{ value: "TRANSFER", label: "Transfer", hint: "Hotel account" },
+						{ value: "TRANSFER", label: "Transfer", hint: t("Hotel account") },
 						{ value: "CARD", label: "Card", hint: "Company card" },
 					]}
 				/>

@@ -80,7 +80,7 @@ export function LockScreen({
 			<header className="flex flex-wrap items-center justify-between gap-3 border-b border-line bg-card px-4 py-4 sm:px-8">
 				<div className="min-w-0">
 					<p className="truncate text-xl font-bold text-ink sm:text-2xl">
-						{device.hotelName ?? "Your hotel"}
+						{device.hotelName ?? "Your location"}
 					</p>
 					<p className="mt-1 flex items-center gap-2 text-sm text-ink-2">
 						<LockIcon className="size-4" /> {device.name} ·{" "}

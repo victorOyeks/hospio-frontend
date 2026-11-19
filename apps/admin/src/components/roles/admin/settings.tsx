@@ -258,7 +258,7 @@ export function SettingsScreen({
 			{active === "security" && (
 				<SectionCard
 					title="Security"
-					subtitle="For the Hospio360 team; hotels set their own rules in Hotel setup"
+					subtitle="For the Hospio360 team; businesses set their own rules in their own setup"
 					bodyClassName="gap-3 pt-2"
 				>
 					<ToggleField

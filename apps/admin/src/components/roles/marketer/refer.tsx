@@ -57,7 +57,7 @@ export function MarketerRefer({
 	return (
 		<>
 			<PageHeader
-				title="Refer a hotel"
+				title="Refer a business"
 				subtitle="Tell us who to call, or share your link. We contact them and set them up; you earn on the platform fee collected from them."
 			/>
 			{!me.agreementAccepted && (
@@ -77,7 +77,7 @@ export function MarketerRefer({
 				>
 					<FieldRow>
 						<TextField
-							label="Hotel or business name"
+							label="Business name"
 							value={hotel}
 							onChange={setHotel}
 							placeholder="Mangrove Point Suites"

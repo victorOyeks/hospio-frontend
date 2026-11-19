@@ -79,7 +79,7 @@ export function HotelDrawer({ hotels, role }: { hotels: HotelRef[]; role: AdminR
 			className="sm:max-w-[760px]"
 		>
 			{!hotel ? (
-				<Note tone="warning">This hotel isn't in the list here. It may have been removed, or it belongs to a business you can't see.</Note>
+				<Note tone="warning">This location isn't in the list here. It may have been removed, or it belongs to a business you can't see.</Note>
 			) : (
 				<div className="flex flex-col gap-4">
 					<PillTabs tabs={tabs} value={active} onChange={(k) => void setTab(k === "overview" ? null : k)} />
@@ -104,7 +104,7 @@ function HotelOverview({ hotel }: { hotel: HotelRef }) {
 			{loading && !overview ? (
 				<Loading label="Gathering today's figures…" />
 			) : error || !overview ? (
-				<Note tone="warning">{error ?? "Today's figures aren't available for this hotel right now. Try again in a moment."}</Note>
+				<Note tone="warning">{error ?? "Today's figures aren't available for this location right now. Try again in a moment."}</Note>
 			) : (
 				<div className="grid grid-cols-2 gap-3 md:grid-cols-3">
 					<KpiCard

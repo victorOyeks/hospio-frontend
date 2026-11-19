@@ -20,6 +20,7 @@ import { PageHeader } from "@hospio/ui/shared/page-header";
 import { SectionCard } from "@hospio/ui/shared/section-card";
 import { StatusPill } from "@hospio/ui/shared/status-pill";
 import { cell, tableHead, tableRow } from "@hospio/ui/shared/ui";
+import { useWording } from "@hospio/ui/shared/wording";
 
 /**
  * Hospio fees for the owner (every hotel) and the manager (their hotel, read-only): what each hotel sold each day (VAT
@@ -143,6 +144,8 @@ export function HospioFees({
 	month?: string | null;
 	audience?: "owner" | "manager";
 }) {
+	const { biz } = useWording();
+	const { place: w } = useWording();
 	const router = useRouter();
 	const [open, setOpen] = useState<DailyFeeRow | null>(null);
 	const months = recentMonths();
@@ -158,7 +161,7 @@ export function HospioFees({
 		<>
 			<PageHeader
 				title="Hospio fees"
-				subtitle={`${period} · what ${audience === "manager" ? "the hotel" : "each hotel"} sold (VAT excluded) and Hospio360's fee on it, billed monthly`}
+				subtitle={`${period} · what ${audience === "manager" ? `the ${w.place}` : `each ${biz.place}`} sold (VAT excluded) and Hospio360's fee on it, billed monthly`}
 			>
 					<select
 						value={month ?? ""}
@@ -176,7 +179,7 @@ export function HospioFees({
 			</PageHeader>
 			{error && <Note tone="danger">{error}</Note>}
 			<Note tone="info">
-				Billed monthly: nothing is taken from {audience === "manager" ? "the hotel's" : "your"} account. These fees are added to{" "}
+				Billed monthly: nothing is taken from {audience === "manager" ? `the ${w.place}'s` : "your"} account. These fees are added to{" "}
 				{audience === "manager" ? "the business's" : "your"} {billedIn} invoice, issued on the 1st and due 7 days later
 				{audience === "manager" ? "; the owner pays it" : ""}.{" "}
 				<Link href="/dashboard/billing" className="font-medium text-primary underline underline-offset-2">
@@ -280,7 +283,7 @@ export function HospioFees({
 				)}
 			</SectionCard>
 			{open && (
-				<Modal open onOpenChange={(o) => !o && setOpen(null)} title={`${open.hotelName ?? "Hotel"} · ${day(open.date, true)}`} subtitle="What was sold (VAT excluded) and the fee">
+				<Modal open onOpenChange={(o) => !o && setOpen(null)} title={`${open.hotelName ?? biz.Place} · ${day(open.date, true)}`} subtitle="What was sold (VAT excluded) and the fee">
 					<div className="flex flex-col gap-4">
 						<table className="w-full text-left text-[13px]">
 							<tbody>

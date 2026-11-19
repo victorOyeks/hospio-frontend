@@ -46,6 +46,7 @@ import { StatusPill } from "@hospio/ui/shared/status-pill";
 import { SearchBox, Toolbar } from "@hospio/ui/shared/toolbar";
 import { btn } from "@hospio/ui/shared/ui";
 import { HotelFilter } from "./common";
+import { useBizText, useWording } from "@hospio/ui/shared/wording";
 
 type Hotel = {
 	hotelId: string;
@@ -252,6 +253,7 @@ export function OwnerReports({
 	/** The owner schedules for every hotel and for the managers; a manager for their own hotel only. */
 	owner?: boolean;
 }) {
+	const tb = useBizText();
 	const [q, setQ] = useQueryStates({
 		report: parseAsString,
 		from: parseAsString,
@@ -278,7 +280,7 @@ export function OwnerReports({
 			(stays || (r.kind !== "OCCUPANCY" && r.kind !== "GUESTS")) &&
 			(r.kind !== "TIPS" || tips) &&
 			(!search ||
-			`${r.name} ${r.description} ${r.area}`
+			`${r.name} ${tb(r.description)} ${r.area}`
 				.toLowerCase()
 				.includes(search.toLowerCase())),
 	);
@@ -288,7 +290,7 @@ export function OwnerReports({
 		<>
 			<PageHeader
 				title="Reports"
-				subtitle="Built from live data · every hotel or one branch · download as CSV or schedule"
+				subtitle={tb("Built from live data · every hotel or one branch · download as CSV or schedule")}
 			/>
 			<Toolbar
 				left={
@@ -328,7 +330,7 @@ export function OwnerReports({
 									</StatusPill>
 								)}
 							</div>
-							<p className="text-[13px] text-ink-2">{r.description}</p>
+							<p className="text-[13px] text-ink-2">{tb(r.description)}</p>
 							{sched.map((s) => (
 								<p key={s.id} className="text-[11px] text-ink-3">
 									{EVERY[s.every]} at {s.sendAt} · {s.hotelName}
@@ -558,14 +560,15 @@ function ReportPanel({
 	onClose: () => void;
 	onSchedule: () => void;
 }) {
+	const tb = useBizText();
 	const [built, setBuilt] = useState<BuiltReport | null>(null);
 	const [error, setError] = useState<string | null>(null);
 	const mail = useAction();
 	const [loading, setLoading] = useState(false);
 	const [f, t] = from && to ? [from, to] : period("month");
 	const hotelName = hotel
-		? (hotels.find((h) => h.hotelId === hotel)?.name ?? "Hotel")
-		: "All hotels";
+		? (hotels.find((h) => h.hotelId === hotel)?.name ?? tb("Hotel"))
+		: tb("All hotels");
 	const preset =
 		["yesterday", "week", "month", "last-month"].find((k) => {
 			const [a, b] = period(k);
@@ -606,7 +609,7 @@ function ReportPanel({
 			open={!!report}
 			onOpenChange={(o) => !o && onClose()}
 			title={report?.name ?? ""}
-			subtitle={report?.description}
+			subtitle={report ? tb(report.description) : undefined}
 			icon={FolderIcon}
 			width="lg"
 			footerInfo={built ? `${built.rows.length} rows` : undefined}
@@ -672,7 +675,7 @@ function ReportPanel({
 		>
 			{report && (
 				<div className="flex flex-col gap-6">
-					<PanelSection title="Period and hotel">
+					<PanelSection title={tb("Period and hotel")}>
 						<div className="flex flex-col gap-3">
 							<ChoiceCards
 								value={preset}
@@ -704,11 +707,11 @@ function ReportPanel({
 								/>
 							</FieldRow>
 							<SelectField
-								label="Hotel"
+								label={tb("Hotel")}
 								value={hotel ?? ALL}
 								onChange={(v) => onChange({ hotel: v === ALL ? null : v })}
 								options={[
-									{ value: ALL, label: "All hotels" },
+									{ value: ALL, label: tb("All hotels") },
 									...hotels.map((h) => ({ value: h.hotelId, label: h.name })),
 								]}
 							/>
@@ -722,7 +725,7 @@ function ReportPanel({
 						) : built && built.rows.length === 0 ? (
 							<EmptyState
 								title="Nothing in this period"
-								hint="Try another period or hotel"
+								hint={tb("Try another period or hotel")}
 							/>
 						) : built ? (
 							<div className="flex flex-col gap-2">
@@ -791,6 +794,8 @@ function ScheduleModal({
 	owner: boolean;
 	onClose: () => void;
 }) {
+	const { biz } = useWording();
+	const tb = useBizText();
 	const { run, pending } = useAction();
 	const [every, setEvery] = useState<"DAILY" | "WEEKLY" | "MONTHLY">("WEEKLY");
 	const [time, setTime] = useState("07:00");
@@ -867,7 +872,7 @@ function ScheduleModal({
 						value={scope || ALL}
 						onChange={(v) => setHotel(v === ALL ? "" : v)}
 						options={[
-							...(owner ? [{ value: ALL, label: "All hotels" }] : []),
+							...(owner ? [{ value: ALL, label: tb("All hotels") }] : []),
 							...hotels.map((h) => ({ value: h.hotelId, label: h.name })),
 						]}
 					/>
@@ -875,14 +880,14 @@ function ScheduleModal({
 				{owner && (
 					<ToggleField
 						label="Also send to the managers"
-						hint="Each hotel's managers get their own hotel"
+						hint={tb("Each hotel's managers get their own hotel")}
 						checked={managers}
 						onChange={setManagers}
 					/>
 				)}
 				<Note tone="info">
-					Each run covers {COVERS[every]}. Saving the same report for the same
-					hotel again changes its schedule. Each run arrives as an in-app notice
+					Each run covers {COVERS[every]}. Saving the same report for the same{" "}
+					{biz.place} again changes its schedule. Each run arrives as an in-app notice
 					and an email to your address with a link that opens it here; Send now
 					sends the latest one at once.
 				</Note>

@@ -214,7 +214,7 @@ export function ActivityTab({
 				</div>
 			</div>
 			<p className="text-xs text-ink-3">
-				Guests and bookings of this business are view-only through the hotel
+				Guests and bookings of this business are view-only through the business's
 				app:{" "}
 				<Link
 					href={`/dashboard/businesses/${business.id}`}

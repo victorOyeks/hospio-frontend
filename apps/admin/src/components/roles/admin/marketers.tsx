@@ -369,7 +369,7 @@ export function MarketersScreen({
 		<>
 			<PageHeader
 				title="Marketers"
-				subtitle="People who refer hotels to Hospio360 · a share of the platform fee collected from each business they refer, for a number of months · monthly statements, 5% WHT deducted"
+				subtitle="People who refer businesses to Hospio360 · a share of the platform fee collected from each business they refer, for a number of months · monthly statements, 5% WHT deducted"
 			>
 				{editable && (
 					<button

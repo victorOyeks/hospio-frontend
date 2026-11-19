@@ -40,6 +40,7 @@ import {
 	type ShiftPreset,
 	shiftsSentence,
 } from "@hospio/api/data/rota-setup";
+import { useWording } from "@hospio/ui/shared/wording";
 
 /** The shift as the actions want it: who, when, and the times to keep. */
 const asInput = (s: ShiftRow) => ({
@@ -142,6 +143,7 @@ export function RotaGrid({
 	onSwap: (s: ShiftRow) => void;
 	onAutoFill: () => void;
 }) {
+	const { place: w } = useWording();
 	const [adding, setAdding] = useState<{ person: Person; date: string } | null>(
 		null,
 	);
@@ -265,7 +267,7 @@ export function RotaGrid({
 			<p className="text-xs text-ink-3">
 				Tap + in an empty day to add a shift, a shift to swap or cancel it, or a
 				gap to find cover. Shifts: {shiftsSentence(setup.shifts)}. Change them,
-				the departments and when someone counts as late in Hotel setup → Staff &
+				the departments and when someone counts as late in {w.setup} → Staff &
 				shifts.
 			</p>
 			<AddShiftModal

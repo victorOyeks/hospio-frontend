@@ -196,7 +196,7 @@ export function FeeLockField({
 			{!lock.different && (
 				<Field
 					label="Share of daily sales"
-					hint={`${feeModelLabels.PERCENT_OF_SALES} from the hotel's Moniepoint or OPay account`}
+					hint={`${feeModelLabels.PERCENT_OF_SALES} from the business's Moniepoint or OPay account`}
 					error={lock.errors.addendum ?? lock.errors.pct}
 				>
 					<div className="flex items-center gap-2 rounded-control border border-line bg-subtle px-4 py-3 text-sm text-ink">

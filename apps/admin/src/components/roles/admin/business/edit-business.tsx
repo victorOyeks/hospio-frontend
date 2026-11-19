@@ -209,7 +209,7 @@ function EditBusinessForm({
 			{asHms && (
 				<PanelSection title="Why">
 					<Note tone="info">
-						Use this for support fixes the hotel can't do itself. The owner sees
+						Use this for support fixes the business can't do itself. The owner sees
 						the change in their activity log, marked "by Hospio360", with this reason.
 					</Note>
 					<TextareaField
@@ -368,7 +368,7 @@ export function EditAsHmsPanel({
 			open={open}
 			onOpenChange={onOpenChange}
 			title="Edit as Hospio360"
-			subtitle={`${business.name} · logged in the hotel's activity log; the owner can ask support to undo it within 7 days`}
+			subtitle={`${business.name} · logged in the business's activity log; the owner can ask support to undo it within 7 days`}
 			icon={ShieldAlertIcon}
 			width="md"
 			tone="danger"

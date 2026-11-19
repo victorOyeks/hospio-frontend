@@ -42,6 +42,7 @@ import { StatusPill } from "@hospio/ui/shared/status-pill";
 import { cn } from "@hospio/ui/utils";
 import { OrderPaymentPanel } from "./pos-payment";
 import { BigButton, Stepper } from "./tablet";
+import { usePlaceText } from "@hospio/ui/shared/wording";
 
 type PayDesk = "BAR" | "KITCHEN" | "MANAGER" | "OWNER" | "WAITER" | "CASHIER";
 type Part = NonNullable<Bill["split"]>["parts"][number];
@@ -991,6 +992,7 @@ function ReasonField({
 	value: string;
 	onChange: (v: string) => void;
 }) {
+	const t = usePlaceText();
 	const [other, setOther] = useState(false);
 	if (reasons.length === 0 || other)
 		return (
@@ -1000,7 +1002,7 @@ function ReasonField({
 				onChange={onChange}
 				placeholder="Why?"
 				required
-				hint={reasons.length === 0 ? "Reasons to pick from are kept in Hotel setup → Reasons & lists" : undefined}
+				hint={reasons.length === 0 ? t("Reasons to pick from are kept in Hotel setup → Reasons & lists") : undefined}
 			/>
 		);
 	return (

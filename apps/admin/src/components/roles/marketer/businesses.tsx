@@ -98,7 +98,7 @@ export function MarketerBusinesses({
 				data={businesses}
 				onRowClick={(b) => setOpen(b.id)}
 				emptyTitle="No businesses yet"
-				emptyHint="Refer a hotel to start earning."
+				emptyHint="Refer a business to start earning."
 			/>
 
 			<SidePanel

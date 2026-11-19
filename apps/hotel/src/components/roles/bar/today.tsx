@@ -78,6 +78,7 @@ import {
 	ShiftPill,
 	StatLine,
 } from "../shared-staff/tablet";
+import { usePlaceText, useWording } from "@hospio/ui/shared/wording";
 
 type Panel =
 	| { kind: "sale" }
@@ -120,6 +121,8 @@ export function BarTodayScreen({
 	sales: OutletSalesDayRow | null;
 	till: TillRow | null;
 }) {
+	const t = usePlaceText();
+	const { place: w } = useWording();
 	const { rows, put, apply } = useOrderRows(orders);
 	const [closedRows, setClosedRows] = useState(closed);
 	useEffect(() => setClosedRows(closed), [closed]);
@@ -324,8 +327,7 @@ export function BarTodayScreen({
 			</PageHeader>
 			{!outlet && (
 				<Note tone="warning">
-					No bar is set up for this hotel yet. The manager adds one in Hotel
-					setup → Restaurants & tables.
+					{t("No bar is set up for this hotel yet. The manager adds one in Hotel setup → Restaurants & tables.")}
 				</Note>
 			)}
 			<div className="flex flex-wrap gap-3">
@@ -369,7 +371,7 @@ export function BarTodayScreen({
 				>
 					{tables.length === 0 ? (
 						<Note tone="info">
-							No seats yet. Add them in Hotel setup → Restaurants & tables.
+							No seats yet. Add them in {w.setup} → Restaurants & tables.
 						</Note>
 					) : (
 						<div className="grid grid-cols-4 gap-2">
@@ -409,7 +411,7 @@ export function BarTodayScreen({
 						</div>
 					)}
 					<p className="text-xs text-ink-3">
-						Seats and names come from Hotel setup → Restaurants & tables
+						Seats and names come from {w.setup} → Restaurants & tables
 					</p>
 				</SectionCard>
 				<div className="flex flex-col gap-4">

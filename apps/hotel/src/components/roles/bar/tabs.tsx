@@ -70,6 +70,7 @@ import {
 	ShiftPill,
 	minutesSince,
 } from "../shared-staff/tablet";
+import { useWording } from "@hospio/ui/shared/wording";
 
 type Sub = "add" | "move" | "pay" | "room" | "new" | "bill" | null;
 
@@ -128,6 +129,7 @@ export function BarTabsScreen({
 	settings: OutletSettingsRow;
 	terminals: TerminalRow[];
 }) {
+	const { place: w } = useWording();
 	const { rows, put, apply } = useOrderRows(orders);
 	const [open, setOpen] = useQueryState("open", parseAsString);
 	const [orderParam, setOrderParam] = useQueryState("order", parseAsString);
@@ -293,7 +295,7 @@ export function BarTabsScreen({
 			</PageHeader>
 			{!settings.tabs && (
 				<Note tone="warning">
-					Tabs are switched off in Hotel setup → Restaurant & bar. Existing tabs
+					Tabs are switched off in {w.setup} → Restaurant & bar. Existing tabs
 					can still be settled.
 				</Note>
 			)}

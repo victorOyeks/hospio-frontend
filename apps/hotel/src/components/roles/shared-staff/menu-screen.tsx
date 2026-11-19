@@ -58,6 +58,7 @@ import type {
 import { cn } from "@hospio/ui/utils";
 import { daysLabel } from "./outlet-shared";
 import { BigButton, ShiftPill } from "./tablet";
+import { useWording } from "@hospio/ui/shared/wording";
 
 type Panel =
 	| { kind: "add" }
@@ -162,6 +163,7 @@ export function MenuScreen({
 	/** Every outlet of the hotel: where an item can be made, and the menus to copy from. */
 	outlets?: { id: string; name: string; kind: OutletKind }[];
 }) {
+	const { place: w } = useWording();
 	const [items, setItems] = useState(menu);
 	useEffect(() => setItems(menu), [menu]);
 	const [cats, setCats] = useState(categories);
@@ -937,7 +939,7 @@ export function MenuScreen({
 						{stock.length === 0 && (
 							<Note tone="info">
 								No stock is kept for this outlet yet, so there is nothing to
-								draw from. Link a store in Hotel setup → Restaurants & tables.
+								draw from. Link a store in {w.setup} → Restaurants & tables.
 							</Note>
 						)}
 						{draft.recipe.map((r, i) => (

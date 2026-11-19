@@ -28,6 +28,7 @@ import { SectionCard } from "@hospio/ui/shared/section-card";
 import { SidePanel, WhatHappens } from "@hospio/ui/shared/side-panel";
 import { btn } from "@hospio/ui/shared/ui";
 import { SetupField } from "../manager/hotel-setup";
+import { useBizText, useWording } from "@hospio/ui/shared/wording";
 
 type Tab = "company" | "taxes" | "limits" | "transfer";
 const TIMEZONES = [
@@ -64,6 +65,7 @@ export function OwnerSettings({
 	/** The latest ownership transfer request to Hospio360 support, if any. */
 	transfer: TransferRequestRow | null;
 }) {
+	const tb = useBizText();
 	const [tab] = useTabParam<Tab>("company");
 	const [panel, setPanel] = useState(false);
 	const waiting =
@@ -74,7 +76,7 @@ export function OwnerSettings({
 		<>
 			<PageHeader
 				title="Settings"
-				subtitle="Company details apply to every hotel · taxes and approval limits are set per hotel"
+				subtitle={tb("Company details apply to every hotel · taxes and approval limits are set per hotel")}
 			/>
 			<PillTabs
 				param="tab"
@@ -139,8 +141,7 @@ export function OwnerSettings({
 						</div>
 					)}
 					<Note tone="danger">
-						The new owner gets full control of every hotel. Managers and staff
-						are not affected.
+						{tb("The new owner gets full control of every hotel. Managers and staff are not affected.")}
 					</Note>
 					<Note tone="info">
 						Hospio360 support makes the transfer: this sends them your request, they
@@ -177,6 +178,7 @@ function TransferPanel({
 	business: Business | null;
 	onClose: () => void;
 }) {
+	const { biz } = useWording();
 	const router = useRouter();
 	const { run, pending } = useAction();
 	const [confirm, setConfirm] = useState(false);
@@ -199,7 +201,7 @@ function TransferPanel({
 				open={open}
 				onOpenChange={(o) => !o && close()}
 				title="Transfer ownership"
-				subtitle={`${business?.name ?? "Your business"} · ${business?.hotelCount ?? business?.hotels?.length ?? 0} hotels`}
+				subtitle={`${business?.name ?? "Your business"} · ${business?.hotelCount ?? business?.hotels?.length ?? 0} ${biz.places}`}
 				icon={AlertTriangleIcon}
 				tone="danger"
 				footer={
@@ -288,6 +290,7 @@ function TransferPanel({
 }
 
 function CompanyCard({ business }: { business: Business | null }) {
+	const tb = useBizText();
 	const router = useRouter();
 	const [form, setForm] = useState({
 		name: business?.name ?? "",
@@ -381,7 +384,7 @@ function CompanyCard({ business }: { business: Business | null }) {
 			/>
 			<div className="flex items-center justify-end gap-3">
 				<span className="flex-1 text-xs text-ink-3">
-					Currency and taxes live per hotel under Taxes & currency
+					{tb("Currency and taxes live per hotel under Taxes & currency")}
 				</span>
 				<Button
 					className={btn.primary}
@@ -430,6 +433,8 @@ function SetupCard({
 	subtitle: string;
 	note?: string;
 }) {
+	const tb = useBizText();
+	const { place: w } = useWording();
 	const router = useRouter();
 	const [values, setValues] = useState<Record<string, unknown>>(() =>
 		Object.fromEntries(
@@ -448,8 +453,8 @@ function SetupCard({
 				bodyClassName="max-w-2xl gap-4 pt-3"
 			>
 				<Note tone="info">
-					Hotel setup could not be loaded for {hotelName}. Try again, or open
-					Hotel setup from the sidebar.
+					{w.setup} could not be loaded for {hotelName}. Try again, or open{" "}
+					{w.setup} from the sidebar.
 				</Note>
 			</SectionCard>
 		);
@@ -464,7 +469,7 @@ function SetupCard({
 					href={`/dashboard/hotel-setup/${section.key}`}
 					className="text-[13px] font-semibold text-brand hover:underline"
 				>
-					Open in Hotel setup →
+					Open in {w.setup} →
 				</Link>
 			}
 		>
@@ -494,7 +499,7 @@ function SetupCard({
 				<span className="flex-1 text-xs text-ink-3">
 					{dirty
 						? "Unsaved changes"
-						: "Saved · the hotel's manager sees these values but cannot change them"}
+						: tb("Saved · the hotel's manager sees these values but cannot change them")}
 				</span>
 				<Button
 					className={btn.primary}

@@ -17,12 +17,13 @@ import { SidebarTrigger } from "@hospio/ui/primitives/sidebar";
 import type { Me } from "@hospio/api/api/schema";
 import { logout } from "@hospio/api/actions";
 import { APP } from "@hospio/api/app";
-import { PLATFORM_ROLES, roleLabels, type HotelRole } from "@hospio/api/roles";
+import { PLATFORM_ROLES, roleLabel, type HotelRole } from "@hospio/api/roles";
 import { AdminSearch } from "@hospio/ui/shared/admin-search";
 import { cn } from "@hospio/ui/utils";
 import { type DeviceSetupHotel, LockButton, SetupDeviceModal } from "@hospio/ui/shared/shared-device";
 import { forgetEverything, rememberPage } from "@hospio/ui/shared/draft";
 import { InstallBanner, InstallMenuItem, OpenInAppBanner } from "@hospio/ui/shared/pwa";
+import { useWording } from "@hospio/ui/shared/wording";
 
 function initials(name: string) {
 	return name.split(" ").filter(Boolean).map((w) => w[0]).slice(0, 2).join("").toUpperCase();
@@ -49,9 +50,10 @@ export function Header({
 	setupHotels?: DeviceSetupHotel[];
 	activeHotelId?: string;
 }) {
+	const { biz } = useWording();
 	const [pending, startTransition] = useTransition();
 	const [setupOpen, setSetupOpen] = useState(false);
-	const subtitle = `${roleLabels[role]}${hotelCount > 0 ? ` · ${hotelCount} ${hotelCount === 1 ? "branch" : "branches"}` : ""}`;
+	const subtitle = `${roleLabel(role, biz.hotel)}${hotelCount > 0 ? ` · ${hotelCount} ${hotelCount === 1 ? "branch" : "branches"}` : ""}`;
 
 	return (
 		<header className="flex items-center justify-between gap-3 px-5 pt-6 lg:px-8">

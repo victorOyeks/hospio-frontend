@@ -183,7 +183,7 @@ export function UsageTab({
 						</SectionCard>
 						<SectionCard
 							title="Feature adoption"
-							subtitle="What the hotels have switched on"
+							subtitle="What the locations have switched on"
 							bodyClassName="gap-2 pt-2"
 						>
 							{Object.keys(usage.features).length === 0 && (

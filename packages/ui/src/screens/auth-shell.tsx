@@ -282,12 +282,12 @@ export async function AuthShell({ children }: PropsWithChildren) {
 					<h2 className="max-w-[460px] text-[34px] font-bold leading-[1.12] tracking-[-0.02em]">
 						{admin
 							? "The whole platform, in one view."
-							: "Run your hotels from one place."}
+							: "Run your business from one place."}
 					</h2>
 					<p className="max-w-[440px] text-[16px] leading-[1.55] text-white/75">
 						{admin
 							? "Every business from sign-up to live: onboarding, support, fees and the marketers who bring them in."
-							: "Rooms, bookings, guests, money and your team, with every department working from the same screen."}
+							: "For hotels, lounges, bars and restaurants: sales, guests, money and your team, with every department working from the same screen."}
 					</p>
 					<div className="mt-2 flex flex-wrap gap-2 [@media(max-height:820px)]:hidden">
 						{areas.map((a) => (
@@ -364,7 +364,7 @@ function AdminAuthShell({ children }: PropsWithChildren) {
 				<div className="relative flex flex-col gap-4">
 					<h2 className="max-w-[460px] text-[34px] font-bold leading-[1.12] tracking-[-0.02em]">Hospio360 platform console</h2>
 					<p className="max-w-[440px] text-[16px] leading-[1.55] text-white/70">
-						For Hospio360 staff: businesses from sign-up to live, support, fees and marketers. Hotel teams sign in at their hotel app instead.
+						For Hospio360 staff: businesses from sign-up to live, support, fees and marketers. Business teams sign in at the Hospio360 app instead.
 					</p>
 					<div className="mt-2 flex flex-wrap gap-2 [@media(max-height:820px)]:hidden">
 						{["Businesses", "Support", "Fees", "Marketers"].map((a) => (

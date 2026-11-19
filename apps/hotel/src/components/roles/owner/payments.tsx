@@ -41,6 +41,7 @@ import {
 } from "@hospio/ui/shared/toolbar";
 import { btn } from "@hospio/ui/shared/ui";
 import { DownloadModal, HotelFilter } from "./common";
+import { useBizText } from "@hospio/ui/shared/wording";
 
 type Payment = PaymentRow & AtHotel;
 type Tab = "payments" | "settlements";
@@ -112,6 +113,7 @@ export function OwnerPayments({
 	/** yyyy-mm of "this month" (Lagos). */
 	month: string;
 }) {
+	const tb = useBizText();
 	const router = useRouter();
 	const [tab] = useTabParam<Tab>("payments");
 	const list = useListParams({ extra: ["method", "hotel"] });
@@ -252,7 +254,7 @@ export function OwnerPayments({
 		<>
 			<PageHeader
 				title="Payments & payouts"
-				subtitle={`What ${hotelName ?? "your hotels"} took, and what the POS providers pay out`}
+				subtitle={`What ${hotelName ?? tb("your hotels")} took, and what the POS providers pay out`}
 			>
 				<ExportButton onClick={() => setExportOpen(true)} />
 			</PageHeader>
@@ -353,8 +355,7 @@ export function OwnerPayments({
 					/>
 					{hotel && (
 						<p className="text-xs text-ink-3">
-							Settlements are by business and provider, so they are the same for
-							every hotel.
+							{tb("Settlements are by business and provider, so they are the same for every hotel.")}
 						</p>
 					)}
 				</>
@@ -384,7 +385,7 @@ export function OwnerPayments({
 					onRetry={() => router.refresh()}
 					onRowClick={(p) => void setOpen(p.id)}
 					emptyTitle="No payments here"
-					emptyHint="Try another hotel, method or status."
+					emptyHint={tb("Try another hotel, method or status.")}
 				/>
 			)}
 
@@ -447,7 +448,7 @@ export function OwnerPayments({
 				open={exportOpen}
 				onOpenChange={setExportOpen}
 				title={tab === "settlements" ? "Export settlements" : "Export payments"}
-				what={`${tab === "settlements" ? "Settlements" : "Payments"} · ${hotelName ?? "All hotels"}`}
+				what={`${tab === "settlements" ? "Settlements" : "Payments"} · ${hotelName ?? tb("All hotels")}`}
 				total={tab === "settlements" ? undefined : result.data.total}
 				rows={
 					tab === "settlements"
@@ -499,7 +500,7 @@ export function OwnerPayments({
 									rows: [
 										[
 											"When",
-											"Hotel",
+											tb("Hotel"),
 											"Guest",
 											"For",
 											"Method",

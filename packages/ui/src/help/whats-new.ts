@@ -16,6 +16,7 @@ export const whatsNew: WhatsNewItem[] = [
 	},
 	{
 		title: "One monthly invoice",
+		venueBody: "Nothing is debited from your account any more. On the 1st Hospio360 sends one invoice for the month before: the platform fee for each location, guest messages and devices & internet. Pay it within 7 days under “Billing & invoices” with “Pay now”, and download the invoice and receipts there. If it is still unpaid after the 11th, card/transfer POS payments and new sales pause until it is paid; cash on existing bills and tabs and reports keep working.",
 		body: "Nothing is debited from your account any more. On the 1st Hospio360 sends one invoice for the month before: the platform fee for each location, guest messages and devices & internet. Pay it within 7 days under “Billing & invoices” with “Pay now”, and download the invoice and receipts there. If it is still unpaid after the 11th, card/transfer POS payments, new sales and new bookings pause until it is paid; check-out and cash on existing bills keep working. Hospio fees still shows this month so far.",
 		audience: ["OWNER", "MANAGER"],
 	},
@@ -26,6 +27,7 @@ export const whatsNew: WhatsNewItem[] = [
 	},
 	{
 		title: "Pick up where you were after the lock screen",
+		venueBody: "When a shared tablet locks, or you sign in again after being signed out, you go back to the page you were on. A bar sale, a kitchen order and a till handover keep what you had typed, with “Restored what you were typing · Clear” at the top. Only you get it back: someone else unlocking starts on their own home page. Payments are never kept; take them again.",
 		body: "When a shared tablet locks, or you sign in again after being signed out, you go back to the page you were on. Check-in, New booking, a bar sale, a kitchen order, a till handover and a housekeeping problem report keep what you had typed, with “Restored what you were typing · Clear” at the top. Only you get it back: someone else unlocking starts on their own home page. Payments are never kept; take them again.",
 		audience: ["FRONT_OFFICE", "BAR", "KITCHEN", "HOUSEKEEPING", "MANAGER"],
 	},
@@ -36,6 +38,7 @@ export const whatsNew: WhatsNewItem[] = [
 	},
 	{
 		title: "Your hotel's colours everywhere",
+		venueBody: "Hotel setup → “Brand & colours” sets the brand colour, a short name, the logo and a dark or white sidebar. You see the change straight away; after “Save changes” it is used within a minute for every role, in emails to guests and on WhatsApp messages.",
 		body: "Hotel setup → “Brand & colours” sets the brand colour, a short name, the logo and a dark or white sidebar. You see the change straight away; after “Save changes” it is used within a minute for every role, on the guest's booking page, in booking emails and on WhatsApp messages.",
 		audience: ["MANAGER", "OWNER"],
 	},
@@ -46,11 +49,13 @@ export const whatsNew: WhatsNewItem[] = [
 	},
 	{
 		title: "Guests get WhatsApp and their own booking page",
+		stay: true,
 		body: "When a booking is made, moved or cancelled, the guest gets a WhatsApp, and an email if they have one, with a “View booking” button. Their booking page shows the stay, directions and ways to call or chat with the hotel. A guest with no email gets receipts by WhatsApp.",
 		audience: ["FRONT_OFFICE", "MANAGER", "OWNER"],
 	},
 	{
 		title: "Choose what guests are sent",
+		venueBody: "Hotel setup → “Guest messaging” has your hotel's WhatsApp number and automatic receipts.",
 		body: "Hotel setup → “Guest messaging” has your hotel's WhatsApp number, booking confirmations, a reminder the day before arrival and automatic receipts.",
 		audience: ["MANAGER", "OWNER"],
 	},
@@ -81,6 +86,7 @@ export const whatsNew: WhatsNewItem[] = [
 	},
 	{
 		title: "A room stays the guest's until check-out",
+		stay: true,
 		body: "A guest keeps the room until you check them out, even after their check-out date. Rooms show “Due out” or “Past departure”, and “Today” lists guests past departure under “Leaving today”. Checking someone else into a room with a guest still in it is refused: check that guest out first, or choose another room.",
 		audience: ["FRONT_OFFICE", "MANAGER", "OWNER"],
 	},

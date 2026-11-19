@@ -239,7 +239,7 @@ export function TemplateStep({ ctx }: { ctx: WizardCtx }) {
 			step="template"
 			subtitle={
 				hotels.length > 1
-					? `Start from a ready setup, then change anything · applies to the hotels you tick`
+					? `Start from a ready setup, then change anything · applies to the locations you tick`
 					: undefined
 			}
 			onBack={() => ctx.goTo(prevStep("template"))}
@@ -263,7 +263,7 @@ export function TemplateStep({ ctx }: { ctx: WizardCtx }) {
 					</button>
 				) : undefined
 			}
-			footerNote="Each hotel already answers with the default setup; the template changes what differs. Anything can be changed later in Hotel setup."
+			footerNote="Each location already answers with the default setup; the template changes what differs. Anything can be changed later in its setup."
 		>
 			{venues.length > 0 && (
 				<StepCard
@@ -308,8 +308,8 @@ export function TemplateStep({ ctx }: { ctx: WizardCtx }) {
 						)}
 						{have.length === 0 && rows.length === 0 && (
 							<p className="text-[13px] text-ink-3">
-								No outlets yet. Add the bar, the restaurant floor or the kitchen, or the owner adds them in Hotel
-								setup → Restaurants & tables.
+								No outlets yet. Add the bar, the restaurant floor or the kitchen, or the owner adds them in the
+								location's own setup → Restaurants & tables.
 							</p>
 						)}
 						{rows.map((row) => (
@@ -355,7 +355,7 @@ export function TemplateStep({ ctx }: { ctx: WizardCtx }) {
 			{hotels.length === 0 ? null : templates.length === 0 ? (
 				<EmptyState
 					title="No templates yet"
-					hint="The hotels keep the default setup. Continue and adjust each hotel in Hotel setup."
+					hint="The locations keep the default setup. Continue and adjust each location in its setup."
 				/>
 			) : (
 				<StepCard title="Choose a template">
@@ -374,7 +374,7 @@ export function TemplateStep({ ctx }: { ctx: WizardCtx }) {
 			{template && hotels.length > 0 && (
 				<StepCard
 					title="What it fills in"
-					subtitle="You can open any of these in Hotel setup to change them"
+					subtitle="You can open any of these in its setup to change them"
 				>
 					<div>
 						{Object.entries(template.settings).map(
@@ -404,8 +404,8 @@ export function TemplateStep({ ctx }: { ctx: WizardCtx }) {
 				title="Apply to"
 				subtitle={
 					hotels.length === 0
-						? "Add a hotel first"
-						: "Tick the hotels that should start from this setup"
+						? "Add a location first"
+						: "Tick the locations that should start from this setup"
 				}
 			>
 				<ul className="flex flex-col gap-2">

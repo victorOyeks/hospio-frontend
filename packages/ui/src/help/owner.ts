@@ -8,6 +8,12 @@ export const ownerHelp: HelpModule = {
 	guides: [
 		{
 			id: "own-switch-hotel",
+			venue: {
+				swap: [
+					["On screens with a hotel filter", "On screens with a hotel filter (Staff, Financials, Payments, Reports, Operations, Messaging), pick a hotel there, or leave “All hotels” to see every hotel together."],
+					["An action on a booking or a staff row", "An action on a staff row always goes to that row's own hotel, whichever branch is in the sidebar."],
+				],
+			},
 			title: "Switch the hotel you are working on",
 			when: "You own more than one hotel and want to set up or look at one of them.",
 			topic: "Hotels",
@@ -25,6 +31,23 @@ export const ownerHelp: HelpModule = {
 		},
 		{
 			id: "own-add-hotel",
+			venue: {
+				steps: [
+					"Open “Hotels” and tap “Add a location”.",
+					"Basics: pick the “Kind of location” (Lounge, Bar, Restaurant, Club or Hotel), type its name, the “City” and the “Phone”, then tap “Continue”.",
+					"Address: fill the “Street address”, “Time zone” and “Email”.",
+					"The next step has nothing to fill for a lounge, bar or restaurant: tap “Continue”.",
+					"Manager: turn on “Invite a manager now” and fill their name, email and phone, or skip it.",
+					"Check the Review and tap the Add button.",
+					"If you invited a manager, the invite is emailed to them. You can also copy their invite link and temporary password, or tap “Share in your WhatsApp”. Then tap “Done”.",
+				],
+				goodToKnow: [
+					"Nothing is saved until you tap the Add button on the Review.",
+					"A lounge, bar or restaurant starts with the lounge, bar and restaurant settings. Add its outlets (bar, restaurant, kitchen), menus and tables in its own setup → “Restaurants & tables”.",
+					"The new location appears in your list and in the sidebar's branch switcher straight away.",
+					"The temporary password and link are shown once. Pass them on before you close the panel.",
+				],
+			},
 			title: "Add a new hotel",
 			when: "You are opening another branch and want it on Hospio360.",
 			topic: "Hotels",
@@ -48,6 +71,22 @@ export const ownerHelp: HelpModule = {
 		},
 		{
 			id: "own-pause-hotel",
+			venue: {
+				when: "A hotel's details changed, or it must stop trading for a while or for good.",
+				steps: [
+					"Open “Hotels” and find the hotel. Use the search or the “Active”, “Paused” and “Closed” tabs.",
+					"To change its details, open the row's menu, tap “Edit hotel”, change what you need and tap “Save changes”.",
+					"To pause it, open the row's menu and tap “Pause …”, then confirm.",
+					"To shut it, tap “Close hotel” and confirm.",
+					"To open it again, tap “Reopen hotel”.",
+				],
+				goodToKnow: [
+					"Paused: it shows as paused on your list and reports; staff keep their access.",
+					"Closed: the hotel leaves every screen and staff lose access. Its history stays in reports and the activity log.",
+					"“Details” on the same menu opens the hotel's own page with its staff and money.",
+					"You can also pause or close from the hotel's Hotel setup, in the “Danger zone”.",
+				],
+			},
 			title: "Edit, pause or close a hotel",
 			when: "A hotel's details changed, or it must stop taking bookings for a while or for good.",
 			topic: "Hotels",
@@ -69,6 +108,11 @@ export const ownerHelp: HelpModule = {
 		},
 		{
 			id: "own-invite-user",
+			venue: {
+				swap: [
+					["Front desk, housekeeping, kitchen and other tablet staff", "Bar, kitchen, waiters, cashiers and other tablet staff are added on “Staff”, not here."],
+				],
+			},
 			title: "Invite a manager, finance or inventory user",
 			when: "Someone needs to sign in to run a hotel, its money or its stores.",
 			topic: "People",
@@ -220,6 +264,9 @@ export const ownerHelp: HelpModule = {
 		},
 		{
 			id: "own-run-report",
+			venue: {
+				when: "You want daily figures, sales by outlet, item or staff, payments or expenses for a period.",
+			},
 			title: "Open and download a report",
 			when: "You want guest lists, daily figures, occupancy, revenue, payments or expenses for a period.",
 			topic: "Reports",
@@ -240,6 +287,13 @@ export const ownerHelp: HelpModule = {
 		},
 		{
 			id: "own-hospio-fees",
+			venue: {
+				swap: [
+					["Tap a day to see its lines", "Each row is one day (and one hotel). Tap a day to see its lines: restaurant and bar sales, discounts and voids."],
+					["A sale charged to a room counts once", "The fee is 1.5 % of what was sold that day, VAT excluded."],
+					["Room nights count one night", null],
+				],
+			},
 			title: "See Hospio360's daily fee",
 			when: "You want to see what each hotel sold this month and the fee on it, before the month's invoice.",
 			topic: "Money",
@@ -260,6 +314,11 @@ export const ownerHelp: HelpModule = {
 		},
 		{
 			id: "own-billing",
+			venue: {
+				swap: [
+					["new bookings pause", "If it is still unpaid, from 06:00 on the 12th card/transfer POS payments and new sales (bar and kitchen) pause. Signing in, cash on existing bills and tabs, reports and paying the invoice still work. Everything resumes within a minute of paying."],
+				],
+			},
 			title: "Pay Hospio360's monthly invoice",
 			when: "Your monthly invoice has arrived, or the banner says one is due.",
 			topic: "Money",
@@ -305,6 +364,11 @@ export const ownerHelp: HelpModule = {
 		},
 		{
 			id: "own-message-managers",
+			venue: {
+				swap: [
+					["Guests are messaged from Bookings", "To message other staff, use “Message” on their row in Staff."],
+				],
+			},
 			title: "Message your managers",
 			when: "You need to tell one manager, or all of them, something.",
 			topic: "Messages",
@@ -367,6 +431,11 @@ export const ownerHelp: HelpModule = {
 		},
 		{
 			id: "own-business-settings",
+			venue: {
+				swap: [
+					["open folios keep", "A VAT change applies to new sales only."],
+				],
+			},
 			title: "Set company details, taxes and approval limits",
 			when: "Your company details changed, or you want to change VAT or what needs your approval.",
 			topic: "Business",
@@ -411,6 +480,20 @@ export const ownerHelp: HelpModule = {
 		},
 		{
 			id: "own-guest-messaging",
+			venue: {
+				when: "Guests should reach your hotel on WhatsApp, or you want to change which messages they get.",
+				steps: [
+					"Open “Hotel setup” and pick “Guest messaging”.",
+					"Type “Your hotel's WhatsApp number”. Guests then see “Chat with the hotel on WhatsApp” in emails.",
+					"Turn “Send receipts automatically” on or off.",
+					"Tap “Save changes”.",
+				],
+				goodToKnow: [
+					"With receipts off, no receipt goes after a payment. Staff can still send one from the payment.",
+					"Add the hotel's phone in Hotel setup → “Hotel basics” so messages give it.",
+					"Guest replies to the Hospio360 WhatsApp don't reach you, so set your own WhatsApp number here.",
+				],
+			},
 			title: "Choose what guests are sent",
 			when: "Guests should reach your hotel on WhatsApp, or you want to change which messages they get.",
 			topic: "Hotel setup",
@@ -461,6 +544,13 @@ export const ownerHelp: HelpModule = {
 		},
 		{
 			id: "own-brand-colours",
+			venue: {
+				when: "You want the app and guest messages to look like your hotel.",
+				swap: [
+					["It shows on the sign-in screen and the guest's booking page", "Type a “Short name” if you want one. It shows on the sign-in screen. Left empty, the hotel's name is used."],
+					["Within a minute of saving", "Within a minute of saving, the colour is used everywhere: the app for every role, emails to guests and the banner on WhatsApp messages."],
+				],
+			},
 			title: "Put your hotel's colour, name and logo on Hospio360",
 			when: "You want the app, the guest's booking page and guest messages to look like your hotel.",
 			topic: "Hotel setup",

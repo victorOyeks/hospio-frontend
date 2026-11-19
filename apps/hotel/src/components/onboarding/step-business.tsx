@@ -181,7 +181,7 @@ export function BusinessStep({
 						</p>
 						<p>Nothing here is shared publicly except your trading name.</p>
 						<p>
-							Currency and taxes are set per location, in Hotel setup → Taxes &
+							Currency and taxes are set per location, in its setup → Taxes &
 							currency, once your first location exists.
 						</p>
 					</SideCard>

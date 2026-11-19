@@ -18,6 +18,7 @@ export default async function Page() {
 		<OwnerHotels
 			hotels={hotels}
 			businessName={business?.name}
+			businessKind={business?.venueKind ?? undefined}
 			ownerName={user?.fullName ?? business?.ownerName ?? undefined}
 		/>
 	);

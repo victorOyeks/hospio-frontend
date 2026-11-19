@@ -4,50 +4,50 @@ export const platformHelp: HelpModule = {
 	audience: "PLATFORM",
 	label: "Hospio360 platform",
 	intro:
-		"The menu is grouped by kind of work: Customers (Businesses, Hotels, Onboarding), Operations (Support, Changes by Hospio360), Money (Fees & billing, Payments & POS), Growth (Marketers) and Platform (Integrations, Settings, Admin team). Press ⌘K (Ctrl+K on Windows) to jump to any business, hotel, ticket or page.",
+		"The menu is grouped by kind of work: Customers (Businesses, Locations, Onboarding), Operations (Support, Changes by Hospio360), Money (Fees & billing, Payments & POS), Growth (Marketers) and Platform (Integrations, Settings, Admin team). Press ⌘K (Ctrl+K on Windows) to jump to any business, location, ticket or page.",
 	guides: [
 		{
 			id: "adm-search",
-			title: "Find a business, hotel, ticket or page fast",
+			title: "Find a business, location, ticket or page fast",
 			when: "You know what you're looking for and don't want to click through the menu.",
 			topic: "Getting around",
 			steps: [
 				"Press ⌘K (Ctrl+K on Windows), or tap the search box at the top.",
-				"Type part of a business, owner, hotel, city or ticket subject, or a page name such as “daily fees”.",
+				"Type part of a business, owner, location, city or ticket subject, or a page name such as “daily fees”.",
 				"Use the arrow keys and Enter, or tap a result.",
 			],
 			goodToKnow: [
-				"A business opens its page. A hotel opens its panel on the Hotels page. A ticket opens on Support.",
+				"A business opens its page. A location opens its panel on the Locations page. A ticket opens on Support.",
 				"Pages you can't use with your role aren't offered.",
 				"Every tab, filter and panel is in the link, so Back takes you to where you were and you can share the link with a colleague.",
 			],
 		},
 		{
 			id: "adm-hotel-panel",
-			title: "Look at one hotel: today's figures, POS keys and Hospio fees",
-			when: "You need a hotel's numbers, its POS provider keys or its daily fees.",
+			title: "Look at one location: today's figures, POS keys and Hospio fees",
+			when: "You need a location's numbers, its POS provider keys or its daily fees.",
 			topic: "Businesses",
 			steps: [
-				"Open “Hotels” under Customers. Every hotel across every business is listed.",
-				"Search or filter by business, stage or fee state, then tap the hotel.",
-				"The hotel panel opens. “Overview” has today's figures and links to the business and its tickets.",
+				"Open “Locations” under Customers. Every location across every business is listed.",
+				"Search or filter by business, stage or fee state, then tap the location.",
+				"The location panel opens. “Overview” has today's figures and links to the business and its tickets.",
 				"“POS & Hospio fees” has the POS provider keys and the last 30 days of daily fees.",
-				"“Guest messages” has the hotel's guest-message plan.",
+				"“Guest messages” has the location's guest-message plan.",
 			],
 			goodToKnow: [
-				"The same panel opens from a business's “Hotels” tab and from Payments & POS → “POS & fee collection”.",
-				"A hotel can hold keys for both Moniepoint and OPay: each card payment goes through its terminal's provider. The keys are only for taking guest payments; Hospio360's fees are billed on the monthly invoice.",
+				"The same panel opens from a business's “Locations” tab and from Payments & POS → “POS & fee collection”.",
+				"A location can hold keys for both Moniepoint and OPay: each card payment goes through its terminal's provider. The keys are only for taking guest payments; Hospio360's fees are billed on the monthly invoice.",
 				"Only a Super admin adds, changes or removes POS keys. Finance admin sees them.",
 				"“POS paused” means the business has an unpaid Hospio360 invoice past its last day.",
 				"Support doesn't see the POS & Hospio fees tab.",
 			],
 			route: "/dashboard/hotels",
-			screen: "Hotels",
+			screen: "Locations",
 		},
 		{
 			id: "adm-set-up-business",
-			title: "Set up a business for a hotel owner",
-			when: "A hotel business has agreed to join and Hospio360 will set it up for them.",
+			title: "Set up a business for its owner",
+			when: "A business (a hotel, lounge, bar or restaurant) has agreed to join and Hospio360 will set it up for them.",
 			topic: "Businesses",
 			steps: [
 				"Open “Businesses” and tap “Set up a business for them”.",
@@ -73,7 +73,7 @@ export const platformHelp: HelpModule = {
 			steps: [
 				"Open “Onboarding”. Businesses are grouped under “In progress”, “Ready for handover” and “Handed over”.",
 				"Tap “Details” on the card, then “Continue”.",
-				"Work through the steps on the left: Business & legal, Owner & contacts, Fee & contract, Hotels, Rooms, Hotel setup, People, Connections, Go-live checklist, Logins & handover.",
+				"Work through the steps on the left: Business & legal, Owner & contacts, Fee & contract, Hotels (Locations for a lounge, bar or restaurant), Rooms, Hotel setup, People, Connections, Go-live checklist, Logins & handover.",
 				"On each step, fill it in and tap “Save and continue”.",
 				"On “Rooms”, use “Make rooms” for a run of numbers, or “Paste a room list”.",
 				"On “People”, use “Add a person” or “Paste a staff list”. Each person gets a temporary password.",
@@ -82,7 +82,7 @@ export const platformHelp: HelpModule = {
 			goodToKnow: [
 				"Only Support or a Super admin can run onboarding.",
 				"Each step saves as you go. You can leave and come back to the same step.",
-				"“Hotels” needs at least one hotel before you can continue.",
+				"“Hotels” (or “Locations”) needs at least one before you can continue.",
 				"Temporary passwords are shown once. Write them down or put them in the handover pack.",
 				"To pass an onboarding to a colleague, tap “Details” on the card, then “Reassign”.",
 			],
@@ -96,7 +96,7 @@ export const platformHelp: HelpModule = {
 			topic: "Onboarding",
 			steps: [
 				"Open the business in “Onboarding” and go to step 10, “Logins & handover”.",
-				"Tap “Preview handover pack” to check the logins, hotels and notes. You can print it.",
+				"Tap “Preview handover pack” to check the logins, locations and notes. You can print it.",
 				"Tap “Copy passwords” to copy the staff logins.",
 				"Tap “Send handover”, check the owner's email, then tap “Send handover” again.",
 				"Copy the owner's email, temporary password and invite link from the card that appears.",
@@ -175,7 +175,7 @@ export const platformHelp: HelpModule = {
 		},
 		{
 			id: "adm-view-as-owner",
-			title: "See a business's hotel app as the owner",
+			title: "See a business's app as the owner",
 			when: "You need to see exactly what the owner sees to solve a problem.",
 			topic: "Support",
 			steps: [
@@ -183,7 +183,7 @@ export const platformHelp: HelpModule = {
 				"Tap “View as owner”.",
 				"Under “Why you need to look (the owner sees this)”, give the reason.",
 				"Pick “For how long”: 15, 30 or 60 minutes.",
-				"Tap “Open as owner”. The hotel app opens in a new tab.",
+				"Tap “Open as owner”. The business's app opens in a new tab.",
 				"When you are done, tap “Leave” on the orange bar at the top.",
 			],
 			goodToKnow: [
@@ -191,7 +191,7 @@ export const platformHelp: HelpModule = {
 				"It is read only. You can't save or change anything.",
 				"The visit is logged with your name and reason, and the owner can see it.",
 				"The access ends when the time is up. The visit is listed under “Viewed as owner” on the business's “Contract & activity” tab.",
-				"“View as owner” is also on a hotel's panel (Hotels → the hotel → Overview).",
+				"“View as owner” is also on a location's panel (Locations → the location → Overview).",
 			],
 			route: "/dashboard/businesses",
 			screen: "Businesses",
@@ -199,7 +199,7 @@ export const platformHelp: HelpModule = {
 		{
 			id: "adm-handle-ticket",
 			title: "Reply to, assign and resolve a support ticket",
-			when: "A hotel has reported a problem and it needs handling.",
+			when: "A business has reported a problem and it needs handling.",
 			topic: "Support",
 			steps: [
 				"Open “Support”. New tickets are under “Waiting on us”.",
@@ -212,7 +212,7 @@ export const platformHelp: HelpModule = {
 			goodToKnow: [
 				"Every platform role can handle tickets.",
 				"Replies and the resolution are emailed to the person who opened the ticket. Internal notes are never sent.",
-				"Took a call or WhatsApp message? Tap “New ticket”, pick the business (and a hotel if you like), add a subject and details, then “Create ticket”.",
+				"Took a call or WhatsApp message? Tap “New ticket”, pick the business (and a location if you like), add a subject and details, then “Create ticket”.",
 				"A system alert's “Ticket” button opens a new ticket already filled in.",
 			],
 			route: "/dashboard/support",
@@ -266,7 +266,7 @@ export const platformHelp: HelpModule = {
 			steps: [
 				"Open “Fees & billing”, go to the “Statements” tab and tap “Generate this month”.",
 				"Pick the “Month”. Leave “Only this business” empty for every live business, then tap “Generate”.",
-				"Open a statement to see its lines per hotel and its payments.",
+				"Open a statement to see its lines per location and its payments.",
 				"Tap “Send statement” to send it to the business.",
 				"When money arrives, tap “Record payment”, enter the “Amount received”, “Received on” and “Reference”, then tap “Record”.",
 			],
@@ -324,11 +324,11 @@ export const platformHelp: HelpModule = {
 		{
 			id: "adm-daily-fees",
 			title: "Check Hospio's daily fees",
-			when: "You want to see what each hotel was charged day by day.",
+			when: "You want to see what each location was charged day by day.",
 			topic: "Money",
 			steps: [
-				"Open “Fees & billing”. The “Daily fees” tab lists every hotel's days, newest first.",
-				"Narrow it by business, status or hotel name.",
+				"Open “Fees & billing”. The “Daily fees” tab lists every location's days, newest first.",
+				"Narrow it by business, status or location name.",
 				"Tap a day to see its sales by source, the fee and what was carried from earlier days.",
 				"A Super admin can tap “Work out yesterday” at the top.",
 			],
@@ -341,12 +341,12 @@ export const platformHelp: HelpModule = {
 		},
 		{
 			id: "adm-payouts",
-			title: "Pay hotels their card and transfer money",
-			when: "Card and transfer payments taken on hotel terminals need paying out to the hotels.",
+			title: "Pay businesses their card and transfer money",
+			when: "Card and transfer payments taken on POS terminals need paying out to the businesses.",
 			topic: "Money",
 			steps: [
 				"Open “Payments & POS”. On “Settlements & payouts”, tap “Run settlements for yesterday”.",
-				"On the “Settlements” tab, tap a row to see the gross, provider fee, Hospio360 share and what goes to the hotel.",
+				"On the “Settlements” tab, tap a row to see the gross, provider fee, Hospio360 share and what goes to the business.",
 				"Tap “Create payout batch”, pick “All pending settlements” (or choose some) and tap “Create batch”.",
 				"Make the bank transfer.",
 				"In the batch, tap “Mark paid”, enter the “Bank reference” and “Paid on”, then tap “Mark paid”.",
@@ -357,7 +357,7 @@ export const platformHelp: HelpModule = {
 				"Cash never settles. Only approved card and transfer payments do.",
 				"Bounced payouts go to the “Failed payouts” tab. Use “Retry” for another attempt, and “Resolve” once the bank confirms the money landed.",
 				"The “Guest payments” tab lists guest payments across every business. It is read only.",
-				"“POS & fee collection” lists every hotel's POS keys and whether POS is paused for an unpaid invoice. Tap a hotel to change them.",
+				"“POS & fee collection” lists every location's POS keys and whether POS is paused for an unpaid invoice. Tap a location to change them.",
 			],
 			route: "/dashboard/payments",
 			screen: "Payments & POS",
@@ -365,7 +365,7 @@ export const platformHelp: HelpModule = {
 		{
 			id: "adm-marketers",
 			title: "Invite and approve a marketer",
-			when: "Someone will bring hotels to Hospio360 for a share of the fee.",
+			when: "Someone will bring businesses to Hospio360 for a share of the fee.",
 			topic: "Marketers",
 			steps: [
 				"Open “Marketers” and tap “Invite a marketer”.",
@@ -465,7 +465,7 @@ export const platformHelp: HelpModule = {
 				"Keys are stored encrypted. A saved secret is only ever shown masked.",
 				"Services pick up a change within a minute.",
 				"“Using the server's setting” means nothing is saved in the portal for that provider.",
-				"A hotel's own POS keys are set on the hotel, not here: open it from “Hotels”.",
+				"A location's own POS keys are set on the location, not here: open it from “Locations”.",
 			],
 			route: "/dashboard/integrations",
 			screen: "Integrations",

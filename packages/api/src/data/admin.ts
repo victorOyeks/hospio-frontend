@@ -1,3 +1,4 @@
+import { hasAccommodation, venueType } from "@hospio/api/venue";
 import "server-only";
 
 /**
@@ -722,6 +723,8 @@ async function allTenantHotels() {
 		city: h.city,
 		address: h.address,
 		rooms: h.roomCount,
+		venueType: h.venueType ?? undefined,
+		hasAccommodation: h.hasAccommodation ?? undefined,
 		timezone: h.timezone,
 		status: h.status,
 	}));
@@ -2123,6 +2126,8 @@ export const adminData = {
 						city: h.city ?? "",
 						address: h.address ?? "",
 						rooms: h.rooms,
+						venueType: venueType((h as { venueType?: string }).venueType),
+						hasAccommodation: hasAccommodation(h as { venueType?: string; hasAccommodation?: boolean; rooms?: number }),
 						timezone: h.timezone ?? "Africa/Lagos",
 						status: h.status,
 						collection: null,

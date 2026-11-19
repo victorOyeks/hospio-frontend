@@ -18,7 +18,7 @@ const dmSans = DM_Sans({
 
 export const metadata: Metadata = {
 	title: "Hospio360 Admin",
-	description: "Run your hotels from one place",
+	description: "Run your business from one place",
 	// Installed on iPhone/iPad: full screen, its own name under the icon (docs/pwa.md). The icon is app/apple-icon.png.
 	appleWebApp: { capable: true, title: "Hospio360 Admin", statusBarStyle: "default" },
 	other: { "apple-mobile-web-app-capable": "yes" },

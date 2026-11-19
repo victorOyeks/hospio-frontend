@@ -159,6 +159,7 @@ export const maintenanceHelp: HelpModule = {
 		},
 		{
 			id: "mnt-out-of-order",
+			stay: true,
 			title: "Take a room out of order",
 			when: "A room can't be used by guests until the repair is done.",
 			topic: "Rooms",
