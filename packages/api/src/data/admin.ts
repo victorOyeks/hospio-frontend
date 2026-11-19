@@ -664,7 +664,7 @@ const demoFailed: FailedPayoutItem[] = extra.demoFailedPayouts.map((f) => ({
 	lastTriedAt: f.lastTriedAt,
 }));
 
-const integrationGroups = ["EMAIL", "MESSAGING", "PAYMENTS", "POS", "FEE_DEBIT"] as const;
+const integrationGroups = ["EMAIL", "MESSAGING", "PAYMENTS", "POS"] as const;
 const integrationTypes = ["TEXT", "SECRET", "URL", "NUMBER", "BOOLEAN"] as const;
 const toIntegrationCard = (v: IntegrationView): IntegrationCard => ({
 	provider: v.provider,
@@ -2056,7 +2056,10 @@ export const adminData = {
 						fail("platform-service integrations", error);
 						return errorMessage(error, "Integrations could not be loaded");
 					}
-					return res.data.map(toIntegrationCard);
+					// Only the groups the page knows (a provider in a group since removed, such as the old fee debit, is left out).
+					return res.data
+						.filter((v) => (integrationGroups as readonly string[]).includes(v.group))
+						.map(toIntegrationCard);
 				} catch (e) {
 					// An answer in another shape (a service not yet updated) fails validation here instead of breaking the page.
 					fail("platform-service integrations", e);
@@ -2146,11 +2149,9 @@ export const adminData = {
 					...h,
 					collection: {
 						provider: i % 3 === 2 ? null : i % 2 ? "OPAY" : "MONIEPOINT",
-						debitEnabled: i % 3 === 0,
 						posPaused: i % 7 === 6,
 						keysIn: i % 3 !== 2,
 						providers: i % 3 === 2 ? [] : i % 2 ? ["OPAY"] : ["MONIEPOINT", "OPAY"],
-						debitConfigured: i % 3 !== 2,
 					},
 					lastFee:
 						i % 3 === 2
@@ -2161,22 +2162,14 @@ export const adminData = {
 									status: i % 3 === 0 ? "PAID" : "SHADOW",
 								},
 				}));
-			// Three calls whatever the number of hotels: every hotel's fee state, every hotel's POS status, and the server's
-			// debit configuration (the same for every hotel, read through any one hotel).
+			// Two calls whatever the number of hotels: every hotel's fee state and every hotel's POS status.
 			const session = await withSession();
-			const [states, pos, sample] = await Promise.all([
+			const [states, pos] = await Promise.all([
 				api("@get/platform/admin/fees/hotels", session),
 				api("@get/payment/admin/pos-configs", session),
-				base[0]
-					? api("@get/platform/admin/businesses/:businessId/hotels/:hotelId/fee-collection", {
-							...session,
-							params: { businessId: base[0].businessId, hotelId: base[0].id },
-						})
-					: Promise.resolve({ data: null }),
 			]);
 			const stateOf = new Map((states.data?.data ?? []).map((x) => [x.hotelId, x]));
 			const posOf = new Map((pos.data?.data ?? []).map((x) => [x.hotelId, x]));
-			const configured = new Map((sample.data?.data?.providers ?? []).map((p) => [p.provider, p.debitConfigured]));
 			const latest = new Map<string, { date: string; fee: number; status: string }>();
 			for (const x of states.data?.data ?? []) {
 				if (x.lastFee) latest.set(x.hotelId, { date: x.lastFee.date, fee: x.lastFee.fee, status: x.lastFee.status });
@@ -2184,26 +2177,21 @@ export const adminData = {
 			return base.map((h) => {
 				const st = stateOf.get(h.id);
 				const ps = posOf.get(h.id);
-				// The provider the fee is debited from, else the first provider with keys.
-				const provider = st?.provider ?? ps?.providers[0] ?? null;
+				const provider = ps?.providers[0] ?? null;
 				const c = st || ps ? true : null;
 				return {
 					...h,
 					collection: c
 						? {
 								provider,
-								debitEnabled: !!st?.debitEnabled,
 								posPaused: !!(st?.posPaused || ps?.posPaused),
 								keysIn: !!ps && ps.providers.length > 0,
 								providers: ps?.providers ?? [],
-								debitConfigured: provider ? !!configured.get(provider) : false,
 							}
 						: {
 								provider: null,
-								debitEnabled: false,
 								posPaused: false,
 								keysIn: false,
-								debitConfigured: false,
 							},
 					lastFee: latest.get(h.id) ?? null,
 				};

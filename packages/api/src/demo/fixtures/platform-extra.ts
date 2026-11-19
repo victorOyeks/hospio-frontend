@@ -163,7 +163,7 @@ const f = (key: string, label: string, type: DemoIntegrationField["type"], value
 export const demoIntegrationCards: {
 	provider: string;
 	label: string;
-	group: "EMAIL" | "MESSAGING" | "PAYMENTS" | "POS" | "FEE_DEBIT";
+	group: "EMAIL" | "MESSAGING" | "PAYMENTS" | "POS";
 	testable: boolean;
 	updatedByName: string | null;
 	updatedAt: string | null;
@@ -173,9 +173,7 @@ export const demoIntegrationCards: {
 	{ provider: "SMTP", label: "SMTP (fallback)", group: "EMAIL", testable: true, updatedByName: null, updatedAt: null, fields: [f("host", "Host", "TEXT"), f("port", "Port", "NUMBER", null, "Usually 587"), f("username", "Username", "TEXT"), f("password", "Password", "SECRET"), f("startTls", "Use STARTTLS", "BOOLEAN")] },
 	{ provider: "INFOBIP", label: "Infobip WhatsApp", group: "MESSAGING", testable: true, updatedByName: null, updatedAt: null, fields: [f("baseUrl", "Base URL", "URL", null, "e.g. https://xxxx.api.infobip.com"), f("apiKey", "API key", "SECRET"), f("sender", "WhatsApp sender number", "TEXT")] },
 	{ provider: "TERMII", label: "Termii SMS", group: "MESSAGING", testable: true, updatedByName: "Amarachi Udeh", updatedAt: at(-6, 9, 0), fields: [f("apiKey", "API key", "SECRET", "TL••••••••a81c"), f("senderId", "Sender ID", "TEXT", "Hospio360")] },
-	{ provider: "PAYSTACK", label: "Paystack", group: "PAYMENTS", testable: true, updatedByName: null, updatedAt: null, fields: [f("secretKey", "Secret key", "SECRET"), f("publicKey", "Public key", "TEXT")] },
+	{ provider: "PAYSTACK", label: "Paystack (monthly invoice payments)", group: "PAYMENTS", testable: true, updatedByName: null, updatedAt: null, fields: [f("secretKey", "Secret key", "SECRET"), f("publicKey", "Public key", "TEXT")] },
 	{ provider: "MONIEPOINT", label: "Moniepoint POS", group: "POS", testable: false, updatedByName: null, updatedAt: null, fields: [f("baseUrl", "Base URL", "URL"), f("apiKey", "API key", "SECRET"), f("webhookSecret", "Webhook secret", "SECRET")] },
 	{ provider: "OPAY", label: "OPay POS", group: "POS", testable: false, updatedByName: null, updatedAt: null, fields: [f("baseUrl", "Base URL", "URL"), f("clientAuthKey", "Client auth key", "SECRET")] },
-	{ provider: "FEE_DEBIT_OPAY", label: "OPay fee debit", group: "FEE_DEBIT", testable: false, updatedByName: null, updatedAt: null, fields: [f("enabled", "Debit through OPay", "BOOLEAN"), f("merchantId", "Hospio merchant ID", "TEXT"), f("privateKey", "Merchant private key", "SECRET")] },
-	{ provider: "FEE_DEBIT_MONIEPOINT", label: "Moniepoint fee debit", group: "FEE_DEBIT", testable: false, updatedByName: null, updatedAt: null, fields: [f("enabled", "Debit through Moniepoint", "BOOLEAN"), f("accountNumber", "Hospio collection account", "TEXT"), f("apiKey", "API key", "SECRET")] },
 ];

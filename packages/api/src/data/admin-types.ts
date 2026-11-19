@@ -603,7 +603,7 @@ export type IntegrationItem = {
 };
 
 /** Integrations page: one provider's keys (GET/PUT /platform/admin/integrations). */
-export type IntegrationGroup = "EMAIL" | "MESSAGING" | "PAYMENTS" | "POS" | "FEE_DEBIT";
+export type IntegrationGroup = "EMAIL" | "MESSAGING" | "PAYMENTS" | "POS";
 export type IntegrationFieldType = "TEXT" | "SECRET" | "URL" | "NUMBER" | "BOOLEAN";
 export type IntegrationFieldView = {
 	key: string;
@@ -630,16 +630,15 @@ export type IntegrationsData =
 
 // ---- hotels across businesses --------------------------------------------------------------------
 
-/** How a hotel's Hospio fee is collected, as the Hotels list shows it (fee-collection, money roles only). */
+/** A hotel's POS keys and pause, as the Hotels list shows them (money roles only). Nothing is debited: fees go on the monthly invoice. */
 export type HotelCollectionSummary = {
+	/** The first provider with complete keys. */
 	provider: string | null;
-	debitEnabled: boolean;
 	posPaused: boolean;
 	/** The hotel has complete POS keys for at least one provider. */
 	keysIn: boolean;
 	/** Every provider with complete keys (a hotel can hold Moniepoint and OPay side by side). */
 	providers?: string[];
-	debitConfigured: boolean;
 };
 
 /** One hotel on the flat Hotels page, with its business and (for money roles) its fee state. */

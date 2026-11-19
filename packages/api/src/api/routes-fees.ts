@@ -64,21 +64,12 @@ export const FeeRefund = z.object({
 	clawback: z.looseObject({ id: z.string(), net: num }).nullable().optional(),
 });
 
-export const ProviderState = z.object({
-	provider: z.string(),
-	debitConfigured: z.boolean(),
-	hotelKeys: z.boolean(),
-	reason: str,
-});
-
+/** A hotel's POS pause for an unpaid invoice (the daily fee debit and its provider were removed on 19 Nov 2026). */
 export const FeeCollection = z.object({
 	hotelId: z.string(),
-	provider: str,
-	debitEnabled: z.boolean(),
 	posPaused: z.boolean(),
 	changedByName: str,
 	changedAt: str,
-	providers: z.array(ProviderState),
 });
 
 /** One provider's keys for a hotel, masked. A hotel can hold Moniepoint and OPay side by side. */
@@ -145,8 +136,6 @@ export const feeRoutes = {
 			z.array(
 				z.object({
 					hotelId: z.string(),
-					provider: str,
-					debitEnabled: z.boolean(),
 					posPaused: z.boolean(),
 					lastFee: DailyFee.nullable().optional(),
 				}),

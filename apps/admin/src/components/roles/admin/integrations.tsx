@@ -2,10 +2,13 @@
 
 import {
 	CheckCircle2Icon,
+	ChevronDownIcon,
+	ChevronUpIcon,
 	FlaskConicalIcon,
 	Loader2Icon,
 	LockIcon,
 	MailIcon,
+	PencilIcon,
 	PlugZapIcon,
 	RefreshCwIcon,
 	XCircleIcon,
@@ -39,15 +42,61 @@ import { useRefresh } from "./live";
  * Platform → Integrations (Super admin): the keys Hospio360 uses with each provider, kept encrypted by platform-service. A
  * provider with nothing saved here runs on the server's own setting; a save sends only the fields that changed, and "Use the
  * server's value" clears a saved one. The services read changes within a minute.
+ *
+ * Compact layout (19 Nov 2026): each provider is a short summary card (name, status, last change, Test connection, Edit) whose
+ * fields open on Edit; rarely changed fields (addresses, webhook keys) and the "Use the server's value" links sit under
+ * "Advanced". From 1280px the groups run in two columns, split so each column holds about as many cards, in reading order.
  */
 
 const GROUPS: { key: IntegrationGroup; title: string; subtitle: string }[] = [
-	{ key: "EMAIL", title: "Email", subtitle: "Sign-in codes, invites, statements and guest booking emails" },
-	{ key: "MESSAGING", title: "Messaging", subtitle: "WhatsApp to guests and SMS phone checks" },
-	{ key: "PAYMENTS", title: "Payments", subtitle: "Online payments: owners paying their Hospio360 monthly invoice (Paystack)" },
-	{ key: "POS", title: "POS", subtitle: "The server's POS setting, used by locations without their own keys" },
-	{ key: "FEE_DEBIT", title: "Fee debit (no longer used)", subtitle: "Nothing is debited any more: Hospio360 bills one invoice a month. Kept for reference" },
+	{ key: "EMAIL", title: "Email", subtitle: "Sign-in codes, invites, invoices and guest booking emails" },
+	{ key: "MESSAGING", title: "Messaging", subtitle: "WhatsApp to guests and SMS sign-in codes" },
+	{
+		key: "PAYMENTS",
+		title: "Payments",
+		subtitle: "Paystack: owners pay their monthly Hospio360 invoice online (card, transfer or USSD)",
+	},
+	{ key: "POS", title: "POS", subtitle: "Card terminals for guest payments; each location's own keys are set on the location" },
 ];
+
+/** Fields most people never change: shown under "Advanced" (unless they are all the card has). */
+const ADVANCED_KEYS = new Set(["baseUrl", "notifyUrl", "webhookKey"]);
+const isAdvanced = (card: IntegrationCard, f: IntegrationFieldView) =>
+	ADVANCED_KEYS.has(f.key) || (card.provider === "TERMII" && f.key === "secretKey");
+
+type Group = (typeof GROUPS)[number] & { cards: IntegrationCard[] };
+
+/** Splits the groups, in order, into two columns holding about as many cards each. */
+function twoColumns(groups: Group[]): [Group[], Group[]] {
+	const weight = (g: Group) => g.cards.length + 0.5;
+	const total = groups.reduce((n, g) => n + weight(g), 0);
+	let best = groups.length;
+	let bestGap = Number.POSITIVE_INFINITY;
+	let left = 0;
+	for (let i = 0; i <= groups.length; i++) {
+		const gap = Math.abs(total - 2 * left);
+		if (gap < bestGap) {
+			bestGap = gap;
+			best = i;
+		}
+		if (i < groups.length) left += weight(groups[i]);
+	}
+	return [groups.slice(0, best), groups.slice(best)];
+}
+
+function GroupSection({ g }: { g: Group }) {
+	return (
+		<section className="flex flex-col gap-2">
+			<div>
+				<h2 className="text-base font-bold text-ink">{g.title}</h2>
+				<p className="text-xs text-ink-3">{g.subtitle}</p>
+			</div>
+			{g.cards.map((c) => (
+				<ProviderCard key={c.provider} initial={c} />
+			))}
+		</section>
+	);
+}
 
 export function IntegrationsScreen({ data }: { data: IntegrationsData }) {
 	const { refresh, pending } = useRefresh();
@@ -61,6 +110,10 @@ export function IntegrationsScreen({ data }: { data: IntegrationsData }) {
 			{pending ? <Loader2Icon className="size-4 animate-spin" /> : <RefreshCwIcon className="size-4" />} Reload
 		</button>
 	);
+	const groups: Group[] = data.ok
+		? GROUPS.map((g) => ({ ...g, cards: data.cards.filter((c) => c.group === g.key) })).filter((g) => g.cards.length > 0)
+		: [];
+	const [left, right] = twoColumns(groups);
 	return (
 		<>
 			<PageHeader
@@ -85,29 +138,21 @@ export function IntegrationsScreen({ data }: { data: IntegrationsData }) {
 					</div>
 				</SectionCard>
 			) : null}
-			{data.ok && (
-				<>
-					{data.cards.length === 0 && (
-						<Note tone="info">No providers were returned, so every provider uses the server's setting.</Note>
+			{data.ok && data.cards.length === 0 && (
+				<Note tone="info">No providers were returned, so every provider uses the server's setting.</Note>
+			)}
+			{groups.length > 0 && (
+				<div className="grid items-start gap-5 xl:grid-cols-2">
+					{[left, right].map((col, i) =>
+						col.length === 0 ? null : (
+							<div key={i === 0 ? "left" : "right"} className="flex min-w-0 flex-col gap-5">
+								{col.map((g) => (
+									<GroupSection key={g.key} g={g} />
+								))}
+							</div>
+						),
 					)}
-					{GROUPS.map((g) => {
-						const cards = data.cards.filter((c) => c.group === g.key);
-						if (cards.length === 0) return null;
-						return (
-							<section key={g.key} className="flex flex-col gap-3">
-								<div>
-									<h2 className="text-lg font-bold text-ink">{g.title}</h2>
-									<p className="text-xs text-ink-3">{g.subtitle}</p>
-								</div>
-								<div className="grid gap-4 xl:grid-cols-2">
-									{cards.map((c) => (
-										<ProviderCard key={c.provider} initial={c} />
-									))}
-								</div>
-							</section>
-						);
-					})}
-				</>
+				</div>
 			)}
 			{data.status.length > 0 && <IntegrationStatusList items={data.status} />}
 		</>
@@ -133,6 +178,8 @@ function fieldError(f: IntegrationFieldView, edit: string | undefined) {
 
 function ProviderCard({ initial }: { initial: IntegrationCard }) {
 	const [card, setCard] = useState(initial);
+	const [open, setOpen] = useState(false);
+	const [advanced, setAdvanced] = useState(false);
 	const [edits, setEdits] = useState<Record<string, string>>({});
 	const [clear, setClear] = useState<string[]>([]);
 	const [saving, setSaving] = useState(false);
@@ -146,6 +193,12 @@ function ProviderCard({ initial }: { initial: IntegrationCard }) {
 	const invalid = card.fields.some((f) => fieldError(f, edits[f.key]));
 	const set = (key: string, v: string) => setEdits((e) => ({ ...e, [key]: v }));
 	const toggleClear = (key: string) => setClear((c) => (c.includes(key) ? c.filter((k) => k !== key) : [...c, key]));
+	const allAdvanced = card.fields.every((f) => isAdvanced(card, f));
+	const main = allAdvanced ? card.fields : card.fields.filter((f) => !isAdvanced(card, f));
+	const extra = allAdvanced ? [] : card.fields.filter((f) => isAdvanced(card, f));
+	// "Use the server's value" for the main fields lives under Advanced too, so the main form stays short.
+	const savedMain = main.filter((f) => f.saved);
+	const advancedCount = extra.length + savedMain.length;
 
 	const save = async () => {
 		setSaving(true);
@@ -168,121 +221,182 @@ function ProviderCard({ initial }: { initial: IntegrationCard }) {
 		setTest(r.ok ? r.data : { ok: false, message: r.error });
 	};
 
-	return (
-		<SectionCard
-			title={card.label}
-			subtitle={
-				card.updatedAt
-					? `Changed ${fmtWhen(card.updatedAt)}${card.updatedByName ? ` by ${card.updatedByName}` : ""}`
-					: "Never changed in the portal"
-			}
-			headerRight={
-				anySaved ? (
-					<StatusPill tone="success">Saved in the portal</StatusPill>
-				) : (
-					<StatusPill tone="grey">Using the server's setting</StatusPill>
-				)
-			}
-			bodyClassName="gap-4 pt-2"
+	const serverLink = (f: IntegrationFieldView) =>
+		f.saved ? (
+			<button type="button" className={cn(btn.link, "self-start text-xs")} onClick={() => toggleClear(f.key)}>
+				{clear.includes(f.key) ? "Keep the saved value" : "Use the server's value"}
+			</button>
+		) : null;
+
+	const renderField = (f: IntegrationFieldView, withLink: boolean) => {
+		if (clear.includes(f.key))
+			return (
+				<div key={f.key} className="flex flex-col gap-1 rounded-[10px] border border-dashed border-line px-3 py-2">
+					<span className="text-[13px] font-medium text-ink">{f.label}</span>
+					<span className="text-xs text-ink-3">Goes back to the server's value when you save.</span>
+					{serverLink(f)}
+				</div>
+			);
+		const link = withLink ? serverLink(f) : null;
+		if (f.type === "BOOLEAN")
+			return (
+				<div key={f.key} className="flex flex-col gap-1">
+					<ToggleField
+						label={f.label}
+						hint={f.hint ?? undefined}
+						checked={(edits[f.key] ?? (f.value === "true" ? "true" : "false")) === "true"}
+						onChange={(v) => set(f.key, v ? "true" : "false")}
+					/>
+					{link}
+				</div>
+			);
+		if (f.type === "SECRET")
+			return (
+				<div key={f.key} className="flex flex-col gap-1">
+					<TextField
+						label={f.saved ? `${f.label} · replace` : f.label}
+						type="password"
+						value={edits[f.key] ?? ""}
+						onChange={(v) => set(f.key, v)}
+						placeholder={f.saved ? `Saved ${f.value ?? "••••"} · paste a new one to replace it` : "Empty · paste to save"}
+						hint={f.hint ?? undefined}
+					/>
+					{link}
+				</div>
+			);
+		return (
+			<div key={f.key} className="flex flex-col gap-1">
+				<TextField
+					label={f.label}
+					type={f.type === "NUMBER" ? "number" : f.type === "URL" ? "url" : "text"}
+					value={edits[f.key] ?? f.value ?? ""}
+					onChange={(v) => set(f.key, v)}
+					placeholder={f.saved ? undefined : "Empty"}
+					hint={f.hint ?? undefined}
+					error={fieldError(f, edits[f.key])}
+				/>
+				{link}
+			</div>
+		);
+	};
+
+	const testButton = card.testable && (
+		<button
+			type="button"
+			className={cn(btn.secondary, btn.small, "flex items-center gap-2")}
+			onClick={runTest}
+			disabled={testing || saving}
+			title={dirty ? "Tests what is saved now; save first to test your changes" : undefined}
 		>
-			{card.fields.map((f) => {
-				const clearing = clear.includes(f.key);
-				const serverLink = f.saved ? (
-					<button type="button" className={cn(btn.link, "text-xs")} onClick={() => toggleClear(f.key)}>
-						{clearing ? "Keep the saved value" : "Use the server's value"}
+			{testing ? <Loader2Icon className="size-4 animate-spin" /> : <PlugZapIcon className="size-4" />} Test connection
+		</button>
+	);
+
+	return (
+		<article className="flex flex-col rounded-card border border-line bg-card px-4 py-3" aria-label={card.label}>
+			<header className="flex flex-wrap items-center gap-x-3 gap-y-2">
+				<div className="min-w-[180px] flex-1">
+					<h3 className="text-[15px] font-bold text-ink">{card.label}</h3>
+					<p className="text-xs text-ink-3">
+						{card.updatedAt
+							? `Changed ${fmtWhen(card.updatedAt)}${card.updatedByName ? ` by ${card.updatedByName}` : ""}`
+							: "Never changed in the portal"}
+					</p>
+				</div>
+				<div className="ml-auto flex flex-wrap items-center justify-end gap-2">
+					{anySaved ? (
+						<StatusPill tone="success">Saved in the portal</StatusPill>
+					) : (
+						<StatusPill tone="grey">Using the server's setting</StatusPill>
+					)}
+					{!open && testButton}
+					<button
+						type="button"
+						className={cn(btn.secondary, btn.small, "flex items-center gap-2")}
+						onClick={() => setOpen((v) => !v)}
+						aria-expanded={open}
+					>
+						{open ? <ChevronUpIcon className="size-4" /> : <PencilIcon className="size-4" />} {open ? "Close" : "Edit"}
 					</button>
-				) : null;
-				if (clearing)
-					return (
-						<div key={f.key} className="flex flex-col gap-1 rounded-[10px] border border-dashed border-line px-3 py-2">
-							<span className="text-[13px] font-medium text-ink">{f.label}</span>
-							<span className="text-xs text-ink-3">Goes back to the server's value when you save.</span>
-							{serverLink}
+				</div>
+			</header>
+			{open && (
+				<div className="mt-3 flex flex-col gap-3 border-t border-line pt-3">
+					{main.map((f) => renderField(f, allAdvanced))}
+					{advancedCount > 0 && (
+						<div className="rounded-[10px] border border-line">
+							<button
+								type="button"
+								className="flex w-full items-center gap-2 px-3 py-2 text-left text-[13px] font-semibold text-ink-2 hover:text-ink"
+								onClick={() => setAdvanced((v) => !v)}
+								aria-expanded={advanced}
+							>
+								{advanced ? <ChevronUpIcon className="size-4 shrink-0" /> : <ChevronDownIcon className="size-4 shrink-0" />}
+								Advanced
+								<span className="min-w-0 truncate font-normal text-ink-3">
+									{extra.length > 0 ? extra.map((f) => f.label.toLowerCase()).join(", ") : "use the server's value"}
+								</span>
+							</button>
+							{advanced && (
+								<div className="flex flex-col gap-3 border-t border-line px-3 py-3">
+									{extra.map((f) => renderField(f, true))}
+									{savedMain.length > 0 && (
+										<div className="flex flex-col gap-1">
+											<p className="text-xs text-ink-3">Go back to the server's own setting for a saved field:</p>
+											{savedMain.map((f) => (
+												<div key={f.key} className="flex flex-wrap items-center gap-x-2 text-[13px] text-ink">
+													<span>{f.label}</span>
+													{serverLink(f)}
+												</div>
+											))}
+										</div>
+									)}
+								</div>
+							)}
 						</div>
-					);
-				if (f.type === "BOOLEAN")
-					return (
-						<div key={f.key} className="flex flex-col gap-1">
-							<ToggleField
-								label={f.label}
-								hint={f.hint ?? undefined}
-								checked={(edits[f.key] ?? (f.value === "true" ? "true" : "false")) === "true"}
-								onChange={(v) => set(f.key, v ? "true" : "false")}
-							/>
-							{serverLink}
-						</div>
-					);
-				if (f.type === "SECRET")
-					return (
-						<div key={f.key} className="flex flex-col gap-1">
-							<TextField
-								label={f.saved ? `${f.label} · replace` : f.label}
-								type="password"
-								value={edits[f.key] ?? ""}
-								onChange={(v) => set(f.key, v)}
-								placeholder={f.saved ? `Saved ${f.value ?? "••••"} · paste a new one to replace it` : "Empty · paste to save"}
-								hint={f.hint ?? undefined}
-							/>
-							{serverLink}
-						</div>
-					);
-				return (
-					<div key={f.key} className="flex flex-col gap-1">
-						<TextField
-							label={f.label}
-							type={f.type === "NUMBER" ? "number" : f.type === "URL" ? "url" : "text"}
-							value={edits[f.key] ?? f.value ?? ""}
-							onChange={(v) => set(f.key, v)}
-							placeholder={f.saved ? undefined : "Empty"}
-							hint={f.hint ?? undefined}
-							error={fieldError(f, edits[f.key])}
-						/>
-						{serverLink}
-					</div>
-				);
-			})}
+					)}
+					{card.provider === "BREVO" && <SendTestEmail />}
+				</div>
+			)}
 			{test && (
 				<p
 					className={cn(
-						"flex items-center gap-2 rounded-[10px] px-3 py-[10px] text-xs font-medium",
+						"mt-3 flex items-center gap-2 rounded-[10px] px-3 py-2 text-xs font-medium",
 						test.ok ? "bg-success-soft text-success" : "bg-danger-soft text-danger",
 					)}
 				>
-					{test.ok ? <CheckCircle2Icon className="size-4" /> : <XCircleIcon className="size-4" />} {test.message}
+					{test.ok ? <CheckCircle2Icon className="size-4 shrink-0" /> : <XCircleIcon className="size-4 shrink-0" />}{" "}
+					{test.message}
 				</p>
 			)}
-			{card.provider === "BREVO" && <SendTestEmail />}
-			<div className="flex flex-wrap items-center justify-end gap-2 border-t border-line pt-4">
-				{dirty && <span className="mr-auto text-xs text-ink-3">Unsaved changes</span>}
-				{card.testable && (
+			{(open || dirty) && (
+				<div className="mt-3 flex flex-wrap items-center justify-end gap-2 border-t border-line pt-3">
+					{dirty && <span className="mr-auto text-xs text-ink-3">Unsaved changes</span>}
+					{open && testButton}
+					{dirty && (
+						<button
+							type="button"
+							className={cn(btn.secondary, btn.small)}
+							onClick={() => {
+								setEdits({});
+								setClear([]);
+							}}
+							disabled={saving}
+						>
+							Discard
+						</button>
+					)}
 					<button
 						type="button"
-						className={cn(btn.secondary, "flex items-center gap-2")}
-						onClick={runTest}
-						disabled={testing || saving}
-						title={dirty ? "Tests what is saved now; save first to test your changes" : undefined}
+						className={cn(btn.primary, btn.small)}
+						onClick={save}
+						disabled={!dirty || invalid || saving}
 					>
-						{testing ? <Loader2Icon className="size-4 animate-spin" /> : <PlugZapIcon className="size-4" />} Test connection
+						{saving ? "Saving…" : "Save"}
 					</button>
-				)}
-				{dirty && (
-					<button
-						type="button"
-						className={btn.secondary}
-						onClick={() => {
-							setEdits({});
-							setClear([]);
-						}}
-						disabled={saving}
-					>
-						Discard
-					</button>
-				)}
-				<button type="button" className={btn.primary} onClick={save} disabled={!dirty || invalid || saving}>
-					{saving ? "Saving…" : "Save"}
-				</button>
-			</div>
-		</SectionCard>
+				</div>
+			)}
+		</article>
 	);
 }
 

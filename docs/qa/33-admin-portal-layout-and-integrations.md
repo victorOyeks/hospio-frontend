@@ -52,20 +52,19 @@ Password for every account: `Hospio123!`.
 
 ## 4. Money pages
 
-1. Fees & billing → **Daily fees**: every hotel's days. As super admin, **Work out yesterday** and **Run debit now** are there.
-2. Payments & POS → **POS & fee collection**: every hotel's keys, Hospio fee state, provider debit and last daily fee. Search a
+1. Fees & billing → **Daily fees**: every hotel's days. As super admin, **Work out yesterday** is there (no "Run debit now": nothing is debited, script 63).
+2. Payments & POS → **POS & fee collection**: every hotel's keys, Hospio fee state and last daily fee. Search a
    hotel; open its panel.
 
 ## 5. Integrations (super admin)
 
-1. Platform → **Integrations**: cards for Email, Messaging, Payments, POS and Fee debit. With nothing saved, each says it uses the
-   server's setting.
+1. Platform → **Integrations**: cards for Email, Messaging, Payments and POS (the Fee debit group was removed on 19 Nov 2026,
+   script 74). With nothing saved, each says it uses the server's setting.
 2. **Test connection** on Infobip, Brevo, Termii and Paystack: each answers in plain words (templates, account, balance).
    Nothing is sent or charged.
-3. Fee debit · Moniepoint: enter `not a url` and save. It's refused ("isn't a web address"). Enter
-   `https://example.invalid/debit` and save: it shows as saved.
-4. Within a minute, a hotel's panel → POS & Hospio fees shows Moniepoint debit "configured". Then **Use the server's value** on
-   that field and save: it goes back to "not configured".
+3. Moniepoint POS → **Edit**: enter `not a url`. It's refused ("Start with https://"). Don't save a real value: the staging
+   keys are live. Tap **Discard**.
+4. **Use the server's value** is under **Advanced** on an open card. Don't use it on staging's saved keys.
 5. Secret fields never show in full: after saving, they show as `••••••` plus the last 4 characters.
 6. The connection checks at the bottom of the page still show each provider's status.
 
