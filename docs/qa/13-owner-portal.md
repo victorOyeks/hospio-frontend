@@ -99,8 +99,8 @@ use them. Add your own "QA Owner …" staff in section 3 and work on those.
 4. **Do:** row menu → **Pause for 7 days** → **Pause for 7 days**. **Expect:** status **Paused until <the 7th day>**.
    Try to sign in as that person: "This account is paused until …". Then row menu → **End the pause** → **End the
    pause now**. **Expect:** Active.
-5. **Do:** row menu → **Suspend** → leave the reason empty → **Suspend**: "Say why … is suspended". Type a reason →
-   **Suspend**. **Expect:** **Suspended**; the profile shows "Suspended by <you> on <date>: <reason>"; the person
+5. **Do:** row menu → **Suspend** → leave the reason empty. **Expect:** the red **Suspend** button stays greyed out and the
+   field says "Write the reason to suspend (at least 3 characters)" (QA 80). Type a reason → **Suspend**. **Expect:** **Suspended**; the profile shows "Suspended by <you> on <date>: <reason>"; the person
    cannot sign in ("This account is suspended…"); the hotel's manager gets an in-app notice. **Reinstate** → Active.
 6. **Do:** row menu → **New temporary password** → **Reset password**. **Expect:** the temporary password shown once
    and **(delivery)** an email (sent) and an SMS row "Not sent · SMS coming soon".

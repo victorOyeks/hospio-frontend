@@ -720,6 +720,7 @@ export function ShiftsScreen({
 						<TextField
 							label="New PIN"
 							type="password"
+							reveal={false}
 							value={pin.next}
 							onChange={(v) =>
 								setPin({ ...pin, next: v.replace(/\D/g, "").slice(0, 6) })
@@ -728,6 +729,7 @@ export function ShiftsScreen({
 						<TextField
 							label="Again"
 							type="password"
+							reveal={false}
 							value={pin.again}
 							onChange={(v) =>
 								setPin({ ...pin, again: v.replace(/\D/g, "").slice(0, 6) })

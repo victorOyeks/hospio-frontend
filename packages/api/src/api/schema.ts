@@ -1287,6 +1287,10 @@ export const schema = createSchema({
 				page: z.number(),
 				size: z.number(),
 				sort: z.string(),
+				// Listed so the client keeps them: an unlisted query key is dropped before the call (DEF-093: the Roles
+				// cards read ROLE_<ROLE> counts that only come with roleCounts; the owner's Staff leaves the owner out with staffOnly).
+				staffOnly: z.boolean(),
+				roleCounts: z.boolean(),
 			})
 			.partial()
 			.optional(),
