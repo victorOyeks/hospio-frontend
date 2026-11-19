@@ -2,6 +2,7 @@
 
 import { PencilIcon, ShieldAlertIcon } from "lucide-react";
 import { useState } from "react";
+import { toast } from "sonner";
 import { recordChange } from "@hospio/api/actions/platform-admin";
 import { updateBusiness } from "@hospio/api/actions/tenant";
 import { useAction } from "@hospio/api/actions/use-action";
@@ -10,9 +11,11 @@ import type { AdminChangeRow } from "@hospio/api/data/admin-types";
 import type { BusinessRow } from "@hospio/api/data/types";
 import { Note } from "@hospio/ui/shared/detail-list";
 import { FieldRow, TextareaField, TextField } from "@hospio/ui/shared/field";
+import { fmtLongDate } from "@hospio/ui/shared/format";
 import { PanelSection, SidePanel } from "@hospio/ui/shared/side-panel";
 import { btn } from "@hospio/ui/shared/ui";
 import { businessRequestFrom, refreshBusiness } from "../onboarding/shared";
+import { ChargesStartField } from "./charges-start";
 import { FeeLockField, feeLockValue, showFeeLockError, useFeeLock } from "./fee-lock";
 
 /** Edit business and Edit as Hospio360: the same form, the second with a required reason that is logged as a change. */
@@ -65,7 +68,6 @@ const FIELD_LABELS: Partial<Record<keyof BusinessRequest, string>> = {
 	feeModel: "Fee model",
 	feeValue: "Fee",
 	feeAddendumRef: "Fee addendum",
-	contractStartsOn: "Agreement start",
 	contractNotes: "Contract notes",
 };
 
@@ -94,7 +96,7 @@ function diffBusiness(
 }
 
 function EditBusinessForm({
-	business,
+	business: initial,
 	onCancel,
 	onSaved,
 	asHms,
@@ -106,6 +108,8 @@ function EditBusinessForm({
 	asHms?: boolean;
 }) {
 	const { run, pending } = useAction();
+	// The row this form edits; a charges start change mirrors its date into contractStartsOn at once, so later saves start from that.
+	const [business, setBase] = useState(initial);
 	const [reason, setReason] = useState("");
 	const [name, setName] = useState(business.name);
 	const [legalName, setLegalName] = useState(business.legalName ?? "");
@@ -129,14 +133,29 @@ function EditBusinessForm({
 			: null,
 		business.feeAddendumRef,
 	);
-	const [contractStartsOn, setStartsOn] = useState(
-		business.contractStartsOn ?? "",
-	);
 	const [contractNotes, setNotes] = useState(business.contractNotes ?? "");
 	const emailOk = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(ownerEmail.trim());
 	const reasonOk = !asHms || reason.trim().length >= 8;
 	const valid =
 		name.trim().length > 1 && ownerName.trim().length > 1 && emailOk && reasonOk;
+
+	// "Charges start on" lives in platform-service (the Money tab's API and rules); tenant's contractStartsOn keeps the same date as a
+	// mirror, written here exactly as onboarding step 3 does, from the saved row only (unsaved form edits are not sent).
+	const mirrorChargesStart = async (date: string | null) => {
+		if ((business.contractStartsOn ?? null) === date) return;
+		const saved = await updateBusiness(
+			business.id,
+			businessRequestFrom(business, { contractStartsOn: date }),
+		);
+		if (!saved.ok) {
+			toast.error(
+				`Charges start ${date ? `on ${fmtLongDate(date)}` : "cleared"}, but the business record could not be updated: ${saved.error}`,
+				{ duration: 8000 },
+			);
+			return;
+		}
+		setBase((prev) => refreshBusiness(prev, saved.data));
+	};
 
 	const save = () => {
 		const fee = feeLockValue(lock);
@@ -156,7 +175,6 @@ function EditBusinessForm({
 			feeModel: "PERCENT_OF_SALES",
 			feeValue: fee.feeValue,
 			feeAddendumRef: fee.feeAddendumRef,
-			contractStartsOn: contractStartsOn || null,
 			contractNotes: contractNotes.trim() || null,
 		};
 		const body = businessRequestFrom(business, patch);
@@ -310,14 +328,10 @@ function EditBusinessForm({
 			</PanelSection>
 			<PanelSection title="Fee & contract">
 				<FeeLockField lock={lock} />
-				<FieldRow>
-					<TextField
-						label="Agreement starts on"
-						type="date"
-						value={contractStartsOn}
-						onChange={setStartsOn}
-					/>
-				</FieldRow>
+				<ChargesStartField
+					businessId={business.id}
+					onChanged={(d) => void mirrorChargesStart(d)}
+				/>
 				<TextareaField
 					label="Contract notes"
 					value={contractNotes}

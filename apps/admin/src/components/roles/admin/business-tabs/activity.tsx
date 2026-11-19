@@ -22,6 +22,7 @@ import { WhatHappens } from "@hospio/ui/shared/side-panel";
 import { StatusPill } from "@hospio/ui/shared/status-pill";
 import { btn } from "@hospio/ui/shared/ui";
 import { cn } from "@hospio/ui/utils";
+import { ChargesTag, useChargesStart } from "../business/charges-start";
 import { SupportAccessButton } from "../support-access-button";
 import { BusinessTabHeader } from "./nav";
 
@@ -45,6 +46,7 @@ export function ActivityTab({
 	/** Activity and Changes by Hospio360 are audit logs, deleted after this many days. */
 	retentionDays: number;
 }) {
+	const charges = useChargesStart(business.id);
 	const [changes, setChanges] = useState(initialChanges);
 	useEffect(() => setChanges(initialChanges), [initialChanges]);
 	const [undo, setUndo] = useState<AdminChangeRow | null>(null);
@@ -77,10 +79,17 @@ export function ActivityTab({
 								: business.feeModel,
 						},
 						{
-							label: "Contract starts",
-							value: business.contractStartsOn
-								? fmtLongDate(business.contractStartsOn)
-								: "—",
+							label: "Charges start on",
+							value: charges.view ? (
+								<span className="flex flex-wrap items-center gap-2">
+									{charges.view.chargesStartOn
+										? fmtLongDate(charges.view.chargesStartOn)
+										: "No date"}
+									<ChargesTag row={charges.view} />
+								</span>
+							) : (
+								"…"
+							),
 						},
 						{ label: "Account manager", value: business.accountManager },
 						{
