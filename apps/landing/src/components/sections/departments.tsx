@@ -51,7 +51,7 @@ const departments: { icon: LucideIcon; name: string; text: string }[] = [
 	{
 		icon: CoinsIcon,
 		name: "Finance",
-		text: "Tills, cash, expenses, reports and night audit, with the owner’s view across every hotel.",
+		text: "Tills, cash, expenses, reports and night audit, with the owner’s view across every location.",
 	},
 ];
 

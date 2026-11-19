@@ -23,8 +23,8 @@ const features: { icon: LucideIcon; title: string; text: string }[] = [
 	},
 	{
 		icon: SendIcon,
-		title: "Receipts by email, from your hotel’s name",
-		text: "Guests get confirmations and receipts by email, sent in your hotel’s name, and on WhatsApp when they leave only a phone number.",
+		title: "Receipts by email, in your business’s name",
+		text: "Guests get confirmations and receipts by email, sent in your business’s name, and on WhatsApp when they leave only a phone number.",
 	},
 ];
 
@@ -79,7 +79,7 @@ const row =
 
 export function GuestFolio() {
 	return (
-		<section id="folio" className="scroll-mt-[88px] bg-card">
+		<section id="folio" className="scroll-mt-[76px] bg-card">
 			<div
 				className={cn(
 					container,
@@ -89,7 +89,7 @@ export function GuestFolio() {
 				<div className="flex flex-col gap-7">
 					<SectionHeader
 						align="left"
-						eyebrow="Guest folio"
+						eyebrow="Guest folio and bills"
 						title="The bill that keeps itself."
 						intro="Dinner at the restaurant, drinks at the bar, laundry, the minibar — every department posts straight to the guest’s folio. No paper slips, no end-of-stay surprises."
 						titleClassName="max-w-[500px]"

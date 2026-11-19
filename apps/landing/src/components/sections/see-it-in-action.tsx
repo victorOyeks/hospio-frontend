@@ -12,10 +12,12 @@ export function SeeItInAction() {
 			id="video"
 			eyebrow="Watch"
 			title="See Hospio360 in action"
-			contentClassName="items-center gap-8 pt-0 md:gap-10 md:pt-0"
+			compact
+			contentClassName="items-center pt-0 md:pt-0"
 		>
-			<VideoEmbed video={VIDEOS.overview} className="max-w-[960px]" />
-			<div className="flex flex-wrap items-center justify-center gap-3">
+			<VideoEmbed video={VIDEOS.overview} className="max-w-[760px]" />
+			{/* On a phone the hero's two buttons are still in view just above, so they are not repeated. */}
+			<div className="hidden flex-wrap items-center justify-center gap-3 sm:flex">
 				<a
 					href={SIGN_UP_URL}
 					className={cn(

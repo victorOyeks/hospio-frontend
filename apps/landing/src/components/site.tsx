@@ -20,7 +20,7 @@ export const CONTACT_EMAIL =
 
 /** Where Oyeks Global Ltd is (footer, legal pages, notices clause of the Terms). */
 export const REGISTERED_OFFICE = "Lagos, Nigeria";
-export const DEMO_MAILTO = `mailto:${CONTACT_EMAIL}?subject=${encodeURIComponent("Hospio360 demo request")}&body=${encodeURIComponent("Hotel name:\nCity:\nNumber of rooms:\nBest phone number:\n")}`;
+export const DEMO_MAILTO = `mailto:${CONTACT_EMAIL}?subject=${encodeURIComponent("Hospio360 demo request")}&body=${encodeURIComponent("Business name:\nType (hotel, lounge, bar or restaurant):\nCity:\nBest phone number:\n")}`;
 /** The public site's own address (canonical links, Open Graph, robots). */
 export const SITE_URL = (
 	process.env.NEXT_PUBLIC_SITE_URL ?? "https://hospio360.com"
@@ -34,11 +34,11 @@ export const container = "mx-auto w-full max-w-[1200px] px-4";
 export const btnLg = "px-4 py-[13px] text-[15px]";
 
 const nav = [
-	{ href: "/#product", label: "Product" },
-	{ href: "/#departments", label: "Departments" },
-	{ href: "/#payments", label: "Payments" },
-	{ href: "/#onboarding", label: "Onboarding" },
+	{ href: "/features", label: "Features" },
+	{ href: "/#onboarding", label: "Getting started" },
 	{ href: "/#pricing", label: "Pricing" },
+	{ href: "/#partners", label: "Partners" },
+	{ href: "/#faq", label: "FAQ" },
 ];
 
 export function Wordmark({
@@ -80,7 +80,7 @@ export function SiteHeader() {
 			<div
 				className={cn(
 					container,
-					"flex h-[72px] items-center justify-between gap-6 md:h-[87px]",
+					"flex h-[60px] items-center justify-between gap-4 md:h-[76px] md:gap-6",
 				)}
 			>
 				<Wordmark />
@@ -153,10 +153,10 @@ const footerColumns: {
 	{
 		title: "Product",
 		links: [
-			{ href: "/#product", label: "Owner portal" },
-			{ href: "/#product", label: "Manager portal" },
-			{ href: "/#product", label: "Staff tablet app" },
-			{ href: "/#payments", label: "Payments" },
+			{ href: "/features", label: "All features" },
+			{ href: "/features#product", label: "Owner, manager and staff apps" },
+			{ href: "/features#departments", label: "Departments" },
+			{ href: "/features#payments", label: "Payments" },
 			{ href: "/#pricing", label: "Pricing" },
 		],
 	},
@@ -193,17 +193,25 @@ const footerColumns: {
 export function SiteFooter() {
 	return (
 		<footer className="border-t border-line bg-page">
-			<div className={cn(container, "flex flex-col gap-12 pt-16 pb-10")}>
-				<div className="grid gap-10 sm:grid-cols-2 md:grid-cols-[minmax(0,320px)_repeat(4,minmax(0,1fr))] md:gap-12">
-					<div className="flex flex-col gap-[14px] sm:col-span-2 md:col-span-1">
+			<div
+				className={cn(
+					container,
+					"flex flex-col gap-8 pt-10 pb-8 md:gap-10 md:pt-14 md:pb-10",
+				)}
+			>
+				<div className="grid grid-cols-2 gap-x-6 gap-y-8 md:grid-cols-[minmax(0,300px)_repeat(4,minmax(0,1fr))] md:gap-10">
+					<div className="col-span-2 flex flex-col gap-3 md:col-span-1">
 						<Wordmark />
 						<p className="text-sm leading-[1.55] text-ink-2">
-							Hotel Management System — one system for owners, managers and
-							every department.
+							One system for hotels, lounges, bars and restaurants — owners,
+							managers and every department.
 						</p>
 					</div>
 					{footerColumns.map((c) => (
-						<div key={c.title} className="flex flex-col gap-3 text-sm">
+						<div
+							key={c.title}
+							className="flex min-w-0 flex-col gap-[10px] text-sm"
+						>
 							<p className="font-bold text-ink">{c.title}</p>
 							{c.links.map((l) => (
 								<a
@@ -224,9 +232,14 @@ export function SiteFooter() {
 						</p>
 						<p>{REGISTERED_OFFICE}</p>
 					</div>
-					<a href={`mailto:${CONTACT_EMAIL}`} className="hover:text-ink">
-						{CONTACT_EMAIL}
-					</a>
+					<div className="flex flex-wrap items-center gap-x-5 gap-y-1">
+						<a href={`mailto:${CONTACT_EMAIL}`} className="hover:text-ink">
+							{CONTACT_EMAIL}
+						</a>
+						<a href="#top" className="font-semibold hover:text-ink">
+							Back to top ↑
+						</a>
+					</div>
 				</div>
 			</div>
 		</footer>
@@ -241,6 +254,8 @@ type SectionHeaderProps = {
 	dark?: boolean;
 	className?: string;
 	titleClassName?: string;
+	/** The shorter home-page style: a smaller headline and tighter spacing. */
+	compact?: boolean;
 };
 
 /** Eyebrow, headline and intro in the design's section-header style; centred by default. */
@@ -252,12 +267,14 @@ export function SectionHeader({
 	dark = false,
 	className,
 	titleClassName,
+	compact = false,
 }: SectionHeaderProps) {
 	const center = align === "center";
 	return (
 		<div
 			className={cn(
-				"flex w-full flex-col gap-4",
+				"flex w-full flex-col",
+				compact ? "gap-[10px]" : "gap-4",
 				center && "items-center text-center",
 				className,
 			)}
@@ -272,7 +289,10 @@ export function SectionHeader({
 			</p>
 			<h2
 				className={cn(
-					"text-[34px] font-bold leading-[1.1] tracking-[-0.02em] md:text-[48px]",
+					"font-bold leading-[1.1] tracking-[-0.02em]",
+					compact
+						? "text-[26px] md:text-[38px]"
+						: "text-[34px] md:text-[48px]",
 					dark ? "text-white" : "text-ink",
 					center && "max-w-[820px]",
 					titleClassName,
@@ -283,7 +303,8 @@ export function SectionHeader({
 			{intro && (
 				<p
 					className={cn(
-						"text-[17px] leading-[1.55] md:text-[18px]",
+						"leading-[1.55]",
+						compact ? "text-[15px] md:text-[17px]" : "text-[17px] md:text-[18px]",
 						dark ? "text-nav-foreground" : "text-ink-2",
 						center && "max-w-[720px]",
 					)}
@@ -316,7 +337,7 @@ export function Section({
 		<section
 			id={id}
 			className={cn(
-				"scroll-mt-[88px]",
+				"scroll-mt-[76px]",
 				tone === "card" && "bg-card",
 				tone === "page" && "bg-page",
 				dark && "bg-brand",
@@ -326,7 +347,10 @@ export function Section({
 			<div
 				className={cn(
 					container,
-					"flex flex-col gap-12 py-16 md:gap-14 md:py-[112px]",
+					"flex flex-col",
+					header.compact
+						? "gap-6 py-10 md:gap-9 md:py-16"
+						: "gap-12 py-16 md:gap-14 md:py-[112px]",
 					contentClassName,
 				)}
 			>

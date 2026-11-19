@@ -1,69 +1,55 @@
-import {
-	BedDoubleIcon,
-	CheckIcon,
-	type LucideIcon,
-	ShieldIcon,
-	StoreIcon,
-	UserPlusIcon,
-} from "lucide-react";
 import { Section } from "@/components/site";
-import { IconTile } from "./shared";
 
-const steps: { icon: LucideIcon; title: string; text: string }[] = [
+const steps: { title: string; text: string }[] = [
 	{
-		icon: StoreIcon,
 		title: "Create your account",
 		text: "Sign up as the owner and confirm your phone number.",
 	},
 	{
-		icon: BedDoubleIcon,
-		title: "Your business and first hotel",
-		text: "Business details, then your hotel’s address and contacts.",
+		title: "Add your business",
+		text: "Its details and your first location.",
 	},
 	{
-		icon: UserPlusIcon,
-		title: "Rooms and prices",
-		text: "Room types, prices and room numbers, added in a few minutes.",
+		title: "Rooms or outlets, and prices",
+		text: "Rooms for a hotel; outlets for a lounge, bar or restaurant.",
 	},
 	{
-		icon: CheckIcon,
-		title: "Your first manager",
-		text: "Invite the manager who runs the hotel day to day, then you’re live.",
+		title: "Invite your manager",
+		text: "The person who runs it day to day. Then you’re live.",
 	},
 ];
 
+/** The four sign-up steps as one compact row of numbered chips (on a phone: the step names only). */
 export function Onboarding() {
 	return (
 		<Section
 			id="onboarding"
-			tone="card"
-			eyebrow="Onboarding"
-			title="Set up your hotel in four steps."
-			intro="Sign up and walk through a short setup, saving as you go. Prefer to hand it over? The Hospio360 team can set up your business, hotels, rooms and staff for you, then hand you the keys."
+			eyebrow="Getting started"
+			title="Live in four steps."
+			compact
 		>
-			<ol className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+			<ol className="grid gap-2 sm:grid-cols-2 sm:gap-3 lg:grid-cols-4 lg:gap-5">
 				{steps.map((s, i) => (
 					<li
 						key={s.title}
-						className="flex flex-col gap-[14px] rounded-[16px] border border-line bg-page p-6"
+						className="flex items-center gap-3 rounded-[14px] border border-line bg-card px-[14px] py-[10px] sm:items-start sm:py-3 lg:p-5"
 					>
-						<div className="flex items-center justify-between">
-							<IconTile icon={s.icon} />
-							<span className="text-[28px] font-bold leading-none text-line-strong">
-								{String(i + 1).padStart(2, "0")}
+						<span className="flex size-7 shrink-0 items-center justify-center rounded-pill bg-brand text-[13px] font-bold text-white">
+							{i + 1}
+						</span>
+						<p className="flex min-w-0 flex-col gap-[2px]">
+							<span className="text-[15px] font-bold leading-[1.3] text-ink">
+								{s.title}
 							</span>
-						</div>
-						<h3 className="text-[18px] font-bold text-ink">{s.title}</h3>
-						<p className="text-sm leading-[1.5] text-ink-2">{s.text}</p>
+							<span className="hidden text-[13px] leading-[1.4] text-ink-2 sm:block">
+								{s.text}
+							</span>
+						</p>
 					</li>
 				))}
 			</ol>
-			<p className="mx-auto flex max-w-full items-center gap-3 rounded-[24px] bg-status-note-soft px-5 py-[14px] text-sm text-status-note">
-				<ShieldIcon className="size-[18px] shrink-0" />
-				<span>
-					Staff get their own logins and a role, and anyone can turn on 2-step
-					sign-in with an authenticator app.
-				</span>
+			<p className="-mt-2 text-center text-[13px] leading-[1.5] text-ink-2 md:-mt-3 md:text-sm">
+				Prefer to hand it over? The Hospio360 team can set it all up for you.
 			</p>
 		</Section>
 	);
