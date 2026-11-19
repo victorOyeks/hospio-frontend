@@ -30,7 +30,7 @@ import { SidePanel, WhatHappens } from "@hospio/ui/shared/side-panel";
 import { btn as btnStyle } from "@hospio/ui/shared/ui";
 import { ThreadsView } from "../shared-staff/threads";
 import { HotelFilter } from "./common";
-import { useBizText } from "@hospio/ui/shared/wording";
+import { useBizText, useWording } from "@hospio/ui/shared/wording";
 
 type Hotel = { hotelId: string; name: string };
 export type ManagerContact = {
@@ -54,6 +54,7 @@ export function OwnerMessaging({
 	hotels: Hotel[];
 	managers: ManagerContact[];
 }) {
+	const words = useWording();
 	const tb = useBizText();
 	const [open, setOpen] = useQueryState("open", parseAsString);
 	// The hotel filter goes to the server (that hotel's threads), so a change reads the list again from page 1.
@@ -71,7 +72,7 @@ export function OwnerMessaging({
 		<>
 			<PageHeader
 				title="Messaging"
-				subtitle="Your managers and teams · guests are messaged from Bookings"
+				subtitle={words.stays ? "Your managers and teams · guests are messaged from Bookings" : "Your managers and teams"}
 			>
 				<Button
 					variant="outline"

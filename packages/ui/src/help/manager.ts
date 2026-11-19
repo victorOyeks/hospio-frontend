@@ -5,6 +5,7 @@ export const managerHelp: HelpModule = {
 	label: "Manager",
 	intro:
 		"Your team and their access, approvals, rooms and prices, money, the night audit and hotel setup.",
+	venueIntro: "Your team and their access, approvals, menus and prices, money, the night audit and hotel setup.",
 	guides: [
 		{
 			id: "mgr-add-staff",

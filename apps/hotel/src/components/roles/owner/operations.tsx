@@ -166,7 +166,7 @@ export function OwnerOperations({
 					<PillTabs
 						param="tab"
 						tabs={[
-							{ key: "hotels", label: "Hotels now" },
+							{ key: "hotels", label: tb("Hotels now") },
 							{ key: "departments", label: "Departments" },
 							{ key: "activity", label: "Activity log", count: rows.length },
 							{
@@ -195,7 +195,7 @@ export function OwnerOperations({
 							<SectionCard
 								key={h.hotelId}
 								title={h.name}
-								subtitle={`${h.manager === "—" ? "No manager yet" : h.manager} · ${plural(h.rooms, "room")}`}
+								subtitle={`${h.manager === "—" ? "No manager yet" : h.manager}${h.hasAccommodation === false ? "" : ` · ${plural(h.rooms, "room")}`}`}
 								action={{
 									label: "Open",
 									href: `/dashboard/hotels/${h.hotelId}`,

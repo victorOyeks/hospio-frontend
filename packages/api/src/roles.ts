@@ -120,6 +120,29 @@ export function roleDescription(role: HotelRole, place = "hotel", hotelsOnly = t
 	return roleDescriptions[role];
 }
 
+// A permission line about rooms, stays or folios: left out where there are no rooms.
+const STAY_LINE = /\b(rooms?|room-service|folios?|bookings?|check(?:ed)?[- ]?(?:in|out)|checkout|minibar|linen|housekeeping|guests in and out)\b/i;
+
+/**
+ * A role's permission modules at this location: all of them where there are rooms; at a lounge, bar or restaurant the modules
+ * and lines about rooms, stays and folios are left out and "Hotel setup" is named for the place by the caller.
+ */
+export function rolePermissions(role: HotelRole, stays = true): RolePermissionModule[] {
+	const mods = ROLE_PERMISSIONS[role] ?? [];
+	if (stays) return mods;
+	const keep = (lines: string[]) => lines.filter((l) => !STAY_LINE.test(l));
+	return mods
+		.filter((m) => !STAY_LINE.test(m.name))
+		.map((m) => ({ ...m, view: keep(m.view), edit: keep(m.edit), full: keep(m.full) }))
+		.filter((m) => m.view.length + m.edit.length + m.full.length > 0);
+}
+
+/** What only a manager or the owner can do, at this location (see `rolePermissions`). */
+export function managerOnlyActions(stays = true): string[] {
+	if (stays) return [...MANAGER_ONLY_ACTIONS];
+	return ["Approve or decline refunds; resolve disputes", ...MANAGER_ONLY_ACTIONS.filter((l) => !STAY_LINE.test(l) && !l.startsWith("Approve or decline")), "Hotel setup: outlets, tables, lists and prices"];
+}
+
 export const roleIcons: Record<HotelRole, LucideIcon> = {
 	OWNER: BriefcaseIcon,
 	MANAGER: LayoutDashboardIcon,

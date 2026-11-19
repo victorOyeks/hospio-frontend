@@ -24,6 +24,7 @@ import { SectionCard } from "@hospio/ui/shared/section-card";
 import { SidePanel } from "@hospio/ui/shared/side-panel";
 import { btn, cell, tableHead, tableRow } from "@hospio/ui/shared/ui";
 import { cn } from "@hospio/ui/utils";
+import { useWording } from "@hospio/ui/shared/wording";
 
 /**
  * Billing & invoices (hospio-backend docs/plan-monthly-invoices.md): Hospio360's one invoice a month for the business, issued on
@@ -54,6 +55,7 @@ export function BillingScreen({
 	error: string | null;
 	audience?: "owner" | "manager";
 }) {
+	const words = useWording();
 	const router = useRouter();
 	const params = useSearchParams();
 	const openId = params.get("invoice");
@@ -221,8 +223,10 @@ export function BillingScreen({
 			</SectionCard>
 			<p className="text-[12px] text-ink-3">
 				How it works: the invoice is issued on the 1st at 07:00 for the month before and is due on the 8th. Reminders go to the owner by email.
-				If it isn't paid by the 11th, card/transfer POS payments, new sales and new bookings pause from 06:00 on the 12th; check-out, cash on
-				existing bills and tabs, reports and paying the invoice still work. A month under ₦1,000 is carried into the next one. No VAT is charged.
+				{words.stays
+					? "If it isn't paid by the 11th, card/transfer POS payments, new sales and new bookings pause from 06:00 on the 12th; check-out, cash on existing bills and tabs, reports and paying the invoice still work."
+					: "If it isn't paid by the 11th, card/transfer POS payments and new sales pause from 06:00 on the 12th; cash on existing bills and tabs, reports and paying the invoice still work."}{" "}
+				 A month under ₦1,000 is carried into the next one. No VAT is charged.
 			</p>
 
 			<SidePanel

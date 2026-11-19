@@ -237,7 +237,7 @@ export function helpFor(
 		return {
 			key: a,
 			label: say(a)(m.label),
-			intro: say(a)(m.intro),
+			intro: say(a)(words.stays ? m.intro : (m.venueIntro ?? m.intro)),
 			current: a === active,
 			guides: m.guides.filter((g) => fits(g, a)).map((g) => ({
 				...worded(g, a),
@@ -248,7 +248,7 @@ export function helpFor(
 	const withOpen = (m: HelpModule, key: string): HelpSection => ({
 		key,
 		label: say(key)(m.label),
-		intro: say(key)(m.intro),
+		intro: say(key)(words.stays ? m.intro : (m.venueIntro ?? m.intro)),
 		current: false,
 		guides: m.guides.filter((g) => fits(g, key)).map((g) => ({
 			...worded(g, key),

@@ -4,6 +4,7 @@ export const barHelp: HelpModule = {
 	audience: "BAR",
 	label: "Bar",
 	intro: "Sales, tabs, room charges, bar stock, the menu and your till.",
+	venueIntro: "Sales, tabs, bar stock, the menu and your till.",
 	guides: [
 		{
 			id: "bar-ring-up-sale",

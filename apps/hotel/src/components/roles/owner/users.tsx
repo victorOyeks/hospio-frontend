@@ -26,7 +26,7 @@ import { useAction } from "@hospio/api/actions/use-action";
 import type { UserCreated } from "@hospio/api/api/schema";
 import type { PageResult } from "@hospio/api/data/paging";
 import type { OwnerHotelRow, PortalUserRow } from "@hospio/api/data/types";
-import { type HotelRole, isHotelRole, roleLabels } from "@hospio/api/roles";
+import { type HotelRole, isHotelRole, roleLabels, roleLabel } from "@hospio/api/roles";
 import { Button } from "@hospio/ui/primitives/button";
 import { DataTable } from "@hospio/ui/shared/data-table";
 import { withDeliveries } from "@hospio/ui/shared/deliveries-store";
@@ -204,7 +204,7 @@ export function OwnerUsers({
 		{
 			accessorKey: "role",
 			header: "Role",
-			cell: ({ row }) => roleLabels[row.original.role],
+			cell: ({ row }) => roleLabel(row.original.role, biz.hotel),
 		},
 		{
 			accessorKey: "hotels",
@@ -332,7 +332,7 @@ export function OwnerUsers({
 				title={selected?.fullName ?? ""}
 				subtitle={
 					selected
-						? `${roleLabels[selected.role]} · ${hotelsLabel(selected, tb)}`
+						? `${roleLabel(selected.role, biz.hotel)} · ${hotelsLabel(selected, tb)}`
 						: undefined
 				}
 				icon={UserRoundIcon}
@@ -404,7 +404,7 @@ export function OwnerUsers({
 											className="flex items-center gap-3 px-3 py-[10px] text-[13px]"
 										>
 											<span className="flex-1 font-medium text-ink">
-												{isHotelRole(g.role) ? roleLabels[g.role] : g.role}
+												{isHotelRole(g.role) ? roleLabel(g.role, biz.hotel) : g.role}
 											</span>
 											<span className="text-ink-2">
 												{g.hotelName ?? (g.hotelId ? "Hotel" : "All hotels")}

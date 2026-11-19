@@ -160,7 +160,7 @@ export function OwnerPayments({
 				/>
 			),
 		},
-		{ accessorKey: "hotelName", header: "Hotel" },
+		{ accessorKey: "hotelName", header: tb("Hotel") },
 		{
 			accessorKey: "method",
 			header: "Method",

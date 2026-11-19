@@ -68,7 +68,7 @@ import {
 import { cn } from "@hospio/ui/utils";
 import { useWhatsAppKinds } from "@/lib/use-whatsapp-kinds";
 import { channelOptions, NO_WHATSAPP_MESSAGES } from "./guest-message";
-import { usePlaceText } from "@hospio/ui/shared/wording";
+import { usePlaceText, useWording } from "@hospio/ui/shared/wording";
 
 type Tab = "waiting" | "open" | "mine" | "done" | "all";
 const TABS: Tab[] = ["waiting", "open", "mine", "done", "all"];
@@ -107,6 +107,7 @@ export function GuestInbox({
 	people?: Assignable[];
 	onShift?: OnShiftRow[];
 }) {
+	const words = useWording();
 	const router = useRouter();
 	const list = useListParams({ extra: ["tab", "channel"] });
 	const tab = (
@@ -153,7 +154,7 @@ export function GuestInbox({
 		<>
 			<PageHeader
 				title="Messages"
-				subtitle={`${hotelName} · guests by email (booking messages and receipts also go on WhatsApp) · conversations go 30 days after the last message`}
+				subtitle={`${hotelName} · guests by email (${words.stays ? "booking messages and receipts" : "receipts"} also go on WhatsApp) · conversations go 30 days after the last message`}
 			>
 				{canManage && (
 					<Button
@@ -264,7 +265,7 @@ export function GuestInbox({
 								}
 								hint={
 									canWrite
-										? "Message a guest with New message or from their booking"
+										? words.stays ? "Message a guest with New message or from their booking" : "Message a guest with New message"
 										: undefined
 								}
 								className="m-4"

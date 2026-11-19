@@ -1,5 +1,8 @@
+"use client";
+
 import { naira, nairaShort } from "@hospio/ui/shared/format";
 import { SectionCard } from "@hospio/ui/shared/section-card";
+import { useWording } from "@hospio/ui/shared/wording";
 import type { OutletSalesDayRow } from "@hospio/api/data/types";
 
 /**
@@ -11,7 +14,7 @@ export function OutletSalesCard({
 	sales,
 	className,
 	href = "/dashboard/financials/sales",
-	rooms = true,
+	rooms: roomsProp,
 }: {
 	sales: OutletSalesDayRow | null | undefined;
 	className?: string;
@@ -20,6 +23,9 @@ export function OutletSalesCard({
 	/** Where "Every sale" opens: the all-outlets sales history. */
 	href?: string;
 }) {
+	// Left out by the caller: the active location decides (nothing goes "on rooms" at a lounge, bar or restaurant).
+	const { stays } = useWording();
+	const rooms = roomsProp ?? stays;
 	return (
 		<SectionCard
 			title={rooms ? "Restaurant & bar sales today" : "Sales today"}

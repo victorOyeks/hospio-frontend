@@ -170,6 +170,10 @@ export const REPORTS: {
 ];
 
 /** A printable page of a built report, for "Save as PDF" in the browser's print dialog. */
+/** A report's one line: without rooms, "Revenue by source" has no rooms or laundry to name. */
+const describe = (r: { kind: string; description: string }, stays: boolean) =>
+	!stays && r.kind === "REVENUE" ? "Restaurant, bar and other revenue per hotel" : r.description;
+
 function printReport(title: string, subtitle: string, built: BuiltReport) {
 	const esc = (v: unknown) =>
 		String(v ?? "")
@@ -280,7 +284,7 @@ export function OwnerReports({
 			(stays || (r.kind !== "OCCUPANCY" && r.kind !== "GUESTS")) &&
 			(r.kind !== "TIPS" || tips) &&
 			(!search ||
-			`${r.name} ${tb(r.description)} ${r.area}`
+			`${r.name} ${tb(describe(r, stays))} ${r.area}`
 				.toLowerCase()
 				.includes(search.toLowerCase())),
 	);
@@ -330,7 +334,7 @@ export function OwnerReports({
 									</StatusPill>
 								)}
 							</div>
-							<p className="text-[13px] text-ink-2">{tb(r.description)}</p>
+							<p className="text-[13px] text-ink-2">{tb(describe(r, stays))}</p>
 							{sched.map((s) => (
 								<p key={s.id} className="text-[11px] text-ink-3">
 									{EVERY[s.every]} at {s.sendAt} · {s.hotelName}
@@ -609,7 +613,7 @@ function ReportPanel({
 			open={!!report}
 			onOpenChange={(o) => !o && onClose()}
 			title={report?.name ?? ""}
-			subtitle={report ? tb(report.description) : undefined}
+			subtitle={report ? tb(describe(report, hotels.length === 0 || hotels.some((h) => h.hasAccommodation !== false))) : undefined}
 			icon={FolderIcon}
 			width="lg"
 			footerInfo={built ? `${built.rows.length} rows` : undefined}
