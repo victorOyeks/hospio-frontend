@@ -19,7 +19,7 @@ export default async function ChangesPage({
 	const sp = await searchParams;
 	const page = pageParam(sp);
 	const tab = param(sp, "tab") ?? "changes";
-	const [role, changes, businesses, activity] = await Promise.all([
+	const [role, changes, businesses, activity, retentionDays] = await Promise.all([
 		getActiveRole(),
 		adminData.changes.list({
 			businessId: param(sp, "businessId"),
@@ -32,6 +32,7 @@ export default async function ChangesPage({
 			page: tab === "activity" ? page : 0,
 			size: 25,
 		}),
+		data.activity.retention(),
 	]);
 	return (
 		<ChangesScreen
@@ -39,6 +40,7 @@ export default async function ChangesPage({
 			changes={changes}
 			businesses={businesses}
 			activity={activity}
+			retentionDays={retentionDays}
 		/>
 	);
 }

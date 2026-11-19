@@ -193,6 +193,17 @@ export const mlData = {
 			}
 			return { ok: true, data: toPaged(res.data, toActivityRow) };
 		},
+		/**
+		 * How many days audit logs are kept before they are deleted automatically (platform setting, 7; docs/data-retention.md in
+		 * hospio-backend): what the audit pages' note says. 7 when the answer doesn't come.
+		 */
+		retention: async (): Promise<number> => {
+			if (!live("platform")) return give(7);
+			const { data: res } = await api("@get/platform/activity/retention", {
+				...(await withSession()),
+			}).catch(() => ({ data: null }));
+			return res?.data.days ?? 7;
+		},
 		/** One entry (a link to one off the page). */
 		get: async (id: string): Promise<ActivityRow | null> => {
 			if (!live("platform"))

@@ -17,6 +17,7 @@ import { fmtWhen } from "@hospio/ui/shared/format";
 import { ConfirmModal } from "@hospio/ui/shared/modal";
 import { PageHeader } from "@hospio/ui/shared/page-header";
 import { PillTabs } from "@hospio/ui/shared/pill-tabs";
+import { RetentionNote } from "@hospio/ui/shared/retention-note";
 import { SectionCard } from "@hospio/ui/shared/section-card";
 import { WhatHappens } from "@hospio/ui/shared/side-panel";
 import { StatusPill } from "@hospio/ui/shared/status-pill";
@@ -35,11 +36,14 @@ export function ChangesScreen({
 	changes: initial,
 	businesses,
 	activity,
+	retentionDays,
 }: {
 	role: AdminRole;
 	changes: Paged<AdminChangeRow>;
 	businesses: BusinessRow[];
 	activity: Paged<AdminActivityRow>;
+	/** Both tabs are audit logs, deleted after this many days (GET /platform/activity/retention). */
+	retentionDays: number;
 }) {
 	const [changes, setChanges] = useState(initial.content);
 	useEffect(() => setChanges(initial.content), [initial.content]);
@@ -127,6 +131,7 @@ export function ChangesScreen({
 				title="Changes by Hospio360"
 				subtitle="Everything our team changed inside a business's account, with the reason given; marked undone within 7 days once support puts it back"
 			/>
+			<RetentionNote days={retentionDays} />
 			<Toolbar
 				left={
 					<PillTabs

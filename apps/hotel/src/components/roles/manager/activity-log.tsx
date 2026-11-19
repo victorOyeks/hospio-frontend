@@ -16,6 +16,7 @@ import { fmtWhen, humanize, plural } from "@hospio/ui/shared/format";
 import { useListParams } from "@hospio/ui/shared/list-params";
 import { Modal } from "@hospio/ui/shared/modal";
 import { PageHeader } from "@hospio/ui/shared/page-header";
+import { RetentionNote } from "@hospio/ui/shared/retention-note";
 import { PanelSection, SidePanel } from "@hospio/ui/shared/side-panel";
 import { StatusPill } from "@hospio/ui/shared/status-pill";
 import {
@@ -94,11 +95,14 @@ export function ActivityLogScreen({
 	rows,
 	hotelName,
 	opened,
+	retentionDays,
 }: {
 	rows: PageResult<ActivityRow>;
 	hotelName: string;
 	/** The entry in `?open=` when it is not on this page. */
 	opened?: ActivityRow | null;
+	/** Entries are deleted after this many days (GET /platform/activity/retention). */
+	retentionDays: number;
 }) {
 	const words = useWording();
 	const t = usePlaceText();
@@ -224,6 +228,7 @@ export function ActivityLogScreen({
 			>
 				<ExportButton onClick={() => setExporting(true)} />
 			</PageHeader>
+			<RetentionNote days={retentionDays} />
 
 			<Toolbar
 				left={
@@ -299,7 +304,7 @@ export function ActivityLogScreen({
 				footerInfo={
 					entry?.byPlatform
 						? "Made by Hospio support on your behalf"
-						: "Entries are kept for 6 months and cannot be edited"
+						: `Entries are kept for ${retentionDays} days, then deleted automatically, and cannot be edited`
 				}
 			>
 				{entry && (

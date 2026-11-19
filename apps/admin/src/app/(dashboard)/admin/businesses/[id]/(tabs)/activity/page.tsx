@@ -18,10 +18,11 @@ export default async function BusinessActivityPage({
 		data.platform.business(id),
 	]);
 	if (!business) notFound();
-	const [activity, changes, grants] = await Promise.all([
+	const [activity, changes, grants, retentionDays] = await Promise.all([
 		adminData.activity({ businessId: id, size: 50 }),
 		adminData.changes.list({ businessId: id, size: 50 }),
 		adminData.supportAccess(id),
+		data.activity.retention(),
 	]);
 	return (
 		<ActivityTab
@@ -30,6 +31,7 @@ export default async function BusinessActivityPage({
 			changes={changes.content}
 			grants={grants}
 			canEdit={adminRole(role) !== "FINANCE_ADMIN"}
+			retentionDays={retentionDays}
 		/>
 	);
 }

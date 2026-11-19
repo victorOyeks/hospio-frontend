@@ -277,7 +277,7 @@
       {
         "heading": "7. How long we keep it",
         "paragraphs": [
-          "7.1 Venue data is kept for as long as the venue uses Hospio360 and then returned or deleted as agreed with the venue (you can ask for an export for **30 days** after the contract ends; the data is then deleted within **60 days**, with backups overwritten in their normal cycle). Some items are deleted automatically sooner: in-app notifications after 30 days, chat conversations 30 days after the last message, and activity logs after six months.",
+          "7.1 Venue data is kept for as long as the venue uses Hospio360 and then returned or deleted as agreed with the venue (you can ask for an export for **30 days** after the contract ends; the data is then deleted within **60 days**, with backups overwritten in their normal cycle). Some items are deleted automatically sooner: in-app notifications after 30 days, chat conversations 30 days after the last message, and activity logs (including the record of changes made by Hospio360 staff) after 7 days.",
           "7.2 Our own customer, billing, acceptance and commission records are kept for **6 years** after the relationship ends, to meet tax and accounting law and to show what was agreed. Marketing contacts are kept until you opt out or for **2 years** without contact."
         ]
       },
@@ -417,7 +417,7 @@
         "heading": "12. Return and deletion",
         "paragraphs": [
           "12.1 When the Agreement ends, we will, at your choice during the export window in the Terms of Service (clause 7.4), provide an export of Customer Personal Data and then delete it within **60 days** of the end of the export window, unless Nigerian law requires it to be kept. Copies in backups are deleted as the backups are overwritten in their normal cycle, and are protected in the meantime.",
-          "12.2 While the Agreement continues, some data is deleted automatically: in-app notifications after 30 days, staff and guest chat conversations 30 days after the last message, and the activity log after six months (or the period set in the Platform). Business records such as bookings, folios and payments are kept for as long as the Agreement continues unless you delete them."
+          "12.2 While the Agreement continues, some data is deleted automatically: in-app notifications after 30 days, staff and guest chat conversations 30 days after the last message, and the activity log, including the record of changes made by our staff, after 7 days (or a longer period set in the Platform). Business records such as bookings, folios and payments are kept for as long as the Agreement continues unless you delete them."
         ]
       },
       {
@@ -445,7 +445,7 @@
           "– **Authentication.** Individual logins with passwords and phone verification codes; optional quick-switch PINs on shared devices that are tied to the device's Venue, lock after repeated wrong attempts, and are never set by a manager for someone else; sessions expire and can be revoked; pausing or removing a user ends their sessions.",
           "– **Encryption in transit.** All traffic between users' devices and the Platform, and between the Platform and its providers, uses HTTPS/TLS.",
           "– **Encryption of secrets.** POS provider keys and integration credentials are stored encrypted (AES-256-GCM) and shown masked.",
-          "– **Audit logs.** Significant actions (including changes made by our staff and changes to settings and integrations) are recorded in an activity log visible to your business and to our administrators; secret values are never logged.",
+          "– **Audit logs.** Significant actions (including changes made by our staff and changes to settings and integrations) are recorded in an activity log visible to your business and to our administrators, kept for 7 days and then deleted automatically; secret values are never logged.",
           "– **Backups.** Databases are backed up regularly by our cloud hosting provider and backups are kept for a limited period, protected with access controls.",
           "– **Least privilege for staff.** Our staff access your data only for onboarding, support or security, under role-based permissions.",
           "– **Data minimisation with providers.** Each provider receives only the data needed for its service (for example an email provider receives the recipient's address and the message).",
@@ -927,7 +927,7 @@
       {
         "heading": "4. Monitoring and records",
         "paragraphs": [
-          "4.1 Hospio360 keeps records of sign-ins and of actions taken (an activity log), including who created, changed or voided a booking, charge, payment or stock entry, and when. It also records when you accepted these terms (version, date and time, IP address and device). Your employer and, when helping your employer, Hospio360 support staff, can see these records. They may be used to investigate errors, losses or misconduct."
+          "4.1 Hospio360 keeps records of sign-ins and of actions taken (an activity log), including who created, changed or voided a booking, charge, payment or stock entry, and when. It also records when you accepted these terms (version, date and time, IP address and device). Your employer and, when helping your employer, Hospio360 support staff, can see these records. They may be used to investigate errors, losses or misconduct. The activity log is kept for 7 days, then deleted automatically."
         ]
       },
       {
