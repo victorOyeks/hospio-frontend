@@ -138,7 +138,7 @@ export const demoPlatformSettings = {
 	general: { company: "Hospio360 Technologies Ltd", supportEmail: "support@hospio360.com", supportWhatsApp: "+234 700 467 7460", website: "https://hospio360.com", timezone: "Africa/Lagos" },
 	fees: { model: "Per room / month", perRoom: 1500, revenuePct: 2, trialDays: 30, dueDay: 5, graceDays: 10, marketerSharePct: 20, marketerMonths: 12, whtPct: 5, invoiceVatPct: 0, invoiceMinimum: 1000 },
 	security: { require2Step: true, sessionHours: 12, adminIpAllowlist: false, auditRetentionDays: 183 },
-	system: { diskWarnPct: 85, diskCriticalPct: 95, memoryPct: 90, swapPct: 75, memoryMinutes: 10, serviceDownMinutes: 2, certDays: 14, kafkaLag: 500, kafkaStuckMinutes: 10, dbConnectionsPct: 80, emailAlerts: true },
+	system: { diskWarnPct: 85, diskCriticalPct: 95, memoryPct: 90, swapPct: 75, memoryMinutes: 15, serviceDownMinutes: 2, certDays: 14, kafkaLag: 500, kafkaStuckMinutes: 10, dbConnectionsPct: 80, emailAlerts: true, alertsOn: false, bellAlerts: true },
 };
 
 export const demoAdminActivity = [

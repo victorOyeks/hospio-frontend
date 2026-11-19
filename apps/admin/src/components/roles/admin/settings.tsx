@@ -344,10 +344,25 @@ export function SettingsScreen({
 						{sysNum("kafkaStuckMinutes", "…with no progress for (minutes)")}
 					</FieldRow>
 					<ToggleField
-						label="Email the Super admins as well as the bell"
-						hint="Off · the bell and the dashboard only"
+						label="Alerts"
+						hint={
+							sys.alertsOn == null
+								? "Not set: off on staging and dev, on in production. Off · nothing is emailed or sent to the bell"
+								: "Off · nothing is emailed or sent to the bell; problems still show on System health"
+						}
+						checked={sys.alertsOn === true || sys.alertsOn === "true"}
+						onChange={(v) => editable && set("system", "alertsOn", v)}
+					/>
+					<ToggleField
+						label="Email the Super admins"
+						hint="At most one email an hour; more in that hour come together"
 						checked={sys.emailAlerts !== false && sys.emailAlerts !== "false"}
 						onChange={(v) => editable && set("system", "emailAlerts", v)}
+					/>
+					<ToggleField
+						label="Ring the Super admins' bell"
+						checked={sys.bellAlerts !== false && sys.bellAlerts !== "false"}
+						onChange={(v) => editable && set("system", "bellAlerts", v)}
 					/>
 					{save("system")}
 				</SectionCard>
