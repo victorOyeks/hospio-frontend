@@ -425,6 +425,8 @@ export const BusinessRequest = z.object({
 	logoUrl: z.string().nullable().optional(),
 	brandColour: z.string().nullable().optional(),
 	contractStartsOn: z.string().nullable().optional(),
+	/** True empties contractStartsOn (null alone leaves it): the mirror of a cleared "Charges start on". */
+	clearContractStartsOn: z.boolean().nullable().optional(),
 	contractNotes: z.string().nullable().optional(),
 	source: BusinessSource.nullable().optional(),
 	/** Left out, kept. */

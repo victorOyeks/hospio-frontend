@@ -145,7 +145,10 @@ function EditBusinessForm({
 		if ((business.contractStartsOn ?? null) === date) return;
 		const saved = await updateBusiness(
 			business.id,
-			businessRequestFrom(business, { contractStartsOn: date }),
+			businessRequestFrom(business, {
+				contractStartsOn: date,
+				clearContractStartsOn: date === null,
+			}),
 		);
 		if (!saved.ok) {
 			toast.error(
