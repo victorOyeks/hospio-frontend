@@ -19,22 +19,22 @@ export type SiteVideo = {
 
 export const VIDEOS = {
 	overview: {
-		url: "https://youtu.be/XKnbTyUPgC0",
-		title: "Hospio360 promo video",
+		url: "https://youtu.be/v28K0LTJqK8",
+		title: "Hospio360 promo v2",
 		description:
-			"A one-minute look at Hospio360: one app for hotels, lounges, bars and restaurants, from bookings and orders to payments and the owner's view.",
-		caption: "One app for hotels, lounges, bars and restaurants — 1 minute",
-		uploadDate: "2026-11-18T12:46:29-08:00",
-		duration: "PT1M1S",
+			"A look at Hospio360: one app for hotels, lounges, bars and restaurants, from tabs, orders and split bills to POS payments, tills and the owner's view, and how we set you up with devices.",
+		caption: "One app for hotels, lounges, bars and restaurants — 80 seconds",
+		uploadDate: "2026-11-19T00:40:19-08:00",
+		duration: "PT1M19S",
 	},
 	partner: {
-		url: "https://youtu.be/O-ME_umLQ8Y",
-		title: "Hospio360 partners video",
+		url: "https://youtu.be/5_qhbYZEWc4",
+		title: "Hospio360 partner video v2",
 		description:
 			"How the Hospio360 partner programme works: introduce owners of hotels, lounges, bars or restaurants and earn 20% of Hospio360's fee from each business for 12 months.",
 		caption: "How the partner programme works — 75 seconds",
-		uploadDate: "2026-11-18T12:54:36-08:00",
-		duration: "PT1M14S",
+		uploadDate: "2026-11-19T00:38:40-08:00",
+		duration: "PT1M15S",
 	},
 } as const satisfies Record<string, SiteVideo>;
 
