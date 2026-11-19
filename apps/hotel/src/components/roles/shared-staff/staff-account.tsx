@@ -261,6 +261,9 @@ export function PauseModal({
 	);
 }
 
+/** Shortest reason a suspension is logged with; the Suspend button stays off until it is typed. */
+const SUSPEND_REASON_MIN = 3;
+
 export function SuspendStaffModal({
 	staff,
 	onClose,
@@ -274,27 +277,25 @@ export function SuspendStaffModal({
 	const router = useRouter();
 	const { run, pending } = useAction();
 	const [reason, setReason] = useState("");
+	// The service refuses a reason under 3 characters too (identity StaffAccountService.suspend).
+	const reasonOk = reason.trim().length >= SUSPEND_REASON_MIN;
 	return (
 		<ConfirmModal
 			open={!!staff}
-			onOpenChange={(o) => !o && onClose()}
+			onOpenChange={(o) => {
+				if (!o) {
+					setReason("");
+					onClose();
+				}
+			}}
 			tone="danger"
 			title={`Suspend ${staff?.fullName}?`}
 			subtitle="Until you reinstate them · logged with your reason"
 			confirmLabel="Suspend"
 			pending={pending}
+			confirmDisabled={!reasonOk}
 			onConfirm={() => {
-				if (!staff) return;
-				if (reason.trim().length < 3) {
-					run(
-						async () => ({
-							ok: false as const,
-							error: `Say why ${staff.fullName} is suspended`,
-						}),
-						"",
-					);
-					return;
-				}
+				if (!staff || !reasonOk) return;
 				run(
 					() => suspendStaff(uid(staff), reason.trim()),
 					`${staff.fullName} suspended`,
@@ -326,6 +327,11 @@ export function SuspendStaffModal({
 					onChange={setReason}
 					rows={3}
 					placeholder="What happened"
+					hint={
+						reasonOk
+							? undefined
+							: `Write the reason to suspend (at least ${SUSPEND_REASON_MIN} characters)`
+					}
 				/>
 			</div>
 		</ConfirmModal>

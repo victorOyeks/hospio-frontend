@@ -206,5 +206,6 @@ unlocked.
 - A change made in the same second a session was opened (suspend straight after an unlock) only takes effect at the
   session's next refresh; that is how access changes already work everywhere.
 - The lock screen lists everyone who fits the device; a big team uses the search box.
-- The owner's Staff screen has no PIN reset or remind yet (the manager's has).
+- No longer a limit (since 10 Nov 2026): the owner's Staff screen has **Remind** and **Reset PIN** like the manager's
+  (QA 16 section 4, QA 80 section 4). Seeing them as the owner is expected, not a defect.
 

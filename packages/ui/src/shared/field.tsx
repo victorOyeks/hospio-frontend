@@ -1,7 +1,8 @@
 "use client";
 
+import { EyeIcon, EyeOffIcon } from "lucide-react";
 import Link from "next/link";
-import { createContext, type ReactNode, useContext } from "react";
+import { createContext, type ReactNode, useContext, useState } from "react";
 import {
 	Select,
 	SelectContent,
@@ -110,11 +111,14 @@ export function TextField({
 	prefix,
 	className,
 	disabled,
+	reveal = true,
 }: {
 	label: string;
 	value: string;
 	onChange: (v: string) => void;
 	type?: string;
+	/** With type="password": the show/hide eye (default on). */
+	reveal?: boolean;
 	placeholder?: string;
 	hint?: ReactNode;
 	error?: string;
@@ -123,6 +127,10 @@ export function TextField({
 	className?: string;
 	disabled?: boolean;
 }) {
+	// A password field gets the same eye as the sign-in form's (DEF-091): a real button, so Tab reaches it and
+	// Enter or Space toggles it; its label says what it will do. A PIN typed here keeps `reveal={false}` (a PIN is never shown).
+	const secret = type === "password" && reveal;
+	const [show, setShow] = useState(false);
 	return (
 		<Field
 			label={label}
@@ -138,13 +146,35 @@ export function TextField({
 					</span>
 				)}
 				<input
-					type={type}
+					type={secret && show ? "text" : type}
 					value={value}
 					onChange={(e) => onChange(e.target.value)}
 					placeholder={placeholder}
 					disabled={disabled}
-					className={cn(inputCls, prefix && "pl-8", error && "border-danger")}
+					aria-label={label}
+					className={cn(
+						inputCls,
+						prefix && "pl-8",
+						secret && "pr-11",
+						error && "border-danger",
+					)}
 				/>
+				{secret && (
+					<button
+						type="button"
+						onClick={() => setShow((s) => !s)}
+						disabled={disabled}
+						className="absolute right-3 top-1/2 -translate-y-1/2 rounded text-ink-3 hover:text-ink focus-visible:outline-2 focus-visible:outline-brand disabled:opacity-50"
+						aria-label={show ? "Hide password" : "Show password"}
+						aria-pressed={show}
+					>
+						{show ? (
+							<EyeOffIcon className="size-4" />
+						) : (
+							<EyeIcon className="size-4" />
+						)}
+					</button>
+				)}
 			</div>
 		</Field>
 	);

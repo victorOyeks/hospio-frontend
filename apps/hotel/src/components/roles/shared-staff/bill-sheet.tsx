@@ -1341,6 +1341,7 @@ export function ApproveHereModal({
 				<TextField
 					label={person?.owner ? "Owner's password" : "Manager's PIN"}
 					type="password"
+					reveal={!!person?.owner}
 					value={secret}
 					onChange={(v) => setSecret(person?.owner ? v : v.replace(/\D/g, "").slice(0, 6))}
 					placeholder={person?.owner ? "Password" : "6 digits"}
