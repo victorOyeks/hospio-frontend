@@ -107,6 +107,9 @@ No account is needed.
    lounge, bar or restaurant, not only a hotel? · Do we need new hardware? · Who sets everything up? · Can one location see
    another location's data?
 2. **Do:** click a question, then click it again. **Expect:** the answer opens under it, then closes.
+   **Do:** open the first question, then click the second. **Expect:** the second opens and the first closes by itself: only
+   one answer is ever open. The same on `/features#faq`. With the keyboard: Tab to a question, Enter or Space opens and closes
+   it.
 3. **Do:** click **More questions**. **Expect:** `/features#faq` opens with all 7 questions.
 4. **Do:** click **Ask us on a demo**. **Expect:** an email draft "Hospio360 demo request" asking for the business name, its
    type (hotel, lounge, bar or restaurant), city and phone number.

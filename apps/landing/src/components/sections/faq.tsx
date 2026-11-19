@@ -1,6 +1,7 @@
 import { ArrowRightIcon, ChevronDownIcon } from "lucide-react";
 import Link from "next/link";
 import { cn } from "@hospio/ui/utils";
+import { SingleOpen } from "@/components/single-open";
 import { container, DEMO_MAILTO, SectionHeader } from "@/components/site";
 
 /**
@@ -63,8 +64,9 @@ export function FaqJsonLd({ faqs }: { faqs: { q: string; a: string }[] }) {
 }
 
 /**
- * The questions as a closed accordion. Plain <details>, so it opens without JavaScript and every answer is in the page
- * for search engines. `limit` shows only the first few, with a link to the rest on /features.
+ * The questions as a closed accordion with one answer open at a time (opening another closes the first; clicking the
+ * open one closes it). Plain <details name>, so it opens without JavaScript and every answer is in the page for search
+ * engines. `limit` shows only the first few, with a link to the rest on /features.
  */
 export function Faq({ limit }: { limit?: number }) {
 	const faqs = limit ? FAQS.slice(0, limit) : FAQS;
@@ -78,9 +80,9 @@ export function Faq({ limit }: { limit?: number }) {
 				)}
 			>
 				<SectionHeader eyebrow="FAQ" title="Questions owners ask us." compact />
-				<div className="flex flex-col border-t border-line">
+				<SingleOpen className="flex flex-col border-t border-line">
 					{faqs.map((f) => (
-						<details key={f.q} className="group border-b border-line">
+						<details key={f.q} name="faq" className="group border-b border-line">
 							<summary className="flex cursor-pointer list-none items-center justify-between gap-4 py-[14px] text-[16px] font-bold leading-[1.3] text-ink md:py-[18px] md:text-[18px] [&::-webkit-details-marker]:hidden">
 								{f.q}
 								<ChevronDownIcon
@@ -93,7 +95,7 @@ export function Faq({ limit }: { limit?: number }) {
 							</p>
 						</details>
 					))}
-				</div>
+				</SingleOpen>
 				<div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-[15px] font-semibold">
 					{more && (
 						<Link
