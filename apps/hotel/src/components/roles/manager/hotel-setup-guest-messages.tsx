@@ -400,9 +400,14 @@ function InvoicePanel({ id, onClose }: { id: string | null; onClose: () => void 
 									label: `${i.emailCount} email${i.emailCount === 1 ? "" : "s"}`,
 									value: naira(i.emailAmount),
 								},
-								// SMS shows only on older invoices that charged for it.
+								// There is no SMS price now: SMS shows only on an older invoice that charged for it.
 								...(i.smsCount
-									? [{ label: `${i.smsCount} SMS`, value: naira(i.smsAmount) }]
+									? [
+											{
+												label: `${i.smsCount} SMS (older messages)`,
+												value: naira(i.smsAmount),
+											},
+										]
 									: []),
 								{
 									label: `${i.whatsappCount} WhatsApp`,

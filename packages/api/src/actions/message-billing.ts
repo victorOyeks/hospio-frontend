@@ -196,7 +196,6 @@ export async function getDefaultMessagePrices(): Promise<
 
 export async function setDefaultMessagePrices(prices: {
 	email: number;
-	sms: number;
 	whatsapp: number;
 }): Promise<ActionResult<CommPriceSet>> {
 	const { data, error } = await api(
@@ -236,7 +235,6 @@ export async function setHotelMessagePlan(
 		businessId: string;
 		enabled?: boolean;
 		email?: number | null;
-		sms?: number | null;
 		whatsapp?: number | null;
 		useDefaults?: boolean;
 	},

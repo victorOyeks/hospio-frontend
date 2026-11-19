@@ -2,7 +2,7 @@
 
 ## Purpose
 
-Hotels now pay for the emails, SMS and WhatsApp messages they send to people outside the hotel (guests, companies,
+Hotels now pay for the emails and WhatsApp messages they send to people outside the hotel (guests, companies,
 suppliers). Hospio360 charges per message, sends one invoice per hotel each month, and the owner or manager pays it with
 Paystack. An invoice unpaid 10 days after it is issued suspends the hotel's guest messages until it is paid.
 
@@ -44,7 +44,8 @@ Password for every account: `Hospio123!`. Don't change these accounts' roles or 
   add your number if you need a real text.
 - **Paystack is in test mode.** Pay with the test card `4084 0840 8408 4081`, CVV `408`, any future expiry. If asked,
   the PIN is `0000` and the OTP is `123456`. No real money moves.
-- **Default prices:** email ₦5, SMS ₦10, WhatsApp ₦25.
+- **Default prices:** email ₦5, WhatsApp ₦25. There is no SMS price (since 19 Nov 2026): guest messages never go by SMS,
+  SMS is only for sign-in codes. See script 73.
 - **Name test data `QA GM …`** (guests, bookings).
 - **The delivery log has no screen in the hotel app yet.** Check it through the API with the manager's token:
   `GET https://api-staging.hospio360.com/messaging/deliveries?q=<your email>`. Each row has:
@@ -62,7 +63,7 @@ Password for every account: `Hospio123!`. Don't change these accounts' roles or 
 | Company statements, payment reminders, purchase orders | Hospio360's own fee statements and these invoices |
 
 A message is charged only if it went out (Sent or Delivered). A message the network rejects (e.g. DND), or one that
-fails or is held back, costs nothing. A WhatsApp that went out as an SMS is charged as an SMS.
+fails or is held back, costs nothing. Guest messages are emails and WhatsApp only; nothing is charged as an SMS.
 
 ---
 
@@ -70,7 +71,7 @@ fails or is held back, costs nothing. A WhatsApp that went out as an SMS is char
 
 1. Sign in as the **manager**. Go to Hotel setup → **Guest messages**. You see:
    - the on/off switch;
-   - the price per email, SMS and WhatsApp;
+   - the price per email and WhatsApp (no SMS);
    - this month's count and amount per channel;
    - the Invoices table.
 2. If the service is **on**, switch it **off**. A confirm box explains that guest messages will stop. Confirm. The
@@ -95,26 +96,26 @@ With the service **on**:
 3. Manager → Hotel setup → Guest messages:
    - "Emails this month" went up by **3**, and the amount by **₦15** at ₦5 each.
    - "See each message" lists all three, each with the time, kind, recipient and price.
-4. Send an **SMS** to a number that is **not** allow-listed. In the delivery log (API) it is `FAILED`, with "Held back:
-   not on this environment's allow-list". This month's SMS count does **not** change.
-5. Send to a **WhatsApp** number that is allow-listed, with a free-text message. It goes as an SMS, because free text
-   has no WhatsApp template. It is counted under SMS at the SMS price.
+4. Send a **WhatsApp** to a number that is **not** allow-listed. In the delivery log (API) it is `FAILED`, with "Held
+   back: not on this environment's allow-list". This month's WhatsApp count does **not** change.
+5. Nothing is ever sent or counted as an SMS: a WhatsApp that cannot go (no template) is recorded as not sent, never
+   swapped for an SMS (script 25).
 
 ## 3. Prices (admin portal)
 
 1. Sign in as **finance admin** (`tobi@`) → Fees & billing. Scroll down to **Guest messages · default prices**, which
-   shows ₦5 · ₦10 · ₦25.
+   shows ₦5 · ₦25 (email · WhatsApp).
 2. Change prices → set email **6**. Save, and the card shows ₦6. Set it back to **5**.
-   - Saving with a box left empty is refused: "Enter all three prices".
+   - Saving with a box left empty is refused: "Enter both prices".
 3. Businesses → Royal Suites Ltd → hotel **Simpas Ikeja**. The **Guest messages** card shows:
    - On/Off;
    - the prices, labelled "Default prices";
    - this month's amount;
    - the unpaid amount.
-4. Click **Prices** and set SMS to **8**. Save, and the card shows ₦5 · ₦8 · ₦25 with "The hotel's own prices". In the
-   hotel app, the manager's Guest messages page shows ₦8 for SMS too.
+4. Click **Prices** and set WhatsApp to **20**. Save, and the card shows ₦5 · ₦20 with "The hotel's own prices". In the
+   hotel app, the manager's Guest messages page shows ₦20 for WhatsApp too.
 5. A new price applies only to messages sent **from now on**. Messages already counted keep the price they had.
-6. Click Prices again → **Use default prices**. The card is back to ₦5 · ₦10 · ₦25 with "Default prices".
+6. Click Prices again → **Use default prices**. The card is back to ₦5 · ₦25 with "Default prices".
 7. Turn the switch on the card off and on again. The hotel app follows within a refresh.
 
 ## 4. Opt-in during onboarding (admin portal)
@@ -143,7 +144,8 @@ Invoices are issued on their own at **00:30 on the 1st (Lagos time)**, for the m
 4. The owner and manager also get the invoice **email** (from Hospio360). It shows the counts and the amount per
    channel, the total, the due date and a link to pay.
 5. In the hotel app, open the invoice. It shows:
-   - **Summary:** emails, SMS and WhatsApp with their amounts, and the total;
+   - **Summary:** emails and WhatsApp with their amounts, and the total (an SMS line only on an older invoice that charged
+     SMS, labelled "SMS (older messages)");
    - **By kind of message:** e.g. Booking confirmations, Messages to guests, each with a count, the price each and the
      amount;
    - **Every message:** when it was sent, what it was, who it went to, and its price. The prices add up to the total.

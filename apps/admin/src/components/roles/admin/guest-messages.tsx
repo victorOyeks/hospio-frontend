@@ -31,8 +31,7 @@ import { cn } from "@hospio/ui/utils";
 /**
  * Guest messages as a paid service, Hospio360's side (hospio-backend docs/guest-message-billing.md): each hotel's plan
  * (on/off, its own prices, suspension) for onboarding and the hotel page, and the default prices and all invoices for
- * Fees & billing. Guest messages go by email and WhatsApp only (SMS is for sign-in codes), so SMS prices are not shown
- * or edited here; saves send the stored SMS price back unchanged.
+ * Fees & billing. Guest messages go by email and WhatsApp only (SMS is for sign-in codes), so there is no SMS price.
  */
 
 const monthName = (yyyyMm: string) => {
@@ -280,7 +279,6 @@ function PricesModal({
 			businessId,
 			useDefaults,
 			email: useDefaults || email === "" ? null : email,
-			sms: useDefaults || !plan.customPrices ? null : plan.prices.sms,
 			whatsapp: useDefaults || whatsapp === "" ? null : whatsapp,
 		});
 		setBusy(false);
@@ -337,7 +335,7 @@ export function GuestMessageBilling() {
 
 	async function savePrices() {
 		if (!prices || !edit || edit.email === "" || edit.whatsapp === "") return toast.error("Enter both prices");
-		const r = await setDefaultMessagePrices({ email: edit.email, sms: prices.sms, whatsapp: edit.whatsapp });
+		const r = await setDefaultMessagePrices({ email: edit.email, whatsapp: edit.whatsapp });
 		if (!r.ok) return toast.error(r.error);
 		toast.success("Default prices saved");
 		setEdit(null);

@@ -1095,13 +1095,12 @@ export const Notification = z.object({
 
 /** Guest messages as a paid service (hospio-backend docs/guest-message-billing.md). */
 const num = z.union([z.number(), z.string()]).transform((v) => Number(v));
-export const CommPrices = z.object({ email: num, sms: num, whatsapp: num });
+/** Guest messages are emails and WhatsApp only (SMS is for sign-in codes): there is no SMS price or SMS usage. */
+export const CommPrices = z.object({ email: num, whatsapp: num });
 export const CommUsage = z.object({
 	emailCount: z.number(),
-	smsCount: z.number(),
 	whatsappCount: z.number(),
 	emailAmount: num,
-	smsAmount: num,
 	whatsappAmount: num,
 	total: num,
 });
@@ -1131,6 +1130,7 @@ export const CommInvoice = z.object({
 	month: z.string(),
 	hotelName: z.string().nullable(),
 	emailCount: z.number(),
+	/** History only: 0 on every new invoice; an older invoice that charged SMS keeps its count and amount. */
 	smsCount: z.number(),
 	whatsappCount: z.number(),
 	emailAmount: num,
@@ -1873,7 +1873,6 @@ export const schema = createSchema({
 	"@put/messaging/billing/messages/admin/prices": {
 		input: z.object({
 			email: z.number(),
-			sms: z.number(),
 			whatsapp: z.number(),
 		}),
 		output: envelope(CommPrices),
@@ -1887,7 +1886,6 @@ export const schema = createSchema({
 			businessId: z.string(),
 			enabled: z.boolean().optional(),
 			email: z.number().nullable().optional(),
-			sms: z.number().nullable().optional(),
 			whatsapp: z.number().nullable().optional(),
 			useDefaults: z.boolean().optional(),
 		}),
