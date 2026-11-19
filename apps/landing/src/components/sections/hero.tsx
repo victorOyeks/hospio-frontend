@@ -127,11 +127,8 @@ export function Hero() {
 							</span>
 						))}
 					</span>
-					<span>
-						<span className="font-semibold text-brand">
-							Hotels, lounges, bars &amp; restaurants
-						</span>
-						<span className="hidden sm:inline"> · built for Nigeria</span>
+					<span className="font-semibold text-brand">
+						Hotels, lounges, bars &amp; restaurants
 					</span>
 				</p>
 				<h1 className="max-w-[980px] text-center text-[36px] font-bold leading-[1.06] tracking-[-0.025em] text-ink sm:text-[48px] md:text-[60px]">
