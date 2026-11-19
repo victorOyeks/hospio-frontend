@@ -20,6 +20,23 @@ const badgeWord: Record<NonNullable<NavLink["badge"]>, string> = {
 	approvals: "waiting",
 };
 
+/**
+ * One menu row, for every link in every menu (admin groups and the hotel roles' flat lists alike), so a link added to
+ * links.tsx needs no styling of its own: transparent at rest with white text at 80%, a faint wash on hover, and the open
+ * page in a lighter row with full-white text and a short white bar on its left. The icon rail (below 1280px) centres the
+ * icon and shows the open page as a white tile with the nav colour. Overrides the primitive's filled pill (primitives/sidebar).
+ */
+const navRow = cn(
+	"relative h-[36px] gap-[10px] rounded-[10px] bg-transparent px-[10px] py-0 text-[13.5px] font-normal text-white/80 transition-colors",
+	"hover:bg-white/[0.07] hover:text-white active:bg-white/10 active:text-white",
+	"focus-visible:ring-2 focus-visible:ring-white/70",
+	"data-[active=true]:bg-white/[0.13] data-[active=true]:font-medium data-[active=true]:text-white",
+	"before:absolute before:inset-y-[9px] before:left-0 before:w-[3px] before:rounded-r-full before:bg-white before:opacity-0 before:transition-opacity data-[active=true]:before:opacity-100",
+	"group-data-[collapsible=icon]:mx-auto group-data-[collapsible=icon]:size-[40px]! group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:p-[11px]! group-data-[collapsible=icon]:before:hidden",
+	"group-data-[collapsible=icon]:data-[active=true]:bg-white group-data-[collapsible=icon]:data-[active=true]:text-nav",
+	"[&>svg]:size-[18px]",
+);
+
 /** Which link owns the current path: the longest matching prefix. */
 function activeUrl(pathname: string, items: NavLink[]) {
 	return items
@@ -57,13 +74,16 @@ export function NavMain({
 	}
 
 	return groups.map((g) => (
-		<sidebar.SidebarGroup key={g.title ?? "all"} className={cn("px-0", g.title ? "py-1 first:pt-3" : "py-3")}>
+		<sidebar.SidebarGroup
+			key={g.title ?? "all"}
+			className={cn("px-0 py-0", g.title ? "pt-[12px] first:pt-[2px] group-data-[collapsible=icon]:pt-[8px]" : "py-[12px]")}
+		>
 			{g.title && (
-				<sidebar.SidebarGroupLabel className="h-7 px-2 text-[11px] font-semibold uppercase tracking-[0.06em] text-white/45">
+				<sidebar.SidebarGroupLabel className="h-[22px] px-[10px] text-[11px] font-semibold uppercase tracking-[0.08em] text-white/45 group-data-[collapsible=icon]:-mt-[22px]">
 					{g.title}
 				</sidebar.SidebarGroupLabel>
 			)}
-			<sidebar.SidebarMenu className={g.title ? "gap-y-[2px]" : "gap-y-[10px]"}>
+			<sidebar.SidebarMenu className={g.title ? "gap-y-[2px]" : "gap-y-[4px]"}>
 				{g.items.map((item) => {
 					const isActive = active === item.url;
 					const count = item.badge ? (badges[item.badge] ?? 0) : 0;
@@ -73,21 +93,20 @@ export function NavMain({
 								tooltip={t(item.title)}
 								asChild
 								isActive={isActive}
-								className={cn(
-									"h-10 rounded-[14px] px-2 text-sm text-white transition-opacity",
-									"hover:bg-white/10 hover:text-white",
-									"data-[active=true]:bg-white/10 data-[active=true]:font-medium data-[active=true]:text-white",
-									!isActive && "opacity-70 hover:opacity-100",
-									g.title && "h-9",
-								)}
+								className={navRow}
 							>
-								<Link href={item.url} prefetch={false} className="flex w-full items-center gap-2">
+								<Link
+									href={item.url}
+									prefetch={false}
+									aria-current={isActive ? "page" : undefined}
+									className="flex w-full items-center gap-[10px]"
+								>
 									<LinkIcon icon={item.icon} />
 									<span className="truncate">{t(item.title)}</span>
 									{count > 0 && (
 										<span
 											className={cn(
-												"ml-auto rounded-pill px-[7px] py-px text-[11px] font-bold leading-[18px] text-white group-data-[collapsible=icon]:hidden",
+												"ml-auto rounded-pill px-[6px] text-[11px] font-semibold leading-[18px] text-white group-data-[collapsible=icon]:hidden",
 												item.badge === "inbox" ? "bg-danger" : "bg-warning",
 											)}
 											title={`${count} ${badgeWord[item.badge ?? "inbox"]}`}
