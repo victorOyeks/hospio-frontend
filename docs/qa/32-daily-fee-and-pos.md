@@ -1,5 +1,9 @@
 # QA script · Hospio's daily fee and the hotel's own POS (staging)
 
+> **Out of date for the debit (19 Nov 2026).** Nothing is debited any more: each day goes on the monthly invoice (script 63), and
+> the debit switch, "Run debit now" and the Fee debit integration cards are removed (script 74). Skip section 5; the POS sections
+> still apply.
+
 ## Purpose
 
 Hospio360 takes **1.5 % of what each hotel sells every day** (VAT excluded). The rate is set per business in the admin portal.

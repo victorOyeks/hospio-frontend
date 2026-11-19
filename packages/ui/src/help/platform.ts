@@ -454,11 +454,11 @@ export const platformHelp: HelpModule = {
 			when: "Email, WhatsApp, SMS, Paystack or POS keys need adding, replacing or removing.",
 			topic: "Team",
 			steps: [
-				"Open “Integrations” under Platform. Providers are grouped: Email, Messaging, Payments and POS (the old fee debit group is no longer used).",
-				"On the provider's card, fill in what changed. For a secret, paste the new value in its box; leave it empty to keep the saved one.",
+				"Open “Integrations” under Platform. Providers are grouped: Email, Messaging, Payments (Paystack, for owners paying their monthly invoice) and POS. Each card shows its name, whether it uses a saved key or the server's setting, and when it last changed.",
+				"Tap “Edit” on the provider's card and fill in what changed. Webhook keys, addresses and “Use the server's value” are under “Advanced”. For a secret, paste the new value in its box; leave it empty to keep the saved one.",
 				"Tap “Save”. Only the fields you changed are sent.",
 				"Tap “Test connection” to check the saved keys work.",
-				"To go back to the server's own setting for a field, tap “Use the server's value” under it, then “Save”.",
+				"To go back to the server's own setting for a field, open “Advanced”, tap “Use the server's value” for it, then “Save”.",
 			],
 			goodToKnow: [
 				"Only a Super admin sees Integrations.",
