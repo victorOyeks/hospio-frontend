@@ -186,10 +186,16 @@ export async function approversHere(): Promise<{ id: string; name: string; owner
 export async function saleReasons(): Promise<{ discount: string[]; void: string[] }> {
 	if (!live("hotel-config")) return { discount: [], void: [] };
 	const s = await withSession();
-	const read = (listName: string) =>
-		api("@get/hotel-config/setup/lists/:listName", { ...s, params: { listName }, query: { activeOnly: true } })
-			.then((r) => (r.data?.data ?? []).map((i) => i.label).filter((x): x is string => !!x))
-			.catch(() => [] as string[]);
+	const read = async (listName: string) => {
+		const { data, error } = await api("@get/hotel-config/setup/lists/:listName", { ...s, params: { listName }, query: {} }).catch(
+			(e: unknown) => ({ data: null, error: e }),
+		);
+		if (error || !data) {
+			console.error(`hotel-config list ${listName}:`, error);
+			return [] as string[];
+		}
+		return data.data.filter((i) => i.active).map((i) => i.label);
+	};
 	const [discount, voids] = await Promise.all([read("DISCOUNT_REASONS"), read("VOID_REASONS")]);
 	return { discount, void: voids };
 }
