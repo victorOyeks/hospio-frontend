@@ -174,6 +174,10 @@ export const mlRoutes = {
 	},
 
 	// platform-service
+	/** How many days audit logs (activity log, Changes by Hospio360) are kept before they are deleted (docs/data-retention.md). */
+	"@get/platform/activity/retention": {
+		output: envelope(z.object({ days: z.number() }).loose()),
+	},
 	"@get/platform/activity/:id": {
 		params: id,
 		output: envelope(

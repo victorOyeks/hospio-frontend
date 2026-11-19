@@ -17,9 +17,10 @@ export default async function ActivityPage({
 	const sp = await searchParams;
 	const query = listQueryFrom(sp, ["department"]);
 	const open = typeof sp.open === "string" ? sp.open : undefined;
-	const [hotel, rows] = await Promise.all([
+	const [hotel, rows, retentionDays] = await Promise.all([
 		getActiveHotel(),
 		data.activity.page(query),
+		data.activity.retention(),
 	]);
 	const opened =
 		open && !rows.data.content.some((r) => r.id === open)
@@ -30,6 +31,7 @@ export default async function ActivityPage({
 			rows={rows}
 			hotelName={hotel?.name ?? "This hotel"}
 			opened={opened}
+			retentionDays={retentionDays}
 		/>
 	);
 }

@@ -297,14 +297,15 @@ export function SettingsScreen({
 							disabled={!editable}
 						/>
 						<SelectField
-							label="Keep activity logs for"
-							value={str(sec.auditRetentionDays, "183")}
+							label="Keep audit logs for"
+							hint="Activity log and Changes by Hospio360, then deleted automatically (never less than 7 days)"
+							value={str(sec.auditRetentionDays, "7")}
 							onChange={(v) => set("security", "auditRetentionDays", num(v))}
 							options={[
+								{ value: "7", label: "7 days" },
+								{ value: "14", label: "14 days" },
+								{ value: "30", label: "30 days" },
 								{ value: "90", label: "90 days" },
-								{ value: "183", label: "6 months" },
-								{ value: "365", label: "1 year" },
-								{ value: "1825", label: "5 years" },
 							]}
 							disabled={!editable}
 						/>

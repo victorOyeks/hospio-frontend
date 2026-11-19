@@ -16,6 +16,7 @@ import { DetailList } from "@hospio/ui/shared/detail-list";
 import { EmptyState } from "@hospio/ui/shared/empty-state";
 import { fmtLongDate, fmtWhen, naira } from "@hospio/ui/shared/format";
 import { ConfirmModal } from "@hospio/ui/shared/modal";
+import { RetentionNote } from "@hospio/ui/shared/retention-note";
 import { SectionCard } from "@hospio/ui/shared/section-card";
 import { WhatHappens } from "@hospio/ui/shared/side-panel";
 import { StatusPill } from "@hospio/ui/shared/status-pill";
@@ -34,12 +35,15 @@ export function ActivityTab({
 	changes: initialChanges,
 	grants,
 	canEdit,
+	retentionDays,
 }: {
 	business: BusinessRow;
 	activity: Paged<AdminActivityRow>;
 	changes: AdminChangeRow[];
 	grants: SupportAccessGrantItem[];
 	canEdit: boolean;
+	/** Activity and Changes by Hospio360 are audit logs, deleted after this many days. */
+	retentionDays: number;
 }) {
 	const [changes, setChanges] = useState(initialChanges);
 	useEffect(() => setChanges(initialChanges), [initialChanges]);
@@ -89,6 +93,7 @@ export function ActivityTab({
 					]}
 				/>
 			</SectionCard>
+			<RetentionNote days={retentionDays} />
 			<div className="grid gap-4 xl:grid-cols-2">
 				<SectionCard
 					title="Activity"

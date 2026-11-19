@@ -23,6 +23,7 @@ import { fmtAgo, fmtWhen, plural } from "@hospio/ui/shared/format";
 import { ConfirmModal } from "@hospio/ui/shared/modal";
 import { PageHeader } from "@hospio/ui/shared/page-header";
 import { PillTabs, useTabParam } from "@hospio/ui/shared/pill-tabs";
+import { RetentionNote } from "@hospio/ui/shared/retention-note";
 import { SectionCard } from "@hospio/ui/shared/section-card";
 import {
 	PanelSection,
@@ -63,11 +64,14 @@ export function OwnerOperations({
 	departments,
 	activity,
 	changes,
+	retentionDays,
 }: {
 	hotels: OwnerHotelRow[];
 	departments: (DepartmentLive & AtHotel)[];
 	activity: Activity[];
 	changes: OwnerChangeRow[];
+	/** The Activity log and Changes by Hospio360 are deleted after this many days (GET /platform/activity/retention). */
+	retentionDays: number;
 }) {
 	const words = useWording();
 	const { biz } = useWording();
@@ -186,6 +190,9 @@ export function OwnerOperations({
 					/>
 				}
 			/>
+			{(tab === "activity" || tab === "changes") && (
+				<RetentionNote days={retentionDays} />
+			)}
 
 			{tab === "hotels" &&
 				(live.length === 0 ? (
