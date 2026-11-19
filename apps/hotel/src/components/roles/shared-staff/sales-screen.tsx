@@ -57,6 +57,7 @@ import {
 	methodLabel,
 	saleWhere,
 } from "./sale-panel";
+import { useWording } from "@hospio/ui/shared/wording";
 
 const STATUS_OPTIONS = [
 	{ value: "UNPAID", label: "Unpaid (to pay or part paid)" },
@@ -131,6 +132,7 @@ export function SalesScreen({
 	terminals: TerminalRow[];
 	inHouse: BookingRow[];
 }) {
+	const words = useWording();
 	const router = useRouter();
 	const [loading, startTransition] = useTransition();
 	const [params, setParams] = useQueryStates(
@@ -459,7 +461,7 @@ export function SalesScreen({
 							</div>
 						)}
 
-						<div className="grid grid-cols-2 gap-3 lg:grid-cols-5">
+						<div className={cn("grid grid-cols-2 gap-3", words.stays || data.totals.onRooms > 0 ? "lg:grid-cols-5" : "lg:grid-cols-4")}>
 							<KpiCard
 								label="Sales"
 								value={data.totals.sales}
@@ -494,12 +496,15 @@ export function SalesScreen({
 								icon={ClockIcon}
 								hint="To pay, part paid and still open"
 							/>
-							<KpiCard
-								label="On rooms"
-								value={naira(data.totals.onRooms)}
-								icon={BedDoubleIcon}
-								hint="Collected at check-out"
-							/>
+							{/* Only where there are rooms to charge to (docs/plan-venue-type.md); a past room sale still shows. */}
+							{(words.stays || data.totals.onRooms > 0) && (
+								<KpiCard
+									label="On rooms"
+									value={naira(data.totals.onRooms)}
+									icon={BedDoubleIcon}
+									hint="Collected at check-out"
+								/>
+							)}
 						</div>
 
 						{management && (

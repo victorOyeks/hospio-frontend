@@ -66,6 +66,8 @@ export type HelpModule = {
 	label: string;
 	/** One line under the heading. */
 	intro: string;
+	/** The line at a lounge, bar or restaurant where it differs (hotel words, like the rest). */
+	venueIntro?: string;
 	guides: HelpGuide[];
 };
 

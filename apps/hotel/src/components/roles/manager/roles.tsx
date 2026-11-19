@@ -23,7 +23,7 @@ import { searchStaffAccess } from "@hospio/api/actions/staff-lists";
 import { useAction } from "@hospio/api/actions/use-action";
 import type { PageResult } from "@hospio/api/data/paging";
 import type { GrantRow, RolesAccessRow } from "@hospio/api/data/types";
-import { type HotelRole, MANAGER_ONLY_ACTIONS, ROLE_PERMISSIONS, roleDescription, roleIcons, roleLabels } from "@hospio/api/roles";
+import { type HotelRole, managerOnlyActions, rolePermissions, roleDescription, roleIcons, roleLabels } from "@hospio/api/roles";
 import { usePlaceText, useWording } from "@hospio/ui/shared/wording";
 
 type Level = "FULL" | "EDIT" | "VIEW";
@@ -79,7 +79,11 @@ export function RolesScreen({
 	const { place: w } = useWording();
 	const t = usePlaceText();
 	const router = useRouter();
-	const GIVABLE = accommodation ? GIVABLE_ALL : GIVABLE_ALL.filter((r) => r !== "FRONT_OFFICE");
+	// A lounge, bar or restaurant has no front office or housekeeping, and its lists leave out rooms, stays and folios.
+	const GIVABLE = accommodation ? GIVABLE_ALL : GIVABLE_ALL.filter((r) => r !== "FRONT_OFFICE" && r !== "HOUSEKEEPING");
+	const managerOnly = managerOnlyActions(accommodation).map(t);
+	const perms = (r: HotelRole) =>
+		rolePermissions(r, accommodation).map((m) => ({ ...m, name: t(m.name), view: m.view.map(t), edit: m.edit.map(t), full: m.full.map(t) }));
 	const list = useListParams({ extra: ["holds"] });
 	const [tab, setTab] = useQueryState("tab");
 	const active = (tab ?? "roles") as "roles" | "access";
@@ -219,7 +223,7 @@ export function RolesScreen({
 				<div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
 					{GIVABLE.map((role) => {
 						const Icon = roleIcons[role];
-						const mods = ROLE_PERMISSIONS[role] ?? [];
+						const mods = perms(role);
 						const n = holders(role);
 						return (
 							<button key={role} type="button" onClick={() => void setOpenRole(role)} className="flex flex-col gap-3 rounded-card border border-line bg-card p-[18px] text-left transition-colors hover:bg-brand-soft/20">
@@ -231,7 +235,7 @@ export function RolesScreen({
 								<p className="text-[13px] text-ink-2">{roleDescription(role, w.place)}</p>
 								<ul className="flex flex-col gap-[2px] text-xs text-ink-3">
 									{role === "MANAGER"
-										? MANAGER_ONLY_ACTIONS.slice(0, 3).map((m) => <li key={m} className="flex items-center gap-[6px]"><CheckIcon className="size-3 text-success" /> {m}</li>)
+										? managerOnly.slice(0, 3).map((m) => <li key={m} className="flex items-center gap-[6px]"><CheckIcon className="size-3 text-success" /> {m}</li>)
 										: mods.slice(0, 3).map((m) => <li key={m.key} className="flex items-center gap-[6px]"><CheckIcon className="size-3 text-success" /> {m.name}: {(m.edit[0] ?? m.view[0] ?? m.full[0]) || ""}</li>)}
 								</ul>
 							</button>
@@ -239,7 +243,7 @@ export function RolesScreen({
 					})}
 					<div className="flex flex-col gap-2 rounded-card border border-dashed border-line-strong bg-subtle/40 p-[18px]">
 						<p className="flex items-center gap-2 text-[15px] font-bold text-ink"><ShieldCheckIcon className="size-4 text-brand" /> Managers only</p>
-						<ul className="flex flex-col gap-1 text-xs text-ink-2">{MANAGER_ONLY_ACTIONS.map((m) => <li key={m}>· {m}</li>)}</ul>
+						<ul className="flex flex-col gap-1 text-xs text-ink-2">{managerOnly.map((m) => <li key={m}>· {m}</li>)}</ul>
 					</div>
 				</div>
 			) : (
@@ -265,11 +269,11 @@ export function RolesScreen({
 					<div className="flex flex-col gap-5">
 						{currentRole === "MANAGER" ? (
 							<PanelSection title="A manager can do everything every role allows, plus">
-								<ul className="flex flex-col gap-1 text-xs text-ink-2">{MANAGER_ONLY_ACTIONS.map((m) => <li key={m} className="flex gap-1"><CheckIcon className="mt-[2px] size-3 shrink-0 text-success" /> {m}</li>)}</ul>
+								<ul className="flex flex-col gap-1 text-xs text-ink-2">{managerOnly.map((m) => <li key={m} className="flex gap-1"><CheckIcon className="mt-[2px] size-3 shrink-0 text-success" /> {m}</li>)}</ul>
 								<Note tone="info">A manager at View only can look at everything but change nothing.</Note>
 							</PanelSection>
 						) : (
-							(ROLE_PERMISSIONS[currentRole] ?? []).map((m) => (
+							perms(currentRole).map((m) => (
 								<PanelSection key={m.key} title={m.name}>
 									<div className="grid grid-cols-3 gap-2">
 										{(["VIEW", "EDIT", "FULL"] as Level[]).map((lvl) => {
@@ -321,7 +325,7 @@ export function RolesScreen({
 									<ul className="flex flex-col gap-1 text-xs text-ink-2">
 										{g.role === "MANAGER" || g.role === "OWNER"
 											? <li className="flex gap-1"><CheckIcon className="mt-[2px] size-3 shrink-0 text-success" /> Every screen at this hotel{g.level === "VIEW" ? ", to look at only" : ""}</li>
-											: (ROLE_PERMISSIONS[g.role as HotelRole] ?? []).map((m) => {
+											: perms(g.role as HotelRole).map((m) => {
 													const items = [...m.view, ...(g.level !== "VIEW" ? m.edit : []), ...(g.level === "FULL" ? m.full : [])];
 													return items.length ? <li key={m.key} className="flex gap-1"><CheckIcon className="mt-[2px] size-3 shrink-0 text-success" /> {m.name}: {items.join(", ")}</li> : null;
 												})}
@@ -354,7 +358,7 @@ export function RolesScreen({
 					<ChoiceCards label="Level" value={newLevel} onChange={setNewLevel} options={LEVEL_OPTIONS} />
 					<TextField label="Last day (optional)" type="date" value={newUntil} onChange={setNewUntil} hint="Leave empty for a role with no end. It ends at midnight after this day, Lagos time" />
 					{newRole && newRole !== "MANAGER" && (
-						<WhatHappens items={(ROLE_PERMISSIONS[newRole as HotelRole] ?? []).map((m) => `${m.name}: ${[...m.view, ...(newLevel !== "VIEW" ? m.edit : []), ...(newLevel === "FULL" ? m.full : [])].join(", ") || "nothing at this level"}`)} />
+						<WhatHappens items={perms(newRole as HotelRole).map((m) => `${m.name}: ${[...m.view, ...(newLevel !== "VIEW" ? m.edit : []), ...(newLevel === "FULL" ? m.full : [])].join(", ") || "nothing at this level"}`)} />
 					)}
 					{newRole === "MANAGER" && <Note tone="warning">{t("A manager can open every screen at this hotel and change other people's roles.")}</Note>}
 				</div>

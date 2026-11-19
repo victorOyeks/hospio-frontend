@@ -680,6 +680,7 @@ function TransactionsTab({
 	demo: boolean;
 	hotelName: string;
 }) {
+	const tb = useBizText();
 	const [search, setSearch] = useState("");
 	const [hotel, setHotel] = useState("");
 	const [kind, setKind] = useState("");
@@ -710,7 +711,7 @@ function TransactionsTab({
 				/>
 			),
 		},
-		{ accessorKey: "hotelName", header: "Hotel" },
+		{ accessorKey: "hotelName", header: tb("Hotel") },
 		{
 			accessorKey: "kind",
 			header: "Type",
@@ -841,7 +842,7 @@ function ExpensesTab({
 				/>
 			),
 		},
-		{ accessorKey: "hotelName", header: "Hotel" },
+		{ accessorKey: "hotelName", header: tb("Hotel") },
 		{
 			accessorKey: "paidFrom",
 			header: "Paid from",
@@ -1023,6 +1024,7 @@ function PayrollTab({
 	payroll: PayrollRow[];
 	hotels: OwnerHotelFinance[];
 }) {
+	const tb = useBizText();
 	const [hotel, setHotel] = useState("");
 	const [run, setRun] = useState(false);
 	const { run: go, pending } = useNotConnectedAction();
@@ -1038,7 +1040,7 @@ function PayrollTab({
 				<TwoLine primary={row.original.name} secondary={row.original.role} />
 			),
 		},
-		{ accessorKey: "hotel", header: "Hotel" },
+		{ accessorKey: "hotel", header: tb("Hotel") },
 		{
 			accessorKey: "salary",
 			header: "Salary",
@@ -1168,6 +1170,7 @@ function OrganizationsTab({
 	requests: CreditRequestRow[];
 	hotels: { hotelId: string; name: string }[];
 }) {
+	const tb = useBizText();
 	const router = useRouter();
 	const [hotel, setHotel] = useState("");
 	const [review, setReview] = useState<CreditRequestRow | null>(null);
@@ -1212,7 +1215,7 @@ function OrganizationsTab({
 				/>
 			),
 		},
-		{ accessorKey: "hotelName", header: "Hotel" },
+		{ accessorKey: "hotelName", header: tb("Hotel") },
 		{
 			accessorKey: "creditLimit",
 			header: "Credit limit",

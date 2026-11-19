@@ -252,7 +252,7 @@ export function OwnerStaffScreen({
 				/>
 			),
 		},
-		{ accessorKey: "hotelName", header: "Hotel", enableSorting: false },
+		{ accessorKey: "hotelName", header: tb("Hotel"), enableSorting: false },
 		{ accessorKey: "department", header: "Department", enableSorting: false },
 		{
 			accessorKey: "role",

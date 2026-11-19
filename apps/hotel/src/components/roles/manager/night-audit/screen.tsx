@@ -325,11 +325,17 @@ export function NightAuditScreen({
 			</PageHeader>
 
 			<nav className="flex gap-6 border-b border-line text-sm">
-				{[
-					["Bookings", "/dashboard/bookings"],
-					["Folios", "/dashboard/folios"],
-					["Organizations", "/dashboard/organizations"],
-				].map(([l, h]) => (
+				{(stays
+					? [
+							["Bookings", "/dashboard/bookings"],
+							["Folios", "/dashboard/folios"],
+							["Organizations", "/dashboard/organizations"],
+						]
+					: [
+							["Financials", "/dashboard/financials"],
+							["Payments", "/dashboard/payments"],
+						]
+				).map(([l, h]) => (
 					<Link key={l} href={h} className="pb-3 text-ink-2 hover:text-ink">
 						{l}
 					</Link>

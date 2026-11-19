@@ -5,6 +5,7 @@ export const maintenanceHelp: HelpModule = {
 	label: "Maintenance",
 	intro:
 		"Work orders from fault to fixed, preventive jobs, parts from the store and rooms out of order.",
+	venueIntro: "Work orders from fault to fixed, preventive jobs and parts from the store.",
 	guides: [
 		{
 			id: "mnt-find-work",
