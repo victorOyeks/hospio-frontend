@@ -82,6 +82,8 @@ export const PlatformChange = z.object({
 	undoneAt: str,
 	undoneBy: str,
 	businessName: str,
+	undoRequestedAt: str,
+	undoRequestedByName: str,
 	undone: z.boolean().nullable().optional(),
 	createdAt: str,
 });

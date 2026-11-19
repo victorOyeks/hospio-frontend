@@ -33,6 +33,11 @@ export type AdminChangeRow = PlatformChangeRow & {
 	hotelId?: string;
 	beforeJson?: string;
 	afterJson?: string;
+	/** When support marked it undone. */
+	undoneAt?: string;
+	/** The owner asked support to undo it (ticket opened from the owner's Changes by Hospio360). */
+	undoRequestedAt?: string;
+	undoRequestedBy?: string;
 };
 
 export type AdminActivityRow = {
@@ -43,6 +48,8 @@ export type AdminActivityRow = {
 	target: string;
 	eventType: string;
 	businessId?: string;
+	/** The event as recorded (JSON): the fields shown under Details. */
+	payload?: string;
 };
 
 export type OverviewData = {
