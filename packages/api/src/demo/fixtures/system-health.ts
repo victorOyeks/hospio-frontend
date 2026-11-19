@@ -69,6 +69,7 @@ export function demoSystemHealth(): SystemHealthReport {
 				{ label: "System journal", path: "/var/log/journal", bytes: 1.1 * GB, note: null },
 				{ label: "Hospio web apps", path: "/home/devoyeks/apps", bytes: 294 * MB, note: null },
 			],
+			largestMeasuredAt: iso(6 * 60_000),
 			hospioMemory: 6.4 * GB,
 			level: "OK",
 			error: null,
@@ -179,6 +180,7 @@ export function demoSystemHealth(): SystemHealthReport {
 			issuer: "Let's Encrypt",
 			error: null,
 			level: "OK" as const,
+			checkedAt: iso(20 * 60_000),
 		})),
 		history: { day, week: day.filter((_, i) => i % 12 === 0), diskGrowthPerDay: 576 * MB, diskFullInDays: 133.7, diskTrend: "GROWING" },
 		thresholds: {

@@ -92,6 +92,8 @@ export function SystemHealthScreen({ initial, superAdmin }: { initial: SystemHea
 	const [loading, setLoading] = useState(false);
 	const [now, setNow] = useState(() => Date.now());
 	const busy = useRef(false);
+	/** Failed polls in a row: one miss (a deploy restarting the service) isn't shown; two are. */
+	const misses = useRef(0);
 
 	const reload = useCallback(async (fresh: boolean) => {
 		if (busy.current) return;
@@ -100,14 +102,17 @@ export function SystemHealthScreen({ initial, superAdmin }: { initial: SystemHea
 		try {
 			const r = await loadSystemHealth(fresh);
 			if (r.ok) {
+				misses.current = 0;
 				setReport(r.data);
 				setError(null);
 			} else {
-				setError(r.error);
+				misses.current++;
 				if (fresh) toast.error(r.error);
+				if (fresh || misses.current >= 2) setError(r.error);
 			}
 		} catch {
-			setError("System health couldn't be read. Trying again in 30 seconds.");
+			misses.current++;
+			if (fresh || misses.current >= 2) setError("System health couldn't be read. Trying again in 30 seconds.");
 		} finally {
 			busy.current = false;
 			setLoading(false);
@@ -483,7 +488,12 @@ function ServerCard({ report }: { report: SystemHealthReport }) {
 	const swapPct = pct(s.swapUsed, s.swapTotal);
 	const t = report.thresholds;
 	return (
-		<SectionCard title="Server" subtitle={`${s.hostname ?? "This server"} · ${s.os ?? ""}`} bodyClassName="gap-4 pt-1">
+		<SectionCard
+			title="Server"
+			subtitle={`${s.hostname ?? "This server"} · ${s.os ?? ""}`}
+			className="min-w-0"
+			bodyClassName="gap-4 pt-1"
+		>
 			<div className="flex flex-col gap-3">
 				<p className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.04em] text-ink-3">
 					<HardDriveIcon className="size-3" /> Disks · amber from 80% used, red from 90%
@@ -545,7 +555,12 @@ function ServerCard({ report }: { report: SystemHealthReport }) {
 			/>
 			{s.largest.length > 0 && (
 				<div className="flex flex-col gap-1">
-					<p className="text-[11px] font-semibold uppercase tracking-[0.04em] text-ink-3">What uses the disk</p>
+					<p className="text-[11px] font-semibold uppercase tracking-[0.04em] text-ink-3">
+						What uses the disk
+						<span className="font-normal normal-case tracking-normal">
+							{s.largestMeasuredAt ? ` · measured ${fmtDate(s.largestMeasuredAt, "h:mmaaa")}, every 15 minutes` : " · being measured"}
+						</span>
+					</p>
 					{[
 						...s.largest,
 						...(report.database?.totalBytes != null
@@ -591,6 +606,7 @@ function DatabaseCard({ report }: { report: SystemHealthReport }) {
 		<SectionCard
 			title="Database"
 			subtitle={d.up ? `PostgreSQL ${d.version ?? ""}` : "PostgreSQL"}
+			className="min-w-0"
 			headerRight={<StatusPill tone={TONE[d.level]}>{d.up ? "up" : "not reachable"}</StatusPill>}
 			bodyClassName="gap-4 pt-1"
 		>
@@ -753,6 +769,7 @@ function CertsCard({ report }: { report: SystemHealthReport }) {
 								<span className="block truncate text-[13px] font-semibold text-ink">{c.host}</span>
 								<span className="block truncate text-xs text-ink-3">
 									{c.error ?? `${c.issuer ?? ""} · until ${fmtDate(c.expiresAt, "d MMM yyyy")}`}
+									{c.checkedAt ? ` · read ${fmtDate(c.checkedAt, "h:mmaaa")}` : ""}
 								</span>
 							</span>
 							<StatusPill tone={TONE[c.level]}>
