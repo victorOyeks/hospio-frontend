@@ -12,9 +12,10 @@ const dmSans = DM_Sans({
 	fallback: ["system-ui", "sans-serif"],
 });
 
-const title = "Hospio360 · Hotel management for Nigerian hotels";
+const title =
+	"Hospio360 · Hotel, lounge, bar and restaurant management in Nigeria";
 const description =
-	"Hospio360 runs a Nigerian hotel from one place: bookings and front desk, folios and payments, housekeeping, laundry, maintenance, restaurant and bar, inventory, reports and night audit, with the owner's view across every hotel.";
+	"Hospio360 runs a Nigerian hotel, lounge, bar or restaurant from one place: bookings and front desk, orders, tabs and bills, payments, housekeeping, laundry, maintenance, kitchen and bar, inventory, reports and night audit, with the owner's view across every location.";
 
 export const metadata: Metadata = {
 	title: { default: title, template: "%s · Hospio360" },
@@ -28,7 +29,7 @@ export const metadata: Metadata = {
 	openGraph: {
 		title,
 		description:
-			"One system for the front desk, every department and the owner, from booking to night audit.",
+			"One system for hotels, lounges, bars and restaurants: every department and the owner, from the first order or booking to night audit.",
 		url: "/",
 		siteName: "Hospio360",
 		type: "website",

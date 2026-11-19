@@ -13,15 +13,16 @@ import {
 	TriangleAlertIcon,
 } from "lucide-react";
 import Image from "next/image";
+import Link from "next/link";
 import { btn } from "@hospio/ui/shared/ui";
 import { cn } from "@hospio/ui/utils";
 import { btnLg, container, DEMO_MAILTO, SIGN_UP_URL } from "@/components/site";
 import { type PillTone, shotShadow, softTileTones, StatusPill } from "./shared";
 
 const trust: { icon: LucideIcon; text: string }[] = [
-	{ icon: ShieldIcon, text: "Each hotel’s data kept separate" },
+	{ icon: ShieldIcon, text: "Each location’s data kept separate" },
 	{ icon: LockIcon, text: "2-step sign-in with an authenticator app" },
-	{ icon: CreditCardIcon, text: "Cash, card and transfer on every folio" },
+	{ icon: CreditCardIcon, text: "Cash, card and transfer on every bill" },
 ];
 
 const sidebar = [
@@ -105,21 +106,20 @@ export function Hero() {
 			<div
 				className={cn(
 					container,
-					"flex flex-col items-center gap-7 pt-12 pb-16 md:pt-[72px] md:pb-24",
+					"flex flex-col items-center gap-5 pt-9 pb-10 md:gap-6 md:pt-14 md:pb-16",
 				)}
 			>
-				<p className="inline-flex items-center gap-2 rounded-pill bg-brand-soft px-[14px] py-2 text-center text-sm font-medium text-brand">
+				<p className="inline-flex items-center gap-2 rounded-pill bg-brand-soft px-[14px] py-[6px] text-center text-[13px] font-medium text-brand md:py-2 md:text-sm">
 					<span className="size-2 shrink-0 rounded-full bg-status-ok" />
-					Hotel management for Nigerian hotels, one branch or many
+					For hotels, lounges, bars and restaurants in Nigeria
 				</p>
-				<h1 className="max-w-[980px] text-center text-[40px] font-bold leading-[1.06] tracking-[-0.025em] text-ink sm:text-[52px] md:text-[68px]">
-					Every room, every till, every branch — on one screen.
+				<h1 className="max-w-[980px] text-center text-[36px] font-bold leading-[1.06] tracking-[-0.025em] text-ink sm:text-[48px] md:text-[60px]">
+					Every room, every table, every till — on one screen.
 				</h1>
-				<p className="max-w-[760px] text-center text-[17px] leading-[1.5] text-ink-2 md:text-[20px]">
-					Hospio360 connects owners, managers and every department — front desk,
-					housekeeping, kitchen, bar, laundry, maintenance, inventory and
-					finance — so bookings, charges and payments land in one place, in real
-					time.
+				<p className="max-w-[720px] text-center text-[16px] leading-[1.5] text-ink-2 md:text-[19px]">
+					Hospio360 runs your hotel, lounge, bar or restaurant from one place:
+					bookings, orders, payments and every department, in real time, at
+					every location.
 				</p>
 				<div className="flex flex-wrap items-center justify-center gap-3">
 					<a
@@ -145,7 +145,7 @@ export function Hero() {
 						Book a demo
 					</a>
 				</div>
-				<ul className="flex flex-wrap items-center justify-center gap-x-7 gap-y-2">
+				<ul className="hidden flex-wrap items-center justify-center gap-x-7 gap-y-2 sm:flex">
 					{trust.map((t) => {
 						const Icon = t.icon;
 						return (
@@ -159,10 +159,20 @@ export function Hero() {
 						);
 					})}
 				</ul>
-				<figure className="flex w-full flex-col items-center gap-3">
-					<OwnerDashboardShot />
+				{/* The product shot is for wider screens only, and cut short with a fade: the full pictures are on /features. */}
+				<figure className="hidden w-full flex-col items-center gap-3 md:flex">
+					<div className="relative max-h-[300px] w-full overflow-hidden rounded-t-[20px] lg:max-h-[340px]">
+						<OwnerDashboardShot />
+						<div className="pointer-events-none absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-page to-transparent" />
+					</div>
 					<figcaption className="text-[13px] text-ink-3">
-						The owner’s morning view, shown with sample data.
+						The owner’s morning view, shown with sample data.{" "}
+						<Link
+							href="/features"
+							className="font-semibold text-brand underline underline-offset-2"
+						>
+							See all features
+						</Link>
 					</figcaption>
 				</figure>
 			</div>
@@ -176,7 +186,7 @@ function OwnerDashboardShot() {
 		<div
 			aria-hidden
 			className={cn(
-				"mt-1 flex w-full overflow-hidden rounded-[20px] border border-line bg-card",
+				"flex w-full overflow-hidden rounded-[20px] border border-line bg-card",
 				shotShadow,
 			)}
 		>

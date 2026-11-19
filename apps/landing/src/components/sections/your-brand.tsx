@@ -41,7 +41,7 @@ const arrivals = [
 
 export function YourBrand() {
 	return (
-		<section id="brand" className="scroll-mt-[88px] bg-page">
+		<section id="brand" className="scroll-mt-[76px] bg-page">
 			<div
 				className={cn(
 					container,
@@ -52,7 +52,7 @@ export function YourBrand() {
 					<SectionHeader
 						align="left"
 						eyebrow="Your brand"
-						title="Your hotel, your colours."
+						title="Your business, your colours."
 						intro="Upload your logo and pick your palette in Hotel setup. Every staff tablet and portal takes on your brand at sign-in."
 					/>
 					<ul className="flex flex-col gap-3">

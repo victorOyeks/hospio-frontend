@@ -37,7 +37,7 @@ export function RolesStrip() {
 				)}
 			>
 				<p className="text-center text-[15px] font-medium text-ink-2">
-					One system for everyone who keeps the hotel running
+					One system for everyone who keeps the place running
 				</p>
 				<ul className="flex flex-wrap justify-center gap-[10px]">
 					{roles.map((r) => {

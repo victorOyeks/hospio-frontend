@@ -11,15 +11,15 @@ import {
 
 export function ClosingCta() {
 	return (
-		<section id="contact" className="scroll-mt-[88px] bg-page">
-			<div className={cn(container, "py-16 md:py-24")}>
-				<div className="flex flex-col items-center gap-6 rounded-[20px] bg-brand px-6 py-14 text-center md:px-16 md:py-20">
-					<h2 className="max-w-[900px] text-[36px] font-bold leading-[1.08] tracking-[-0.02em] text-white md:text-[52px]">
-						Bring every branch onto one screen.
+		<section id="contact" className="scroll-mt-[76px] bg-page">
+			<div className={cn(container, "py-10 md:py-16")}>
+				<div className="flex flex-col items-center gap-4 rounded-[20px] bg-brand px-5 py-9 text-center md:gap-5 md:px-16 md:py-14">
+					<h2 className="max-w-[900px] text-[28px] font-bold leading-[1.08] tracking-[-0.02em] text-white md:text-[42px]">
+						Bring every location onto one screen.
 					</h2>
-					<p className="max-w-[620px] text-[17px] leading-[1.55] text-nav-foreground md:text-[18px]">
-						Create your account and set up your first hotel today, or ask us for
-						a demo on a hotel like yours.
+					<p className="max-w-[620px] text-[15px] leading-[1.55] text-nav-foreground md:text-[17px]">
+						Create your account and set up your first location today, or ask us
+						for a demo on a business like yours.
 					</p>
 					<div className="flex flex-wrap items-center justify-center gap-3">
 						<a
@@ -35,9 +35,9 @@ export function ClosingCta() {
 						</a>
 						<a
 							href={DEMO_MAILTO}
-							className="inline-flex items-center gap-2 rounded-control border border-white/80 px-5 py-[14px] text-base font-semibold text-white hover:bg-white/10"
+							className="inline-flex items-center gap-[6px] rounded-control border border-white/80 px-4 py-[13px] text-[15px] font-semibold text-white hover:bg-white/10"
 						>
-							<CalendarDaysIcon className="size-[18px]" />
+							<CalendarDaysIcon className="size-[15px]" strokeWidth={2.5} />
 							Book a demo
 						</a>
 					</div>

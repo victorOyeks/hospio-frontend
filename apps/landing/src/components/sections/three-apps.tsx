@@ -16,17 +16,17 @@ const rail = ["Today", "Rooms", "Bookings", "Payments"];
 const apps = [
 	{
 		title: "Owner portal",
-		text: "All your hotels in one morning view: revenue, profit, occupancy and what needs your eye today.",
+		text: "All your locations in one morning view: revenue, profit, occupancy and what needs your eye today.",
 		points: [
 			"Approvals over each manager’s limit",
-			"Revenue, expenses and profit for each hotel",
+			"Revenue, expenses and profit for each location",
 			"Change taxes, currency and approval limits",
 		],
 		preview: <OwnerPreview />,
 	},
 	{
 		title: "Manager portal",
-		text: "Run the branch: rooms, bookings, folios, staff, night audit, approvals — and set up how your hotel works.",
+		text: "Run the branch: rooms, bookings, folios, staff, night audit, approvals — and set up how your business works.",
 		points: [
 			"Live room board and departments",
 			"Approve discounts, voids and spend",
@@ -52,7 +52,7 @@ export function ThreeApps() {
 			id="product"
 			eyebrow="Built for every level"
 			title="The right view for the owner, the manager and the shift."
-			intro="Owners see every hotel at a glance. Managers run their branch. Staff get a tablet app that shows only their own work — nothing more, nothing less."
+			intro="Owners see every location at a glance. Managers run their branch. Staff get a tablet app that shows only their own work — nothing more, nothing less."
 		>
 			<div className="grid grid-cols-1 gap-6 md:grid-cols-3">
 				{apps.map((app) => (

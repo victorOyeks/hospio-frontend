@@ -34,7 +34,7 @@ const steps = [
 const extras = [
 	"Split card + cash",
 	"POS offline → cash only",
-	"Hotels that don’t take cash",
+	"Businesses that don’t take cash",
 	"Check-out with a payment pending",
 	"Refunds and disputes go to the manager",
 ];

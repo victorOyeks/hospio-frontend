@@ -1,6 +1,7 @@
 import { ImageResponse } from "next/og";
 
-export const alt = "Hospio360 · Hotel management for Nigerian hotels";
+export const alt =
+	"Hospio360 · Hotel, lounge, bar and restaurant management in Nigeria";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
@@ -31,10 +32,10 @@ export default function OpengraphImage() {
 					maxWidth: 980,
 				}}
 			>
-				Every room, every till, every hotel, on one screen.
+				Every room, every table, every till, on one screen.
 			</div>
 			<div style={{ marginTop: 28, fontSize: 30, color: "#e8c9d3" }}>
-				Hotel management for Nigerian hotels
+				For hotels, lounges, bars and restaurants in Nigeria
 			</div>
 		</div>,
 		{ ...size },

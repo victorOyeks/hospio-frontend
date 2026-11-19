@@ -58,7 +58,7 @@ export function Control() {
 			id="control"
 			eyebrow="Control and trust"
 			title="You stay in charge — even when you’re not in the building."
-			intro="Clear limits, clear access, and a record of every action. Nothing is hard-coded: each hotel sets its own rules."
+			intro="Clear limits, clear access, and a record of every action. Nothing is hard-coded: each location sets its own rules."
 		>
 			<div className="grid gap-6 md:grid-cols-3">
 				<article className={card}>
@@ -88,7 +88,7 @@ export function Control() {
 						Three levels of access
 					</h3>
 					<p className="text-[15px] leading-[1.5] text-ink-2">
-						Hotels give each person a role from the modules they use — at one of
+						You give each person a role from the modules they use — at one of
 						three levels.
 					</p>
 					<ul className="flex flex-col gap-[10px] pt-2">
