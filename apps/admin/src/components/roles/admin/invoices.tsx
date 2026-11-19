@@ -113,8 +113,8 @@ export function InvoicesTab({
 	}, [businessId]);
 
 	const load = useCallback(async () => {
-		if (status === CANDIDATES) return;
-		const r = await adminInvoices({ status: status ?? undefined, month: month ?? undefined, businessId: businessId ?? biz ?? undefined });
+		// The candidates view keeps the cards and counts of every invoice.
+		const r = await adminInvoices({ status: status && status !== CANDIDATES ? status : undefined, month: month ?? undefined, businessId: businessId ?? biz ?? undefined });
 		if (r.ok) {
 			setList(r.data);
 			setError(null);

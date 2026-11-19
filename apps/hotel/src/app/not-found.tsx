@@ -1,7 +1,13 @@
 import { Button } from "@hospio/ui/primitives/button";
 import Link from "next/link";
+import { cookies } from "next/headers";
+import { redirect } from "next/navigation";
+import { mySuspension } from "@hospio/api/actions/suspension";
+import { COOKIES } from "@hospio/api/session";
 
-export default function NotFound() {
+export default async function NotFound() {
+	// A suspended business has one screen, even for an address that doesn't exist (hospio-backend docs/suspension.md).
+	if ((await cookies()).get(COOKIES.token)?.value && (await mySuspension()).suspended) redirect("/suspended");
 	return (
 		<div className="flex min-h-[100dvh] flex-col items-center justify-center bg-background px-4 py-12 sm:px-6 lg:px-8">
 			<div className="mx-auto max-w-md text-center">
