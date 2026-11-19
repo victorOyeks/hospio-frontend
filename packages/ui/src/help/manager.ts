@@ -98,9 +98,7 @@ export const managerHelp: HelpModule = {
 		{
 			id: "mgr-shared-tablet",
 			venue: {
-				swap: [
-					["One tablet at the bar, kitchen or front desk", "One tablet at the bar, the kitchen or the cashier's point is used by several people in a shift."],
-				],
+				when: "One tablet at the bar, the kitchen or the cashier's point is used by several people in a shift.",
 			},
 			title: "Set up a shared tablet and PIN",
 			when: "One tablet at the bar, kitchen or front desk is used by several people in a shift.",

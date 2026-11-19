@@ -38,7 +38,7 @@ export const whatsNew: WhatsNewItem[] = [
 	},
 	{
 		title: "A tidier admin portal",
-		body: "The menu is grouped: Customers, Operations, Money, Growth and Platform. “Hotels” lists every hotel across businesses; tap one for its figures, POS keys, Hospio fees and guest messages in a side panel. Press ⌘K to jump to any business, hotel, ticket or page. Fees & billing and Payments & POS have clear tabs, and provider keys are on the new “Integrations” page (Super admin).",
+		body: "The menu is grouped: Customers, Operations, Money, Growth and Platform. “Locations” lists every location (hotel, lounge, bar or restaurant) across businesses; tap one for its figures, POS keys, Hospio fees and guest messages in a side panel. Press ⌘K to jump to any business, hotel, ticket or page. Fees & billing and Payments & POS have clear tabs, and provider keys are on the new “Integrations” page (Super admin).",
 		audience: ["PLATFORM"],
 	},
 	{

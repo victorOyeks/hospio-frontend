@@ -150,7 +150,7 @@ export function AdminSearch({ role }: { role: HotelRole }) {
 				className="hidden h-[42px] w-full min-w-0 max-w-[380px] items-center gap-[10px] rounded-xl border border-line bg-card pl-[14px] pr-[10px] text-left md:flex"
 			>
 				<SearchIcon className="size-[18px] text-ink-3" />
-				<span className="min-w-0 flex-1 truncate text-sm text-ink-3">Search businesses, hotels, tickets, pages…</span>
+				<span className="min-w-0 flex-1 truncate text-sm text-ink-3">Search businesses, locations, tickets, pages…</span>
 				<kbd className="rounded-md bg-subtle px-[6px] py-[2px] text-[11px] font-medium text-ink-2">⌘ K</kbd>
 			</button>
 			<button type="button" onClick={() => setOpen(true)} className="flex size-[42px] items-center justify-center rounded-xl border border-line bg-card text-ink-2 md:hidden" aria-label="Search">

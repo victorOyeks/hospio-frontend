@@ -109,6 +109,8 @@ export function stepSubtitle(step: AdminOnboardingStep, v?: VenueCtx): string {
 		return "Room types and numbers for each location with rooms";
 	if (v?.locations && step === "template")
 		return "Start from a ready setup for each location; anything can be changed afterwards";
+	// The remaining steps name "each hotel": "each location" for a business that is not hotels only.
+	if (v?.locations) return STEP_META[step].subtitle.replace(/each hotel\b/g, "each location");
 	return STEP_META[step].subtitle;
 }
 
