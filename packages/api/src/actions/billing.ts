@@ -6,6 +6,10 @@ import { api, errorMessage } from "@hospio/api/api/client";
 import type {
 	BillingStatus,
 	BusinessBilling,
+	ChargesBanner,
+	ChargesStartPreview,
+	ChargesStartRow,
+	ChargesStartView,
 	IssueRun,
 	InvoiceEvent,
 	InvoiceLine,
@@ -36,6 +40,10 @@ export type InvoicePaymentView = z.infer<typeof InvoicePayment>;
 export type InvoiceEventView = z.infer<typeof InvoiceEvent>;
 export type BusinessBillingView = z.infer<typeof BusinessBilling>;
 export type IssueRunView = z.infer<typeof IssueRun>;
+export type ChargesStartRowView = z.infer<typeof ChargesStartRow>;
+export type ChargesStartDetail = z.infer<typeof ChargesStartView>;
+export type ChargesStartPreviewView = z.infer<typeof ChargesStartPreview>;
+export type ChargesBannerView = z.infer<typeof ChargesBanner>;
 export type InvoiceDay = z.infer<typeof DailyFee>;
 /** A file from the services: CSV as text, a PDF as base64, for the browser to save. */
 export type BillingFile = { name: string; type: string; text?: string; base64?: string };
@@ -270,4 +278,59 @@ export async function businessBilling(businessId: string): Promise<ActionResult<
 		return { ok: true, data: { state: "DUE", openInvoices: 1, outstanding: demoInvoice().outstanding, latestNumber: demoInvoice().number, latestStatus: "DUE", restricted: false } };
 	const { data, error } = await api("@get/platform/admin/businesses/:businessId/billing", { ...(await withSession()), params: { businessId } });
 	return error || !data ? fail(error, "Billing could not be loaded") : { ok: true, data: data.data };
+}
+
+// ---- free until charges start --------------------------------------------------------------------------------------
+
+/** The hotel app's Billing & invoices banner. Never fails a page: anything wrong reads as nothing to show (null). */
+export async function chargesBanner(): Promise<ChargesBannerView | null> {
+	if (!live("platform"))
+		return { state: "FREE", chargesStartOn: null, ratePct: 1.5, title: "Free: no charges until Hospio360 tells you", message: "Devices you lease from us are still billed monthly." };
+	const { data, error } = await api("@get/platform/billing/charges", await withSession());
+	return error || !data ? null : data.data;
+}
+
+/** Every business with a charges start record (a business missing from it is free), keyed by business id. */
+export async function chargesStartRows(): Promise<Record<string, ChargesStartRowView>> {
+	if (!live("platform")) return {};
+	const { data, error } = await api("@get/platform/admin/billing/charges-start", await withSession());
+	if (error || !data) return {};
+	const out: Record<string, ChargesStartRowView> = {};
+	for (const r of data.data.rows ?? []) out[r.businessId] = r;
+	return out;
+}
+
+export async function chargesStart(businessId: string): Promise<ActionResult<ChargesStartDetail>> {
+	if (!live("platform"))
+		return {
+			ok: true,
+			data: { businessId, chargesStartOn: null, state: "FREE", label: "Free", ratePct: 1.5, canEdit: false, setByName: null, setAt: null, reason: null, history: [] },
+		};
+	const { data, error } = await api("@get/platform/admin/businesses/:businessId/charges-start", { ...(await withSession()), params: { businessId } });
+	return error || !data ? fail(error, "The charges start date could not be loaded") : { ok: true, data: data.data };
+}
+
+/** What a new date (null = clear) would do to the days not invoiced yet. */
+export async function previewChargesStart(businessId: string, date: string | null): Promise<ActionResult<ChargesStartPreviewView>> {
+	if (!live("platform")) return { ok: false, error: DEMO_WRITE };
+	const { data, error } = await api("@get/platform/admin/businesses/:businessId/charges-start/preview", {
+		...(await withSession()),
+		params: { businessId },
+		query: date ? { date } : {},
+	});
+	return error || !data ? fail(error, "The change could not be checked") : { ok: true, data: data.data };
+}
+
+/** Money roles: set, move or clear (null) the date, with a reason; `confirmEarlier` when free days would become billable. */
+export async function setChargesStart(
+	businessId: string,
+	body: { chargesStartOn: string | null; reason: string; confirmEarlier?: boolean },
+): Promise<ActionResult<ChargesStartDetail>> {
+	if (!live("platform")) return { ok: false, error: DEMO_WRITE };
+	const { data, error } = await api("@put/platform/admin/businesses/:businessId/charges-start", {
+		...(await withSession()),
+		params: { businessId },
+		body: { chargesStartOn: body.chargesStartOn, reason: body.reason.trim(), confirmEarlier: body.confirmEarlier ?? false },
+	});
+	return error || !data ? fail(error, "The charges start date could not be saved") : { ok: true, data: data.data };
 }

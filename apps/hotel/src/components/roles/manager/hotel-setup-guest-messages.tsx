@@ -50,7 +50,7 @@ export function GuestMessagesSection({ isOwner }: { isOwner: boolean }) {
 	const [invoices, setInvoices] = useState<Paged<CommInvoiceRow> | null>(null);
 	const [error, setError] = useState<string | null>(null);
 	const [busy, setBusy] = useState(false);
-	const [confirmOff, setConfirmOff] = useState(false);
+	const [confirmOff, setConfirmOff] = useState<Channel | null>(null);
 	const [open, setOpen] = useState<string | null>(params.get("invoice"));
 	const [usageOpen, setUsageOpen] = useState(false);
 
@@ -69,14 +69,16 @@ export function GuestMessagesSection({ isOwner }: { isOwner: boolean }) {
 		void load();
 	}, [load]);
 
-	async function toggle(on: boolean) {
+	async function toggle(channel: Channel, on: boolean) {
 		setBusy(true);
-		const r = await setGuestMessages(on);
+		const r = await setGuestMessages(
+			channel === "WHATSAPP" ? { whatsappOn: on } : { emailOn: on },
+		);
 		setBusy(false);
-		setConfirmOff(false);
+		setConfirmOff(null);
 		if (!r.ok) return toast.error(r.error);
 		setPlan(r.data);
-		toast.success(on ? "Guest messages are on" : "Guest messages are off");
+		toast.success(`${CHANNEL_NAME[channel]} is ${on ? "on" : "off"} for guest messages`);
 	}
 
 	if (error) return <Note tone="danger">{error}</Note>;
@@ -90,6 +92,8 @@ export function GuestMessagesSection({ isOwner }: { isOwner: boolean }) {
 			(i) => i.status === "DUE" || i.status === "OVERDUE",
 		) ?? [];
 	const u = plan.thisMonth;
+	const whatsappOn = plan.whatsappOn ?? plan.enabled;
+	const emailOn = plan.emailOn ?? plan.enabled;
 	return (
 		<div className="flex min-w-0 flex-col gap-4">
 			{plan.suspended && (
@@ -108,38 +112,49 @@ export function GuestMessagesSection({ isOwner }: { isOwner: boolean }) {
 				</Note>
 			)}
 
+			{plan.freePeriod && (
+				<Note tone="info">
+					<span className="font-semibold">Free period:</span> messages are
+					sent at ₦0 until your charges start
+					{plan.chargesStartOn ? ` on ${fmtLongDate(plan.chargesStartOn)}` : " (Hospio360 tells you the date)"}.
+					Each one still shows below, marked Free period.
+				</Note>
+			)}
+
 			<SectionCard
 				title="Guest messages"
 				subtitle={words.stays ? "Booking confirmations, receipts and other messages to your guests, companies and suppliers, by email and WhatsApp" : "Receipts and other messages to your guests, companies and suppliers, by email and WhatsApp"}
 			>
 				<div className="flex flex-col gap-4 pt-2">
-					<div className="flex items-start gap-4 rounded-xl border border-line p-4">
-						<div className="min-w-0 flex-1">
-							<p className="text-[14px] font-semibold text-ink">
-								{plan.enabled
-									? "On · your guests hear from you"
-									: "Off · nothing is sent to guests"}
-							</p>
-							<p className="mt-1 text-[13px] text-ink-2">
-								{t("Each message is sent from your hotel's name and charged per")}{" "}
-								message at the prices below. You get one invoice a month. Codes,
-								sign-in and staff messages are always free.
-							</p>
-							{plan.changedBy && (
-								<p className="mt-2 text-xs text-ink-3">
-									Last changed by {plan.changedBy}
-									{plan.changedAt ? ` · ${fmtWhen(plan.changedAt)}` : ""}
-								</p>
-							)}
+					<div className="rounded-xl border border-line p-4">
+						<p className="text-[13px] text-ink-2">
+							{t("Each message is sent from your hotel's name and charged per")}{" "}
+							message at the prices below. You get one invoice a month. Codes,
+							sign-in and staff messages are always free. A channel that is
+							off sends nothing and costs nothing.
+						</p>
+						<div className="mt-3 flex flex-col divide-y divide-line">
+							<ChannelSwitch
+								icon={MessageCircleIcon}
+								label="WhatsApp"
+								on={whatsappOn}
+								busy={busy}
+								onChange={(on) => (on ? void toggle("WHATSAPP", true) : setConfirmOff("WHATSAPP"))}
+							/>
+							<ChannelSwitch
+								icon={MailIcon}
+								label="Email"
+								on={emailOn}
+								busy={busy}
+								onChange={(on) => (on ? void toggle("EMAIL", true) : setConfirmOff("EMAIL"))}
+							/>
 						</div>
-						<Switch
-							checked={plan.enabled}
-							disabled={busy}
-							onCheckedChange={(on) =>
-								on ? void toggle(true) : setConfirmOff(true)
-							}
-							aria-label="Guest messages"
-						/>
+						{plan.changedBy && (
+							<p className="mt-2 text-xs text-ink-3">
+								Last changed by {plan.changedBy}
+								{plan.changedAt ? ` · ${fmtWhen(plan.changedAt)}` : ""}
+							</p>
+						)}
 					</div>
 
 					<div className="grid gap-3 sm:grid-cols-2">
@@ -248,19 +263,61 @@ export function GuestMessagesSection({ isOwner }: { isOwner: boolean }) {
 			<InvoicePanel id={open} onClose={() => setOpen(null)} />
 			<MessagesPanel open={usageOpen} onClose={() => setUsageOpen(false)} />
 			<ConfirmModal
-				open={confirmOff}
-				onOpenChange={setConfirmOff}
-				title="Turn guest messages off?"
-				subtitle={words.stays ? "Guests stop getting booking confirmations, receipts and other messages from your hotel by email and WhatsApp. Codes and sign-in still work. You can turn it back on any time." : t("Guests stop getting receipts and other messages from your hotel by email and WhatsApp. Codes and sign-in still work. You can turn it back on any time.")}
+				open={confirmOff !== null}
+				onOpenChange={(o) => !o && setConfirmOff(null)}
+				title={`Turn ${confirmOff ? CHANNEL_NAME[confirmOff] : ""} off?`}
+				subtitle={
+					confirmOff === "WHATSAPP"
+						? t(words.stays
+							? "Guests stop getting receipts, booking messages and other messages from your hotel on WhatsApp: nothing is sent and nothing is charged. Email is not affected. You can turn it back on any time."
+							: "Guests stop getting receipts and other messages from your hotel on WhatsApp: nothing is sent and nothing is charged. Email is not affected. You can turn it back on any time.")
+						: t(words.stays
+							? "Guests stop getting booking confirmations, folios and other messages from your hotel by email: nothing is sent and nothing is charged. WhatsApp is not affected. Codes and sign-in still work."
+							: "Guests stop getting messages from your hotel by email: nothing is sent and nothing is charged. WhatsApp is not affected. Codes and sign-in still work.")
+				}
 				confirmLabel="Turn off"
 				tone="danger"
-				onConfirm={() => void toggle(false)}
+				onConfirm={() => confirmOff && void toggle(confirmOff, false)}
 			/>
 			{!isOwner && (
 				<p className="text-xs text-ink-3">
 					The owner sees these too and pays them on the Hospio360 monthly invoice.
 				</p>
 			)}
+		</div>
+	);
+}
+
+type Channel = "WHATSAPP" | "EMAIL";
+const CHANNEL_NAME: Record<Channel, string> = { WHATSAPP: "WhatsApp", EMAIL: "Email" };
+
+function ChannelSwitch({
+	icon: Icon,
+	label,
+	on,
+	busy,
+	onChange,
+}: {
+	icon: typeof MailIcon;
+	label: string;
+	on: boolean;
+	busy: boolean;
+	onChange: (on: boolean) => void;
+}) {
+	return (
+		<div className="flex items-center gap-3 py-3">
+			<span className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-brand-soft text-brand">
+				<Icon className="size-4" />
+			</span>
+			<div className="min-w-0 flex-1">
+				<p className="text-[14px] font-semibold text-ink">
+					{label} · {on ? "On" : "Off"}
+				</p>
+				<p className="text-xs text-ink-3">
+					{on ? "Sent to guests and charged per message" : "Never sent, never charged"}
+				</p>
+			</div>
+			<Switch checked={on} disabled={busy} onCheckedChange={onChange} aria-label={`${label} guest messages`} />
 		</div>
 	);
 }
@@ -540,6 +597,11 @@ function MessageTable({
 							<td className="px-3 py-2 text-xs text-ink-2">{m.to}</td>
 							<td className="px-3 py-2 text-right text-[13px] font-semibold">
 								{m.price == null ? "—" : naira(m.price)}
+								{m.freePeriod && (
+									<span className="mt-0.5 block">
+										<StatusPill tone="success">Free period</StatusPill>
+									</span>
+								)}
 							</td>
 						</tr>
 					))}

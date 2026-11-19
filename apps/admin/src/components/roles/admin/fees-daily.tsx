@@ -20,6 +20,7 @@ import { SectionCard } from "@hospio/ui/shared/section-card";
 import { FilterSelect, SearchBox, Toolbar } from "@hospio/ui/shared/toolbar";
 import { btn } from "@hospio/ui/shared/ui";
 import { FeeDayModal, FeeTable } from "./hotel-fees";
+import { useChargesRows } from "./business/charges-start";
 import { Loading } from "./live";
 
 /**
@@ -38,6 +39,7 @@ export function DailyFeesTab({
 	const money = role === "SUPER_ADMIN" || role === "FINANCE_ADMIN";
 	const opts = parseAsString.withDefault("").withOptions({ scroll: false });
 	const [biz, setBiz] = useQueryState("dbiz", opts);
+	const charges = useChargesRows();
 	const [status, setStatus] = useQueryState("dstatus", opts);
 	const [q, setQ] = useState("");
 	const [days, setDays] = useState<DailyFeeRow[] | null>(null);
@@ -85,7 +87,7 @@ export function DailyFeesTab({
 							value={biz}
 							onChange={(v) => void setBiz(v || null)}
 							all="All businesses"
-							options={businesses.map((b) => ({ value: b.id, label: b.name }))}
+							options={businesses.map((b) => ({ value: b.id, label: charges ? `${b.name} · ${charges[b.id]?.label ?? "Free"}` : b.name }))}
 						/>
 						<FilterSelect
 							value={status}
@@ -96,6 +98,7 @@ export function DailyFeesTab({
 								{ value: "INVOICED", label: "On invoice, unpaid" },
 								{ value: "PAID", label: "Paid" },
 								{ value: "NO_FEE", label: "No fee" },
+								{ value: "FREE", label: "Free (before charges start)" },
 								{ value: "SHADOW", label: "Statement only (trial)" },
 							]}
 						/>

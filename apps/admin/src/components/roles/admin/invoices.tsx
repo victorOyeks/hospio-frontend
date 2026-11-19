@@ -37,6 +37,7 @@ import { suspensionCandidates } from "@hospio/api/actions/suspension";
 import { SuspensionCandidates } from "./business/suspension";
 import { Loading, monthOptions } from "./live";
 import { can } from "./shared";
+import { ChargesTag, useChargesRows } from "./business/charges-start";
 
 /**
  * Admin · Fees & billing → Invoices (hospio-backend docs/plan-monthly-invoices.md): every business's Hospio360 monthly invoice
@@ -94,6 +95,7 @@ export function InvoicesTab({
 	businessId?: string;
 }) {
 	const money_ = can.money(role);
+	const charges = useChargesRows();
 	const opts = parseAsString.withOptions({ history: "replace", scroll: false });
 	const [status, setStatus] = useQueryState("istatus", opts);
 	const [month, setMonth] = useQueryState("imonth", opts);
@@ -158,7 +160,7 @@ export function InvoicesTab({
 								value={biz ?? ""}
 								onChange={(v) => void setBiz(v || null)}
 								all="All businesses"
-								options={businesses.map((b) => ({ value: b.id, label: b.name }))}
+								options={businesses.map((b) => ({ value: b.id, label: charges ? `${b.name} · ${charges[b.id]?.label ?? "Free"}` : b.name }))}
 							/>
 						)}
 						<DownloadButton load={() => exportInvoices(query)}>Export CSV</DownloadButton>
@@ -207,7 +209,12 @@ export function InvoicesTab({
 											{r.number}
 											<span className="block text-[11px] font-normal text-ink-3">Issued {fmtLongDate(r.issuedOn)}</span>
 										</td>
-										{!businessId && <td className={cell}>{r.businessName ?? "—"}</td>}
+										{!businessId && (
+											<td className={cell}>
+												{r.businessName ?? "—"}
+												{charges && <ChargesTag row={charges[r.businessId]} className="mt-1 block" />}
+											</td>
+										)}
 										<td className={cell}>{r.monthLabel ?? r.month}</td>
 										<td className={`${cell} text-right`}>{money(r.sections.platform)}</td>
 										<td className={`${cell} text-right`}>{r.sections.messages ? money(r.sections.messages) : "—"}</td>

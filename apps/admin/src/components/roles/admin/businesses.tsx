@@ -40,6 +40,7 @@ import {
 } from "./business/fee-lock";
 import { can, HealthBar, ReadOnlyNote, StagePill } from "./shared";
 import { BUSINESS_KIND_OPTIONS, type BusinessKindKey, venueLabel } from "@hospio/api/venue";
+import { ChargesTag, useChargesRows } from "./business/charges-start";
 
 const STAGES = [
 	"ALL",
@@ -92,6 +93,7 @@ export function BusinessesScreen({
 	const counts = page.counts ?? {};
 	const active = (list.params.stage ?? "ALL") as (typeof STAGES)[number];
 
+	const charges = useChargesRows();
 	const columns: ColumnDef<BusinessRow, unknown>[] = [
 		{
 			accessorKey: "name",
@@ -107,11 +109,12 @@ export function BusinessesScreen({
 			accessorKey: "stage",
 			header: "Stage",
 			cell: ({ row }) => (
-				<span className="flex items-center gap-2">
+				<span className="flex flex-wrap items-center gap-2">
 					<StagePill stage={row.original.stage} />
 					{row.original.source === "SELF_SERVE" && (
 						<span className="text-[11px] text-ink-3">self-serve</span>
 					)}
+					{charges && <ChargesTag row={charges[row.original.id]} />}
 				</span>
 			),
 		},

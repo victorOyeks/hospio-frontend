@@ -49,6 +49,8 @@ export const DailyFee = z.object({
 	devicePackageId: str,
 	deviceRate: num,
 	deviceFee: num,
+	/** FREE days (before the charges start date): what the platform fee would have been; 0 on billed days. */
+	waivedFee: num,
 	deviceCarriedIn: num,
 	platformPaid: num,
 	devicePaid: num,

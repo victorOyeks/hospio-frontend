@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
+import { setChargesStart } from "@hospio/api/actions/billing";
 import { changeBusinessMarketer } from "@hospio/api/actions/marketer-admin";
 import { updateBusiness } from "@hospio/api/actions/tenant";
 import { useAction } from "@hospio/api/actions/use-action";
@@ -37,6 +38,7 @@ import {
 	referrerOptions,
 	useReferrers,
 } from "../business/referred-by";
+import { ChargesTag, useChargesStart } from "../business/charges-start";
 import {
 	FeeLockField,
 	feeLockValue,
@@ -485,9 +487,21 @@ export function FeeStep({ ctx }: { ctx: WizardCtx }) {
 				: null,
 		fromBusiness ? business.feeAddendumRef : saved?.feeAddendumRef,
 	);
+	// "Charges start on" (hospio-backend docs/plan-monthly-invoices.md) lives in platform-service: money roles set it here with a
+	// reason; tenant's contractStartsOn keeps the same date (a mirror). No date = free: no platform fee, devices still billed.
+	const charges = useChargesStart(business.id);
 	const [contractStartsOn, setStartsOn] = useState(
 		saved?.contractStartsOn ?? business.contractStartsOn ?? "",
 	);
+	const [chargesReason, setChargesReason] = useState("Order form: charges start date");
+	const seeded = useRef(false);
+	useEffect(() => {
+		if (seeded.current || !charges.view) return;
+		seeded.current = true;
+		setStartsOn(charges.view.chargesStartOn ?? "");
+	}, [charges.view]);
+	const canSetCharges = !!charges.view?.canEdit && ctx.editable;
+	const chargesChanged = !!charges.view && (contractStartsOn || null) !== (charges.view.chargesStartOn ?? null);
 	const [contractNotes, setNotes] = useState(
 		saved?.contractNotes ?? business.contractNotes ?? "",
 	);
@@ -518,6 +532,17 @@ export function FeeStep({ ctx }: { ctx: WizardCtx }) {
 			const fee = feeLockValue(lock);
 			if (!fee) return;
 			const { feeValue, feeAddendumRef } = fee;
+			if (canSetCharges && chargesChanged) {
+				const c = await setChargesStart(business.id, {
+					chargesStartOn: contractStartsOn || null,
+					reason: chargesReason,
+				});
+				if (!c.ok) {
+					toast.error(c.error, { duration: 8000 });
+					return;
+				}
+				charges.setView(c.data);
+			}
 			const patch = {
 				feeModel: FEE_MODEL,
 				feeValue,
@@ -563,10 +588,22 @@ export function FeeStep({ ctx }: { ctx: WizardCtx }) {
 			<StepCard title="Contract">
 				<FieldRow>
 					<TextField
-						label="Agreement starts on"
+						label="Charges start on"
 						type="date"
 						value={contractStartsOn}
 						onChange={setStartsOn}
+						disabled={!canSetCharges}
+						hint={
+							<>
+								Leave empty = free: no platform fee until a date is set. Devices are still billed.
+								{charges.view && !charges.view.canEdit && " Only a Super admin or Finance admin can change it."}
+								{charges.view && (
+									<span className="mt-1 block">
+										<ChargesTag row={charges.view} />
+									</span>
+								)}
+							</>
+						}
 					/>
 					<SelectField
 						label="Referred by"
@@ -628,6 +665,15 @@ export function FeeStep({ ctx }: { ctx: WizardCtx }) {
 							Undo
 						</button>
 					</div>
+				)}
+				{canSetCharges && chargesChanged && (
+					<TextField
+						label="Why is the charges start date changing?"
+						value={chargesReason}
+						onChange={setChargesReason}
+						hint="8 to 500 characters · saved when you continue, kept in Changes by Hospio360"
+						error={chargesReason.trim().length < 8 ? "Give a reason (8 characters or more)" : undefined}
+					/>
 				)}
 				<TextareaField
 					label="Contract notes"

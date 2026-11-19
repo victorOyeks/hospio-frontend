@@ -57,10 +57,22 @@ function InvoiceStatus({ status }: { status: string }) {
  * own when it is paid, or by hand here).
  */
 function sendingState(p: CommPlanView) {
-	if (!p.enabled) return { tone: "grey" as const, label: "Not subscribed", detail: "Nothing is sent or billed" };
+	const wa = waOn(p);
+	const em = emOn(p);
+	if (!wa && !em) return { tone: "grey" as const, label: "Not subscribed", detail: "WhatsApp and email off: nothing is sent or billed" };
 	if (p.suspended) return { tone: "danger" as const, label: "On hold", detail: holdDetail(p) };
-	return { tone: "success" as const, label: "Sending", detail: "Booking emails and WhatsApp go to guests" };
+	const free = p.freePeriod ? " · free period (₦0)" : "";
+	if (wa && em) return { tone: "success" as const, label: "Sending", detail: `Guest emails and WhatsApp go to guests${free}` };
+	return {
+		tone: "success" as const,
+		label: wa ? "WhatsApp only" : "Email only",
+		detail: `${wa ? "Email" : "WhatsApp"} is switched off: never sent, never charged${free}`,
+	};
 }
+
+/** Per channel (an older server sends only `enabled`: both follow it). */
+const waOn = (p: CommPlanView) => p.whatsappOn ?? p.enabled;
+const emOn = (p: CommPlanView) => p.emailOn ?? p.enabled;
 
 function holdDetail(p: CommPlanView) {
 	const why = p.suspendedReason ? p.suspendedReason.charAt(0).toUpperCase() + p.suspendedReason.slice(1) : "Held by Hospio360";
@@ -100,13 +112,14 @@ export function GuestMessagePlans({
 		void load();
 	}, [load]);
 
-	async function toggle(p: CommPlanView, on: boolean) {
-		const r = await setHotelMessagePlan(p.hotelId, { businessId, enabled: on });
+	async function toggle(p: CommPlanView, channel: "WHATSAPP" | "EMAIL", on: boolean) {
+		const r = await setHotelMessagePlan(p.hotelId, channel === "WHATSAPP" ? { businessId, whatsappOn: on } : { businessId, emailOn: on });
 		if (!r.ok) return toast.error(r.error);
+		const name = channel === "WHATSAPP" ? "WhatsApp" : "Email";
 		toast.success(
 			on
-				? `${nameOf(p)} is subscribed to guest messages${p.suspended ? " (still on hold until the hold is lifted)" : ""}`
-				: `${nameOf(p)} is unsubscribed: nothing is sent or billed`,
+				? `${nameOf(p)}: ${name} on for guest messages${p.suspended ? " (still on hold until the hold is lifted)" : ""}`
+				: `${nameOf(p)}: ${name} off, never sent or charged`,
 		);
 		void load();
 	}
@@ -129,8 +142,8 @@ export function GuestMessagePlans({
 	return (
 		<SectionCard title={title} subtitle={subtitle} flush>
 			<p className="mx-5 mb-4 text-[12px] leading-relaxed text-ink-3">
-				<span className="font-semibold text-ink-2">Subscribed</span> is the hotel's choice to use the paid service (their manager
-				can change it in Hotel setup). <span className="font-semibold text-ink-2">On hold</span> is Hospio360 stopping it for
+				<span className="font-semibold text-ink-2">WhatsApp</span> and <span className="font-semibold text-ink-2">Email</span> are the
+				hotel's choice per channel (their manager can change them in Hotel setup): a channel that is off is never sent or charged. <span className="font-semibold text-ink-2">On hold</span> is Hospio360 stopping it for
 				non-payment: added on its own when an invoice goes overdue and lifted on its own when it is paid. Messages go only when
 				a location is subscribed and not on hold.
 			</p>
@@ -145,7 +158,7 @@ export function GuestMessagePlans({
 						<thead className={tableHead}>
 							<tr>
 								<th className="px-4 py-2 text-left">Hotel</th>
-								<th className="px-4 py-2 text-left">Subscribed</th>
+								<th className="px-4 py-2 text-left">Channels</th>
 								<th className="px-4 py-2 text-left">Sending</th>
 								<th className="px-4 py-2 text-left">Prices (email · WhatsApp)</th>
 								<th className="px-4 py-2 text-right">This month</th>
@@ -160,9 +173,15 @@ export function GuestMessagePlans({
 									<tr key={p.hotelId} className={tableRow}>
 										<td className={cn(cell, "font-semibold")}>{nameOf(p)}</td>
 										<td className={cell}>
-											<span className="flex items-center gap-2 text-[13px] text-ink-2">
-												<Switch checked={p.enabled} onCheckedChange={(on) => void toggle(p, on)} aria-label={`${nameOf(p)} subscribed to guest messages`} />
-												{p.enabled ? "Yes" : "No"}
+											<span className="flex flex-col gap-1.5 text-[13px] text-ink-2">
+												<span className="flex items-center gap-2">
+													<Switch checked={waOn(p)} onCheckedChange={(on) => void toggle(p, "WHATSAPP", on)} aria-label={`${nameOf(p)} WhatsApp guest messages`} />
+													WhatsApp {waOn(p) ? "on" : "off"}
+												</span>
+												<span className="flex items-center gap-2">
+													<Switch checked={emOn(p)} onCheckedChange={(on) => void toggle(p, "EMAIL", on)} aria-label={`${nameOf(p)} email guest messages`} />
+													Email {emOn(p) ? "on" : "off"}
+												</span>
 											</span>
 										</td>
 										<td className={cn(cell, "max-w-[260px]")}>

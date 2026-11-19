@@ -53,12 +53,13 @@ export async function getGuestMessagePlan(): Promise<
 	return { ok: true, data: data.data };
 }
 
+/** Per channel: `{ whatsappOn }`, `{ emailOn }` or both. Off = never sent, never charged. */
 export async function setGuestMessages(
-	enabled: boolean,
+	channels: { emailOn?: boolean; whatsappOn?: boolean },
 ): Promise<ActionResult<CommPlanView>> {
 	const { data, error } = await api("@put/messaging/billing/messages", {
 		...(await withSession()),
-		body: { enabled },
+		body: channels,
 	});
 	if (error || !data)
 		return {
@@ -234,6 +235,8 @@ export async function setHotelMessagePlan(
 	plan: {
 		businessId: string;
 		enabled?: boolean;
+		emailOn?: boolean;
+		whatsappOn?: boolean;
 		email?: number | null;
 		whatsapp?: number | null;
 		useDefaults?: boolean;
