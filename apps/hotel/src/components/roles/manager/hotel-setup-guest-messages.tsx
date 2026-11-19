@@ -110,7 +110,7 @@ export function GuestMessagesSection({ isOwner }: { isOwner: boolean }) {
 
 			<SectionCard
 				title="Guest messages"
-				subtitle="Booking confirmations, receipts and other messages to your guests, companies and suppliers, by email and WhatsApp"
+				subtitle={words.stays ? "Booking confirmations, receipts and other messages to your guests, companies and suppliers, by email and WhatsApp" : "Receipts and other messages to your guests, companies and suppliers, by email and WhatsApp"}
 			>
 				<div className="flex flex-col gap-4 pt-2">
 					<div className="flex items-start gap-4 rounded-xl border border-line p-4">

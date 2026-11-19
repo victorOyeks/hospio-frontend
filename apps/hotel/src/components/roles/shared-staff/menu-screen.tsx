@@ -163,6 +163,7 @@ export function MenuScreen({
 	/** Every outlet of the hotel: where an item can be made, and the menus to copy from. */
 	outlets?: { id: string; name: string; kind: OutletKind }[];
 }) {
+	const words = useWording();
 	const { place: w } = useWording();
 	const [items, setItems] = useState(menu);
 	useEffect(() => setItems(menu), [menu]);
@@ -1008,7 +1009,7 @@ export function MenuScreen({
 							</BigButton>
 						)}
 						<p className="text-xs text-ink-3">
-							When an order is paid or charged to a room, this stock is taken
+							When an order is paid{words.stays ? " or charged to a room" : ""}, this stock is taken
 							from the outlet's store. Items without a recipe draw nothing.
 						</p>
 					</PanelSection>

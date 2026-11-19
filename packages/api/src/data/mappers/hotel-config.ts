@@ -810,24 +810,40 @@ const STAY_FIELDS: Record<string, string[]> = {
 	outlets: ["roomCharge"],
 	messaging: ["sendConfirmation", "arrivalMessage"],
 	night: ["arrivalsResolvedFirst"],
+	// A deposit holds a booking and a rate is a room's price: neither exists without rooms.
+	money: ["depositPct"],
+	approvals: ["rateChangesNeedOwner"],
+};
+
+/** Labels and hints that name rooms, bookings or the booking page, as a lounge, bar or restaurant reads them (hotel words, like the rest). */
+const VENUE_COPY: Record<string, Record<string, { label?: string; help?: string }>> = {
+	brand: { shortName: { help: "On the sign-in screen; your hotel's name when empty" } },
+	messaging: { whatsappNumber: { help: "Guests tap Chat on WhatsApp in their emails to reach you here" } },
+	taxes: { pricesIncludeTax: { label: "Prices include tax" } },
 };
 
 export function withoutStays(sections: HotelSetupSection[]): HotelSetupSection[] {
 	return sections
 		.filter((x) => !STAY_SECTIONS.has(x.key))
 		.map((x) => {
-			const drop = STAY_FIELDS[x.key];
-			if (!drop) return x;
+			const drop = STAY_FIELDS[x.key] ?? [];
+			const copy = VENUE_COPY[x.key] ?? {};
 			return {
 				...x,
-				title: x.key === "basics" ? "Location basics" : x.title,
 				description:
 					x.key === "outlets"
 						? "Tabs, tab limits and who takes payment"
 						: x.key === "basics"
 							? "Your opening hours and what prints at the foot of receipts"
 							: x.description,
-				fields: x.fields.filter((f) => !drop.includes(f.key)),
+				fields: x.fields
+					.filter((f) => !drop.includes(f.key))
+					.map((f) => ({
+						...f,
+						...copy[f.key],
+						// The service charge note lists what a guest bill can hold: no rooms or laundry here.
+						help: (copy[f.key]?.help ?? f.help)?.replace("(rooms, restaurant, bar, laundry)", "(restaurant and bar)"),
+					})),
 			};
 		});
 }

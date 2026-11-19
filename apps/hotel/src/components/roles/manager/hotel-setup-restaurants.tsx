@@ -20,6 +20,7 @@ import { Modal } from "@hospio/ui/shared/modal";
 import { StatusPill } from "@hospio/ui/shared/status-pill";
 import { btn } from "@hospio/ui/shared/ui";
 import { cn } from "@hospio/ui/utils";
+import { useWording } from "@hospio/ui/shared/wording";
 
 const KINDS: { value: OutletKind; label: string }[] = [
 	{ value: "KITCHEN", label: "Kitchen" },
@@ -66,6 +67,7 @@ export function RestaurantsSection({
 	terminals?: TerminalRow[];
 	locked: boolean;
 }) {
+	const words = useWording();
 	const [outlets, setOutlets] = useState(initial);
 	useEffect(() => setOutlets(initial), [initial]);
 	const [outlet, setOutlet] = useState<OutletDraft | null>(null);
@@ -285,7 +287,7 @@ export function RestaurantsSection({
 					<span className="font-semibold text-ink">Why this matters · </span>
 					Staff pick the table or seat from this list when they take an order,
 					and a recipe takes stock from the outlet's store each time an order is
-					paid or charged to a room.
+					paid{words.stays ? " or charged to a room" : ""}.
 				</p>
 			</div>
 

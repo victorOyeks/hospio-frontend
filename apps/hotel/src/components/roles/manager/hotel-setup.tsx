@@ -114,6 +114,15 @@ const why: Record<string, string> = {
 	danger: "Only the owner can change ownership or close the hotel.",
 };
 
+/** The same notes where they differ at a lounge, bar or restaurant (no deposits, bookings, room charges or folios there). */
+const venueWhy: Record<string, string> = {
+	basics: "Your opening hours tell staff and the night audit when the day runs; the footer prints on every receipt.",
+	money: "Payment methods and the till float show up on every sale and receipt.",
+	outlets: "Tabs, their limit and who takes payment decide how a sale is opened and closed.",
+	messaging: "Guests get receipts by WhatsApp from Hospio360 and by email from your hotel. Replies to Hospio360's WhatsApp don't reach you, so add your own WhatsApp number for guests to chat with you.",
+};
+
+
 /**
  * Manager · Hotel setup (the owner opens the same screen with the owner-only sections unlocked): every
  * list, time and rule the hotel runs on. Saves go to PUT /hotel-config/setup/{section} and the lists
@@ -140,9 +149,14 @@ export function HotelSetupScreen({
 	/** The hotel's POS terminals: an outlet may take payment on its own one. */
 	terminals?: TerminalRow[];
 }) {
+	const words = useWording();
 	const t = usePlaceText();
 	const { place: w } = useWording();
 	const section = sections.find((s) => s.key === activeKey) ?? sections[0];
+	const whyFor = (key: string) => {
+		const text = (words.stays ? undefined : venueWhy[key]) ?? why[key];
+		return text ? t(text) : undefined;
+	};
 	const locked = !!section.ownerOnly && !isOwner;
 	const ownerSections = sections.filter((s) => s.ownerOnly);
 	const hotelSections = sections.filter((s) => !s.ownerOnly);
@@ -191,7 +205,7 @@ export function HotelSetupScreen({
 							key={section.key}
 							section={section}
 							locked={locked}
-							why={why[section.key] ? t(why[section.key]) : undefined}
+							why={whyFor(section.key)}
 							hotelId={hotelId}
 						/>
 						<PosKeysCard />
@@ -203,7 +217,7 @@ export function HotelSetupScreen({
 							key={section.key}
 							section={section}
 							locked={locked}
-							why={why[section.key] ? t(why[section.key]) : undefined}
+							why={whyFor(section.key)}
 							hotelId={hotelId}
 						/>
 						<MinibarPricesSection hotelId={hotelId} locked={locked} />
@@ -214,7 +228,7 @@ export function HotelSetupScreen({
 						key={section.key}
 						section={section}
 						locked={locked}
-						why={why[section.key] ? t(why[section.key]) : undefined}
+						why={whyFor(section.key)}
 						hotelId={hotelId}
 					/>
 				)}
@@ -321,8 +335,9 @@ function SectionForm({
 					<div className="flex flex-col gap-3 rounded-xl border border-danger/30 bg-danger-soft/40 p-4">
 						<p className="text-[13px] font-semibold text-danger">Danger zone</p>
 						<p className="text-xs text-ink-2">
-							Pausing stops new bookings; closing removes the hotel from every
-							screen after the last guest checks out.
+							{words.stays
+								? "Pausing stops new bookings; closing removes the hotel from every screen after the last guest checks out."
+								: t("Pausing shows the hotel as paused; closing removes the hotel from every screen.")}
 						</p>
 						<div className="flex gap-2">
 							{values.status !== "ACTIVE" && (
@@ -843,7 +858,7 @@ function BrandPreview({
 							{name}
 						</span>
 					</div>
-					{["Bookings", "Rooms", "Reports"].map((item, n) => (
+					{(words.stays ? ["Bookings", "Rooms", "Reports"] : ["Sales", "Menus", "Reports"]).map((item, n) => (
 						<span
 							key={item}
 							className={cn(
@@ -865,7 +880,7 @@ function BrandPreview({
 					<p className="text-sm font-bold text-ink">Today at {name}</p>
 					<div className="flex flex-wrap items-center gap-2">
 						<span className="rounded-control bg-brand px-3 py-[6px] text-xs font-semibold text-brand-foreground">
-							New booking
+							{words.stays ? "New booking" : "New sale"}
 						</span>
 						<span className="rounded-pill bg-brand-soft px-2 py-[2px] text-[11px] font-semibold text-brand">
 							3 arriving
