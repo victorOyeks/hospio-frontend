@@ -1121,6 +1121,12 @@ export const CommPlan = z.object({
 	outstanding: num,
 	openInvoices: z.number(),
 	onlinePayment: z.boolean(),
+	/** Per channel (19 Nov 2026): off = never sent, never charged. Older servers send only `enabled` (both follow it). */
+	emailOn: z.boolean().nullable().optional(),
+	whatsappOn: z.boolean().nullable().optional(),
+	/** The business has no charges yet (before its charges start date): messages go at ₦0. */
+	freePeriod: z.boolean().nullable().optional(),
+	chargesStartOn: z.string().nullable().optional(),
 });
 export const CommInvoice = z.object({
 	id: z.string(),
@@ -1168,6 +1174,8 @@ export const CommMessage = z.object({
 	subject: z.string().nullable(),
 	status: z.string(),
 	price: num.nullable(),
+	/** Sent before the business's charges start date: ₦0. */
+	freePeriod: z.boolean().nullable().optional(),
 });
 const pageOf = <T extends z.ZodTypeAny>(row: T) =>
 	z.object({
@@ -1838,7 +1846,11 @@ export const schema = createSchema({
 	},
 	"@get/messaging/billing/messages": { output: envelope(CommPlan) },
 	"@put/messaging/billing/messages": {
-		input: z.object({ enabled: z.boolean() }),
+		input: z.object({
+			enabled: z.boolean().optional(),
+			emailOn: z.boolean().optional(),
+			whatsappOn: z.boolean().optional(),
+		}),
 		output: envelope(CommPlan),
 	},
 	"@get/messaging/billing/messages/this-month": {
@@ -1885,6 +1897,8 @@ export const schema = createSchema({
 		input: z.object({
 			businessId: z.string(),
 			enabled: z.boolean().optional(),
+			emailOn: z.boolean().optional(),
+			whatsappOn: z.boolean().optional(),
 			email: z.number().nullable().optional(),
 			whatsapp: z.number().nullable().optional(),
 			useDefaults: z.boolean().optional(),

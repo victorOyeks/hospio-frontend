@@ -1,11 +1,12 @@
 "use client";
 
-import { CalendarClockIcon, CreditCardIcon, FileTextIcon, ReceiptIcon } from "lucide-react";
+import { CalendarClockIcon, CreditCardIcon, FileTextIcon, GiftIcon, ReceiptIcon } from "lucide-react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import {
+	type ChargesBannerView,
 	confirmInvoicePayment,
 	type InvoiceRowView,
 	type InvoiceView,
@@ -50,10 +51,12 @@ export function BillingScreen({
 	invoices,
 	error,
 	audience = "owner",
+	charges = null,
 }: {
 	invoices: InvoiceRowView[];
 	error: string | null;
 	audience?: "owner" | "manager";
+	charges?: ChargesBannerView | null;
 }) {
 	const words = useWording();
 	const router = useRouter();
@@ -159,6 +162,7 @@ export function BillingScreen({
 				</Link>
 			</PageHeader>
 			{error && <Note tone="danger">{error}</Note>}
+			{charges && <ChargesBanner charges={charges} />}
 			{restricted && (
 				<Note tone="danger">
 					Card/transfer POS payments, new sales and new bookings are paused until the unpaid invoice is paid.
@@ -271,5 +275,35 @@ export function BillingScreen({
 				)}
 			</SidePanel>
 		</>
+	);
+}
+
+/**
+ * When Hospio360's platform fee applies (hospio-backend docs/plan-monthly-invoices.md, "Free until charges start"): FREE (no date
+ * set: nothing is charged until Hospio360 sets one), STARTS (a date ahead) or BILLING (it has started). The server words it.
+ */
+function ChargesBanner({ charges }: { charges: ChargesBannerView }) {
+	const free = charges.state === "FREE" || charges.state === "STARTS";
+	return (
+		<section
+			aria-label="When charges start"
+			className={cn(
+				"flex items-start gap-3 rounded-card border px-4 py-3",
+				free ? "border-success/30 bg-success-soft" : "border-line bg-card",
+			)}
+		>
+			<span
+				className={cn(
+					"flex size-9 shrink-0 items-center justify-center rounded-lg",
+					free ? "bg-card text-success" : "bg-brand-soft text-brand",
+				)}
+			>
+				{free ? <GiftIcon className="size-4" /> : <CalendarClockIcon className="size-4" />}
+			</span>
+			<div className="min-w-0">
+				<p className={cn("text-[14px] font-semibold", free ? "text-success" : "text-ink")}>{charges.title}</p>
+				{charges.message && <p className="mt-0.5 text-[13px] text-ink-2">{charges.message}</p>}
+			</div>
+		</section>
 	);
 }

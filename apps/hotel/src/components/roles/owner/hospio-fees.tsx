@@ -70,7 +70,7 @@ function recentMonths() {
 const day = (d: string, long = false) =>
 	new Date(`${d}T12:00:00`).toLocaleDateString("en-GB", long ? { weekday: "long", day: "numeric", month: "long", year: "numeric" } : { weekday: "short", day: "numeric", month: "short" });
 
-/** ACCRUED: waiting for the month's invoice; INVOICED: on an invoice not paid yet; PAID: the invoice is paid. */
+/** FREE: before the charges start date (no platform fee; devices still billed). ACCRUED: waiting for the month's invoice; INVOICED: on an invoice not paid yet; PAID: the invoice is paid. */
 function status(s: string) {
 	switch (s) {
 		case "ACCRUED":
@@ -83,6 +83,8 @@ function status(s: string) {
 			return <StatusPill tone="info">Statement only</StatusPill>;
 		case "NO_FEE":
 			return <StatusPill tone="grey">No fee</StatusPill>;
+		case "FREE":
+			return <StatusPill tone="success">Free</StatusPill>;
 		default:
 			return <StatusPill tone="grey">{s.charAt(0) + s.slice(1).toLowerCase().replace(/_/g, " ")}</StatusPill>;
 	}
@@ -154,6 +156,9 @@ export function HospioFees({
 	const sales = days.reduce((s, d) => s + d.sales, 0);
 	const fees = days.reduce((s, d) => s + d.fee, 0);
 	const deviceShare = days.reduce((s, d) => s + (d.deviceFee ?? 0), 0);
+	const freeDays = days.filter((d) => d.status === "FREE");
+	const waived = freeDays.reduce((s, d) => s + (d.waivedFee ?? 0), 0);
+	const allFree = days.length > 0 && freeDays.length === days.length;
 	const hotels = new Set(days.map((d) => d.hotelId)).size;
 	const anyDevice = days.some((d) => (d.deviceFee ?? 0) > 0 || (d.deviceCarriedIn ?? 0) > 0);
 	const supplied = devices.filter((p) => p.paymentOption !== "OWN_DEVICES" || p.dataPlanMonthly > 0);
@@ -186,9 +191,28 @@ export function HospioFees({
 					Billing &amp; invoices
 				</Link>
 			</Note>
+			{freeDays.length > 0 && (
+				<Note tone="success">
+					{allFree ? "Every day here is free" : `${freeDays.length} of these days are free`}: no platform fee before your charges start date
+					{waived > 0 ? ` (${naira(waived)} not charged)` : ""}. Devices are still billed.
+				</Note>
+			)}
 			<div className="grid grid-cols-1 gap-4 md:grid-cols-3">
 				<KpiCard label="Sales" value={naira(sales)} icon={BanknoteIcon} hint="VAT excluded" />
-				<KpiCard label="Hospio fees" value={naira(fees)} icon={ReceiptIcon} hint={days[0] ? `${days[0].rate} % of sales` : undefined} />
+				<KpiCard
+					label="Hospio fees"
+					value={naira(fees)}
+					icon={ReceiptIcon}
+					hint={
+						allFree
+							? "Free · no charges yet"
+							: freeDays.length > 0
+								? `${freeDays.length} free day${freeDays.length === 1 ? "" : "s"} · ${days.find((d) => d.status !== "FREE")?.rate ?? days[0].rate} % of sales after`
+								: days[0]
+									? `${days[0].rate} % of sales`
+									: undefined
+					}
+				/>
 				<KpiCard
 					label={deviceShare > 0 ? "Devices from sales" : "Invoice"}
 					value={deviceShare > 0 ? naira(deviceShare) : billedIn}
@@ -272,7 +296,12 @@ export function HospioFees({
 										<td className={cell}>{day(d.date)}</td>
 										{hotels > 1 && <td className={cell}>{d.hotelName ?? "—"}</td>}
 										<td className={cell}>{naira(d.sales)}</td>
-										<td className={cell}>{naira(d.fee)}</td>
+										<td className={cell}>
+											{naira(d.fee)}
+											{d.status === "FREE" && (d.waivedFee ?? 0) > 0 && (
+												<span className="block text-xs text-ink-3">free · would have been {naira(d.waivedFee ?? 0)}</span>
+											)}
+										</td>
 										{anyDevice && <td className={cell}>{(d.deviceFee ?? 0) > 0 ? naira(d.deviceFee ?? 0) : "—"}</td>}
 										<td className={cell}>{status(d.status)}</td>
 									</tr>
@@ -304,7 +333,12 @@ export function HospioFees({
 						<DetailList
 							columns={2}
 							items={[
-								{ label: `Fee at ${open.rate} %`, value: naira(open.fee) },
+								open.status === "FREE"
+									? { label: "Fee", value: `${naira(0)} · free (before charges start)` }
+									: { label: `Fee at ${open.rate} %`, value: naira(open.fee) },
+								...(open.status === "FREE" && (open.waivedFee ?? 0) > 0
+									? [{ label: `Would have been at ${open.rate} %`, value: naira(open.waivedFee ?? 0) }]
+									: []),
 								...((open.carriedIn ?? 0) > 0 ? [{ label: "From earlier days", value: naira(open.carriedIn ?? 0) }] : []),
 								...((open.deviceFee ?? 0) > 0 || (open.deviceCarriedIn ?? 0) > 0
 									? [
@@ -318,7 +352,11 @@ export function HospioFees({
 							]}
 						/>
 						<Note tone="info">
-							{open.status === "PAID"
+							{open.status === "FREE"
+								? (open.deviceFee ?? 0) > 0
+									? `Free day: no platform fee. Only the device share is billed, on the ${monthOf(open.date)} invoice.`
+									: "Free day: before your charges start date, nothing is billed for it."
+								: open.status === "PAID"
 								? `Paid with the ${monthOf(open.date)} invoice.`
 								: open.status === "INVOICED"
 									? `On the ${monthOf(open.date)} invoice, not paid yet.`

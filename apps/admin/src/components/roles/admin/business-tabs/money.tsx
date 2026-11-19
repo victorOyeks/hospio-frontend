@@ -31,6 +31,7 @@ import { cn } from "@hospio/ui/utils";
 import { optionLabel, PackageProgress, packageStatus } from "../devices/device-package";
 import { howPaidLabel, throughPos } from "../shared";
 import { InvoicesTab } from "../invoices";
+import { ChargesStartCard } from "../business/charges-start";
 import { BusinessTabHeader } from "./nav";
 
 const feeTone = {
@@ -51,6 +52,7 @@ const dailyTone: Record<string, "success" | "info" | "grey" | "brand" | "warning
 	PAID: "success",
 	SHADOW: "info",
 	NO_FEE: "grey",
+	FREE: "success",
 };
 const dailyLabel: Record<string, string> = {
 	ACCRUED: "for this month's invoice",
@@ -58,6 +60,7 @@ const dailyLabel: Record<string, string> = {
 	PAID: "paid",
 	SHADOW: "statement only",
 	NO_FEE: "no fee",
+	FREE: "free",
 };
 
 const billingState: Record<string, { label: string; tone: "success" | "warning" | "danger" | "grey" }> = {
@@ -190,6 +193,7 @@ export function MoneyTab({
 					</>
 				)}
 			</div>
+			<ChargesStartCard businessId={businessId} />
 			{daily && (
 				<section className="flex flex-col gap-3" data-testid="business-invoices">
 					<div className="flex flex-wrap items-center gap-2">

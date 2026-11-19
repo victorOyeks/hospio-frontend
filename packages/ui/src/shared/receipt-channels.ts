@@ -47,6 +47,14 @@ export function receiptWentOut(outcome?: string | null) {
 
 /** The hotel's guest messages are off (or suspended): the words for it, telling a manager where to turn them on. */
 export function guestMessagesOffText(canSetup: boolean, reason?: string | null) {
+	// Per channel (19 Nov 2026): "WhatsApp is switched off for this hotel …" / "Email is switched off …" ("WhatsApp" keeps its capitals).
+	const channelOff = reason ? /\b(WhatsApp|Email) is switched off\b/i.exec(reason) : null;
+	if (channelOff) {
+		const name = channelOff[1].toLowerCase() === "email" ? "Email" : "WhatsApp";
+		return canSetup
+			? `${name} is switched off for this hotel. Turn it on in Hotel setup → Guest messages.`
+			: `${name} is switched off for this hotel. Ask your manager to turn it on.`;
+	}
 	if (reason && /suspended/i.test(reason)) {
 		return `guest messages are on hold (${reason.replace(/^Not sent: /, "").replace(/^Guest messages are suspended: /, "")})`;
 	}

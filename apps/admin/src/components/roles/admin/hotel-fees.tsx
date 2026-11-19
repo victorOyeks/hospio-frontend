@@ -61,6 +61,8 @@ export function feeStatus(status: string) {
 			return <StatusPill tone="info">Statement only</StatusPill>;
 		case "NO_FEE":
 			return <StatusPill tone="grey">No fee</StatusPill>;
+		case "FREE":
+			return <StatusPill tone="success">Free (before charges start)</StatusPill>;
 		default:
 			return <StatusPill tone="grey">{status.charAt(0) + status.slice(1).toLowerCase().replace(/_/g, " ")}</StatusPill>;
 	}

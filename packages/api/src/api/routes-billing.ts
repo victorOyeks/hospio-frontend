@@ -170,6 +170,60 @@ export const IssueRun = z.object({
 	notes: z.array(z.string()),
 });
 
+/**
+ * "Free until charges start" (hospio-backend docs/plan-monthly-invoices.md): each business's charges start date. No date = FREE (no
+ * platform fee; devices are still billed); a date in the future = STARTS; on or before today = BILLING.
+ */
+export const ChargesStartRow = z.object({
+	businessId: z.string(),
+	chargesStartOn: str,
+	state: z.string(),
+	label: z.string(),
+});
+
+export const ChargesStartHistory = z.object({
+	id: z.string(),
+	createdAt: str,
+	madeByName: str,
+	description: str,
+	reason: str,
+	before: str,
+	after: str,
+});
+
+export const ChargesStartView = z.object({
+	businessId: z.string(),
+	chargesStartOn: str,
+	state: z.string(),
+	label: z.string(),
+	ratePct: num,
+	canEdit: z.boolean(),
+	setByName: str,
+	setAt: str,
+	reason: str,
+	history: z.array(ChargesStartHistory).nullable().optional(),
+});
+
+const DayCount = z.object({ days: z.number(), fee: z.number() });
+
+export const ChargesStartPreview = z.object({
+	current: str,
+	proposed: str,
+	earlier: z.boolean(),
+	toBill: DayCount,
+	toFree: DayCount,
+	message: str,
+});
+
+/** The owner's / manager's banner on Billing & invoices. */
+export const ChargesBanner = z.object({
+	state: z.string(),
+	chargesStartOn: str,
+	ratePct: num,
+	title: z.string(),
+	message: str,
+});
+
 const id = z.object({ id: z.string() });
 const adminQuery = z.object({ status: z.string().optional(), month: z.string().optional(), businessId: z.string().optional() });
 
@@ -184,6 +238,7 @@ export const billingRoutes = {
 		input: z.object({ returnUrl: z.string() }),
 		output: envelope(BillingCheckout),
 	},
+	"@get/platform/billing/charges": { output: envelope(ChargesBanner) },
 	"@post/platform/billing/payments/confirm": {
 		query: z.object({ reference: z.string() }),
 		output: envelope(MonthlyInvoice),
@@ -226,5 +281,21 @@ export const billingRoutes = {
 	"@get/platform/admin/businesses/:businessId/billing": {
 		params: z.object({ businessId: z.string() }),
 		output: envelope(BusinessBilling),
+	},
+	// ---- charges start date (free until then) ----
+	"@get/platform/admin/billing/charges-start": { output: envelope(z.object({ rows: z.array(ChargesStartRow) })) },
+	"@get/platform/admin/businesses/:businessId/charges-start": {
+		params: z.object({ businessId: z.string() }),
+		output: envelope(ChargesStartView),
+	},
+	"@get/platform/admin/businesses/:businessId/charges-start/preview": {
+		params: z.object({ businessId: z.string() }),
+		query: z.object({ date: z.string().optional() }),
+		output: envelope(ChargesStartPreview),
+	},
+	"@put/platform/admin/businesses/:businessId/charges-start": {
+		params: z.object({ businessId: z.string() }),
+		input: z.object({ chargesStartOn: z.string().nullable(), reason: z.string(), confirmEarlier: z.boolean().optional() }),
+		output: envelope(ChargesStartView),
 	},
 };
