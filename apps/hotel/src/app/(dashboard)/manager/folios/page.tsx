@@ -4,7 +4,7 @@ import { data } from "@hospio/api/data";
 
 export const dynamic = "force-dynamic";
 
-/** Manager · Folios: open folios, guest folio, post charge, discount/void, split, transfer, print/email. */
+/** Manager · Folios: open folios, guest folio, post charge, discount/void, split, transfer, email/copy (and the folio PDF). */
 export default async function FoliosPage() {
 	const [hotel, folios, bookings] = await Promise.all([
 		getActiveHotel(),

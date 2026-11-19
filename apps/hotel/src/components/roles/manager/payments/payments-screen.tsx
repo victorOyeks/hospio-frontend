@@ -295,10 +295,7 @@ export function PaymentsScreen({
 												resendReceipt(p.id),
 												`Receipt for ${p.guestName}`,
 											),
-										(r) =>
-											r.sentVia === "WHATSAPP"
-												? `Receipt sent on WhatsApp to ${r.sentTo}`
-												: `Receipt emailed to ${r.sentTo}`,
+										(r) => `Receipt sent on WhatsApp to ${r.sentTo}`,
 									),
 								disabled: p.status !== "APPROVED",
 							},

@@ -114,8 +114,8 @@ Use your own inbox (a gmail you read) wherever a step says "your address".
   soon)".
 - Every invite card (onboarding step 4, manager Staff, owner Users and Staff, admin team and marketers) says "The invite
   was emailed to <address>. SMS and WhatsApp invites are coming soon." The phone field is optional.
-- Take payment, Record payment and the folio's "Print or email the folio" offer Email (sent for real) or Print;
-  WhatsApp (and SMS on take payment) are greyed "coming soon". "Email receipt again" says "Receipt emailed to …".
+- The folio's "Email or copy the folio" offers Email (sent for real) or Copy. Take payment and Record payment offer
+  only WhatsApp or Don't send for the receipt. (Changed 19 Nov 2026: see 71-whatsapp-receipts-no-printing.md.)
 - Phone verification at sign-up still shows the code on screen.
 
 ## Known limits

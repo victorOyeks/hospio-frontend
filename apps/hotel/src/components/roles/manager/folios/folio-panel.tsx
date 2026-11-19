@@ -1,6 +1,6 @@
 "use client";
 
-import { CreditCardIcon, MailIcon, PhoneIcon, PlusIcon, PrinterIcon, ReceiptIcon, ScissorsIcon, ArrowRightLeftIcon } from "lucide-react";
+import { CreditCardIcon, MailIcon, PhoneIcon, PlusIcon, ReceiptIcon, ScissorsIcon, ArrowRightLeftIcon } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
 import { Button } from "@hospio/ui/primitives/button";
@@ -33,7 +33,7 @@ export function FolioPanel({ folio: f, onClose, onAction, onReplace }: { folio: 
 			<SidePanel open width="lg" onOpenChange={(o) => !o && onClose()} title={`${f.guestName} · ${f.roomNumber}`} subtitle={<span className="flex items-center gap-2">Folio {f.reference}{f.organizationName ? ` · ${f.organizationName}` : ""} <StatusPill tone={status.tone}>{status.label}</StatusPill></span>} icon={ReceiptIcon}
 				footerInfo={`Opened ${fmtWhen(f.openedAt)}${f.closedAt ? ` · closed ${fmtWhen(f.closedAt)}` : ""}`}
 				footer={<>
-					<Button variant="outline" className={btn.secondary} onClick={() => onAction("print")}><PrinterIcon className="size-4" /> Print / email</Button>
+					<Button variant="outline" className={btn.secondary} onClick={() => onAction("print")}><MailIcon className="size-4" /> Email / copy</Button>
 					{f.balance > 0 && <Button className={btn.primary} onClick={() => onAction("payment")}><CreditCardIcon className="size-4" /> Record payment</Button>}
 					{isOpen && f.balance <= 0 && <Button asChild className={btn.primary}><Link href={`/dashboard/bookings?open=${f.bookingId}&action=check-out`}>Check out</Link></Button>}
 				</>}

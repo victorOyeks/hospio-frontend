@@ -1,4 +1,4 @@
-/** A printable receipt as the receipt page renders it (plain module: the server builds it, the client prints and emails it). */
+/** A receipt as the receipt page renders it (plain module: the server builds it; managers save it as a PDF, guests get theirs on WhatsApp). */
 export type ReceiptDoc = {
 	kind: "payment" | "sale" | "folio";
 	/** What Email receipt names: the payment, the sale (order) or the folio. */
@@ -13,6 +13,8 @@ export type ReceiptDoc = {
 	issuedAt: string;
 	guest?: string;
 	guestEmail?: string;
+	/** The guest's phone (one payment's receipt), for Send on WhatsApp. */
+	guestPhone?: string;
 	room?: string;
 	servedBy?: string;
 	lines: {
@@ -36,7 +38,7 @@ export type ReceiptDoc = {
 	}[];
 	paid: number;
 	balance: number;
-	/** Why there is nothing to print, when there isn't. */
+	/** Why there is no receipt to show, when there isn't. */
 	empty?: string;
 };
 

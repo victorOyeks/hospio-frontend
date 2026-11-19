@@ -1048,6 +1048,8 @@ export const PaymentResponse = z.object({
 	hotelId: z.string().nullable().optional(),
 	/** The POS's name ("Front desk POS"): which terminal the payment went to. */
 	terminalName: z.string().nullable().optional(),
+	/** The guest's phone, for Send receipt on WhatsApp. */
+	guestPhone: z.string().nullable().optional(),
 });
 
 export const Notification = z.object({
@@ -1774,6 +1776,22 @@ export const schema = createSchema({
 	"@post/payment/payments/:id/verify": { output: envelope(PaymentResponse) },
 	"@post/payment/payments/:id/retry": { output: envelope(PaymentResponse) },
 	"@post/payment/payments/:id/receipt/resend": {
+		output: envelope(
+			z.object({
+				receiptNumber: z.string(),
+				sentTo: z.string(),
+				sentVia: z.string(),
+				deliveries: Deliveries,
+			}),
+		),
+	},
+	/** A payment's receipt on WhatsApp (the only way a payment receipt goes out): channel WHATSAPP, phone when the payment has none. */
+	"@post/payment/receipts/send": {
+		input: z.object({
+			paymentId: z.string(),
+			channel: z.literal("WHATSAPP"),
+			phone: z.string().optional(),
+		}),
 		output: envelope(
 			z.object({
 				receiptNumber: z.string(),

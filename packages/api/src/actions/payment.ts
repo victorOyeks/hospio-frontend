@@ -18,7 +18,7 @@ export type RecordPaymentInput = {
 	guestPhone?: string;
 	guestEmail?: string;
 	description?: string;
-	receipt?: "WHATSAPP" | "EMAIL" | "NONE";
+	receipt?: "WHATSAPP" | "NONE";
 	/** The kitchen or bar order this payment settles; the order closes itself when the payment is approved. */
 	orderId?: string;
 	/** The desk taking the payment (KITCHEN, BAR, …): must be one of the caller's roles. */
@@ -82,8 +82,8 @@ export async function recordPayment(
 			guestPhone: input.guestPhone ?? null,
 			guestEmail: input.guestEmail ?? null,
 			description: input.description ?? "Room charges",
-			// Email when the guest has one, else WhatsApp (the receipt template) when they have a phone; "NONE" sends nothing.
-			receiptPreference: input.receipt ?? "EMAIL",
+			// WhatsApp (the receipt template) to the guest's phone when there is one; "NONE" sends nothing. Never printed or emailed.
+			receiptPreference: input.receipt ?? "WHATSAPP",
 			orderId: input.orderId ?? null,
 			role: input.role ?? null,
 			terminalId: input.method === "CASH" ? null : (input.terminalId ?? null),
@@ -541,9 +541,45 @@ export async function openSupportTicket(input: {
 }
 
 /**
- * Resend receipt: payment-service sends the approved payment's receipt to the guest again, by email when the payment has
- * one, else on WhatsApp (the approved receipt template) when it has a phone, as the automatic receipt does. On staging the
- * delivery comes back for the deliveries panel.
+ * Send the receipt on WhatsApp (take payment, My payments, a sale, a split bill's part): payment-service sends the approved
+ * payment's receipt to `phone` (kept on the payment when it had none), else to the phone the payment has, as the approved
+ * hospio_payment_receipt_v2 template. Payment receipts are never printed or emailed (hospio-backend docs/whatsapp-receipts.md).
+ */
+export async function sendReceipt(input: {
+	paymentId: string;
+	phone?: string | null;
+}): Promise<
+	ActionResult<{
+		receiptNumber: string;
+		sentTo: string;
+		sentVia: string;
+		deliveries?: Delivery[] | null;
+	}>
+> {
+	if (!live("payment"))
+		return { ok: false, error: "Receipts are not connected in demo mode" };
+	const phone = input.phone?.trim();
+	const { data, error } = await api("@post/payment/receipts/send", {
+		...(await withSession()),
+		body: {
+			paymentId: input.paymentId,
+			channel: "WHATSAPP",
+			...(phone ? { phone } : {}),
+		},
+	});
+	if (error || !data)
+		return {
+			ok: false,
+			error: errorMessage(error, "The receipt could not be sent"),
+		};
+	refreshPayments();
+	return { ok: true, data: data.data };
+}
+
+/**
+ * Send receipt again (managers and finance): payment-service sends the approved payment's receipt to the guest again on
+ * WhatsApp (the approved receipt template) to the phone the payment has. On staging the delivery comes back for the
+ * deliveries panel.
  */
 export async function resendReceipt(paymentId: string): Promise<
 	ActionResult<{

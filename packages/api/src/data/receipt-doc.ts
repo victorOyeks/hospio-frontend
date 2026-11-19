@@ -48,6 +48,7 @@ export async function buildReceipt(q: {
 			issuedAt: p.paidAt ?? p.issuedAt ?? new Date().toISOString(),
 			guest: p.guestName,
 			guestEmail: p.guestEmail,
+			guestPhone: p.guestPhone ?? undefined,
 			servedBy: p.takenBy,
 			lines: [{ label: p.description || "Payment", amount: p.amount }],
 			subtotal: p.amount,

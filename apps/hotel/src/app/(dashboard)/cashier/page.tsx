@@ -7,7 +7,7 @@ export const dynamic = "force-dynamic";
 /**
  * Cashier · To pay (hospio-backend docs/plan-venue-type.md, phase 3): every open tab and sale of the location that still owes
  * money, whoever opened it, each with its outlet. The cashier takes the payment (cash into the cashier till, card or transfer on
- * the outlet's POS) and prints the receipt; nothing is rung up or taken off here.
+ * the outlet's POS) and sends the receipt on WhatsApp; nothing is rung up or taken off here.
  */
 export default async function CashierHome() {
 	const desk = await deskOutlets("CASHIER");

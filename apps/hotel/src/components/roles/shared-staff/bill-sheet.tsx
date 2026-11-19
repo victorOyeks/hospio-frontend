@@ -8,7 +8,6 @@ import {
 	GiftIcon,
 	KeyRoundIcon,
 	PercentIcon,
-	PrinterIcon,
 	ReceiptIcon,
 	RotateCwIcon,
 	SplitIcon,
@@ -42,6 +41,7 @@ import { StatusPill } from "@hospio/ui/shared/status-pill";
 import { cn } from "@hospio/ui/utils";
 import { OrderPaymentPanel } from "./pos-payment";
 import { BigButton, Stepper } from "./tablet";
+import { WhatsAppReceiptButton } from "@/components/receipt/whatsapp-receipt";
 import { usePlaceText } from "@hospio/ui/shared/wording";
 
 type PayDesk = "BAR" | "KITCHEN" | "MANAGER" | "OWNER" | "WAITER" | "CASHIER";
@@ -259,14 +259,6 @@ export function BillSheet({
 				}
 				footer={
 					<>
-						{bill && bill.payments.length > 0 && o && (
-							<BigButton
-								tone="secondary"
-								onClick={() => window.open(`/receipt?sale=${encodeURIComponent(o.id)}`, "_blank", "noopener")}
-							>
-								<PrinterIcon className="size-5" /> Receipts
-							</BigButton>
-						)}
 						{can?.split && desk && (
 							<BigButton tone="secondary" onClick={() => setSplitOpen(true)}>
 								<SplitIcon className="size-5" /> Split the bill
@@ -548,14 +540,13 @@ export function BillSheet({
 														{(p.tip ?? 0) > 0 ? ` · plus a ${nairaExact(p.tip)} tip` : ""}
 													</p>
 												</div>
-												<BigButton
-													tone="ghost"
-													onClick={() =>
-														window.open(`/receipt?payment=${encodeURIComponent(p.paymentId)}`, "_blank", "noopener")
-													}
-												>
-													<PrinterIcon className="size-5" /> Receipt
-												</BigButton>
+												{/* Each part's receipt goes to its payer on WhatsApp (no printing, no email). */}
+												<WhatsAppReceiptButton
+													paymentId={p.paymentId}
+													guestName={part?.label ?? o?.guestName}
+													label="WhatsApp receipt"
+													className="h-11"
+												/>
 											</li>
 										);
 									})}

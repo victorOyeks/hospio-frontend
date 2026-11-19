@@ -94,7 +94,7 @@ export const demoSetupExtras: HotelSetupSection[] = [
 		{ key: "apiKey", label: "Provider key", type: "text", value: "mp_live_••••••••••••7f2a", help: "Only Hospio360 support can replace this" },
 		{ key: "terminals", label: "Terminals", type: "list", value: ["Front desk POS · MP-2201-FD", "Bar POS · MP-2202-BAR", "Laundry POS · OP-9931-LDY"] },
 		{ key: "offlineCash", label: "Allow cash when a terminal is offline", type: "toggle", value: true },
-		{ key: "receiptChannel", label: "Default receipt channel", type: "select", value: "WhatsApp", options: ["WhatsApp", "Email", "None"] },
+		{ key: "receiptChannel", label: "Default receipt channel", type: "select", value: "WhatsApp", options: ["WhatsApp", "None"] },
 	] },
 	{ key: "reasons", title: "Reasons & lists", description: "The reason lists staff pick from when they cancel, discount, void or write off", icon: "list", fields: [
 		{ key: "cancel", label: "Cancellation reasons", type: "list", value: ["Guest changed plans", "Double booking", "No-show", "Hotel could not host"] },
