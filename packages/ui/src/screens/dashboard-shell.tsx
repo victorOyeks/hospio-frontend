@@ -41,6 +41,7 @@ import {
 	tokenIsStale,
 } from "@hospio/api/session-refresh";
 import { cn } from "@hospio/ui/utils";
+import { roleLabel } from "@hospio/api/roles";
 import { brandStyle, encodeBrandCookie } from "@hospio/api/brand";
 import { RememberBrand } from "@hospio/ui/shared/remember-brand";
 import { DraftUser } from "@hospio/ui/shared/draft";
@@ -247,6 +248,7 @@ export async function DashboardShell({ children }: PropsWithChildren) {
 						activeHotel={activeHotel}
 						brandLogo={brand?.logoUrl ?? null}
 						badges={badges}
+						person={APP === "admin" ? { name: user.fullName, role: roleLabel(role) } : null}
 						supervisor={
 							role !== "HOUSEKEEPING" || isHousekeepingSupervisor(session)
 						}

@@ -50,7 +50,13 @@ function Panel() {
 
 	return (
 		<>
-			<button type="button" onClick={() => setOpen(true)} className="fixed bottom-3 left-3 z-[60] rounded-full bg-neutral-900 px-3 py-1.5 font-mono text-xs font-semibold text-white shadow-lg hover:bg-neutral-700">
+			{/* Bottom-right, small and faded until hovered: clear of the sidebar's menu and person row (it sat over the last link). */}
+			<button
+				type="button"
+				onClick={() => setOpen(true)}
+				title="Staging API log: the backend calls made for this session"
+				className="fixed bottom-[12px] right-[12px] z-[60] rounded-full bg-neutral-900/80 px-[10px] py-[4px] font-mono text-[11px] font-semibold text-white opacity-60 shadow-md transition-opacity hover:bg-neutral-800 hover:opacity-100 focus-visible:opacity-100"
+			>
 				API
 			</button>
 			{open && (
