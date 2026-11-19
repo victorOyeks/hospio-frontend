@@ -710,6 +710,7 @@ function AddStaffPanel({
 	ownerName: string;
 	onClose: () => void;
 }) {
+	const words = useWording();
 	const tb = useBizText();
 	const { run, pending } = useAction();
 	const [created, setCreated] = useState<UserCreated | null>(null);
@@ -851,7 +852,7 @@ function AddStaffPanel({
 							type="email"
 							value={form.email}
 							onChange={(v) => set("email", v)}
-							placeholder="name@hotel.com"
+							placeholder="name@example.com"
 							hint="They sign in with this"
 							required
 						/>
@@ -886,7 +887,7 @@ function AddStaffPanel({
 							label="Job title"
 							value={form.jobTitle}
 							onChange={(v) => set("jobTitle", v)}
-							placeholder="e.g. Room attendant"
+							placeholder={words.anyStays ? "e.g. Room attendant" : "e.g. Head waiter"}
 						/>
 					</FieldRow>
 					<StaffOutletsField

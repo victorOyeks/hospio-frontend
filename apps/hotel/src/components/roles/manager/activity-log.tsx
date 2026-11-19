@@ -29,7 +29,7 @@ import { exportActivity } from "@hospio/api/actions/ml";
 import { ACTIVITY_DEPARTMENTS } from "@hospio/api/data/activity-labels";
 import type { PageResult } from "@hospio/api/data/paging";
 import type { ActivityRow } from "@hospio/api/data/types";
-import { usePlaceText } from "@hospio/ui/shared/wording";
+import { usePlaceText, useWording } from "@hospio/ui/shared/wording";
 
 const linkFor = (a: ActivityRow) => {
 	const t = a.eventType.toLowerCase();
@@ -100,6 +100,7 @@ export function ActivityLogScreen({
 	/** The entry in `?open=` when it is not on this page. */
 	opened?: ActivityRow | null;
 }) {
+	const words = useWording();
 	const t = usePlaceText();
 	const router = useRouter();
 	const list$ = useListParams({ extra: ["department"] });
@@ -230,7 +231,7 @@ export function ActivityLogScreen({
 						<SearchBox
 							value={list$.search}
 							onChange={list$.setSearch}
-							placeholder="Search people, rooms, amounts…"
+							placeholder={words.stays ? "Search people, rooms, amounts…" : "Search people, amounts…"}
 						/>
 						<FilterSelect
 							value={list$.params.department ?? ""}

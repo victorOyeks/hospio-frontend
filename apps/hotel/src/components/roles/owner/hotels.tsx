@@ -769,7 +769,7 @@ export function AddHotelWizard({
 					? stay
 						? "Rooms and the manager's login are in"
 						: "Created with the manager's login, if you invited one"
-					: `Step ${step + 1} of ${steps.length} · ${steps[step]}`
+					: `Step ${step + 1} of ${steps.length} · ${!stay && step === 2 ? "Rooms (none)" : steps[step]}`
 			}
 			icon={BuildingIcon}
 			width="md"

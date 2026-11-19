@@ -215,7 +215,7 @@ export function GuestInbox({
 						<SearchBox
 							value={list.search}
 							onChange={list.setSearch}
-							placeholder="Guest, room, booking…"
+							placeholder={words.stays ? "Guest, room, booking…" : "Guest, phone, email…"}
 						/>
 					</div>
 				)}
