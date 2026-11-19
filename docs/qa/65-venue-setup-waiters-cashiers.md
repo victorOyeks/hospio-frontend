@@ -7,7 +7,7 @@ Phase 3 of lounges, bars and restaurants (hospio-backend `docs/plan-venue-type.m
 1. **"Lounge / bar / restaurant" setup.** Every location without rooms starts from it by itself, in admin onboarding and in the
    owner's sign-up (hotels keep the Standard hotel setup). It sets: tabs on with a ₦100,000 limit, a tab flagged when open over 4
    hours, a tab needs the guest's name or a table, waiters don't take payment, cash/card/transfer, till float ₦10,000, receipts
-   printed, VAT 7.5 % included, no service charge, guest messages receipts only, opening hours 10:00 to 02:00, a receipt footer, the
+   on WhatsApp, VAT 7.5 % included, no service charge, guest messages receipts only, opening hours 10:00 to 02:00, a receipt footer, the
    day closing at 04:00, and reasons for voids, cancellations and discounts that fit a sale. It stores **nothing** about stays
    (stay rules, housekeeping, check-in times, charge to a room): a venue that adds rooms later gets the hotel defaults for those and
    keeps everything else.
@@ -19,7 +19,7 @@ Phase 3 of lounges, bars and restaurants (hospio-backend `docs/plan-venue-type.m
    it is sent, can't change the menu or prices, has no till. Takes payment only when Hotel setup → Restaurant & bar → **Waiters
    take payment** is on, and cash only when **Waiters can take cash** is on too (it goes into the cashier's till).
 4. **Cashier.** Sees every open tab and sale at every outlet ("To pay"), takes the payment (cash into the cashier till, card or
-   transfer on the outlet's POS), prints or resends receipts, opens, closes and hands over the till. Can't ring anything up, add or
+   transfer on the outlet's POS), sends receipts on WhatsApp, opens, closes and hands over the till. Can't ring anything up, add or
    remove items, or change the menu or prices.
 5. Both roles are offered to hotels too (restaurant and bar), start at **Can edit**, have PIN tiles on shared devices, and show in
    Roles & Permissions, Add staff, onboarding People, the rota and Sales by staff.
@@ -54,7 +54,7 @@ Don't touch "Patio Lounge", real customers or the shared real-person accounts.
    green tick and the card reads "setup applied". Two outlets with the same name are refused.
 3. **Do:** sign in as that venue's manager → Hotel setup. **Expect:** Restaurant & bar: Bar tabs allowed on, Tab limit ₦100,000,
    Flag a tab open longer than 4, **A tab needs a name or a table** on, **Waiters take payment** off, **Waiters can take cash** off.
-   Location basics: Opens at 10:00, Closes at 02:00, the receipt footer. Money: till float ₦10,000, receipts Print. Guest messaging:
+   Location basics: Opens at 10:00, Closes at 02:00, the receipt footer. Money: till float ₦10,000, receipts WHATSAPP. Guest messaging:
    only "Send receipts automatically". Reasons & lists: "Rang up twice", "Sent back or spilled"… and no "No-show".
    Restaurants & tables: the outlets with Bar store / Kitchen store.
 4. **Do:** sign up as an owner on web-staging and pick **Restaurant** (QA 61 section 3). **Expect:** the same setup in Hotel setup
@@ -85,7 +85,7 @@ Waiters take payment **off** (the default). Tablet at 1024 or 820 wide.
 5. **Do (cashier):** **To pay**. **Expect:** "All outlets · to pay" with the Table 4 tab, its number and "Wale Waiter". Open it: only
    **Take payment**.
 6. **Do:** Take payment → Cash with the till closed. **Expect:** "Open your till first: cash taken at the cashier goes into the
-   cashier till…". Open **Till** → Open till (the float is ₦10,000 from Hotel setup) → take the cash again → print or skip the
+   cashier till…". Open **Till** → Open till (the float is ₦10,000 from Hotel setup) → take the cash again → WhatsApp or skip the
    receipt. **Expect:** the tab leaves To pay and My tabs; Till lists "Cash payment".
 7. **Do:** waiter 1 opens another tab with a name; cashier takes **Card on the POS**. **Expect:** it goes to the Bar test terminal
    (the cashier has no POS of their own, so the outlet's desk POS is used); approved → the tab closes.

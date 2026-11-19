@@ -1,6 +1,7 @@
 "use client";
 
-import { type ReceiptChoice, receiptOptions } from "@hospio/ui/shared/receipt-channels";
+import { defaultReceipt, type ReceiptChoice, receiptOptions } from "@hospio/ui/shared/receipt-channels";
+import { WhatsAppReceiptButton } from "@/components/receipt/whatsapp-receipt";
 import { AlertTriangleIcon, CreditCardIcon, RotateCcwIcon, WifiIcon } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -15,9 +16,8 @@ import { ManagerMark } from "@hospio/ui/shared/row-actions";
 import { PanelSection, SidePanel, WhatHappens } from "@hospio/ui/shared/side-panel";
 import { StatusPill } from "@hospio/ui/shared/status-pill";
 import { btn } from "@hospio/ui/shared/ui";
-import { approveRefund, declineRefund, linkTerminal, openDispute, reassignTerminal, recordPayment, removeTerminal, renameTerminal, requestProviderAccount, requestRefund, resendReceipt, resolveDispute, retryPayment, setTerminalStatus, type TerminalRole, verifyPayment } from "@hospio/api/actions/payment";
+import { approveRefund, declineRefund, linkTerminal, openDispute, reassignTerminal, recordPayment, removeTerminal, renameTerminal, requestProviderAccount, requestRefund, resolveDispute, retryPayment, setTerminalStatus, type TerminalRole, verifyPayment } from "@hospio/api/actions/payment";
 import { useAction } from "@hospio/api/actions/use-action";
-import { withDeliveries } from "@hospio/ui/shared/deliveries-store";
 import type { DisputeRow, FolioSummary, PaymentMethod, PaymentRow, RefundRow, TerminalRow } from "@hospio/api/data/types";
 import { methodLabel, paymentTone } from "./payments-screen";
 
@@ -31,8 +31,9 @@ export function PaymentPanel({ payment: p, onClose, onRefund, onDispute, onStatu
 		<SidePanel open onOpenChange={(o) => !o && onClose()} title={naira(p.amount)} subtitle={<span className="flex items-center gap-2">{p.reference} · {p.guestName} <StatusPill tone={paymentTone[p.status]}>{humanize(p.status)}</StatusPill></span>} icon={CreditCardIcon}
 			footerInfo={p.status === "APPROVED" ? `Receipt ${p.receiptSent === "NONE" ? "not sent" : `sent by ${p.receiptSent?.toLowerCase()}`}` : undefined}
 			footer={<>
-				{p.status === "APPROVED" && <a href={`/receipt?payment=${encodeURIComponent(p.id)}`} target="_blank" rel="noopener" className={btn.secondary}>Print receipt</a>}
-				{p.status === "APPROVED" && <Button variant="outline" className={btn.secondary} disabled={pending} onClick={() => run(() => withDeliveries(resendReceipt(p.id), `Receipt for ${p.guestName}`), (r) => (r.sentVia === "WHATSAPP" ? `Receipt sent on WhatsApp to ${r.sentTo}` : `Receipt emailed to ${r.sentTo}`))}>Send receipt again</Button>}
+				{/* The receipt as a document to keep (Save as PDF), for managers; the guest's copy goes on WhatsApp only. */}
+				{p.status === "APPROVED" && <a href={`/receipt?payment=${encodeURIComponent(p.id)}`} target="_blank" rel="noopener" className={btn.secondary}>Receipt PDF</a>}
+				{p.status === "APPROVED" && <WhatsAppReceiptButton paymentId={p.id} phone={p.guestPhone} guestName={p.guestName} label="Send on WhatsApp" />}
 				{p.status === "APPROVED" && <Button className={btn.primary} onClick={() => { onClose(); onRefund(p); }}><RotateCcwIcon className="size-4" /> Refund</Button>}
 				{(p.status === "DECLINED" || p.status === "FAILED") && (p.method === "CARD" || p.method === "TRANSFER") && <Button className={btn.primary} disabled={pending} onClick={retry}>Retry on POS</Button>}
 				{(p.status === "NO_RESPONSE" || p.status === "TIMED_OUT") && (p.method === "CARD" || p.method === "TRANSFER") && <Button variant="outline" className={btn.secondary} disabled={pending || live.pending} onClick={retry}>Retry on POS</Button>}
@@ -213,21 +214,21 @@ export function NewPaymentPanel({ open, folios, preselect, onClose, onSaved }: {
 	const [amount, setAmount] = useState<number | "">("");
 	const [method, setMethod] = useState<PaymentMethod>("CARD");
 	const [receipt, setReceipt] = useState<ReceiptChoice>("NONE");
-	useEffect(() => { if (open) { const f = folios.find((x) => x.id === preselect); setFolioId(f?.id ?? ""); setAmount(f ? f.balance : ""); setPayer(""); setReceipt(f?.guestEmail ? "EMAIL" : "NONE"); } }, [open, preselect, folios]);
+	useEffect(() => { if (open) { const f = folios.find((x) => x.id === preselect); setFolioId(f?.id ?? ""); setAmount(f ? f.balance : ""); setPayer(""); setReceipt(defaultReceipt(f?.guestPhone)); } }, [open, preselect, folios]);
 	const folio = folios.find((f) => f.id === folioId);
 	const name = folio?.guestName ?? payer;
 	return (
 		<SidePanel open={open} onOpenChange={(o) => !o && onClose()} title="Record a payment" subtitle="For a folio, or a walk-in sale without a room" icon={CreditCardIcon}
 			footerInfo={folio ? `${naira(folio.balance)} due on ${folio.roomNumber}` : undefined}
-			footer={<><Button variant="outline" className={btn.secondary} onClick={onClose}>Cancel</Button><Button className={btn.primary} disabled={pending || !name || amount === "" || amount <= 0} onClick={() => amount !== "" && run(() => recordPayment({ method, amount, folioId: folio?.id, guestName: name, guestEmail: folio?.guestEmail, guestPhone: folio?.guestPhone, description: desc, receipt: receipt === "EMAIL" ? "EMAIL" : "NONE" }), method === "CARD" ? "Sent to the front desk POS · waiting for the tap" : `${naira(amount)} recorded`, (r) => { onSaved({ id: r.id, reference: `PAY-${r.id.slice(0, 6).toUpperCase()}`, folioId: folio?.id, guestName: name, roomNumber: folio?.roomNumber, role: "MANAGER", takenBy: "You", method, amount, status: r.status, terminal: method === "CARD" ? "Front desk POS" : undefined, createdAt: new Date().toISOString(), resolvedAt: method === "CARD" ? undefined : new Date().toISOString(), receiptSent: receipt === "EMAIL" ? "EMAIL" : "NONE", description: desc }); onClose(); })}>{method === "CARD" ? "Send to POS" : "Record payment"}</Button></>}
+			footer={<><Button variant="outline" className={btn.secondary} onClick={onClose}>Cancel</Button><Button className={btn.primary} disabled={pending || !name || amount === "" || amount <= 0} onClick={() => amount !== "" && run(() => recordPayment({ method, amount, folioId: folio?.id, guestName: name, guestEmail: folio?.guestEmail, guestPhone: folio?.guestPhone, description: desc, receipt }), method === "CARD" ? "Sent to the front desk POS · waiting for the tap" : `${naira(amount)} recorded`, (r) => { onSaved({ id: r.id, reference: `PAY-${r.id.slice(0, 6).toUpperCase()}`, folioId: folio?.id, guestName: name, roomNumber: folio?.roomNumber, role: "MANAGER", takenBy: "You", method, amount, status: r.status, terminal: method === "CARD" ? "Front desk POS" : undefined, createdAt: new Date().toISOString(), resolvedAt: method === "CARD" ? undefined : new Date().toISOString(), receiptSent: receipt, description: desc }); onClose(); })}>{method === "CARD" ? "Send to POS" : "Record payment"}</Button></>}
 		>
 			<div className="flex flex-col gap-5">
-				<SelectField label="Folio" value={folioId} onChange={(v) => { setFolioId(v); const f = folios.find((x) => x.id === v); if (f) setAmount(f.balance); setReceipt(f?.guestEmail ? "EMAIL" : "NONE"); }} placeholder="No folio · walk-in" options={folios.map((f) => ({ value: f.id, label: `${f.guestName} · ${f.roomNumber}`, hint: `${naira(f.balance)} due` }))} />
+				<SelectField label="Folio" value={folioId} onChange={(v) => { setFolioId(v); const f = folios.find((x) => x.id === v); if (f) setAmount(f.balance); setReceipt(defaultReceipt(f?.guestPhone)); }} placeholder="No folio · walk-in" options={folios.map((f) => ({ value: f.id, label: `${f.guestName} · ${f.roomNumber}`, hint: `${naira(f.balance)} due` }))} />
 				{!folio && <TextField label="Who is paying" value={payer} onChange={setPayer} placeholder="Walk-in guest name" required />}
 				<TextField label="For" value={desc} onChange={setDesc} />
 				<ChoiceCards label="Paid by" value={method} onChange={setMethod} columns={3} options={[{ value: "CARD", label: "Card · POS", hint: "Front desk POS" }, { value: "TRANSFER", label: "Transfer", hint: "Seen in the hotel's account" }, { value: "CASH", label: "Cash", hint: "Into the till" }]} />
 				<MoneyField label="Amount" value={amount} onChange={setAmount} required />
-				<ChoiceCards label="Receipt" value={receipt} onChange={setReceipt} columns={3} options={receiptOptions(folio?.guestEmail)} />
+				<ChoiceCards label="Receipt" value={receipt} onChange={setReceipt} columns={2} options={receiptOptions(folio?.guestPhone)} />
 				<p className="text-xs text-ink-3">{plural(folios.length, "open folio")} with a balance</p>
 			</div>
 		</SidePanel>

@@ -1,17 +1,13 @@
 "use client";
 
-import { MailIcon, PrinterIcon } from "lucide-react";
-import { useState } from "react";
+import { FileDownIcon } from "lucide-react";
 import { Button } from "@hospio/ui/primitives/button";
-import { withDeliveries } from "@hospio/ui/shared/deliveries-store";
 import { DeliveryNotice } from "@hospio/ui/shared/delivery-notice";
 import { btn } from "@hospio/ui/shared/ui";
-import { emailReceipt } from "@hospio/api/actions/ml";
-import { useAction } from "@hospio/api/actions/use-action";
+import { WhatsAppReceiptButton } from "./whatsapp-receipt";
 import {
 	methodLabel,
 	type ReceiptDoc,
-	receiptText,
 	shownSubtotal,
 	taxIncluded,
 } from "@hospio/api/data/receipt-types";
@@ -32,38 +28,25 @@ const when = (iso?: string) =>
 		: "";
 
 /**
- * The receipt page: the receipt itself (what prints), and above it Print (window.print with a print stylesheet), the paper
- * (A4 or an 80 mm thermal roll) and Email receipt to the guest's address. The toolbar never prints.
+ * The receipt page, for managers, finance and the owner: the receipt as a document to keep, and above it Save as PDF (the browser's
+ * "Save as PDF", A4) and, for one payment, Send on WhatsApp. Guests get their receipt on WhatsApp only: receipts are not printed for
+ * them or emailed (hospio-backend docs/whatsapp-receipts.md), so there is no paper size or Email here. The toolbar is never saved.
  */
 export function ReceiptView({
 	doc,
 	error,
-	paper: initial,
 }: {
 	doc: ReceiptDoc | null;
 	error?: string;
-	paper: "a4" | "80mm";
+	/** Old links may still carry `paper=80mm`; the receipt is always A4 now. */
+	paper?: "a4" | "80mm";
 }) {
-	const [paper, setPaper] = useState(initial);
-	const [to, setTo] = useState(doc?.guestEmail ?? "");
-	const { run, pending } = useAction();
+	const paper = "a4" as "a4" | "80mm";
 	const narrow = paper === "80mm";
-	const setPaperUrl = (p: "a4" | "80mm") => {
-		setPaper(p);
-		const u = new URL(window.location.href);
-		if (p === "80mm") u.searchParams.set("paper", "80mm");
-		else u.searchParams.delete("paper");
-		window.history.replaceState(null, "", u.toString());
-	};
 
 	return (
 		<div className="min-h-screen bg-subtle/60 py-6 print:bg-white print:py-0">
-			{/* The page size follows the paper picked: A4 with margins, or an 80 mm roll as long as the receipt. */}
-			<style>
-				{narrow
-					? "@page { size: 80mm auto; margin: 3mm; }"
-					: "@page { size: A4; margin: 14mm; }"}
-			</style>
+			<style>{"@page { size: A4; margin: 14mm; }"}</style>
 			<style>
 				{
 					"@media print { body { background: #fff !important; } .no-print, body .fixed, [data-sonner-toaster] { display: none !important; } }"
@@ -71,65 +54,24 @@ export function ReceiptView({
 			</style>
 
 			<div className="no-print mx-auto mb-4 flex max-w-[720px] flex-wrap items-end gap-3 px-4">
-				<fieldset
-					className="flex rounded-control border border-line bg-card p-[3px]"
-					aria-label="Paper"
-				>
-					{(["a4", "80mm"] as const).map((p) => (
-						<button
-							key={p}
-							type="button"
-							onClick={() => setPaperUrl(p)}
-							className={cn(
-								"rounded-[8px] px-3 py-[6px] text-[13px] font-semibold",
-								paper === p ? "bg-brand text-white" : "text-ink-2",
-							)}
-						>
-							{p === "a4" ? "A4" : "80 mm roll"}
-						</button>
-					))}
-				</fieldset>
 				<Button
 					className={btn.primary}
 					disabled={!doc || !!doc.empty}
 					onClick={() => window.print()}
 				>
-					<PrinterIcon className="size-4" /> Print receipt
+					<FileDownIcon className="size-4" /> Save as PDF
 				</Button>
-				{doc && !doc.empty && (
-					<form
-						className="flex flex-1 flex-wrap items-center gap-2"
-						onSubmit={(e) => {
-							e.preventDefault();
-							run(
-								() =>
-									withDeliveries(
-										emailReceipt({ ...doc.ref, to, text: receiptText(doc) }),
-										"Receipt",
-									),
-								(d) => `Receipt emailed to ${d.to}`,
-							);
-						}}
-					>
-						<input
-							type="email"
-							required
-							value={to}
-							onChange={(e) => setTo(e.target.value)}
-							placeholder="Guest's email"
-							aria-label="Email address"
-							className="h-10 min-w-[200px] flex-1 rounded-control border border-line bg-card px-3 text-[13px]"
-						/>
-						<Button
-							type="submit"
-							variant="outline"
-							className={btn.secondary}
-							disabled={pending || !to.trim()}
-						>
-							<MailIcon className="size-4" /> Email receipt
-						</Button>
-					</form>
+				{doc && !doc.empty && doc.ref.paymentId && (
+					<WhatsAppReceiptButton
+						paymentId={doc.ref.paymentId}
+						phone={doc.guestPhone}
+						guestName={doc.guest}
+						label="Send on WhatsApp"
+					/>
 				)}
+				<p className="w-full text-[12px] text-ink-3">
+					In the save window pick "Save as PDF" as the destination. Guests get their receipt on WhatsApp.
+				</p>
 			</div>
 
 			{!doc ? (

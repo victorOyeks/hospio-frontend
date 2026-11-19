@@ -1,17 +1,15 @@
 "use client";
 
 import {
+	BanIcon,
 	CheckCircle2Icon,
-	PrinterIcon,
 	CreditCardIcon,
 	Loader2Icon,
-	MailIcon,
 	MessageCircleIcon,
 	XCircleIcon,
 	ClockIcon,
 } from "lucide-react";
 import { type ReactNode, useEffect, useRef, useState } from "react";
-import { useWhatsAppKinds } from "@/lib/use-whatsapp-kinds";
 import { toast } from "sonner";
 import {
 	ChoiceCards,
@@ -33,6 +31,11 @@ import {
 } from "@hospio/api/actions/payment";
 import { openTill } from "@hospio/api/actions/finance";
 import { withDeliveries } from "@hospio/ui/shared/deliveries-store";
+import {
+	defaultReceipt,
+	looksLikePhone,
+	type ReceiptChoice,
+} from "@hospio/ui/shared/receipt-channels";
 import type {
 	FolioSummary,
 	PaymentMethod,
@@ -175,7 +178,7 @@ export function usePaymentSteps(
 	autoStart = true,
 ) {
 	const t = usePlaceText();
-	const { recordPayment, emailReceipt, resendReceipt } = useHotelActions();
+	const { recordPayment, sendReceipt } = useHotelActions();
 	const [tgt, setTgt] = useState<PaymentTarget | null>(target ?? null);
 	const [step, setStep] = useState<Step>(
 		autoStart ? (target ? "method" : "who") : "idle",
@@ -196,15 +199,12 @@ export function usePaymentSteps(
 	const [attempt, setAttempt] = useState(0);
 	const [tendered, setTendered] = useState<number | "">("");
 	const [tip, setTip] = useState<number | "">("");
-	// By email when the guest has one; a guest with a phone and no email can get it on WhatsApp (the approved receipt
-	// template, when RECEIPT is in the backend's WhatsApp list), as the automatic receipt does; else the desk prints it.
-	const waKinds = useWhatsAppKinds();
-	const [receipt, setReceipt] = useState<"EMAIL" | "NONE" | "WHATSAPP">(
-		target?.guestEmail ? "EMAIL" : "NONE",
+	// The receipt goes on WhatsApp (the approved receipt template) to the guest's phone, or not at all: receipts are never
+	// printed or emailed (hospio-backend docs/whatsapp-receipts.md). WhatsApp is picked when the guest's phone is known.
+	const [receipt, setReceipt] = useState<ReceiptChoice>(
+		defaultReceipt(target?.guestPhone),
 	);
-	const waReceipt =
-		waKinds.includes("RECEIPT") && !!tgt?.guestPhone && !tgt?.guestEmail;
-	const [contact, setContact] = useState(target?.guestEmail ?? "");
+	const [phone, setPhone] = useState(target?.guestPhone ?? "");
 	const [sending, setSending] = useState(false);
 	const [recorded, setRecorded] = useState<TakenPayment | null>(null);
 	const session = useRef(0);
@@ -237,8 +237,8 @@ export function usePaymentSteps(
 		setCard("waiting");
 		setAttempt(0);
 		setTendered("");
-		setReceipt(t?.guestEmail ? "EMAIL" : "NONE");
-		setContact(t?.guestEmail ?? "");
+		setReceipt(defaultReceipt(t?.guestPhone));
+		setPhone(t?.guestPhone ?? "");
 		setRecorded(null);
 		setCardError(null);
 		setTill(null);
@@ -467,7 +467,7 @@ export function usePaymentSteps(
 		? `${guestName}${folio?.roomNumber ? ` · Room ${folio.roomNumber}` : tgt?.roomNumber ? ` · Room ${tgt.roomNumber}` : ""} · ${nairaExact(amt + tipN)}`
 		: "Choose who is paying";
 
-	async function finish(choice: "EMAIL" | "NONE" | "WHATSAPP" = receipt) {
+	async function finish(choice: ReceiptChoice = receipt) {
 		setSending(true);
 		let payment = recorded;
 		if (!payment) {
@@ -478,13 +478,13 @@ export function usePaymentSteps(
 				folioId: folioId || tgt?.folioId,
 				bookingId: tgt?.bookingId,
 				guestName,
-				guestPhone: tgt?.guestPhone,
-				guestEmail:
-					choice === "EMAIL" && contact.trim()
-						? contact.trim()
-						: tgt?.guestEmail,
+				guestPhone:
+					choice === "WHATSAPP" && phone.trim()
+						? phone.trim()
+						: tgt?.guestPhone,
+				guestEmail: tgt?.guestEmail,
 				description,
-				// Emailed below, once, with the on-screen echo.
+				// Sent below on WhatsApp, once, with the on-screen echo.
 				receipt: "NONE",
 				orderId: tgt?.orderId,
 				role: tgt?.role,
@@ -519,27 +519,17 @@ export function usePaymentSteps(
 			};
 			setRecorded(payment);
 		}
-		let receiptNote = choice === "NONE" ? "Print it from the next screen" : "";
-		if (choice === "EMAIL" && payment.status === "APPROVED") {
+		let receiptNote = choice === "NONE" ? "No receipt sent" : "";
+		if (choice === "WHATSAPP" && payment.status === "APPROVED") {
 			const sent = await withDeliveries(
-				emailReceipt({ paymentId: payment.id, to: contact, text: "" }),
-				`Receipt for ${guestName}`,
-			).catch(() => null);
-			receiptNote = sent?.ok
-				? `Receipt emailed to ${sent.data.to}`
-				: `The receipt wasn't emailed${sent && !sent.ok ? `: ${sent.error}` : ""} · print it or email it from the receipt page`;
-		} else if (choice === "EMAIL") {
-			receiptNote = "Email the receipt from My payments once it is approved";
-		} else if (choice === "WHATSAPP" && payment.status === "APPROVED") {
-			const sent = await withDeliveries(
-				resendReceipt(payment.id),
+				sendReceipt({ paymentId: payment.id, phone }),
 				`Receipt for ${guestName}`,
 			).catch(() => null);
 			receiptNote = sent?.ok
 				? `Receipt sent on WhatsApp to ${sent.data.sentTo}`
-				: `The receipt wasn't sent${sent && !sent.ok ? `: ${sent.error}` : ""} · print it from the next screen`;
+				: `The receipt wasn't sent${sent && !sent.ok ? `: ${sent.error}` : ""} · send it again from My payments`;
 		} else if (choice === "WHATSAPP") {
-			receiptNote = "Send the receipt from My payments once it is approved";
+			receiptNote = "Send the receipt on WhatsApp from My payments once it is approved";
 		}
 		setSending(false);
 		const label =
@@ -708,17 +698,15 @@ export function usePaymentSteps(
 							onClick={() => void finish()}
 							disabled={
 								sending ||
-								(receipt === "EMAIL" && !/^\S+@\S+\.\S+$/.test(contact.trim()))
+								(receipt === "WHATSAPP" && !looksLikePhone(phone))
 							}
 						>
 							{sending ? (
 								<Loader2Icon className="size-4 animate-spin" />
-							) : receipt === "NONE" ? (
-								"Record payment"
 							) : receipt === "WHATSAPP" ? (
 								"Send on WhatsApp & record"
 							) : (
-								"Email receipt & record"
+								"Record payment"
 							)}
 						</button>
 					</>
@@ -1062,39 +1050,23 @@ export function usePaymentSteps(
 						]}
 					/>
 					<Field label="Receipt">
-						<div className="grid grid-cols-3 gap-2">
+						<div className="grid grid-cols-2 gap-2">
 							{(
 								[
-									["EMAIL", "Email", MailIcon, false, undefined],
-									["NONE", "Print", PrinterIcon, false, undefined],
-									[
-										"WHATSAPP",
-										"WhatsApp",
-										MessageCircleIcon,
-										!waReceipt,
-										waReceipt
-											? `Sent to ${tgt?.guestPhone} with the receipt template`
-											: tgt?.guestEmail
-												? "This guest has an email: the receipt goes by email"
-												: !tgt?.guestPhone
-													? "Add the guest's phone to send it on WhatsApp"
-													: "WhatsApp receipts can't be sent right now",
-									],
+									["WHATSAPP", "WhatsApp", MessageCircleIcon],
+									["NONE", "Don't send", BanIcon],
 								] as const
-							).map(([key, label, Icon, soon, why]) => (
+							).map(([key, label, Icon]) => (
 								<button
 									key={key}
 									type="button"
-									disabled={soon}
-									title={why}
-									onClick={() => !soon && setReceipt(key)}
+									onClick={() => setReceipt(key)}
+									aria-pressed={receipt === key}
 									className={cn(
 										"flex flex-col items-center gap-2 rounded-control border px-3 py-3 text-center text-[13px] font-semibold",
-										soon
-											? "cursor-not-allowed border-line text-ink-3 opacity-60"
-											: receipt === key
-												? "border-brand bg-brand-soft/50 text-brand"
-												: "border-line text-ink-2 hover:bg-subtle",
+										receipt === key
+											? "border-brand bg-brand-soft/50 text-brand"
+											: "border-line text-ink-2 hover:bg-subtle",
 									)}
 								>
 									<Icon className="size-5" /> {label}
@@ -1102,13 +1074,19 @@ export function usePaymentSteps(
 							))}
 						</div>
 					</Field>
-					{receipt === "EMAIL" && (
+					{receipt === "WHATSAPP" && (
 						<TextField
-							label="Guest's email"
-							type="email"
-							value={contact}
-							onChange={setContact}
-							placeholder="guest@email.com"
+							label="Guest's WhatsApp number"
+							type="tel"
+							value={phone}
+							onChange={setPhone}
+							placeholder="+234 803 555 0192"
+							hint="The receipt goes as the approved WhatsApp receipt message"
+							error={
+								phone.trim() && !looksLikePhone(phone)
+									? "Type a real phone number, like +234 803 555 0192"
+									: undefined
+							}
 						/>
 					)}
 				</div>
@@ -1129,17 +1107,6 @@ export function usePaymentSteps(
 							: `${guestName}'s folio is updated and the payment is in My payments.`}{" "}
 						{method === "CASH" ? "The cash is counted in your till." : ""}
 					</p>
-					{recorded?.id &&
-						(recorded.status === "APPROVED" || card === "approved") && (
-							<a
-								href={`/receipt?payment=${encodeURIComponent(recorded.id)}`}
-								target="_blank"
-								rel="noopener"
-								className={`${btn.secondary} flex items-center gap-2`}
-							>
-								<PrinterIcon className="size-4" /> Print receipt
-							</a>
-						)}
 					{doneExtra}
 				</div>
 			)}

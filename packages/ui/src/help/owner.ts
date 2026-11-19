@@ -470,7 +470,7 @@ export const ownerHelp: HelpModule = {
 			goodToKnow: [
 				"“Call the hotel” shows when the hotel has a phone. “Chat with the hotel on WhatsApp” shows when the hotel's WhatsApp number is set in Hotel setup → “Guest messaging”.",
 				"Without a street address, “Get directions” finds the hotel by its name and city.",
-				"A receipt to a guest with no email goes by WhatsApp, without a button.",
+				"A receipt goes to the guest's phone by WhatsApp, without a button. Receipts are not printed or emailed.",
 				"WhatsApp messages only go once WhatsApp has approved them. Until then, only the email goes.",
 				"Nothing goes by SMS. SMS is only for sign-in codes.",
 				"If a guest answers the Hospio360 WhatsApp, the hotel does not get it. Guests reach you on the hotel's own WhatsApp or phone.",

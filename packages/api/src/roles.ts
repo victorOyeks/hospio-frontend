@@ -95,7 +95,7 @@ export const roleDescriptions: Record<HotelRole, string> = {
 	INVENTORY: "Stores, stock, orders and deliveries",
 	FINANCE: "Today's money, expenses, tills and night audit",
 	WAITER: "Take orders, open tabs and serve tables",
-	CASHIER: "Take payments, keep the till and print receipts",
+	CASHIER: "Take payments, keep the till and send receipts on WhatsApp",
 	SUPER_ADMIN: "Everything on the platform",
 	SUPPORT: "Onboarding, support and business setup",
 	FINANCE_ADMIN: "Fees, statements and marketer commissions",

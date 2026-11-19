@@ -6,7 +6,7 @@ Phase 4 of lounges, bars and restaurants (hospio-backend `docs/plan-venue-type.m
 
 1. **The bill.** Every open tab or sale has a **Bill**: what is still to pay is always on it. From the bill whoever takes the
    payment can **split** it (equally between people, by item, or by amount), take each part its own way (cash into the right
-   till, card or transfer on the outlet's POS, a room at a hotel), print a receipt per part, and **undo the split** while no
+   till, card or transfer on the outlet's POS, a room at a hotel), send a WhatsApp receipt per part, and **undo the split** while no
    part is paid. The parts always add up to the bill to the kobo: ₦10,000 between three is ₦3,333.33 + ₦3,333.33 + ₦3,333.34;
    VAT and the service charge are shared in proportion. The tab closes by itself when the last part is paid. A split sale is
    still one sale in every report.

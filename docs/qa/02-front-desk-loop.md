@@ -108,10 +108,9 @@ ends on the booking summary.
    "Send for approval" → "Sent to the manager to approve"; it shows in the manager's Approvals and the
    discount lands on the folio when approved (over the manager's limit it goes to the owner). Void stays
    manager-only (the button is disabled for front office with a note).
-   - Print or email → the window is "Print or email the folio"; "Email" is picked when the guest has an email
-     and WhatsApp is greyed "Coming soon" (can't be picked) → Email folio → "Folio emailed to …"; the message
-     card says "Email sent to …" (sent for real: use a `@hospio-qa.test` guest). Without a guest email only
-     "Print / copy" can be used → Print receipt.
+   - Email or copy → the window is "Email or copy the folio"; "Email" is picked when the guest has an email
+     → Email folio → "Folio emailed to …"; the message card says "Email sent to …" (sent for real: use a
+     `@hospio-qa.test` guest). Without a guest email only "Copy" can be used (no Print receipt any more). (Changed 19 Nov 2026: see 71-whatsapp-receipts-no-printing.md.)
 3. Bookings → In-house → Check out: one panel with the bill as the folio has it now (room charges, extras,
    paid, balance). With a balance the button reads "Take ₦X": the payment steps run inside the same panel,
    "Back to check-out" returns with "nothing left to pay", then Check out. Status becomes Checked out and the
@@ -179,13 +178,11 @@ After any payment the booking summary (Paid/Balance), the folio (after check-in)
 till (cash only, when a till is open: Till screen) and Today's money (`/finance/today`, manager) agree. Cash
 taken with no open till still counts in Today's money and is flagged as unattached cash.
 - Payments → request a refund on a payment → it appears for the manager under Payments → Refunds.
-- Manager Payments → an approved payment → Email receipt again (panel or row menu) → "Receipt emailed to …"
-  and the card shows "Email sent to …". A payment whose guest has only a phone is refused: "This guest has no
-  email · print the receipt or email it from the receipt page (WhatsApp receipts are coming soon)".
-- Take payment → receipt step: "Receipt" offers Email (picked when the guest has an email, address filled in),
-  Print, and "WhatsApp · coming soon" / "SMS · coming soon" greyed out. Email → "Email receipt & record" → the
-  toast says "Receipt emailed to …". A bad address keeps the button disabled. Print → "Record payment" → the
-  done screen has Print receipt.
+- Manager Payments → an approved payment → Send on WhatsApp (panel) or Send receipt again (row menu) →
+  "Receipt sent on WhatsApp to …". (Changed 19 Nov 2026: see 71-whatsapp-receipts-no-printing.md.)
+- Take payment → receipt step: "Receipt" offers only WhatsApp (picked when the guest's phone is known, number
+  filled in) and Don't send. WhatsApp → "Send on WhatsApp & record" → "Receipt sent on WhatsApp to …". A bad
+  number keeps the button disabled. Don't send → "Record payment"; the done screen has no Print receipt.
 - My payments (front office) → a card payment still Processing → "Check with the POS" → the toast says what the
   POS answered; it turns Approved only if the POS approved it (no "I've confirmed it landed" any more).
 - Today → "Front desk to-dos" lists only real work from today's bookings and folios (an arrival with no room,

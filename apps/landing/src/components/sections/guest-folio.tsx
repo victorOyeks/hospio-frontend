@@ -23,8 +23,8 @@ const features: { icon: LucideIcon; title: string; text: string }[] = [
 	},
 	{
 		icon: SendIcon,
-		title: "Receipts by email, in your business’s name",
-		text: "Guests get confirmations and receipts by email, sent in your business’s name, and on WhatsApp when they leave only a phone number.",
+		title: "Receipts on WhatsApp, in your business’s name",
+		text: "Guests get their receipts on WhatsApp, in your business’s name. No receipt printer, no paper rolls.",
 	},
 ];
 

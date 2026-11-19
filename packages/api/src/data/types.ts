@@ -299,6 +299,8 @@ export type PaymentRow = {
 	folioId?: Id;
 	bookingId?: Id;
 	guestName: string;
+	/** The guest's phone, for Send receipt on WhatsApp. */
+	guestPhone?: string;
 	roomNumber?: string;
 	role: string;
 	takenBy: string;

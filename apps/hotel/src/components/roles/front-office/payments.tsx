@@ -2,7 +2,8 @@
 
 import { useOpenFolios } from "./use-open-folios";
 import type { ColumnDef } from "@tanstack/react-table";
-import { CreditCardIcon, PrinterIcon, RotateCcwIcon } from "lucide-react";
+import { CreditCardIcon, RotateCcwIcon } from "lucide-react";
+import { WhatsAppReceiptButton } from "@/components/receipt/whatsapp-receipt";
 import { useRouter } from "next/navigation";
 import { useQueryState } from "nuqs";
 import { useEffect, useMemo, useState } from "react";
@@ -118,7 +119,7 @@ export function MyPaymentsScreen({ payments: result, opened, terminals, me, role
 					{(pay.status === "DECLINED" || pay.status === "NO_RESPONSE" || pay.status === "TIMED_OUT") && <button type="button" className={btn.primary} onClick={() => { void setOpenId(null); void setIsNew("1"); }}><RotateCcwIcon className="mr-1 inline size-4" /> Try again</button>}
 					{pay.status === "PROCESSING" && <button type="button" className={btn.secondary} disabled={checking} onClick={() => void check(() => verifyPayment(pay.id), (r) => (r.status === "APPROVED" ? "The POS approved it" : `The POS says ${payTone[r.status]?.label.toLowerCase() ?? r.status}`), (r) => setPayments((xs) => xs.map((p) => (p.id === pay.id ? { ...p, status: r.status, resolvedAt: r.status === "PROCESSING" ? p.resolvedAt : new Date().toISOString() } : p))))}>Check with the POS</button>}
 					{pay.status === "APPROVED" && <button type="button" className={btn.secondary} onClick={() => setRefundFor(pay)}>Request refund <ManagerMark className="ml-1" /></button>}
-					{pay.status === "APPROVED" && <a href={`/receipt?payment=${encodeURIComponent(pay.id)}`} target="_blank" rel="noopener" className={btn.primary}><PrinterIcon className="mr-1 inline size-4" /> Print receipt</a>}
+					{pay.status === "APPROVED" && <WhatsAppReceiptButton paymentId={pay.id} phone={pay.guestPhone} guestName={pay.guestName} />}
 				</>
 			)} footerInfo={pay && <StatusPill tone={payTone[pay.status].tone}>{payTone[pay.status].label}</StatusPill>}>
 				{pay && (
@@ -128,7 +129,7 @@ export function MyPaymentsScreen({ payments: result, opened, terminals, me, role
 						{pay.status === "TIMED_OUT" && <Note tone="warning">The POS gave no final answer within 5 minutes, so this timed out. If the guest did pay, it turns Approved on its own as soon as the provider confirms (it keeps checking for 30 minutes). Check the terminal before trying again.</Note>}
 						{pay.status === "NO_RESPONSE" && <Note tone="danger">The terminal didn't answer. Nothing was charged — check with the guest's bank before trying again.</Note>}
 						<PanelSection title="Payment">
-							<DetailList columns={2} items={[{ label: "Method", value: pay.method === "CARD" ? `Card · ${pay.terminal ?? "POS"}` : pay.method === "TRANSFER" ? (pay.terminal ? `Bank transfer · ${pay.terminal}` : "Bank transfer") : "Cash" }, ...(pay.failureReason && (pay.status === "DECLINED" || pay.status === "FAILED") ? [{ label: "Reason", value: <span className="font-semibold text-danger">{pay.failureReason}</span> }] : []), { label: "Provider ref", value: pay.providerRef ?? "—" }, { label: "For", value: pay.description }, { label: "Folio", value: pay.folioId ? <a href={`/dashboard/folios?open=${pay.folioId}`} className="text-brand">Open folio →</a> : "—" }, { label: "Receipt", value: pay.receiptSent === "EMAIL" ? "Emailed" : pay.receiptSent === "WHATSAPP" ? "Sent on WhatsApp" : pay.receiptSent === "NONE" ? "Not sent" : "Print or email it from the receipt page" }, { label: "Resolved", value: fmtWhen(pay.resolvedAt) }]} />
+							<DetailList columns={2} items={[{ label: "Method", value: pay.method === "CARD" ? `Card · ${pay.terminal ?? "POS"}` : pay.method === "TRANSFER" ? (pay.terminal ? `Bank transfer · ${pay.terminal}` : "Bank transfer") : "Cash" }, ...(pay.failureReason && (pay.status === "DECLINED" || pay.status === "FAILED") ? [{ label: "Reason", value: <span className="font-semibold text-danger">{pay.failureReason}</span> }] : []), { label: "Provider ref", value: pay.providerRef ?? "—" }, { label: "For", value: pay.description }, { label: "Folio", value: pay.folioId ? <a href={`/dashboard/folios?open=${pay.folioId}`} className="text-brand">Open folio →</a> : "—" }, { label: "Receipt", value: pay.receiptSent === "EMAIL" ? "Emailed" : pay.receiptSent === "WHATSAPP" ? "Sent on WhatsApp" : pay.receiptSent === "NONE" ? "Not sent" : "Send it on WhatsApp" }, { label: "Resolved", value: fmtWhen(pay.resolvedAt) }]} />
 						</PanelSection>
 					</div>
 				)}

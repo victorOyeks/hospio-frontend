@@ -1,7 +1,7 @@
 "use client";
 
-import { type ReceiptChoice, receiptOptions } from "@hospio/ui/shared/receipt-channels";
-import { ArrowRightLeftIcon, CreditCardIcon, PlusIcon, PrinterIcon, ReceiptIcon, ScissorsIcon } from "lucide-react";
+import { defaultReceipt, type ReceiptChoice, receiptOptions } from "@hospio/ui/shared/receipt-channels";
+import { ArrowRightLeftIcon, CreditCardIcon, MailIcon, PlusIcon, ReceiptIcon, ScissorsIcon } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useWhatsAppKinds } from "@/lib/use-whatsapp-kinds";
 import { Button } from "@hospio/ui/primitives/button";
@@ -91,15 +91,15 @@ function FolioPaymentModal({ f, onClose, onPatch }: { f: FolioRow; onClose: () =
 	const { run, pending } = useAction();
 	const [amount, setAmount] = useState<number | "">(f.balance > 0 ? f.balance : "");
 	const [method, setMethod] = useState<PaymentMethod>("CARD");
-	const [receipt, setReceipt] = useState<ReceiptChoice>(f.guestEmail ? "EMAIL" : "NONE");
+	const [receipt, setReceipt] = useState<ReceiptChoice>(defaultReceipt(f.guestPhone));
 	return (
 		<Modal open onOpenChange={(o) => !o && onClose()} title="Record payment" subtitle={`${f.guestName} · ${f.roomNumber} · ${naira(f.balance)} due`} icon={CreditCardIcon} size="form"
-			footer={<><Button variant="outline" className={btn.secondary} onClick={onClose}>Cancel</Button><Button className={btn.primary} disabled={pending || amount === "" || amount <= 0} onClick={() => amount !== "" && run(() => recordPayment({ method, amount, folioId: f.id, bookingId: f.bookingId || undefined, guestName: f.guestName, guestPhone: f.guestPhone, guestEmail: f.guestEmail, description: `Folio ${f.reference} · ${f.roomNumber}`, receipt: receipt === "EMAIL" ? "EMAIL" : "NONE" }), method === "CARD" ? `${naira(amount)} sent to the POS` : `${naira(amount)} recorded by ${method.toLowerCase()}`, (p) => { if (p.status === "APPROVED") onPatch(f.id, (x) => addLine(x, { id: p.id, kind: "PAYMENT", description: `Payment by ${method.toLowerCase()}`, category: "Payment", amount, tax: 0, postedAt: now(), postedBy: "You", source: "PAYMENT" })); onClose(); })}>{method === "CARD" ? "Send to POS" : "Record payment"}</Button></>}
+			footer={<><Button variant="outline" className={btn.secondary} onClick={onClose}>Cancel</Button><Button className={btn.primary} disabled={pending || amount === "" || amount <= 0} onClick={() => amount !== "" && run(() => recordPayment({ method, amount, folioId: f.id, bookingId: f.bookingId || undefined, guestName: f.guestName, guestPhone: f.guestPhone, guestEmail: f.guestEmail, description: `Folio ${f.reference} · ${f.roomNumber}`, receipt }), method === "CARD" ? `${naira(amount)} sent to the POS` : `${naira(amount)} recorded by ${method.toLowerCase()}`, (p) => { if (p.status === "APPROVED") onPatch(f.id, (x) => addLine(x, { id: p.id, kind: "PAYMENT", description: `Payment by ${method.toLowerCase()}`, category: "Payment", amount, tax: 0, postedAt: now(), postedBy: "You", source: "PAYMENT" })); onClose(); })}>{method === "CARD" ? "Send to POS" : "Record payment"}</Button></>}
 		>
 			<div className="flex flex-col gap-4">
 				<ChoiceCards label="Paid by" value={method} onChange={setMethod} columns={3} options={[{ value: "CARD", label: "Card · POS" }, { value: "TRANSFER", label: "Transfer" }, { value: "CASH", label: "Cash" }]} />
 				<MoneyField label="Amount" value={amount} onChange={setAmount} required />
-				<ChoiceCards label="Receipt" value={receipt} onChange={setReceipt} columns={3} options={receiptOptions(f.guestEmail)} />
+				<ChoiceCards label="Receipt" value={receipt} onChange={setReceipt} columns={2} options={receiptOptions(f.guestPhone)} />
 			</div>
 		</Modal>
 	);
@@ -158,7 +158,7 @@ function PrintModal({ f, onClose }: { f: FolioRow; onClose: () => void }) {
 	// WhatsApp only once the folio has an approved template (`FOLIO` in the backend's list); it has none today.
 	const waKinds = useWhatsAppKinds();
 	const folioOnWhatsApp = waKinds.includes("FOLIO") && !!f.guestPhone;
-	const [how, setHow] = useState<"print" | "email" | "whatsapp">(f.guestEmail ? "email" : "print");
+	const [how, setHow] = useState<"copy" | "email" | "whatsapp">(f.guestEmail ? "email" : "copy");
 	const [summary, setSummary] = useState<string | null>(null);
 	const [copied, setCopied] = useState(false);
 	useEffect(() => {
@@ -166,12 +166,12 @@ function PrintModal({ f, onClose }: { f: FolioRow; onClose: () => void }) {
 	}, [f.id, act.run]);
 	const pending = send.pending || act.pending;
 	return (
-		<Modal open onOpenChange={(o) => !o && onClose()} title="Print or email the folio" subtitle={`${f.guestName} · ${f.reference}`} icon={PrinterIcon} size="form"
-			footer={<><Button variant="outline" className={btn.secondary} onClick={onClose}>Close</Button>{how === "print" ? <><Button variant="outline" className={btn.secondary} disabled={pending || !summary} onClick={() => { navigator.clipboard?.writeText(summary ?? "").then(() => setCopied(true)).catch(() => undefined); }}>{copied ? "Copied" : "Copy summary"}</Button><a href={`/receipt?folio=${encodeURIComponent(f.id)}`} target="_blank" rel="noopener" className={btn.primary}>Print receipt</a></> : <Button className={btn.primary} disabled={pending} onClick={() => send.run(() => withDeliveries(how === "whatsapp" ? sendFolio(f.id, "WHATSAPP", f.guestPhone ?? "") : sendFolio(f.id, "EMAIL", f.guestEmail ?? ""), `Folio for ${f.guestName}`), how === "whatsapp" ? `Folio sent on WhatsApp to ${f.guestPhone}` : `Folio emailed to ${f.guestEmail}`, onClose)}>{how === "whatsapp" ? "Send on WhatsApp" : "Email folio"}</Button>}</>}
+		<Modal open onOpenChange={(o) => !o && onClose()} title="Email or copy the folio" subtitle={`${f.guestName} · ${f.reference}`} icon={MailIcon} size="form"
+			footer={<><Button variant="outline" className={btn.secondary} onClick={onClose}>Close</Button>{how === "copy" ? <><Button variant="outline" className={btn.secondary} disabled={pending || !summary} onClick={() => { navigator.clipboard?.writeText(summary ?? "").then(() => setCopied(true)).catch(() => undefined); }}>{copied ? "Copied" : "Copy summary"}</Button><a href={`/receipt?folio=${encodeURIComponent(f.id)}`} target="_blank" rel="noopener" className={btn.primary}>Folio PDF</a></> : <Button className={btn.primary} disabled={pending} onClick={() => send.run(() => withDeliveries(how === "whatsapp" ? sendFolio(f.id, "WHATSAPP", f.guestPhone ?? "") : sendFolio(f.id, "EMAIL", f.guestEmail ?? ""), `Folio for ${f.guestName}`), how === "whatsapp" ? `Folio sent on WhatsApp to ${f.guestPhone}` : `Folio emailed to ${f.guestEmail}`, onClose)}>{how === "whatsapp" ? "Send on WhatsApp" : "Email folio"}</Button>}</>}
 		>
 			<div className="flex flex-col gap-4">
-				<ChoiceCards value={how} onChange={setHow} columns={folioOnWhatsApp ? 3 : 2} options={[{ value: "print", label: "Print / copy", hint: "Front desk" }, { value: "email", label: "Email", hint: f.guestEmail ?? "No email", disabled: !f.guestEmail }, ...(folioOnWhatsApp ? [{ value: "whatsapp" as const, label: "WhatsApp", hint: f.guestPhone }] : [])]} />
-				<TextareaField label="Stay summary" value={summary ?? (act.pending ? "Preparing the summary…" : "")} rows={10} hint={how === "print" ? "Copy it to the desk printer or a document" : `Emailed to ${f.guestEmail} as written here`} />
+				<ChoiceCards value={how} onChange={setHow} columns={folioOnWhatsApp ? 3 : 2} options={[{ value: "copy", label: "Copy / PDF", hint: "A document to keep" }, { value: "email", label: "Email", hint: f.guestEmail ?? "No email", disabled: !f.guestEmail }, ...(folioOnWhatsApp ? [{ value: "whatsapp" as const, label: "WhatsApp", hint: f.guestPhone }] : [])]} />
+				<TextareaField label="Stay summary" value={summary ?? (act.pending ? "Preparing the summary…" : "")} rows={10} hint={how === "copy" ? "Copy it into a document, or save the folio as a PDF" : `Emailed to ${f.guestEmail} as written here`} />
 			</div>
 		</Modal>
 	);
