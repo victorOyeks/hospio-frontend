@@ -820,7 +820,7 @@ const STAY_FIELDS: Record<string, string[]> = {
 
 /** Labels and hints that name rooms, bookings or the booking page, as a lounge, bar or restaurant reads them (hotel words, like the rest). */
 const VENUE_COPY: Record<string, Record<string, { label?: string; help?: string }>> = {
-	brand: { shortName: { help: "On the sign-in screen; your hotel's name when empty" } },
+	brand: { logoText: { help: "On the sign-in screen; your hotel's name when empty" } },
 	messaging: { whatsappNumber: { help: "Guests tap Chat on WhatsApp in their emails to reach you here" } },
 	taxes: { pricesIncludeTax: { label: "Prices include tax" } },
 };

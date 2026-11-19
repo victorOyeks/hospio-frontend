@@ -210,6 +210,7 @@ export async function DashboardShell({ children }: PropsWithChildren) {
 				place={APP === "hotel" ? wording(activeHotel) : wording(null)}
 				biz={APP === "hotel" ? businessWording(hotels, business?.venueKind) : wording(null)}
 				stays={accommodation}
+				anyStays={APP !== "hotel" || hotels.length === 0 || hotels.some((h) => hasAccommodation(h))}
 			>
 				{/* Always the hotel's own brand, Hospio360 maroon included, so it replaces a look this browser remembered. */}
 				{brand && (

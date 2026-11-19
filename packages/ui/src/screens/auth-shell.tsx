@@ -100,14 +100,15 @@ function Glimpse({ admin }: { admin: boolean }) {
 				["Fees collected", "92%"],
 			]
 		: [
-				["Arrivals", "12"],
-				["In house", "46"],
-				["Departures", "9"],
+				// For hotels, lounges, bars and restaurants alike (docs/plan-venue-type.md, phase 5).
+				["Sales today", "86"],
+				["Open tabs", "7"],
+				["Guests in house", "46"],
 			];
 	const rows: [string, string, string][] = admin
 		? [
 				["Setup", "Business details · step 2 of 4", "bg-amber-400"],
-				["Live", "First booking taken", "bg-emerald-400"],
+				["Live", "First sale taken", "bg-emerald-400"],
 			]
 		: [
 				["Room 204", "Cleaned · ready for arrival", "bg-emerald-400"],
@@ -203,7 +204,7 @@ function Glimpse({ admin }: { admin: boolean }) {
 						{admin ? "Statement paid" : "Payment received"}
 					</p>
 					<p className="text-[12px] text-ink-3">
-						{admin ? "June fees · ₦240,000" : "Folio 1042 · ₦85,000"}
+						{admin ? "June fees · ₦240,000" : "Receipt 1042 · ₦85,000"}
 					</p>
 				</div>
 			</div>
