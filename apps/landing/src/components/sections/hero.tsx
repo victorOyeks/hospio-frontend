@@ -12,7 +12,7 @@ import {
 	ShieldIcon,
 	TriangleAlertIcon,
 } from "lucide-react";
-import Image from "next/image";
+import { HospioWordmark } from "@hospio/ui/brand/logo";
 import Link from "next/link";
 import { btn } from "@hospio/ui/shared/ui";
 import { cn } from "@hospio/ui/utils";
@@ -192,10 +192,7 @@ function OwnerDashboardShot() {
 		>
 			<aside className="hidden w-[228px] shrink-0 flex-col gap-1 bg-brand px-4 py-6 lg:flex">
 				<div className="flex items-center gap-[10px] pb-5 pl-2">
-					<Image src="/landing/hms-mark.svg" alt="" width={20} height={20} />
-					<span className="text-[15px] font-bold leading-none tracking-[-0.01em] text-white">
-						Hospio360
-					</span>
+					<HospioWordmark title="" className="h-[22px] text-white" />
 				</div>
 				{sidebar.map((item, i) => (
 					<div

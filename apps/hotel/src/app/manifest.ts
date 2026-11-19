@@ -25,9 +25,9 @@ export default async function manifest(): Promise<MetadataRoute.Manifest> {
 		prefer_related_applications: false,
 		related_applications: host ? [{ platform: "webapp", url: `${proto}://${host}/manifest.webmanifest` }] : [],
 		icons: [
-			{ src: "/icons/icon-192.png", sizes: "192x192", type: "image/png", purpose: "any" },
-			{ src: "/icons/icon-512.png", sizes: "512x512", type: "image/png", purpose: "any" },
-			{ src: "/icons/maskable-512.png", sizes: "512x512", type: "image/png", purpose: "maskable" },
+			{ src: "/icons/icon-192.png?v=c", sizes: "192x192", type: "image/png", purpose: "any" },
+			{ src: "/icons/icon-512.png?v=c", sizes: "512x512", type: "image/png", purpose: "any" },
+			{ src: "/icons/maskable-512.png?v=c", sizes: "512x512", type: "image/png", purpose: "maskable" },
 		],
 	};
 }

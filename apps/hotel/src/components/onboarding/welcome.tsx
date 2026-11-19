@@ -14,7 +14,7 @@ import {
 	OWNER_ONBOARDING_STEPS,
 	type OwnerOnboardingStep,
 } from "@hospio/api/types";
-import { HomeIcon } from "@hospio/ui/svgs/home";
+import { HospioWordmark } from "@hospio/ui/brand/logo";
 import { btn } from "@hospio/ui/shared/ui";
 import { cn } from "@hospio/ui/utils";
 import { placeWord, stepHref, stepMeta } from "./steps";
@@ -49,12 +49,7 @@ export function WelcomeChecklist({
 	return (
 		<section className="flex w-full max-w-[520px] flex-col gap-6 rounded-card border border-line bg-card px-8 py-8 shadow-[0_8px_30px_rgba(76,9,30,0.06)]">
 			<div className="flex items-center gap-[10px]">
-				<span className="flex size-8 items-center justify-center rounded-lg bg-brand text-white [&_svg]:size-4">
-					<HomeIcon />
-				</span>
-				<span className="text-sm font-bold tracking-[-0.01em] text-brand">
-					Hospio360
-				</span>
+				<HospioWordmark className="h-[22px] text-brand" />
 			</div>
 			<div>
 				<h1 className="text-2xl font-bold tracking-[-0.01em] text-ink">

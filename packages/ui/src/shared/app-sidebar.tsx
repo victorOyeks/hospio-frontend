@@ -11,6 +11,8 @@ import { OutletSwitcher, type OutletSwitchProps } from "./outlet-switcher";
 import type { HotelRole } from "@hospio/api/roles";
 import type { Hotel } from "@hospio/api/api/schema";
 import { hasAccommodation } from "@hospio/api/venue";
+import { APP } from "@hospio/api/app";
+import { HospioWordmark } from "../brand/logo";
 
 export function AppSidebar({
 	role,
@@ -37,8 +39,17 @@ export function AppSidebar({
 			{...props}
 			className="border-r-0 bg-nav text-white [&_[data-sidebar=sidebar]]:bg-nav"
 		>
-			{/* The branch box is the top of the sidebar (the Hospio360 / hotel name row was removed, 2026-11-15). */}
+			{/* The branch box is the top of the sidebar (the Hospio360 / hotel name row was removed, 2026-11-15). The admin
+			    portal has no branch: Hospio360's wordmark and the console tag head it instead. */}
 			<SidebarHeader className="gap-2 px-4 pt-8">
+				{APP === "admin" && (
+					<div className="flex items-center gap-2 px-2 pb-2">
+						<HospioWordmark className="h-[26px] text-white" />
+						<span className="rounded-pill border border-white/25 bg-white/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.08em] text-white/85">
+							Admin
+						</span>
+					</div>
+				)}
 				<BranchSwitcher
 					hotels={hotels}
 					active={activeHotel}

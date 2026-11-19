@@ -10,7 +10,7 @@ apart from a small "You're offline" page.
 | Piece | Where |
 |---|---|
 | Web app manifest (name, icons, colours, `start_url` /dashboard, `display: standalone`) | `apps/{hotel,admin}/src/app/manifest.ts` → `/manifest.webmanifest` |
-| Icons: 192, 512, maskable 512 (`public/icons/`), Apple touch icon 180 (`src/app/apple-icon.png`), favicon (`src/app/icon.tsx`) | per app; the admin icons carry an **ADMIN** tag |
+| Icons: 192, 512, maskable 512 (`public/icons/`), Apple touch icon 180 (`src/app/apple-icon.png`), favicon 16/32/48 (`src/app/favicon.ico`); all the white "h" of the Hospio360 logo (Option C, rendered from `packages/ui/src/brand/logo-paths.ts`) | per app; the admin icons carry an **ADMIN** tag |
 | Service worker | `apps/{hotel,admin}/public/sw.js` (hand-written, no library) |
 | Offline page | `apps/{hotel,admin}/public/offline.html` (self-contained, no app code) |
 | Registration, install menu item, banner, iOS tip | `packages/ui/src/shared/pwa.tsx`, `packages/ui/src/hooks/use-install-prompt.ts` |
