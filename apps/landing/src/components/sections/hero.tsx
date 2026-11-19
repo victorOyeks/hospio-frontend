@@ -1,5 +1,6 @@
 import {
 	ArrowRightIcon,
+	BedDoubleIcon,
 	CalendarDaysIcon,
 	Building2Icon,
 	ClockIcon,
@@ -8,9 +9,12 @@ import {
 	DownloadIcon,
 	LockIcon,
 	type LucideIcon,
+	MartiniIcon,
 	ReceiptIcon,
 	ShieldIcon,
 	TriangleAlertIcon,
+	UtensilsCrossedIcon,
+	WineIcon,
 } from "lucide-react";
 import { HospioWordmark } from "@hospio/ui/brand/logo";
 import Link from "next/link";
@@ -100,6 +104,9 @@ const branches = [
 	{ name: "Ivory Court Yaba", pct: 8, value: "−₦19.5M", negative: true },
 ];
 
+/** The kinds of business Hospio360 runs, shown as small icons in the hero pill. */
+const VENUE_ICONS: LucideIcon[] = [BedDoubleIcon, MartiniIcon, WineIcon, UtensilsCrossedIcon];
+
 export function Hero() {
 	return (
 		<section className="bg-page">
@@ -109,9 +116,23 @@ export function Hero() {
 					"flex flex-col items-center gap-5 pt-9 pb-10 md:gap-6 md:pt-14 md:pb-16",
 				)}
 			>
-				<p className="inline-flex items-center gap-2 rounded-pill bg-brand-soft px-[14px] py-[6px] text-center text-[13px] font-medium text-brand md:py-2 md:text-sm">
-					<span className="size-2 shrink-0 rounded-full bg-status-ok" />
-					For hotels, lounges, bars and restaurants in Nigeria
+				<p className="inline-flex max-w-full items-center gap-2 whitespace-nowrap rounded-pill border border-brand/15 bg-white py-1 pr-3 pl-1 text-[12px] text-ink-2 shadow-[0_1px_2px_rgba(76,9,30,0.06)] sm:gap-3 sm:py-[5px] sm:pr-4 sm:pl-[5px] sm:text-[13px] md:text-sm">
+					<span className="flex shrink-0 -space-x-[6px] sm:-space-x-[7px]" aria-hidden="true">
+						{VENUE_ICONS.map((Icon) => (
+							<span
+								key={Icon.displayName}
+								className="flex size-6 items-center justify-center rounded-full bg-brand-soft text-brand ring-2 ring-white sm:size-7 md:size-8"
+							>
+								<Icon className="size-3 sm:size-[14px] md:size-4" strokeWidth={2.2} />
+							</span>
+						))}
+					</span>
+					<span>
+						<span className="font-semibold text-brand">
+							Hotels, lounges, bars &amp; restaurants
+						</span>
+						<span className="hidden sm:inline"> · built for Nigeria</span>
+					</span>
 				</p>
 				<h1 className="max-w-[980px] text-center text-[36px] font-bold leading-[1.06] tracking-[-0.025em] text-ink sm:text-[48px] md:text-[60px]">
 					Every room, every table, every till — on one screen.
