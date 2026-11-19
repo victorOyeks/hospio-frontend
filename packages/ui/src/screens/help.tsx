@@ -27,7 +27,7 @@ import { PanelSection, SidePanel } from "@hospio/ui/shared/side-panel";
 import { SearchBox } from "@hospio/ui/shared/toolbar";
 import { btn } from "@hospio/ui/shared/ui";
 import { cn } from "@hospio/ui/utils";
-import { usePlaceText } from "@hospio/ui/shared/wording";
+import { usePlaceText, useWording } from "@hospio/ui/shared/wording";
 
 type Guide = HelpGuide & { open: boolean };
 
@@ -46,6 +46,7 @@ export function HelpScreen({
 	/** The admin app is Hospio360 itself: no tickets, a link to the Support queue instead. */
 	app: "hotel" | "admin";
 }) {
+	const words = useWording();
 	const [search, setSearch] = useState("");
 	const [section, setSection] = useState<string>("all");
 	const [contact, setContact] = useState(false);
@@ -83,7 +84,7 @@ export function HelpScreen({
 				<SearchBox
 					value={search}
 					onChange={setSearch}
-					placeholder="Search guides, e.g. receipt, PIN, check in…"
+					placeholder={words.stays ? "Search guides, e.g. receipt, PIN, check in…" : "Search guides, e.g. receipt, PIN, tab…"}
 					className="w-full max-w-[520px]"
 				/>
 				{content.sections.length > 1 && (

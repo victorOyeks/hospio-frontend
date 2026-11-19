@@ -58,6 +58,7 @@ import type { PageResult } from "@hospio/api/data/paging";
 import type { StockItemRow, WorkOrderRow } from "@hospio/api/data/types";
 import { cn } from "@hospio/ui/utils";
 import { BigButton, BoardCard, Stepper } from "../shared-staff/tablet";
+import { useWording } from "@hospio/ui/shared/wording";
 
 export const CATEGORIES = [
 	"PLUMBING",
@@ -156,6 +157,7 @@ export function WorkOrdersScreen({
 	title: string;
 	subtitle?: string;
 }) {
+	const words = useWording();
 	const [rows, setRows] = useState(initial);
 	useEffect(() => setRows(initial), [initial]);
 	const [openId, setOpenId] = useQueryState("open");
@@ -417,7 +419,7 @@ export function WorkOrdersScreen({
 						<SearchBox
 							value={doneList.search}
 							onChange={doneList.setSearch}
-							placeholder="Search number, title, room, person"
+							placeholder={words.stays ? "Search number, title, room, person" : "Search number, title, person"}
 						/>
 					}
 				/>
@@ -495,13 +497,13 @@ export function WorkOrdersScreen({
 								<SearchBox
 									value={doneList.search}
 									onChange={doneList.setSearch}
-									placeholder="Search number, title, room, person"
+									placeholder={words.stays ? "Search number, title, room, person" : "Search number, title, person"}
 								/>
 							) : (
 								<SearchBox
 									value={search}
 									onChange={setSearch}
-									placeholder="Search number, title, room, person"
+									placeholder={words.stays ? "Search number, title, room, person" : "Search number, title, person"}
 								/>
 							)
 						}
