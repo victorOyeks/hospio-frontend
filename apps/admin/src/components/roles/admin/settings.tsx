@@ -75,12 +75,22 @@ export function SettingsScreen({
 	const g = s.general;
 	const f = s.fees;
 	const sec = s.security;
+	const sys = s.system ?? {};
+	const sysNum = (key: string, label: string, hint?: string) => (
+		<TextField
+			label={label}
+			value={str(sys[key])}
+			onChange={(v) => set("system", key, num(v))}
+			disabled={!editable}
+			hint={hint}
+		/>
+	);
 
 	return (
 		<>
 			<PageHeader
 				title="Platform settings"
-				subtitle="How Hospio360 itself runs: company details, default fees and security"
+				subtitle="How Hospio360 itself runs: company details, default fees, security and system health alerts"
 			>
 				{editable && (
 					<Link
@@ -102,6 +112,7 @@ export function SettingsScreen({
 					{ key: "fees", label: "Fee defaults" },
 					{ key: "devices", label: "Device catalogue" },
 					{ key: "security", label: "Security" },
+					{ key: "system", label: "System health" },
 				]}
 				value={active}
 				onChange={(k) => void setTab(k === "general" ? null : k)}
@@ -299,6 +310,46 @@ export function SettingsScreen({
 						/>
 					</FieldRow>
 					{save("security")}
+				</SectionCard>
+			)}
+
+			{active === "system" && (
+				<SectionCard
+					title="System health alerts"
+					subtitle="When Super admins get the bell (and an email) about the server · Platform → System health"
+					bodyClassName="gap-4 pt-2"
+				>
+					<p className="text-[13px] text-ink-2">
+						Each problem alerts once when it starts, once more if it gets worse and once when it clears. Never by SMS or WhatsApp. The
+						page itself colours a disk amber from 80% and red from 90%.
+					</p>
+					<FieldRow>
+						{sysNum("diskWarnPct", "Disk warning at (% used)")}
+						{sysNum("diskCriticalPct", "Disk critical at (% used)")}
+					</FieldRow>
+					<FieldRow>
+						{sysNum("memoryPct", "Memory used (%)", "Alert only when swap is also over its limit")}
+						{sysNum("swapPct", "Swap used (%)")}
+					</FieldRow>
+					<FieldRow>
+						{sysNum("memoryMinutes", "Memory high for (minutes)")}
+						{sysNum("serviceDownMinutes", "Service down for (minutes)")}
+					</FieldRow>
+					<FieldRow>
+						{sysNum("certDays", "Certificate days left under")}
+						{sysNum("dbConnectionsPct", "Database connections over (%)")}
+					</FieldRow>
+					<FieldRow>
+						{sysNum("kafkaLag", "Kafka messages waiting over")}
+						{sysNum("kafkaStuckMinutes", "…with no progress for (minutes)")}
+					</FieldRow>
+					<ToggleField
+						label="Email the Super admins as well as the bell"
+						hint="Off · the bell and the dashboard only"
+						checked={sys.emailAlerts !== false && sys.emailAlerts !== "false"}
+						onChange={(v) => editable && set("system", "emailAlerts", v)}
+					/>
+					{save("system")}
 				</SectionCard>
 			)}
 

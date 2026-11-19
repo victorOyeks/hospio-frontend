@@ -600,6 +600,193 @@ export const Integration = z.object({
 export const PlatformSettings = z.record(z.string(), JsonMap);
 
 /**
+ * Platform → System health (hospio-backend docs/system-health.md): the server, every Hospio unit, Postgres, Kafka, Redis, TLS
+ * certificates and 7 days of snapshots. Levels are OK / WARNING / PROBLEM; sizes bytes, durations seconds. Nullable throughout:
+ * a part the server couldn't read comes back empty with its `error`, and a newer server adding fields never breaks the page.
+ */
+const level = z.string().nullish().transform((v) => (v === "PROBLEM" || v === "WARNING" ? v : "OK"));
+const SysMount = z.object({
+	path: z.string(),
+	device: str,
+	type: str,
+	total: z.number(),
+	used: z.number(),
+	free: z.number(),
+	usedPct: z.number(),
+	level,
+});
+const SysDir = z.object({ label: z.string(), path: str, bytes: num, note: str });
+const SysServer = z.object({
+	hostname: str,
+	os: str,
+	kernel: str,
+	uptimeSeconds: num,
+	serverTime: str,
+	timezone: str,
+	cores: z.number().nullish(),
+	load1: num,
+	load5: num,
+	load15: num,
+	cpuPct: num,
+	memTotal: num,
+	memUsed: num,
+	memAvailable: num,
+	swapTotal: num,
+	swapUsed: num,
+	memoryStallPct: num,
+	mounts: z.array(SysMount).nullish().transform((v) => v ?? []),
+	largest: z.array(SysDir).nullish().transform((v) => v ?? []),
+	hospioMemory: num,
+	level,
+	error: str,
+});
+const SysService = z.object({
+	key: z.string(),
+	name: str,
+	kind: str,
+	unit: str,
+	port: num,
+	state: str,
+	subState: str,
+	health: str,
+	healthDetail: str,
+	level,
+	commit: str,
+	deployedAt: str,
+	startedAt: str,
+	uptimeSeconds: num,
+	restarts: num,
+	memoryBytes: num,
+	cpuPct: num,
+});
+const SysNamedSize = z.object({ name: z.string(), bytes: z.number() });
+const SysDatabase = z.object({
+	up: z.boolean(),
+	version: str,
+	error: str,
+	totalBytes: num,
+	hospioBytes: num,
+	databases: z.array(SysNamedSize).nullish().transform((v) => v ?? []),
+	schemas: z.array(SysNamedSize).nullish().transform((v) => v ?? []),
+	connections: num,
+	maxConnections: num,
+	longestQuerySeconds: num,
+	largestTables: z
+		.array(
+			z.object({
+				schema: z.string(),
+				table: z.string(),
+				bytes: z.number(),
+				liveRows: num,
+				deadRows: num,
+				lastAutovacuum: str,
+			}),
+		)
+		.nullish()
+		.transform((v) => v ?? []),
+	cacheHitPct: num,
+	deadRows: num,
+	tablesNeedingVacuum: num,
+	backups: z.object({ scheduled: z.boolean(), detail: str }).nullish(),
+	level,
+});
+const SysKafka = z.object({
+	up: z.boolean(),
+	error: str,
+	brokers: num,
+	topics: num,
+	logBytes: num,
+	groups: z
+		.array(
+			z.object({
+				group: z.string(),
+				service: str,
+				lag: z.number(),
+				trend: str,
+				stuckMinutes: num,
+				level,
+			}),
+		)
+		.nullish()
+		.transform((v) => v ?? []),
+	level,
+});
+const SysRedis = z.object({
+	up: z.boolean(),
+	error: str,
+	version: str,
+	usedBytes: num,
+	peakBytes: num,
+	maxBytes: num,
+	keys: num,
+	uptimeSeconds: num,
+	level,
+});
+const SysCert = z.object({
+	host: z.string(),
+	daysLeft: num,
+	expiresAt: str,
+	issuer: str,
+	error: str,
+	level,
+});
+const SysPoint = z.object({
+	at: z.string(),
+	cpuPct: num,
+	memPct: num,
+	swapPct: num,
+	diskPct: num,
+	diskUsed: num,
+	dbBytes: num,
+	servicesUp: num,
+	servicesTotal: num,
+});
+export const SystemHealthReport = z.object({
+	at: z.string(),
+	overall: level,
+	reasons: z
+		.array(z.object({ level, area: z.string(), text: z.string() }))
+		.nullish()
+		.transform((v) => v ?? []),
+	notes: z.array(z.string()).nullish().transform((v) => v ?? []),
+	server: SysServer.nullish(),
+	services: z.array(SysService).nullish().transform((v) => v ?? []),
+	database: SysDatabase.nullish(),
+	kafka: SysKafka.nullish(),
+	redis: SysRedis.nullish(),
+	certs: z.array(SysCert).nullish().transform((v) => v ?? []),
+	history: z
+		.object({
+			day: z.array(SysPoint).nullish().transform((v) => v ?? []),
+			week: z.array(SysPoint).nullish().transform((v) => v ?? []),
+			diskGrowthPerDay: num,
+			diskFullInDays: num,
+			diskTrend: str,
+		})
+		.nullish(),
+	thresholds: z
+		.object({
+			diskWarnPct: z.number(),
+			diskCriticalPct: z.number(),
+			memoryPct: z.number(),
+			swapPct: z.number(),
+			memoryMinutes: z.number(),
+			serviceDownMinutes: z.number(),
+			certDays: z.number(),
+			kafkaLag: z.number(),
+			kafkaStuckMinutes: z.number(),
+			dbConnectionsPct: z.number(),
+			emailAlerts: z.boolean(),
+		})
+		.nullish(),
+	otherApps: z
+		.array(z.object({ unit: str, name: str, memoryBytes: num }))
+		.nullish()
+		.transform((v) => v ?? []),
+	collectSeconds: num,
+});
+
+/**
  * A provider's keys as the Integrations page edits them (docs/admin-portal.md): SECRET values come back masked, `saved` says
  * the portal holds a value (otherwise the service uses its server setting). Nullable throughout so a service ahead or behind
  * never breaks the page.
@@ -1035,6 +1222,11 @@ export const adminRoutes = {
 		input: JsonMap,
 		output: envelope(JsonMap),
 	},
+	// Platform → System health (Super admin, Support): fresh=true asks for a new look (the server keeps one 15 s).
+	"@get/platform/admin/system-health": {
+		query: z.object({ fresh: z.boolean() }).partial().optional(),
+		output: envelope(SystemHealthReport),
+	},
 	// Provider keys (Super admin); the connection checks that used to live at this path are at /status.
 	"@get/platform/admin/integrations": {
 		output: envelope(z.array(IntegrationView)),
@@ -1251,6 +1443,7 @@ export type BusinessMarketer = z.infer<typeof BusinessMarketer>;
 export type MarketerChange = z.infer<typeof MarketerChange>;
 export type ReferralCodeCheck = z.infer<typeof ReferralCodeCheck>;
 export type Integration = z.infer<typeof Integration>;
+export type SystemHealthReport = z.infer<typeof SystemHealthReport>;
 export type IntegrationView = z.infer<typeof IntegrationView>;
 export type PlatformSettings = z.infer<typeof PlatformSettings>;
 export type Settlement = z.infer<typeof Settlement>;

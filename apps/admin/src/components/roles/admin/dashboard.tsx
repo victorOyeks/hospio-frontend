@@ -166,7 +166,7 @@ export function AdminDashboard({
 			<div className="grid gap-4 xl:grid-cols-[1fr_380px]">
 				<SectionCard
 					title="System alerts"
-					subtitle="What the platform found: overdue fees, failing payments, urgent tickets, stalled onboarding"
+					subtitle="What the platform found: overdue fees, failing payments, urgent tickets, stalled onboarding, server problems"
 					count={alerts.length}
 					action={{ label: "Support", href: "/dashboard/support" }}
 					bodyClassName="pt-1"
@@ -206,6 +206,11 @@ export function AdminDashboard({
 											{fmtAgo(a.at)}
 										</p>
 									</div>
+									{a.kind === "SYSTEM_HEALTH" && (
+										<Link href="/dashboard/system" className={cn(btn.secondary, btn.small)}>
+											Open
+										</Link>
+									)}
 									{a.businessId && (
 										<Link
 											href={`/dashboard/businesses/${a.businessId}`}

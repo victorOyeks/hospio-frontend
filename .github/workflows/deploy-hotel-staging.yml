@@ -49,6 +49,8 @@ jobs:
           mkdir -p "$out/apps/hotel/.next"
           cp -r apps/hotel/.next/static "$out/apps/hotel/.next/static"
           [ -d apps/hotel/public ] && cp -r apps/hotel/public "$out/apps/hotel/public"
+          # The commit this bundle was built from, for Platform → System health ("version deployed").
+          echo "${{ github.sha }}" > "$out/.sha"
           tar -czf bundle.tar.gz -C "$out" .
 
       - name: Copy bundle to server

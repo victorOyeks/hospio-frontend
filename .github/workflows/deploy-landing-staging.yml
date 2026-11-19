@@ -50,6 +50,8 @@ jobs:
           mkdir -p "$out/apps/landing/.next"
           cp -r apps/landing/.next/static "$out/apps/landing/.next/static"
           [ -d apps/landing/public ] && cp -r apps/landing/public "$out/apps/landing/public"
+          # The commit this bundle was built from, for Platform → System health ("version deployed").
+          echo "${{ github.sha }}" > "$out/.sha"
           tar -czf bundle.tar.gz -C "$out" .
 
       - name: Copy bundle to server
