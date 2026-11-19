@@ -86,7 +86,8 @@ No account is needed.
 
 1. **Do:** find "One simple price." **Expect:** a large **1.5%** "of your sales", then: worked out on each location's daily
    sales (before VAT) and billed on **one monthly invoice, due within 7 days**; paid online by card, bank transfer or USSD;
-   **nothing is ever debited from your account**. Four ticked lines of what is included, **Get started** and **How fees work**.
+   **nothing is ever debited from your account**. Four ticked lines of what is included, a small grey line saying guest SMS and
+   WhatsApp messages and any devices are charged separately on the same invoice, then **Get started** and **How fees work**.
 2. **Do:** click **How fees work**. **Expect:** `/legal/fees` opens ("Fees and monthly invoice"); its version is unchanged.
 3. **Expect:** nowhere on the home page, `/features` or `/partners/apply` is there any mention of a daily debit, 06:00,
    Moniepoint or OPay, or of "choose the model that fits", "per room-night" or an "agreed share" (the old price wording).
