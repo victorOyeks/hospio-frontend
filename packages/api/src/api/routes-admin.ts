@@ -636,6 +636,8 @@ const SysServer = z.object({
 	memoryStallPct: num,
 	mounts: z.array(SysMount).nullish().transform((v) => v ?? []),
 	largest: z.array(SysDir).nullish().transform((v) => v ?? []),
+	/** When the folder sizes were measured (in the background, every 15 minutes). */
+	largestMeasuredAt: str,
 	hospioMemory: num,
 	level,
 	error: str,
@@ -729,6 +731,8 @@ const SysCert = z.object({
 	issuer: str,
 	error: str,
 	level,
+	/** When it was last read (once an hour). */
+	checkedAt: str,
 });
 const SysPoint = z.object({
 	at: z.string(),
