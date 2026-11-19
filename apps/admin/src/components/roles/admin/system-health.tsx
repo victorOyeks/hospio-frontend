@@ -90,7 +90,10 @@ export function SystemHealthScreen({ initial, superAdmin }: { initial: SystemHea
 	const [report, setReport] = useState<SystemHealthReport | null>(initial.ok ? initial.report : null);
 	const [error, setError] = useState<string | null>(initial.ok ? null : initial.error);
 	const [loading, setLoading] = useState(false);
-	const [now, setNow] = useState(() => Date.now());
+	// The clock starts at the report's own time so the server's HTML and the browser's first render agree (React #418); the
+	// times on the page are formatted in the browser's zone only after mounting.
+	const [now, setNow] = useState(() => (initial.ok ? new Date(initial.report.at).getTime() : 0));
+	const [mounted, setMounted] = useState(false);
 	const busy = useRef(false);
 	/** Failed polls in a row: one miss (a deploy restarting the service) isn't shown; two are. */
 	const misses = useRef(0);
@@ -123,6 +126,8 @@ export function SystemHealthScreen({ initial, superAdmin }: { initial: SystemHea
 		const tick = setInterval(() => {
 			if (document.visibilityState === "visible") void reload(false);
 		}, REFRESH_MS);
+		setMounted(true);
+		setNow(Date.now());
 		const clock = setInterval(() => setNow(Date.now()), 5_000);
 		return () => {
 			clearInterval(tick);
@@ -157,7 +162,11 @@ export function SystemHealthScreen({ initial, superAdmin }: { initial: SystemHea
 				</div>
 			</PageHeader>
 
-			{!report ? (
+			{!mounted ? (
+				<p className="flex items-center gap-2 py-6 text-sm text-ink-3">
+					<Loader2Icon className="size-4 animate-spin" /> Loading…
+				</p>
+			) : !report ? (
 				<EmptyState title="System health couldn't be loaded" hint={error ?? undefined} />
 			) : (
 				<div className={cn("flex min-w-0 flex-col gap-4", loading && "opacity-90")}>
@@ -169,11 +178,11 @@ export function SystemHealthScreen({ initial, superAdmin }: { initial: SystemHea
 					<Banner report={report} />
 					<Headlines report={report} />
 					<Services services={report.services} />
-					<div className="grid min-w-0 gap-4 xl:grid-cols-2">
+					<div className="grid min-w-0 gap-4 xl:grid-cols-2 [&>*]:min-w-0">
 						<ServerCard report={report} />
 						<DatabaseCard report={report} />
 					</div>
-					<div className="grid min-w-0 gap-4 lg:grid-cols-2 2xl:grid-cols-3">
+					<div className="grid min-w-0 gap-4 lg:grid-cols-2 2xl:grid-cols-3 [&>*]:min-w-0">
 						<KafkaCard report={report} />
 						<RedisCard report={report} />
 						<CertsCard report={report} />
