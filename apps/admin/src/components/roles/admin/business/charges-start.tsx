@@ -161,6 +161,72 @@ export function ChargesStartCard({ businessId }: { businessId: string }) {
 	);
 }
 
+/**
+ * Edit business · Fee & contract: the same date as the Money tab, read from platform-service. Money roles change or clear it
+ * through the same modal (reason, preview, confirm when free days become billable); it applies at once, apart from Save business.
+ * `onChanged` gets the new date so the caller can mirror it into tenant's contractStartsOn (as onboarding step 3 does).
+ */
+export function ChargesStartField({ businessId, onChanged }: { businessId: string; onChanged?: (date: string | null) => void }) {
+	const { view, error, setView } = useChargesStart(businessId);
+	const [editing, setEditing] = useState<"change" | "clear" | null>(null);
+	return (
+		<div className="flex flex-col gap-2 rounded-xl border border-line p-3">
+			<div className="flex flex-wrap items-center justify-between gap-2">
+				<p className="text-[13px] font-medium text-ink">Charges start on</p>
+				{view?.canEdit && (
+					<div className="flex flex-wrap gap-2">
+						<button type="button" className={btn.secondary} onClick={() => setEditing("change")}>
+							{view.chargesStartOn ? "Change" : "Set date"}
+						</button>
+						{view.chargesStartOn && (
+							<button type="button" className={btn.ghost} onClick={() => setEditing("clear")}>
+								Clear
+							</button>
+						)}
+					</div>
+				)}
+			</div>
+			{error ? (
+				<Note tone="danger">{error}</Note>
+			) : !view ? (
+				<div className="h-12 animate-pulse rounded-lg bg-subtle" />
+			) : (
+				<div className="min-w-0">
+					<p className="flex flex-wrap items-center gap-2 text-[14px] font-semibold text-ink">
+						{view.chargesStartOn ? fmtLongDate(view.chargesStartOn) : "No date · free"}
+						<ChargesTag row={view} />
+					</p>
+					<p className="mt-1 text-[13px] text-ink-2">{stateWords(view)}</p>
+					{(view.setByName || view.reason) && (
+						<p className="mt-1 text-xs text-ink-3">
+							{view.setByName ? `Set by ${view.setByName}` : "Set"}
+							{view.setAt ? ` · ${fmtWhen(view.setAt)}` : ""}
+							{view.reason ? ` · “${view.reason}”` : ""}
+						</p>
+					)}
+					<p className="mt-1 text-xs text-ink-3">
+						{view.canEdit
+							? "Changes apply at once with their own reason (not with Save business) and are logged in Changes by Hospio360 · Billing start. History is on the Money tab."
+							: "Only a Super admin or Finance admin can change it. History is on the Money tab."}
+					</p>
+				</div>
+			)}
+			{view && editing && (
+				<ChargesStartModal
+					view={view}
+					clearing={editing === "clear"}
+					onClose={() => setEditing(null)}
+					onSaved={(v) => {
+						setView(v);
+						setEditing(null);
+						onChanged?.(v.chargesStartOn ?? null);
+					}}
+				/>
+			)}
+		</div>
+	);
+}
+
 /** Set, move or clear the date: shows what it does to days not invoiced yet and asks for an explicit confirm when free days become billable. */
 export function ChargesStartModal({
 	view,

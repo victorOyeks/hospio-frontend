@@ -666,7 +666,7 @@ function HandoverPackModal({
 								? ` · ${business.feeModel.includes("%") ? `${business.feeValue}%` : naira(business.feeValue)}`
 								: ""}
 							{business.contractStartsOn
-								? ` · from ${fmtLongDate(business.contractStartsOn)}`
+								? ` · charges start on ${fmtLongDate(business.contractStartsOn)}`
 								: ""}
 						</li>
 						<li>• Your account manager: {business.accountManager}</li>

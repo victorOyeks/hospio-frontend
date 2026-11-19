@@ -13,7 +13,7 @@ Guest messages can be switched on and off **per channel** for each location.
 | Clearing the date | Free again from the next day not on an invoice; issued invoices untouched |
 | Devices | **Not free.** Device instalments, data plan and the device share of sales are invoiced as usual, so a free business may get an invoice with only **Devices & internet** |
 | Guest messages in the free period | Messages that are switched on are sent and recorded at **₦0**, tagged **Free period**. After the start date they are priced as usual |
-| Who sets it | Super admin and Finance admin only (onboarding step 3 and the business **Money** tab), with a reason. Support sees it read-only. Every change is in **Changes by Hospio360** (area "Billing start") |
+| Who sets it | Super admin and Finance admin only (onboarding step 3, the business **Money** tab and **Edit business**), with a reason. Support sees it read-only. Every change is in **Changes by Hospio360** (area "Billing start") |
 | Reminder | 7 days before a business's charges start date, money admins get a bell notice and an email |
 | Existing businesses | Kept their billing: charges start date = the old "Agreement starts on" date, else their first worked-out day (go-live). New businesses start with **no date (free)** |
 | WhatsApp / Email switches | Replace the single "Guest messages" switch. Off = never sent, never charged, delivery recorded *Skipped* "WhatsApp (or Email) is switched off for this hotel". Hospio360's hold (suspension) is unchanged |
@@ -107,5 +107,21 @@ Use **QA businesses only** (owner `@hospio-qa.test`), e.g. `qa.ownerb.fcekd@hosp
 
 ## 9 · Tablet widths
 
-At 768 px and 1024 px: the owner banner, the Money tab card and its modal, the Businesses list tags and the two guest-message
+At 768 px and 1024 px: the owner banner, the Money tab card and its modal, the Edit business panel's Charges start on box, the Businesses list tags and the two guest-message
 switches fit without sideways scrolling.
+
+## 10 · Edit business uses the same date
+
+The old "Agreement starts on" field is gone: Edit business (and Edit as Hospio360) show the real **Charges start on** date, changed
+through the same modal and rules as the Money tab. Tenant's `contract_starts_on` is kept the same as the date (as onboarding step 3 does).
+
+1. **Do (Super admin):** a QA business → **Edit** → **Fee & contract**. **Expect:** a **Charges start on** box (no "Agreement starts on"
+   date field) with the date or "No date · free", its tag, who set it and why, and **Set date** / **Change** / **Clear**.
+2. **Do:** **Set date** (or **Change**) to a future date, reason ≥ 8 characters. **Expect:** the same modal as the Money tab (preview,
+   Save disabled under 8 characters); after saving, the box shows the date with **Billing from …**; the panel stays open and
+   **Save business** is not needed. A date earlier than the current one asks for the "Yes, bill N free days" confirm first.
+3. **Expect:** close the panel → **Money** tab shows the same date, and History lists the change; **Changes by Hospio360** has a
+   "Billing start" entry with the reason; the **Activity** tab's Contract card says **Charges start on** with the same date and tag.
+4. **Do:** Edit → **Clear** with a reason. **Expect:** "No date · free", tag **Free**; Money tab and Businesses list say **Free**.
+5. **Do (Support `kola@`):** open Edit on the same business. **Expect:** the box shows the date read-only with "Only a Super admin or
+   Finance admin can change it."; no Set/Change/Clear. Saving other fields works and does not change the date.

@@ -40,7 +40,7 @@ export const STEP_META: Record<
 	},
 	fee: {
 		label: "Fee & contract",
-		subtitle: "How Hospio360 is paid and when the agreement starts",
+		subtitle: "How Hospio360 is paid and when charges start",
 	},
 	hotels: {
 		label: "Hotels",
