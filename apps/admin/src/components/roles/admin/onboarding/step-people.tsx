@@ -326,7 +326,7 @@ export function PeopleStep({ ctx }: { ctx: WizardCtx }) {
 					},
 					{
 						accessorKey: "hotelName",
-						header: "Hotel",
+						header: ctx.venue.locations ? "Location" : "Hotel",
 						cell: ({ row }) =>
 							row.original.hotelName ??
 							(row.original.role === "OWNER" ? "All locations" : "—"),
@@ -635,7 +635,7 @@ function AddPersonPanel({
 							required
 						/>
 						<SelectField
-							label="Hotel"
+							label="Location"
 							value={hotelId || hotels[0]?.id || ""}
 							onChange={setHotelId}
 							options={hotels.map((h) => ({ value: h.id, label: h.name }))}

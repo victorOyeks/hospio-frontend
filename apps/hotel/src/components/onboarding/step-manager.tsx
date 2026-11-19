@@ -271,7 +271,8 @@ export function ManagerStep({
 								{[
 									`Expenses over ${naira(200000)}`,
 									"Discounts over 10%",
-									"Room price changes",
+									// Only where there are rooms to price (docs/plan-venue-type.md).
+									...(place === "hotel" || place === "location" ? ["Room price changes"] : []),
 								].map((t) => (
 									<li key={t} className="flex items-center gap-2">
 										<CheckIcon className="size-3 text-success" /> {t}
