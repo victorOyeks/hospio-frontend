@@ -1,5 +1,6 @@
 "use client";
 
+import { SuspensionCard } from "./business/suspension";
 import {
 	ArrowRightIcon,
 	PencilIcon,
@@ -115,7 +116,7 @@ export function BusinessPage({
 					businessId={business.id}
 					businessName={business.name}
 				/>
-				{editable && (
+				{editable && business.stage !== "SUSPENDED" && (
 					<button
 						type="button"
 						onClick={() => setAction("stage")}
@@ -164,6 +165,17 @@ export function BusinessPage({
 				</ReadOnlyNote>
 			)}
 
+			<SuspensionCard
+				businessId={business.id}
+				businessName={business.name}
+				role={role}
+				stage={business.stage}
+				onChanged={(s) => {
+					setBusiness({ ...business, stage: s.stage as BusinessRow["stage"] });
+					router.refresh();
+				}}
+			/>
+
 			<BusinessTabStrip
 				businessId={business.id}
 				active={current}
@@ -200,6 +212,7 @@ export function BusinessPage({
 				onOpenChange={(o) => (o ? setAction("stage") : close())}
 				business={business}
 				onSaved={saved}
+				role={role}
 			/>
 			<ChangeManagerModal
 				open={action === "manager"}

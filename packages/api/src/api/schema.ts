@@ -12,6 +12,7 @@ import { devicePackageRoutes } from "./routes-device-packages";
 import { legalRoutes } from "./routes-legal";
 import { feeRoutes } from "./routes-fees";
 import { billingRoutes } from "./routes-billing";
+import { suspensionRoutes } from "./routes-suspension";
 import { paymentRoutes } from "./routes-payments";
 import { profileRoutes } from "./routes-profile";
 import { venueRoutes } from "./routes-venue";
@@ -1152,6 +1153,7 @@ export const schema = createSchema({
 	...ownerRoutes,
 	...feeRoutes,
 	...billingRoutes,
+	...suspensionRoutes,
 	...devicePackageRoutes,
 	...legalRoutes,
 	...mlRoutes,

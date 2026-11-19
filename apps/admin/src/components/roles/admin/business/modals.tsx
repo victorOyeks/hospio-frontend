@@ -15,6 +15,8 @@ import { WhatHappens } from "@hospio/ui/shared/side-panel";
 import { btn } from "@hospio/ui/shared/ui";
 import { refreshBusiness } from "../onboarding/shared";
 import { stageMeta } from "../shared";
+import type { AdminRole } from "@hospio/api/demo/fixtures/platform-extra";
+import { SuspendModal } from "./suspension";
 
 const STAGES: BusinessStage[] = [
 	"LEAD",
@@ -31,28 +33,44 @@ const stageHint: Record<BusinessStage, string> = {
 	HANDED_OVER: "Waiting for the owner to accept",
 	LIVE: "Hotels in daily use",
 	AT_RISK: "Fees overdue or usage dropping",
-	SUSPENDED: "Nobody can sign in until reactivated",
+	SUSPENDED: "Everyone at the business is locked out until reactivated",
 	CHURNED: "Left Hospio360",
 };
 
-/** C11 · Change stage (PUT /tenant/businesses/{id}/stage). Suspending needs a reason of 8+ characters. */
+/**
+ * C11 · Change stage (PUT /tenant/businesses/{id}/stage). Choosing Suspended opens the suspension step (reason type, note, the
+ * 7 days' notice; hospio-backend docs/suspension.md). A suspended business is reactivated from its suspension card, not here.
+ */
 export function ChangeStageModal({
 	open,
 	onOpenChange,
 	business,
 	onSaved,
+	role,
 }: {
 	open: boolean;
 	onOpenChange: (o: boolean) => void;
 	business: BusinessRow;
 	onSaved: (b: BusinessRow) => void;
+	role: AdminRole;
 }) {
 	const { run, pending } = useAction();
 	const [stage, setStage] = useState<BusinessStage>(business.stage);
 	const [reason, setReason] = useState("");
 	const suspending = stage === "SUSPENDED";
-	const valid =
-		stage !== business.stage && (!suspending || reason.trim().length >= 8);
+	const valid = stage !== business.stage && !suspending;
+	if (open && suspending && business.stage !== "SUSPENDED")
+		return (
+			<SuspendModal
+				open
+				onOpenChange={onOpenChange}
+				businessId={business.id}
+				businessName={business.name}
+				role={role}
+				onBack={() => setStage(business.stage)}
+				onDone={() => onSaved({ ...business, stage: "SUSPENDED" })}
+			/>
+		);
 	return (
 		<Modal
 			open={open}
@@ -62,7 +80,7 @@ export function ChangeStageModal({
 			icon={suspending ? ShieldAlertIcon : undefined}
 			tone={suspending ? "danger" : "default"}
 			size="confirm"
-			footerInfo="The owner and managers see the stage on their dashboard; a suspension signs everyone out."
+			footerInfo="To suspend, choose Suspended: it asks for the reason type and the notice date, and locks everyone at the business out."
 			footer={
 				<>
 					<button
@@ -100,7 +118,7 @@ export function ChangeStageModal({
 					label="New stage"
 					value={stage}
 					onChange={(v) => setStage(v as BusinessStage)}
-					options={STAGES.map((s) => ({
+					options={STAGES.filter((s) => s !== "SUSPENDED" || business.stage === "LIVE" || business.stage === "AT_RISK").map((s) => ({
 						value: s,
 						label: stageMeta[s]?.label ?? s,
 						hint: stageHint[s],

@@ -274,6 +274,7 @@ export const ownerHelp: HelpModule = {
 				"Reminders come by email on the 6th, 7th, 8th, 9th and 10th, with a final notice on the 11th.",
 				"If it is still unpaid, from 06:00 on the 12th card/transfer POS payments, new sales (bar, kitchen and new laundry orders) and new bookings pause. Signing in, check-out, laundry already taken, cash on existing bills and tabs, reports and paying the invoice still work. Everything resumes within a minute of paying.",
 				"A month under ₦1,000 isn't charged: it is carried into the next month's invoice. No VAT is charged.",
+				"Still unpaid 30 days after its due date? Hospio360 emails you 7 days' notice, then may suspend the account: everyone at the business sees “This account is suspended” and can't use the app. You can still sign in, see what is owed, tap “Pay now” and download invoices and receipts. Paying every overdue invoice in full brings the account back within a minute; nothing is deleted.",
 				"Managers see the invoice for their locations but can't pay it. Only the owner pays.",
 				"Paid by bank transfer instead? Tell Hospio360 support with the reference; they record it and send the receipt.",
 			],

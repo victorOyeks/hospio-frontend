@@ -33,6 +33,8 @@ import { PanelSection, SidePanel } from "@hospio/ui/shared/side-panel";
 import { FilterSelect, Toolbar } from "@hospio/ui/shared/toolbar";
 import { btn, cell, tableHead, tableRow } from "@hospio/ui/shared/ui";
 import { cn } from "@hospio/ui/utils";
+import { suspensionCandidates } from "@hospio/api/actions/suspension";
+import { SuspensionCandidates } from "./business/suspension";
 import { Loading, monthOptions } from "./live";
 import { can } from "./shared";
 
@@ -46,6 +48,8 @@ import { can } from "./shared";
 
 const STATUSES = ["DUE", "DUE_SOON", "OVERDUE", "RESTRICTED", "PAID", "CARRIED_FORWARD", "VOID"];
 const OPEN = ["DUE", "OVERDUE"];
+/** Not an invoice status: the list of businesses 30+ days overdue (hospio-backend docs/suspension.md). */
+const CANDIDATES = "CANDIDATES";
 
 const EVENT_LABEL: Record<string, string> = {
 	ISSUED: "Issued",
@@ -99,9 +103,17 @@ export function InvoicesTab({
 	const [error, setError] = useState<string | null>(null);
 	const [issue, setIssue] = useState(false);
 	const forBusiness = businessId ?? biz ?? undefined;
-	const query = { status: status ?? undefined, month: month ?? undefined, businessId: forBusiness };
+	const query = { status: status && status !== CANDIDATES ? status : undefined, month: month ?? undefined, businessId: forBusiness };
+
+	const candidatesView = status === CANDIDATES && !businessId;
+	const [candidateCount, setCandidateCount] = useState<number | undefined>(undefined);
+	useEffect(() => {
+		if (businessId) return;
+		void suspensionCandidates().then((r) => r.ok && setCandidateCount(r.data.length));
+	}, [businessId]);
 
 	const load = useCallback(async () => {
+		if (status === CANDIDATES) return;
 		const r = await adminInvoices({ status: status ?? undefined, month: month ?? undefined, businessId: businessId ?? biz ?? undefined });
 		if (r.ok) {
 			setList(r.data);
@@ -132,6 +144,7 @@ export function InvoicesTab({
 						tabs={[
 							{ key: "ALL", label: "All" },
 							...STATUSES.map((s) => ({ key: s, label: invoiceStatusLabel(s), count: counts[s] || undefined })),
+							...(businessId ? [] : [{ key: CANDIDATES, label: "Suspension candidates", count: candidateCount || undefined }]),
 						]}
 						value={status ?? "ALL"}
 						onChange={(k) => void setStatus(k === "ALL" ? null : k)}
@@ -158,7 +171,8 @@ export function InvoicesTab({
 				}
 			/>
 			{error && <Note tone="danger">{error}</Note>}
-			<section className="rounded-card border border-line bg-card">
+			{candidatesView && <SuspensionCandidates role={role} onCount={setCandidateCount} />}
+			<section className={cn("rounded-card border border-line bg-card", candidatesView && "hidden")}>
 				{!list && !error ? (
 					<div className="px-5">
 						<Loading label="Loading invoices…" />

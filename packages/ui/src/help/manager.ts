@@ -524,6 +524,7 @@ export const managerHelp: HelpModule = {
 				"Don't send a second charge while one is waiting.",
 				"If the POS doesn't answer, take cash or a bank transfer instead.",
 				"If it says POS payments are paused, the Hospio360 invoice is unpaid: take cash and ask the owner to pay it under Billing & invoices.",
+				"If every page says “This account is suspended”, Hospio360 has suspended the business. Ask the owner to contact Hospio360 (hello@oyeksglobal.com); the app comes back by itself when it is lifted.",
 			],
 		},
 		{
