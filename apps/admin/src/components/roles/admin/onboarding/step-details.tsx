@@ -548,6 +548,8 @@ export function FeeStep({ ctx }: { ctx: WizardCtx }) {
 				feeValue,
 				feeAddendumRef,
 				contractStartsOn: contractStartsOn || null,
+				// No date (free): the mirror is emptied too, so it never shows a date billing no longer uses.
+				clearContractStartsOn: !contractStartsOn && !!business.contractStartsOn,
 				contractNotes: contractNotes.trim(),
 			};
 			const b = await saveFields<"fee">(
