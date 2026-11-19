@@ -41,6 +41,7 @@ import { withSession } from "@hospio/api/api/server";
 import { demoDelay } from "@hospio/api/demo/mode";
 import * as platform from "@hospio/api/demo/fixtures/platform";
 import * as extra from "@hospio/api/demo/fixtures/platform-extra";
+import { demoSystemHealth } from "@hospio/api/demo/fixtures/system-health";
 import { at } from "@hospio/api/demo/fixtures/hotel";
 import type { AdminUserRow, BusinessRow } from "./types";
 import { live } from "./live";
@@ -61,6 +62,7 @@ import {
 	type IntegrationFieldType,
 	type IntegrationItem,
 	type IntegrationsData,
+	type SystemHealthData,
 	type LoadResult,
 	type MarketerAgreementRow,
 	type MarketerBusinessItem,
@@ -2024,12 +2026,13 @@ export const adminData = {
 			);
 			if (error || !res) {
 				fail("platform-service settings", error);
-				return { general: {}, fees: {}, security: {} };
+				return { general: {}, fees: {}, security: {}, system: {} };
 			}
 			return {
 				general: res.data.general ?? {},
 				fees: res.data.fees ?? {},
 				security: res.data.security ?? {},
+				system: res.data.system ?? {},
 			};
 		},
 	},
@@ -2071,6 +2074,34 @@ export const adminData = {
 		return typeof cards === "string"
 			? { ok: false, error: cards, status }
 			: { ok: true, cards, status };
+	},
+
+	/**
+	 * Platform → System health (Super admin, Support): the server, services, database, Kafka, Redis, certificates and trends.
+	 * `fresh` asks the server for a new look instead of the one it keeps for 15 s ("Refresh now").
+	 */
+	systemHealth: async (fresh = false): Promise<SystemHealthData> => {
+		if (!live("platform")) return give({ ok: true, report: demoSystemHealth() });
+		try {
+			const { data: res, error } = await api("@get/platform/admin/system-health", {
+				...(await withSession()),
+				query: fresh ? { fresh: true } : {},
+			});
+			if (error || !res) {
+				fail("platform-service system health", error);
+				return {
+					ok: false,
+					error:
+						error?.status === 403
+							? "Only a Super admin or Support can see system health"
+							: errorMessage(error, "System health could not be loaded"),
+				};
+			}
+			return { ok: true, report: res.data };
+		} catch (e) {
+			fail("platform-service system health", e);
+			return { ok: false, error: "System health could not be read. The platform service may not have the update yet." };
+		}
 	},
 
 	/** The server's connection checks (database, Kafka, providers); any platform role. Empty when the call fails. */

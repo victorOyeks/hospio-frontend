@@ -585,7 +585,7 @@ export type CommissionStatementData = {
 
 // ---- settings ------------------------------------------------------------------------------------
 
-export type SettingsGroup = "general" | "fees" | "security";
+export type SettingsGroup = "general" | "fees" | "security" | "system";
 export type PlatformSettingsData = Record<
 	SettingsGroup,
 	Record<string, unknown>
@@ -673,3 +673,14 @@ export type SupportAccessGrantItem = {
 	expiresAt?: string;
 	expired: boolean;
 };
+
+// ---- system health ---------------------------------------------------------------------------------
+
+/** Platform → System health (GET /platform/admin/system-health), as the server sends it after Zod's defaults. */
+export type { SystemHealthReport } from "@hospio/api/api/routes-admin";
+import type { SystemHealthReport as SystemHealthReportType } from "@hospio/api/api/routes-admin";
+export type SystemHealthService = SystemHealthReportType["services"][number];
+export type SystemHealthPoint = NonNullable<SystemHealthReportType["history"]>["day"][number];
+export type SystemHealthLevel = SystemHealthReportType["overall"];
+/** The page's load: the report, or why it couldn't be read. */
+export type SystemHealthData = { ok: true; report: SystemHealthReportType } | { ok: false; error: string };

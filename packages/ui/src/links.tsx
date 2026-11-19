@@ -286,8 +286,8 @@ export const financeLinks: NavLink[] = [
 
 /**
  * Admin portal menu, grouped so each kind of work has one home: customers (businesses, every hotel, onboarding), day-to-day
- * operations, money, growth and the platform itself. Integrations is for a Super admin only; the rest is shown to every
- * platform role and each page says what that role may change.
+ * operations, money, growth and the platform itself. Integrations is for a Super admin only, System health for a Super admin
+ * and Support; the rest is shown to every platform role and each page says what that role may change.
  */
 export const adminLinks: NavLink[] = [
 	{ title: "Dashboard", url: "/dashboard", icon: HomeIcon, group: "Overview" },
@@ -310,6 +310,13 @@ export const adminLinks: NavLink[] = [
 		icon: PlugIcon,
 		group: "Platform",
 		roles: ["SUPER_ADMIN"],
+	},
+	{
+		title: "System health",
+		url: "/dashboard/system",
+		icon: ActivityIcon,
+		group: "Platform",
+		roles: ["SUPER_ADMIN", "SUPPORT"],
 	},
 	{ title: "Settings", url: "/dashboard/settings", icon: SettingsIcon, group: "Platform" },
 	{ title: "Legal documents", url: "/dashboard/legal", icon: ScaleIcon, group: "Platform" },
