@@ -1,8 +1,6 @@
 "use client";
 
-import type { ColumnDef } from "@tanstack/react-table";
-import { BookOpenIcon, Undo2Icon } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { undoChange } from "@hospio/api/actions/platform-admin";
 import { useAction } from "@hospio/api/actions/use-action";
 import type {
@@ -12,18 +10,14 @@ import type {
 } from "@hospio/api/data/admin-types";
 import type { BusinessRow } from "@hospio/api/data/types";
 import type { AdminRole } from "@hospio/api/demo/fixtures/platform-extra";
-import { DataTable, TwoLine } from "@hospio/ui/shared/data-table";
-import { fmtWhen } from "@hospio/ui/shared/format";
+import { EmptyState } from "@hospio/ui/shared/empty-state";
 import { ConfirmModal } from "@hospio/ui/shared/modal";
 import { PageHeader } from "@hospio/ui/shared/page-header";
 import { PillTabs } from "@hospio/ui/shared/pill-tabs";
 import { RetentionNote } from "@hospio/ui/shared/retention-note";
-import { SectionCard } from "@hospio/ui/shared/section-card";
 import { WhatHappens } from "@hospio/ui/shared/side-panel";
-import { StatusPill } from "@hospio/ui/shared/status-pill";
 import { FilterSelect, SearchBox, Toolbar } from "@hospio/ui/shared/toolbar";
-import { btn } from "@hospio/ui/shared/ui";
-import { cn } from "@hospio/ui/utils";
+import { ActivityLog, ChangeLog } from "./change-log";
 import { ServerPager, useFilterParam, usePageParam } from "./live";
 import { can } from "./shared";
 
@@ -53,77 +47,17 @@ export function ChangesScreen({
 	const [search, setSearch] = useState("");
 	const [undo, setUndo] = useState<AdminChangeRow | null>(null);
 	const { run, pending } = useAction();
-	const now = Date.now();
 	const active = tab || "changes";
 	const rows = changes;
 
-	const columns: ColumnDef<AdminChangeRow, unknown>[] = [
-		{
-			accessorKey: "description",
-			header: "Change",
-			cell: ({ row }) => (
-				<TwoLine
-					primary={row.original.description}
-					secondary={`${row.original.businessName} · ${row.original.area}`}
-				/>
-			),
-		},
-		{
-			accessorKey: "reason",
-			header: "Reason",
-			cell: ({ row }) => (
-				<span className="text-ink-2">{row.original.reason}</span>
-			),
-		},
-		{ accessorKey: "madeBy", header: "By" },
-		{
-			accessorKey: "at",
-			header: "When",
-			cell: ({ row }) => (
-				<span className="text-ink-3">{fmtWhen(row.original.at)}</span>
-			),
-		},
-		{
-			id: "undo",
-			header: "Undo",
-			cell: ({ row }) => {
-				const c = row.original;
-				if (c.undone)
-					return (
-						<StatusPill tone="grey" dot={false}>
-							undone
-						</StatusPill>
-					);
-				const open = new Date(c.undoUntil).getTime() > now;
-				const days = Math.max(
-					0,
-					Math.ceil((new Date(c.undoUntil).getTime() - now) / 86400000),
-				);
-				if (!open)
-					return (
-						<StatusPill tone="grey" dot={false}>
-							window closed
-						</StatusPill>
-					);
-				return can.editBusiness(role) ? (
-					<button
-						type="button"
-						onClick={(e) => {
-							e.stopPropagation();
-							setUndo(c);
-						}}
-						className={cn(btn.secondary, btn.small, "flex items-center gap-1")}
-					>
-						<Undo2Icon className="size-3" /> Undo · {days}d left
-					</button>
-				) : (
-					<StatusPill tone="info" dot={false}>
-						{days}d left
-					</StatusPill>
-				);
-			},
-		},
-	];
+	const needle = search.toLowerCase().trim();
+	const shown = needle
+		? rows.filter((c) => JSON.stringify(c).toLowerCase().includes(needle))
+		: rows;
+	const businessNames = useMemo(
+		() => new Map(businesses.map((b) => [b.id, b.name])),
+		[businesses],
+	);
 
 	return (
 		<>
@@ -179,47 +113,26 @@ export function ChangesScreen({
 				}
 			/>
 			{active === "changes" ? (
-				<DataTable
-					columns={columns}
-					data={rows}
-					search={search}
-					pageSize={initial.size}
-					emptyTitle="No changes"
-					emptyHint="Edits made as Hospio360 appear here."
-					footer={<ServerPager bare page={initial} onPage={setPage} />}
+				<ChangeLog
+					rows={shown}
+					canUndo={can.editBusiness(role)}
+					onUndo={setUndo}
+					empty={
+						needle && rows.length > 0 ? (
+							<EmptyState title="No matches" hint="Nothing on this page matches the search." />
+						) : (
+							<EmptyState title="No changes" hint="Edits made as Hospio360 appear here." />
+						)
+					}
+					footer={<ServerPager bare page={initial} onPage={setPage} className="flex-1" />}
 				/>
 			) : (
-				<SectionCard
-					title="Admin activity"
-					subtitle="Sign-ins, approvals and actions by the Hospio360 team"
-					flush
-				>
-					{activity.content.length === 0 ? (
-						<p className="px-5 pb-5 text-sm text-ink-3">
-							Nothing recorded yet.
-						</p>
-					) : (
-						<ul className="divide-y divide-line">
-							{activity.content.map((a) => (
-								<li key={a.id} className="flex items-center gap-3 px-5 py-3">
-									<BookOpenIcon className="size-4 shrink-0 text-ink-3" />
-									<div className="min-w-0 flex-1">
-										<p className="text-[13px] font-semibold text-ink">
-											{a.action}
-										</p>
-										<p className="text-xs text-ink-3">
-											{a.by} · {a.eventType.toLowerCase().replace(/_/g, " ")}
-										</p>
-									</div>
-									<span className="text-xs text-ink-3">{fmtWhen(a.at)}</span>
-								</li>
-							))}
-						</ul>
-					)}
-					<div className="border-t border-line px-5 py-3">
-						<ServerPager bare page={activity} onPage={setPage} />
-					</div>
-				</SectionCard>
+				<ActivityLog
+					rows={activity.content}
+					businessNames={businessNames}
+					empty={<EmptyState title="Nothing recorded yet" hint="Sign-ins, approvals and actions by the Hospio360 team appear here." />}
+					footer={<ServerPager bare page={activity} onPage={setPage} className="flex-1" />}
+				/>
 			)}
 
 			<ConfirmModal

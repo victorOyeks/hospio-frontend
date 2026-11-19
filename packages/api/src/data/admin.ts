@@ -158,6 +158,9 @@ export const toChangeRow = (
 	undone: undone ?? c.undone ?? !!c.undoneAt,
 	beforeJson: s(c.beforeJson),
 	afterJson: s(c.afterJson),
+	undoneAt: s(c.undoneAt),
+	undoRequestedAt: s(c.undoRequestedAt),
+	undoRequestedBy: s(c.undoRequestedByName),
 });
 const fromChangeRow = (r: ChangeRow) =>
 	toChangeRow(r.change, r.businessName, r.madeByName, r.undone);
@@ -170,6 +173,7 @@ export const toActivityRow = (a: PlatformActivity): AdminActivityRow => ({
 	target: a.businessId ? "Business" : "—",
 	eventType: a.eventType ?? "",
 	businessId: s(a.businessId),
+	payload: s(a.payload),
 });
 
 const feeStatus = (v: string): FeeStatementStatus =>
