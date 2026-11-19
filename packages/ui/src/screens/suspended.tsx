@@ -12,6 +12,7 @@ import {
 } from "@hospio/api/actions/billing";
 import { mySuspension, type SuspensionStatusView } from "@hospio/api/actions/suspension";
 import { HOSPIO_MAROON } from "@hospio/api/brand";
+import { HospioWordmark } from "../brand/logo";
 import { DownloadButton, money } from "../shared/invoice";
 
 /**
@@ -233,7 +234,10 @@ export function SuspendedScreen({
 						</button>
 					</div>
 				</div>
-				<p className="text-center text-[12px] text-ink-2">Hospio360 · Oyeks Global Ltd</p>
+				<p className="flex items-center justify-center gap-2 text-[12px] text-ink-2">
+					<HospioWordmark className="h-4 text-[#4C091E]" />
+					<span aria-hidden="true">·</span> Oyeks Global Ltd
+				</p>
 			</div>
 		</main>
 	);

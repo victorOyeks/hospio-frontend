@@ -1,5 +1,5 @@
 import { MenuIcon } from "lucide-react";
-import Image from "next/image";
+import { HospioWordmark } from "@hospio/ui/brand/logo";
 import Link from "next/link";
 import type { ReactNode } from "react";
 import { btn } from "@hospio/ui/shared/ui";
@@ -52,24 +52,12 @@ export function Wordmark({
 		<Link
 			href="/"
 			aria-label="Hospio360 home"
-			className={cn("flex shrink-0 items-center gap-[10px]", className)}
+			className={cn("flex shrink-0 items-center", className)}
 		>
-			<span
-				className={cn(
-					"flex size-9 items-center justify-center rounded-control",
-					dark ? "bg-white/10" : "bg-brand",
-				)}
-			>
-				<Image src="/landing/hms-mark.svg" alt="" width={20} height={20} />
-			</span>
-			<span
-				className={cn(
-					"text-[20px] font-bold leading-none tracking-[-0.01em]",
-					dark ? "text-white" : "text-brand",
-				)}
-			>
-				Hospio360
-			</span>
+			<HospioWordmark
+				title=""
+				className={cn("h-[26px] md:h-[30px]", dark ? "text-white" : "text-brand")}
+			/>
 		</Link>
 	);
 }

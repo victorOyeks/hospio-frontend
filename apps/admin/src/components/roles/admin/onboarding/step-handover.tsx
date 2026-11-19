@@ -1,5 +1,6 @@
 "use client";
 
+import { HospioWordmark } from "@hospio/ui/brand/logo";
 import {
 	FileTextIcon,
 	HandshakeIcon,
@@ -594,7 +595,7 @@ function HandoverPackModal({
 			<style>{`@media print { body * { visibility: hidden !important; } #handover-pack, #handover-pack * { visibility: visible !important; } #handover-pack { position: fixed; inset: 0; padding: 32px; background: #fff; overflow: visible; } }`}</style>
 			<article id="handover-pack" className="flex flex-col gap-5 text-ink">
 				<header>
-					<p className="text-sm font-bold tracking-[-0.01em] text-brand">Hospio360</p>
+					<HospioWordmark className="h-[24px] text-[#4C091E]" />
 					<h2 className="mt-2 text-2xl font-bold leading-tight">
 						Welcome to Hospio360, {business.name}
 					</h2>
