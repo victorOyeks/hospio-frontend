@@ -200,7 +200,15 @@ export function SystemHealthScreen({ initial, superAdmin }: { initial: SystemHea
 						<CertsCard report={report} />
 					</div>
 					<HistoryCard report={report} />
-					<LimitsCard report={report} superAdmin={superAdmin} onSaved={() => void reload(true)} />
+					<LimitsCard
+						report={report}
+						superAdmin={superAdmin}
+						onSaved={(changed) => {
+							// Show the switch as saved at once; the next look confirms it.
+							setReport((r) => (r?.thresholds ? { ...r, thresholds: { ...r.thresholds, ...changed } } : r));
+							void reload(true);
+						}}
+					/>
 				</div>
 			)}
 		</>
@@ -936,7 +944,15 @@ function HistoryCard({ report }: { report: SystemHealthReport }) {
 
 // ---- alerts: the switches and the limits in force --------------------------------------------------------
 
-function LimitsCard({ report, superAdmin, onSaved }: { report: SystemHealthReport; superAdmin: boolean; onSaved: () => void }) {
+function LimitsCard({
+	report,
+	superAdmin,
+	onSaved,
+}: {
+	report: SystemHealthReport;
+	superAdmin: boolean;
+	onSaved: (changed: Record<string, boolean>) => void;
+}) {
 	const t = report.thresholds;
 	const [saving, setSaving] = useState(false);
 	if (!t) return null;
@@ -946,7 +962,7 @@ function LimitsCard({ report, superAdmin, onSaved }: { report: SystemHealthRepor
 			const r = await saveSettings("system", values);
 			if (r.ok) {
 				toast.success(done);
-				onSaved();
+				onSaved(values.alertsOn === undefined ? values : { ...values, alertsSaved: true });
 			} else toast.error(r.error);
 		} catch {
 			toast.error("The switch couldn't be saved. Try again.");
