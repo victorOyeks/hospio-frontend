@@ -128,14 +128,12 @@ function Actor({ by }: { by: string }) {
 }
 
 function When({ at, now }: { at: string; now: number | null }) {
+	// Nothing time-based in the server render: its clock and time zone differ from the browser's (React #418).
+	if (now === null) return <div className="h-[34px]" />;
 	return (
 		<div className="min-w-0" title={exact(at)}>
-			<p className="truncate text-[13px] text-ink">
-				{now === null ? fmtWhen(at) : fmtAgo(at)}
-			</p>
-			{now !== null && (
-				<p className="truncate text-xs text-ink-3">{fmtTime(at)}</p>
-			)}
+			<p className="truncate text-[13px] text-ink">{fmtAgo(at)}</p>
+			<p className="truncate text-xs text-ink-3">{fmtTime(at)}</p>
 		</div>
 	);
 }
@@ -397,7 +395,8 @@ function ChangeItem({
 								{c.area ? ` · ${c.area}` : ""}
 								<span className="@min-[920px]:hidden">
 									{" "}
-									· {who} · {now === null ? fmtWhen(c.at) : fmtAgo(c.at)}
+									· {who}
+									{now !== null && ` · ${fmtAgo(c.at)}`}
 								</span>
 							</p>
 						</div>
@@ -513,7 +512,8 @@ function ActivityItem({
 							{where} · {eventLabel(a.eventType)}
 							<span className="@min-[920px]:hidden">
 								{" "}
-								· {splitActor(a.by).name} · {now === null ? fmtWhen(a.at) : fmtAgo(a.at)}
+								· {splitActor(a.by).name}
+								{now !== null && ` · ${fmtAgo(a.at)}`}
 							</span>
 						</p>
 					</div>
