@@ -49,8 +49,8 @@ export function Pricing() {
 						))}
 					</ul>
 					<p className="text-[13px] leading-[1.5] text-ink-3">
-						Guest SMS and WhatsApp messages, and any devices you take from us,
-						are charged separately on the same invoice.
+						Guest messages (email, SMS and WhatsApp) and any devices you take
+						from us are charged separately on the same invoice.
 					</p>
 					<div className="mt-auto flex flex-wrap items-center gap-x-5 gap-y-3 pt-1">
 						<a
