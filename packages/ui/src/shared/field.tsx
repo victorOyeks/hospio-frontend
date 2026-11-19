@@ -42,6 +42,11 @@ export function SetupLinks({
 	);
 }
 
+/** Whether the person signed in has Hotel setup (manager, owner): "Turn it on in Hotel setup" vs "ask your manager". */
+export function useCanSetup() {
+	return useContext(SetupLinksContext);
+}
+
 export function Field({
 	label,
 	hint,

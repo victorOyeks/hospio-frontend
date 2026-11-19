@@ -54,8 +54,10 @@ Password `Hospio123!`.
    "Guest's WhatsApp number" with the guest's phone. No Email, no Print, no SMS.
 2. **Do:** clear the number and type `123`. **Expect:** "Type a real phone number…" and **Send on WhatsApp & record** is
    disabled. Type `+234 803 555 0192`.
-3. **Do:** **Send on WhatsApp & record**. **Expect:** toast "₦… in cash recorded · Receipt sent on WhatsApp to +234 803 555
-   0192". The done screen shows the tick and **no Print receipt**. No print window opens at any point.
+3. **Do:** **Send on WhatsApp & record**. **Expect** (staging, guest messages on): a warning toast "₦… in cash recorded ·
+   Receipt held back (test server): +234 803 555 0192 is not on this server's allow-list" (the number is not allow-listed; a
+   real server says "Receipt sent on WhatsApp to …"). The done screen shows the tick and **no Print receipt**. No print window
+   opens at any point.
 4. **Do:** take another cash payment, pick **Don't send** → **Record payment**. **Expect:** "No receipt sent"; nothing sent.
 5. **Do:** a guest with **no phone** (walk-in). **Expect:** **Don't send** is picked; WhatsApp can still be picked and asks for
    the number.
@@ -74,8 +76,8 @@ Repeat 1-4 as **bar** (close a tab / a sale → Collect), **kitchen** (a kitchen
 3. **Bar → Sales** → a paid sale: no **Print receipt** in the footer; each payment under **Payment** has **WhatsApp receipt**.
 4. **Split bill** (a tab split in parts, each paid): no **Receipts** button; each paid part has **WhatsApp receipt**.
 5. **Front office → Bookings → Check out** panel: no **Print receipt**.
-6. A payment with no phone and the number left empty → "This payment has no guest phone · type the guest's WhatsApp number to
-   send the receipt".
+6. A payment with no phone and the number left empty → "Receipt not sent: no phone number · type the guest's WhatsApp number to
+   send it".
 
 ## 3 · Manager and owner
 
@@ -92,6 +94,28 @@ Repeat 1-4 as **bar** (close a tab / a sale → Collect), **kitchen** (a kitchen
    Owner reports: **Save as PDF** still works.
 6. **Hotel setup → Payments → Default receipt channel** and **Hotel setup → POS → Default receipt channel**: only WHATSAPP
    and NONE, with the help "Receipts are not printed or emailed".
+
+## 3b · Honest receipt message (guest messages off, held back)
+
+The app says "Receipt sent on WhatsApp" only when the receipt really went. Simpas Ikeja has guest messages **on**; QA Lounge (qhye)
+has them **off**.
+
+| Outcome | Toast (warning unless sent) |
+|---|---|
+| Sent (queued) | "Receipt sent on WhatsApp to 0803…" |
+| Guest messages off | "Receipt not sent: guest messages are off for this hotel. Turn them on in Hotel setup → Guest messages." (manager/owner; a lounge says "lounge" and "Lounge setup"); other staff: "… Ask your manager to turn them on." |
+| Staging allow-list | "Receipt held back (test server): +234 803 555 0192 is not on this server's allow-list" |
+| No phone | "Receipt not sent: no phone number" |
+
+1. **Do (bar, Simpas):** a small cash sale → Collect → WhatsApp `+234 803 555 0192` → **Send on WhatsApp & record**. **Expect:** the
+   held-back toast above. Platform admin: the delivery record is there, kind RECEIPT, template `hospio_payment_receipt_v2`,
+   "Held back: not on this environment's allow-list" (nothing sent).
+2. **Do (QA Lounge bar):** take payment → receipt step. **Expect:** under WhatsApp a note "WhatsApp receipts won't go: guest messages
+   are off for this lounge. Ask your manager to turn them on." Send anyway → warning toast "… Receipt not sent: guest messages are off
+   for this lounge. Ask your manager to turn them on."
+3. **Do (QA Lounge manager):** Payments → a payment → Send on WhatsApp, and Record a payment with WhatsApp. **Expect:** the note and
+   toast say "Turn them on in Lounge setup → Guest messages."
+4. Any "Receipt sent on WhatsApp" toast at a location whose guest messages are off is a **bug**.
 
 ## 4 · Device catalogue (Super admin)
 
@@ -111,6 +135,7 @@ Repeat 1-4 as **bar** (close a tab / a sale → Collect), **kitchen** (a kitchen
 
 ## Expected vs a bug
 
-- "Held back: not on this environment's allow-list" for a WhatsApp receipt on staging: **expected**.
+- "Held back: not on this environment's allow-list" for a WhatsApp receipt on staging, and the toast "Receipt held back (test
+  server)": **expected**.
 - Any **Print** button, print window or 80 mm option in a payment flow, an **Email** receipt choice, or an SMS receipt: **bug**.
 - A payment refused because of the receipt choice: **bug** (payments never fail over the receipt).

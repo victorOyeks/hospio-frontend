@@ -16,8 +16,9 @@ import { ManagerMark } from "@hospio/ui/shared/row-actions";
 import { PanelSection, SidePanel, WhatHappens } from "@hospio/ui/shared/side-panel";
 import { StatusPill } from "@hospio/ui/shared/status-pill";
 import { btn } from "@hospio/ui/shared/ui";
-import { approveRefund, declineRefund, linkTerminal, openDispute, reassignTerminal, recordPayment, removeTerminal, renameTerminal, requestProviderAccount, requestRefund, resolveDispute, retryPayment, setTerminalStatus, type TerminalRole, verifyPayment } from "@hospio/api/actions/payment";
+import { approveRefund, declineRefund, linkTerminal, openDispute, reassignTerminal, receiptOutlook, recordPayment, removeTerminal, renameTerminal, requestProviderAccount, requestRefund, resolveDispute, retryPayment, setTerminalStatus, type TerminalRole, verifyPayment } from "@hospio/api/actions/payment";
 import { useAction } from "@hospio/api/actions/use-action";
+import { GuestMessagesOffNote, useGuestMessagesOutlook, useRecordedWords } from "@hospio/ui/shared/receipt-outlook";
 import type { DisputeRow, FolioSummary, PaymentMethod, PaymentRow, RefundRow, TerminalRow } from "@hospio/api/data/types";
 import { methodLabel, paymentTone } from "./payments-screen";
 
@@ -214,13 +215,16 @@ export function NewPaymentPanel({ open, folios, preselect, onClose, onSaved }: {
 	const [amount, setAmount] = useState<number | "">("");
 	const [method, setMethod] = useState<PaymentMethod>("CARD");
 	const [receipt, setReceipt] = useState<ReceiptChoice>("NONE");
+	// Guest messages off: said under the receipt choice before paying, and in the toast (hospio-backend docs/whatsapp-receipts.md).
+	const guestMessages = useGuestMessagesOutlook(() => receiptOutlook(), open);
+	const recordedWords = useRecordedWords();
 	useEffect(() => { if (open) { const f = folios.find((x) => x.id === preselect); setFolioId(f?.id ?? ""); setAmount(f ? f.balance : ""); setPayer(""); setReceipt(defaultReceipt(f?.guestPhone)); } }, [open, preselect, folios]);
 	const folio = folios.find((f) => f.id === folioId);
 	const name = folio?.guestName ?? payer;
 	return (
 		<SidePanel open={open} onOpenChange={(o) => !o && onClose()} title="Record a payment" subtitle="For a folio, or a walk-in sale without a room" icon={CreditCardIcon}
 			footerInfo={folio ? `${naira(folio.balance)} due on ${folio.roomNumber}` : undefined}
-			footer={<><Button variant="outline" className={btn.secondary} onClick={onClose}>Cancel</Button><Button className={btn.primary} disabled={pending || !name || amount === "" || amount <= 0} onClick={() => amount !== "" && run(() => recordPayment({ method, amount, folioId: folio?.id, guestName: name, guestEmail: folio?.guestEmail, guestPhone: folio?.guestPhone, description: desc, receipt }), method === "CARD" ? "Sent to the front desk POS · waiting for the tap" : `${naira(amount)} recorded`, (r) => { onSaved({ id: r.id, reference: `PAY-${r.id.slice(0, 6).toUpperCase()}`, folioId: folio?.id, guestName: name, roomNumber: folio?.roomNumber, role: "MANAGER", takenBy: "You", method, amount, status: r.status, terminal: method === "CARD" ? "Front desk POS" : undefined, createdAt: new Date().toISOString(), resolvedAt: method === "CARD" ? undefined : new Date().toISOString(), receiptSent: receipt, description: desc }); onClose(); })}>{method === "CARD" ? "Send to POS" : "Record payment"}</Button></>}
+			footer={<><Button variant="outline" className={btn.secondary} onClick={onClose}>Cancel</Button><Button className={btn.primary} disabled={pending || !name || amount === "" || amount <= 0} onClick={() => amount !== "" && run(() => recordPayment({ method, amount, folioId: folio?.id, guestName: name, guestEmail: folio?.guestEmail, guestPhone: folio?.guestPhone, description: desc, receipt }), method === "CARD" ? "Sent to the front desk POS · waiting for the tap" : (r) => recordedWords(`${naira(amount)} recorded`, r.status === "APPROVED" && r.receipt ? { ...r.receipt, sentTo: folio?.guestPhone } : null), (r) => { onSaved({ id: r.id, reference: `PAY-${r.id.slice(0, 6).toUpperCase()}`, folioId: folio?.id, guestName: name, roomNumber: folio?.roomNumber, role: "MANAGER", takenBy: "You", method, amount, status: r.status, terminal: method === "CARD" ? "Front desk POS" : undefined, createdAt: new Date().toISOString(), resolvedAt: method === "CARD" ? undefined : new Date().toISOString(), receiptSent: receipt, description: desc }); onClose(); })}>{method === "CARD" ? "Send to POS" : "Record payment"}</Button></>}
 		>
 			<div className="flex flex-col gap-5">
 				<SelectField label="Folio" value={folioId} onChange={(v) => { setFolioId(v); const f = folios.find((x) => x.id === v); if (f) setAmount(f.balance); setReceipt(defaultReceipt(f?.guestPhone)); }} placeholder="No folio · walk-in" options={folios.map((f) => ({ value: f.id, label: `${f.guestName} · ${f.roomNumber}`, hint: `${naira(f.balance)} due` }))} />
@@ -229,6 +233,7 @@ export function NewPaymentPanel({ open, folios, preselect, onClose, onSaved }: {
 				<ChoiceCards label="Paid by" value={method} onChange={setMethod} columns={3} options={[{ value: "CARD", label: "Card · POS", hint: "Front desk POS" }, { value: "TRANSFER", label: "Transfer", hint: "Seen in the hotel's account" }, { value: "CASH", label: "Cash", hint: "Into the till" }]} />
 				<MoneyField label="Amount" value={amount} onChange={setAmount} required />
 				<ChoiceCards label="Receipt" value={receipt} onChange={setReceipt} columns={2} options={receiptOptions(folio?.guestPhone)} />
+				{receipt === "WHATSAPP" && <GuestMessagesOffNote outlook={guestMessages} />}
 				<p className="text-xs text-ink-3">{plural(folios.length, "open folio")} with a balance</p>
 			</div>
 		</SidePanel>

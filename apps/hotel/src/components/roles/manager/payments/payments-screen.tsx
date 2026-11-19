@@ -37,6 +37,7 @@ import {
 import { btn } from "@hospio/ui/shared/ui";
 import { resendReceipt, verifyPayment } from "@hospio/api/actions/payment";
 import { useAction } from "@hospio/api/actions/use-action";
+import { useReceiptOutcomeText } from "@hospio/ui/shared/receipt-outlook";
 import { exportPayments } from "@hospio/api/actions/reservation-lists";
 import type { PageResult } from "@hospio/api/data/paging";
 import { csvName, downloadCsv } from "@hospio/ui/shared/csv";
@@ -138,6 +139,7 @@ export function PaymentsScreen({
 	const [refund, setRefund] = useState<RefundRow | null>(null);
 	const [dispute, setDispute] = useState<DisputeRow | null>(null);
 	const live = useAction();
+	const receiptWords = useReceiptOutcomeText();
 	const active = (TABS.includes(tab as Tab) ? tab : "all") as Tab;
 	const selected =
 		payments.find((p) => p.id === openId) ??
@@ -295,7 +297,11 @@ export function PaymentsScreen({
 												resendReceipt(p.id),
 												`Receipt for ${p.guestName}`,
 											),
-										(r) => `Receipt sent on WhatsApp to ${r.sentTo}`,
+										(r) => {
+											// Honest words: "sent" only when it went (hospio-backend docs/whatsapp-receipts.md).
+											const said = receiptWords(r);
+											return said.sent ? said.text : { warning: said.text };
+										},
 									),
 								disabled: p.status !== "APPROVED",
 							},

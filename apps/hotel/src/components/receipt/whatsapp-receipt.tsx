@@ -7,8 +7,9 @@ import { withDeliveries } from "@hospio/ui/shared/deliveries-store";
 import { TextField } from "@hospio/ui/shared/field";
 import { Modal } from "@hospio/ui/shared/modal";
 import { looksLikePhone } from "@hospio/ui/shared/receipt-channels";
+import { GuestMessagesOffNote, useGuestMessagesOutlook, useReceiptOutcomeText } from "@hospio/ui/shared/receipt-outlook";
 import { btn } from "@hospio/ui/shared/ui";
-import { sendReceipt } from "@hospio/api/actions/payment";
+import { receiptOutlook, sendReceipt } from "@hospio/api/actions/payment";
 import { useAction } from "@hospio/api/actions/use-action";
 import { cn } from "@hospio/ui/utils";
 
@@ -70,6 +71,9 @@ export function WhatsAppReceiptModal({
 	onSent?: (sentTo: string) => void;
 }) {
 	const { run, pending } = useAction();
+	const receiptWords = useReceiptOutcomeText();
+	// Guest messages off: said before sending (hospio-backend docs/whatsapp-receipts.md).
+	const guestMessages = useGuestMessagesOutlook(() => receiptOutlook(), true);
 	const [to, setTo] = useState(phone ?? "");
 	// Empty: the phone the payment already has (payment-service refuses in words when there is none).
 	const ok = !to.trim() || looksLikePhone(to);
@@ -92,7 +96,11 @@ export function WhatsAppReceiptModal({
 						onClick={() =>
 							run(
 								() => withDeliveries(sendReceipt({ paymentId, phone: to }), `Receipt for ${guestName ?? "the guest"}`),
-								(r) => `Receipt sent on WhatsApp to ${r.sentTo}`,
+								(r) => {
+									// Honest words: "sent" only when it went (hospio-backend docs/whatsapp-receipts.md).
+									const said = receiptWords(r);
+									return said.sent ? said.text : { warning: said.text };
+								},
 								(r) => {
 									onSent?.(r.sentTo);
 									onClose();
@@ -105,6 +113,7 @@ export function WhatsAppReceiptModal({
 				</>
 			}
 		>
+			<GuestMessagesOffNote outlook={guestMessages} className="mb-3" />
 			<TextField
 				label="Guest's WhatsApp number"
 				type="tel"

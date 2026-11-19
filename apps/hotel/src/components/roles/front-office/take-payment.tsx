@@ -36,6 +36,11 @@ import {
 	looksLikePhone,
 	type ReceiptChoice,
 } from "@hospio/ui/shared/receipt-channels";
+import {
+	GuestMessagesOffNote,
+	useGuestMessagesOutlook,
+	useReceiptOutcomeText,
+} from "@hospio/ui/shared/receipt-outlook";
 import type {
 	FolioSummary,
 	PaymentMethod,
@@ -178,7 +183,8 @@ export function usePaymentSteps(
 	autoStart = true,
 ) {
 	const t = usePlaceText();
-	const { recordPayment, sendReceipt } = useHotelActions();
+	const { recordPayment, sendReceipt, receiptOutlook } = useHotelActions();
+	const receiptWords = useReceiptOutcomeText();
 	const [tgt, setTgt] = useState<PaymentTarget | null>(target ?? null);
 	const [step, setStep] = useState<Step>(
 		autoStart ? (target ? "method" : "who") : "idle",
@@ -206,6 +212,11 @@ export function usePaymentSteps(
 	);
 	const [phone, setPhone] = useState(target?.guestPhone ?? "");
 	const [sending, setSending] = useState(false);
+	// Whether this hotel's guest messages are on, asked once the steps start: the receipt step says so before anyone pays.
+	const guestMessages = useGuestMessagesOutlook(
+		() => receiptOutlook(),
+		step !== "idle" && step !== "who",
+	);
 	const [recorded, setRecorded] = useState<TakenPayment | null>(null);
 	const session = useRef(0);
 	const sent = useRef<string | null>(null);
@@ -520,14 +531,21 @@ export function usePaymentSteps(
 			setRecorded(payment);
 		}
 		let receiptNote = choice === "NONE" ? "No receipt sent" : "";
+		// Told honestly (hospio-backend docs/whatsapp-receipts.md): "sent" only when it went; skipped, held back or refused say so.
+		let receiptWent = true;
 		if (choice === "WHATSAPP" && payment.status === "APPROVED") {
 			const sent = await withDeliveries(
 				sendReceipt({ paymentId: payment.id, phone }),
 				`Receipt for ${guestName}`,
 			).catch(() => null);
-			receiptNote = sent?.ok
-				? `Receipt sent on WhatsApp to ${sent.data.sentTo}`
-				: `The receipt wasn't sent${sent && !sent.ok ? `: ${sent.error}` : ""} · send it again from My payments`;
+			if (sent?.ok) {
+				const said = receiptWords(sent.data);
+				receiptNote = said.text;
+				receiptWent = said.sent;
+			} else {
+				receiptWent = false;
+				receiptNote = `The receipt wasn't sent${sent && !sent.ok ? `: ${sent.error}` : ""} · send it again from My payments`;
+			}
 		} else if (choice === "WHATSAPP") {
 			receiptNote = "Send the receipt on WhatsApp from My payments once it is approved";
 		}
@@ -538,9 +556,14 @@ export function usePaymentSteps(
 				: method === "TRANSFER"
 					? "by transfer"
 					: "in cash";
-		if (payment.status === "APPROVED")
+		if (payment.status === "APPROVED" && receiptWent)
 			toast.success(`${nairaExact(amt + tipN)} ${label} recorded`, {
 				description: receiptNote,
+			});
+		else if (payment.status === "APPROVED")
+			toast.warning(`${nairaExact(amt + tipN)} ${label} recorded`, {
+				description: receiptNote,
+				duration: 10000,
 			});
 		else
 			toast.info(`${nairaExact(amt + tipN)} ${label} is processing`, {
@@ -1074,6 +1097,7 @@ export function usePaymentSteps(
 							))}
 						</div>
 					</Field>
+					{receipt === "WHATSAPP" && <GuestMessagesOffNote outlook={guestMessages} />}
 					{receipt === "WHATSAPP" && (
 						<TextField
 							label="Guest's WhatsApp number"
