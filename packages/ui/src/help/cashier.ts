@@ -14,7 +14,7 @@ export const cashierHelp: HelpModule = {
 				"On “To pay”, tap the tab (find it by table, number or waiter).",
 				"Check the items and the total, then tap “Take payment”.",
 				"Pick “Card on the POS”, “Bank transfer on the POS” or “Cash”.",
-				"Under “Receipt”, print or email it, or tap “Skip receipt”.",
+				"Under “Receipt”, pick “WhatsApp” (to the guest's phone) or “Don't send”, or tap “Skip receipt”. Receipts are not printed or emailed.",
 			],
 			goodToKnow: [
 				"“To pay” shows every outlet's open tabs and sales that still owe money.",
@@ -48,7 +48,7 @@ export const cashierHelp: HelpModule = {
 			topic: "Payments",
 			steps: [
 				"Open “Sales” for every sale over the days you choose; filter by “To pay” to see what is owed.",
-				"Open “My payments” for the payments you took; tap one to print or resend its receipt.",
+				"Open “My payments” for the payments you took; tap one and tap “Send receipt on WhatsApp” to send its receipt again.",
 			],
 			goodToKnow: ["The number next to “Sales” in the sidebar is how many sales still owe money."],
 			route: "/dashboard/sales",

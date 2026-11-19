@@ -12,7 +12,7 @@ export const frontOfficeHelp: HelpModule = {
 			topic: "Bookings",
 			steps: [
 				"Open “Bookings” and tap “New booking”.",
-				"Under “Guest”, search “Returning guest” by name or phone, or type the “Full name” and “Phone” of a new guest. Add an “Email” if they want the confirmation and receipt by email too.",
+				"Under “Guest”, search “Returning guest” by name or phone, or type the “Full name” and “Phone” of a new guest. Add an “Email” if they want the confirmation by email too (receipts go on WhatsApp).",
 				"Under “Stay”, pick the “Room type”, the “Check-in” and “Check-out” dates, the number of “Adults” and the “Expected arrival time”.",
 				"Under “Price”, keep “Normal”.",
 				"Under “Payment”, choose “Pay in full now”, “50% deposit”, “Pay at check-out” or “Company account” (then pick the “Organization”).",
@@ -84,7 +84,7 @@ export const frontOfficeHelp: HelpModule = {
 				"Open “Bookings” on the “Departures” or “In-house” tab and tap “Check out” on the guest's row (or on “Today”).",
 				"Go through the bill with the guest: room charges, extras, discounts, what is paid and the balance.",
 				"If there is a balance, tap “Take ₦…”, take the payment, then tap “Back to check-out”.",
-				"Tap “Print receipt” if the guest wants a paper copy.",
+				"Receipts are not printed: a receipt goes to the guest on WhatsApp when you take the payment.",
 				"Tap “Check out”. The folio closes and the room goes to housekeeping as Needs cleaning.",
 			],
 			goodToKnow: [
@@ -107,7 +107,7 @@ export const frontOfficeHelp: HelpModule = {
 				"Pick the “Guest folio”, check “Who is paying”, the “Amount” and “What for”, then tap “Continue · ₦…”.",
 				"On “How is the guest paying?”, pick the “Method”: “Card on the POS”, “Bank transfer” or “Cash”.",
 				"Card: pick the “Terminal” and tap “Send to POS”, then hand the guest the POS. Bank transfer: also goes to the POS. Pick the “Terminal”, tap “Send to POS”, and the guest chooses transfer on the POS and pays to the account it shows. Cash: tap “Count cash”, enter the “Cash received” and tap “Cash received”.",
-				"Under “Receipt”, “Email” is picked when the guest has an email: check the “Guest's email” and tap “Email receipt & record”. Or pick “Print” and tap “Record payment”, or tap “Skip receipt”.",
+"Under “Receipt”, “WhatsApp” is picked when the guest's phone is known: check the “Guest's WhatsApp number” and tap “Send on WhatsApp & record”. Or pick “Don't send” and tap “Record payment”, or tap “Skip receipt”.",
 				"Tap “Done”. The folio and your payments list update.",
 			],
 			goodToKnow: [
@@ -115,7 +115,7 @@ export const frontOfficeHelp: HelpModule = {
 				"A card stays “Processing” until the POS answers. If it is declined, tap “Try another way” or “Try again on POS”. Nothing was charged.",
 				"A card still “Processing” later: open it in “Payments” and tap “Check with the POS”. It is approved only when the POS says so.",
 				"Transfers are matched to the bank by finance later.",
-				"The receipt email is sent for real. The WhatsApp button is greyed out, but a guest with no email gets the receipt by WhatsApp. You can also print it from the done screen.",
+				"The receipt goes on WhatsApp as the hotel's approved receipt message. Receipts are not printed or emailed.",
 				"To give money back, open the payment in “Payments” and tap “Request refund”. A manager approves refunds.",
 			],
 			route: "/dashboard/payments",
@@ -178,20 +178,18 @@ export const frontOfficeHelp: HelpModule = {
 		},
 		{
 			id: "fo-print-receipt",
-			title: "Print a receipt",
-			when: "A guest asks for a paper receipt for a payment or for their stay.",
+			title: "Send a receipt on WhatsApp",
+			when: "A guest asks for a receipt for a payment.",
 			topic: "Money",
 			steps: [
-				"For one payment: open “Payments”, open the payment and tap “Print receipt”.",
-				"For the whole stay: open the folio in “Folios”, tap “Print or email”, pick “Print / copy” and tap “Print receipt”. You can also tap “Print receipt” in the check-out panel.",
-				"The receipt opens in a new tab. Pick the paper: “A4” or “80 mm roll” for a slip printer.",
-				"Tap “Print receipt” at the top of that tab.",
-				"To email it instead, type the “Guest's email” and tap “Email receipt”.",
+				"Right after you take a payment, pick “WhatsApp” under “Receipt”, check the guest's number and tap “Send on WhatsApp & record”.",
+				"To send it again: open “Payments”, open the payment and tap “Send receipt on WhatsApp”.",
+				"Type or check the “Guest's WhatsApp number” and tap “Send on WhatsApp”.",
 			],
 			goodToKnow: [
-				"Only an approved payment has a receipt to print.",
-				"Right after you take a payment, the last step also has “Print receipt”.",
-				"The folio window is “Print or email the folio”: “Email” and “Email folio” send it for real to the guest's email. The folio has no WhatsApp template, so there is no WhatsApp choice: print it for a guest without an email.",
+				"Receipts are not printed or emailed: WhatsApp is the only way.",
+				"Only an approved payment has a receipt.",
+				"For the whole stay, open the folio in “Folios” and tap “Email or copy”: “Email” sends the stay summary to the guest's email, “Copy” copies it.",
 			],
 		},
 		{
@@ -374,7 +372,7 @@ export const frontOfficeHelp: HelpModule = {
 			goodToKnow: [
 				"“Call the hotel” shows when the hotel has a phone. “Chat with the hotel on WhatsApp” shows when the hotel's WhatsApp number is set in Hotel setup → “Guest messaging”.",
 				"Without a street address, “Get directions” finds the hotel by its name and city.",
-				"A receipt to a guest with no email goes by WhatsApp, without a button.",
+				"A receipt goes to the guest's phone by WhatsApp, without a button. Receipts are not printed or emailed.",
 				"WhatsApp messages only go once WhatsApp has approved them. Until then, only the email goes.",
 				"Nothing goes by SMS. SMS is only for sign-in codes.",
 				"If a guest answers the Hospio360 WhatsApp, the hotel does not get it. Guests reach you on the hotel's own WhatsApp or phone.",

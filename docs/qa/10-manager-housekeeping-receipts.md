@@ -86,6 +86,10 @@ provider keys. Housekeeping has "Days lost & found items are kept" (90).
 
 ## 8. Receipts
 
+> Changed 19 Nov 2026: receipts are no longer printed or emailed; they go on WhatsApp only. Steps 1-6 below are
+> replaced by **71-whatsapp-receipts-no-printing.md**. The receipt page is now for managers and owners only (Save as PDF,
+> A4) and has no paper size or Email receipt.
+
 1. Front office → take a cash payment → the success step has Print receipt. The receipt page shows the hotel name,
    address and phone, receipt number (RCP-yyyy-nnnnnn), date and time, item, total, payment method and reference, who
    took it, and the guest.

@@ -13,12 +13,14 @@ type Words = {
 	biz: Wording;
 	/** False at a location without rooms (a lounge, bar or restaurant): copy about bookings and stays is left out. */
 	stays: boolean;
+	/** True when any location of the business has rooms: business-level copy (the invoice note) then mentions bookings. */
+	anyStays: boolean;
 };
 
-const WordingContext = createContext<Words>({ place: HOTEL_WORDING, biz: HOTEL_WORDING, stays: true });
+const WordingContext = createContext<Words>({ place: HOTEL_WORDING, biz: HOTEL_WORDING, stays: true, anyStays: true });
 
-export function WordingProvider({ place, biz, stays, children }: PropsWithChildren<Words>) {
-	const value = useMemo(() => ({ place, biz, stays }), [place, biz, stays]);
+export function WordingProvider({ place, biz, stays, anyStays, children }: PropsWithChildren<Words>) {
+	const value = useMemo(() => ({ place, biz, stays, anyStays }), [place, biz, stays, anyStays]);
 	return <WordingContext.Provider value={value}>{children}</WordingContext.Provider>;
 }
 

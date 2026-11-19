@@ -9,7 +9,7 @@ import {
 	OWNER_ONBOARDING_STEPS,
 	type OwnerOnboardingStep,
 } from "@hospio/api/types";
-import { HomeIcon } from "@hospio/ui/svgs/home";
+import { HospioWordmark } from "@hospio/ui/brand/logo";
 import { cn } from "@hospio/ui/utils";
 import { logout } from "@hospio/api/actions";
 import { saveForLater } from "./persist";
@@ -42,12 +42,7 @@ export function OnboardingShell({
 		<main className="flex min-h-screen flex-col bg-page">
 			<header className="flex h-[52px] items-center gap-6 border-b border-line bg-card px-6">
 				<Link href="/dashboard" className="flex items-center gap-[10px]">
-					<span className="flex size-8 items-center justify-center rounded-lg bg-brand text-white [&_svg]:size-4">
-						<HomeIcon />
-					</span>
-					<span className="text-sm font-bold tracking-[-0.01em] text-brand">
-						Hospio360
-					</span>
+					<HospioWordmark className="h-[22px] text-brand" />
 				</Link>
 				{bar && (
 					<ol className="mx-auto hidden items-center md:flex">

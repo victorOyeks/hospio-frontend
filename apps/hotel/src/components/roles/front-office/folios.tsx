@@ -1,7 +1,7 @@
 "use client";
 
 import type { ColumnDef } from "@tanstack/react-table";
-import { CreditCardIcon, MailIcon, PercentIcon, PlusIcon, PrinterIcon, ReceiptIcon } from "lucide-react";
+import { CreditCardIcon, MailIcon, PercentIcon, PlusIcon, ReceiptIcon } from "lucide-react";
 import { useQueryState } from "nuqs";
 import { useEffect, useMemo, useState } from "react";
 import { useWhatsAppKinds } from "@/lib/use-whatsapp-kinds";
@@ -95,7 +95,7 @@ export function FoliosScreen({ folios: initial, terminals, isManager = false, ti
 				width="lg"
 				footer={folio && (
 					<>
-						<button type="button" className={btn.secondary} onClick={() => setModal("send")}><PrinterIcon className="mr-1 inline size-4" /> Print or email</button>
+						<button type="button" className={btn.secondary} onClick={() => setModal("send")}><MailIcon className="mr-1 inline size-4" /> Email or copy</button>
 						{folio.balance > 0 && folio.organizationName == null && <button type="button" className={btn.primary} onClick={() => { setPayTarget({ guestName: folio.guestName, roomNumber: folio.roomNumber, folioId: folio.id, amountDue: folio.balance }); setPayOpen(true); }}><CreditCardIcon className="mr-1 inline size-4" /> Take {naira(folio.balance)}</button>}
 					</>
 				)}
@@ -200,13 +200,14 @@ function DiscountVoidModal({ folio, open, onOpenChange, isManager, onApplied }: 
 }
 
 /**
- * 4.6 Print or email: the stay summary comes from folio-service and is emailed. WhatsApp is offered only once the folio has an
+ * 4.6 Email or copy: the stay summary comes from folio-service and is emailed (a folio, not a payment receipt: payment receipts
+ * go on WhatsApp only and nothing is printed). WhatsApp is offered only once the folio has an
  * approved template (`FOLIO` in `useWhatsAppKinds`); it has none today, so it is not offered.
  */
 function SendFolioModal({ folio, open, onOpenChange }: { folio: FolioRow; open: boolean; onOpenChange: (o: boolean) => void }) {
 	const waKinds = useWhatsAppKinds();
 	const folioOnWhatsApp = waKinds.includes("FOLIO") && !!folio.guestPhone;
-	const [how, setHow] = useState<"PRINT" | "EMAIL" | "WHATSAPP">(folio.guestEmail ? "EMAIL" : "PRINT");
+	const [how, setHow] = useState<"COPY" | "EMAIL" | "WHATSAPP">(folio.guestEmail ? "EMAIL" : "COPY");
 	const [to, setTo] = useState(folio.guestEmail ?? "");
 	const [summary, setSummary] = useState<string | null>(null);
 	const [copied, setCopied] = useState(false);
@@ -219,11 +220,11 @@ function SendFolioModal({ folio, open, onOpenChange }: { folio: FolioRow; open: 
 	}, [open, folio.id, act.run]);
 	const pending = send.pending || act.pending;
 	return (
-		<Modal open={open} onOpenChange={onOpenChange} title="Print or email the folio" subtitle={`${folio.guestName} · ${naira(folio.charges + folio.tax)} charges`} icon={MailIcon} size="form" footer={<><button type="button" className={btn.secondary} onClick={() => onOpenChange(false)}>Close</button>{how === "PRINT" ? <><button type="button" className={btn.secondary} disabled={pending || !summary} onClick={() => { navigator.clipboard?.writeText(summary ?? "").then(() => setCopied(true)).catch(() => undefined); }}>{copied ? "Copied" : "Copy summary"}</button><a href={`/receipt?folio=${encodeURIComponent(folio.id)}`} target="_blank" rel="noopener" className={btn.primary}>Print receipt</a></> : how === "WHATSAPP" ? <button type="button" className={btn.primary} disabled={pending} onClick={() => void send.run(() => withDeliveries(sendFolio(folio.id, "WHATSAPP", folio.guestPhone ?? ""), `Folio for ${folio.guestName}`), `Folio sent on WhatsApp to ${folio.guestPhone}`, () => onOpenChange(false))}>Send on WhatsApp</button> : <button type="button" className={btn.primary} disabled={pending || !to.trim()} onClick={() => void send.run(() => withDeliveries(sendFolio(folio.id, "EMAIL", to), `Folio for ${folio.guestName}`), `Folio emailed to ${to.trim()}`, () => onOpenChange(false))}>Email folio</button>}</>}>
+		<Modal open={open} onOpenChange={onOpenChange} title="Email or copy the folio" subtitle={`${folio.guestName} · ${naira(folio.charges + folio.tax)} charges`} icon={MailIcon} size="form" footer={<><button type="button" className={btn.secondary} onClick={() => onOpenChange(false)}>Close</button>{how === "COPY" ? <button type="button" className={btn.primary} disabled={pending || !summary} onClick={() => { navigator.clipboard?.writeText(summary ?? "").then(() => setCopied(true)).catch(() => undefined); }}>{copied ? "Copied" : "Copy summary"}</button> : how === "WHATSAPP" ? <button type="button" className={btn.primary} disabled={pending} onClick={() => void send.run(() => withDeliveries(sendFolio(folio.id, "WHATSAPP", folio.guestPhone ?? ""), `Folio for ${folio.guestName}`), `Folio sent on WhatsApp to ${folio.guestPhone}`, () => onOpenChange(false))}>Send on WhatsApp</button> : <button type="button" className={btn.primary} disabled={pending || !to.trim()} onClick={() => void send.run(() => withDeliveries(sendFolio(folio.id, "EMAIL", to), `Folio for ${folio.guestName}`), `Folio emailed to ${to.trim()}`, () => onOpenChange(false))}>Email folio</button>}</>}>
 			<div className="flex flex-col gap-4">
-				<ChoiceCards value={how} onChange={setHow} columns={folioOnWhatsApp ? 3 : 2} options={[{ value: "PRINT", label: "Print / copy" }, { value: "EMAIL", label: "Email" }, ...(folioOnWhatsApp ? [{ value: "WHATSAPP" as const, label: "WhatsApp", hint: folio.guestPhone }] : [])]} />
+				<ChoiceCards value={how} onChange={setHow} columns={folioOnWhatsApp ? 3 : 2} options={[{ value: "COPY", label: "Copy" }, { value: "EMAIL", label: "Email" }, ...(folioOnWhatsApp ? [{ value: "WHATSAPP" as const, label: "WhatsApp", hint: folio.guestPhone }] : [])]} />
 				{how === "EMAIL" && <TextField label="Guest's email" type="email" value={to} onChange={setTo} />}
-				<TextareaField label="Stay summary" value={summary ?? (act.pending ? "Preparing the summary…" : "")} rows={10} hint={how === "PRINT" ? "Copy it to the desk printer or a document" : "This summary is what the guest receives"} />
+				<TextareaField label="Stay summary" value={summary ?? (act.pending ? "Preparing the summary…" : "")} rows={10} hint={how === "COPY" ? "Copy it into a document or a message" : "This summary is what the guest receives"} />
 			</div>
 		</Modal>
 	);

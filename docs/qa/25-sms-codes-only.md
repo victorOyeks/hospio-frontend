@@ -46,7 +46,7 @@ text.
 
 Check each of these. None should offer SMS, show "SMS · coming soon", or say a message will "go as an SMS":
 
-- **Take a payment:** the receipt choices are Email, Print and WhatsApp.
+- **Take a payment:** the receipt choices are WhatsApp and Don't send. (Changed 19 Nov 2026: see 71-whatsapp-receipts-no-printing.md.)
 - **Hotel setup → Payments:** the default receipt choices. **Hotel setup → POS:** the default receipt channel.
 - **Message a guest**, and the guest inbox's channel filter and reply box.
 - **Hotel setup → Guest messages:** prices and usage show email and WhatsApp only.

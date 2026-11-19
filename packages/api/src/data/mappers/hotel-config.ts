@@ -226,9 +226,11 @@ export const SETUP_CATALOGUE: SectionDef[] = [
 				key: "receipts",
 				label: "Default receipt channel",
 				type: "select",
-				options: ["WHATSAPP", "EMAIL", "PRINT", "NONE"],
+				// Receipts go on WhatsApp or not at all (19 Nov 2026): a stored PRINT or EMAIL reads as WhatsApp.
+				options: ["WHATSAPP", "NONE"],
 				default: "WHATSAPP",
-				retired: ["SMS"],
+				retired: ["SMS", "PRINT", "EMAIL"],
+				help: "WHATSAPP: to the guest's phone when it is known, else nothing. NONE: no receipt. Receipts are not printed or emailed",
 			},
 			{
 				key: "depositPct",
@@ -510,9 +512,10 @@ export const SETUP_CATALOGUE: SectionDef[] = [
 				key: "receiptChannel",
 				label: "Default receipt channel",
 				type: "select",
-				options: ["PRINT", "WHATSAPP", "EMAIL", "NONE"],
-				default: "PRINT",
-				retired: ["SMS"],
+				options: ["WHATSAPP", "NONE"],
+				default: "WHATSAPP",
+				retired: ["SMS", "PRINT", "EMAIL"],
+				help: "WHATSAPP: to the guest's phone when it is known, else nothing. NONE: no receipt. Receipts are not printed or emailed",
 			},
 		],
 	},
@@ -817,7 +820,7 @@ const STAY_FIELDS: Record<string, string[]> = {
 
 /** Labels and hints that name rooms, bookings or the booking page, as a lounge, bar or restaurant reads them (hotel words, like the rest). */
 const VENUE_COPY: Record<string, Record<string, { label?: string; help?: string }>> = {
-	brand: { shortName: { help: "On the sign-in screen; your hotel's name when empty" } },
+	brand: { logoText: { help: "On the sign-in screen; your hotel's name when empty" } },
 	messaging: { whatsappNumber: { help: "Guests tap Chat on WhatsApp in their emails to reach you here" } },
 	taxes: { pricesIncludeTax: { label: "Prices include tax" } },
 };

@@ -4,7 +4,6 @@ import {
 	BanIcon,
 	BedDoubleIcon,
 	CreditCardIcon,
-	PrinterIcon,
 	ReceiptIcon,
 	RotateCwIcon,
 } from "lucide-react";
@@ -48,6 +47,7 @@ import { type Bill, readBill } from "@hospio/api/actions/bill";
 import { BillSheet } from "./bill-sheet";
 import { OrderPaymentPanel } from "./pos-payment";
 import { BigButton } from "./tablet";
+import { WhatsAppReceiptButton } from "@/components/receipt/whatsapp-receipt";
 
 /** Where a sale stands, in words and colour. Codes never show raw. */
 export const SALE_STATUS: Record<
@@ -309,14 +309,6 @@ export function SalePanel({
 				}
 				footer={
 					<>
-						{sale && s && s.status !== "CANCELLED" && sale.payments.length > 0 && (
-							<BigButton
-								tone="secondary"
-								onClick={() => window.open(`/receipt?sale=${encodeURIComponent(s.id)}`, "_blank", "noopener")}
-							>
-								<PrinterIcon className="size-5" /> Print receipt
-							</BigButton>
-						)}
 						{sale?.can.cancel && (
 							<BigButton tone="ghost" onClick={() => setSub("cancel")}>
 								<BanIcon className="size-5" /> Cancel sale
@@ -569,8 +561,17 @@ export function SalePanel({
 													{p.reference ? ` · Ref ${p.reference}` : ""}
 												</span>
 											</span>
-											<span className="font-semibold text-ink">
-												{naira(p.amount)}
+											<span className="flex flex-col items-end gap-1">
+												<span className="font-semibold text-ink">
+													{naira(p.amount)}
+												</span>
+												{/* The guest's receipt goes on WhatsApp only (no printing, no email). */}
+												<WhatsAppReceiptButton
+													paymentId={p.paymentId}
+													guestName={s.guestName}
+													label="WhatsApp receipt"
+													className="h-9 px-3 text-[12px]"
+												/>
 											</span>
 										</li>
 									))}

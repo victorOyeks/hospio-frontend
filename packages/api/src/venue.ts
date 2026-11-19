@@ -136,10 +136,11 @@ const HOTEL_WORD = /(?<![\w/@{.-])([Hh])otel(s?)(?![\w-]| guests?\b)/g;
 export function adaptText(text: string, w: Wording, setup?: string): string {
 	const area = setup ?? w.setup;
 	if (w.hotel && area === "Hotel setup") return text;
-	let out = text.replace(/\bHotel setup\b/g, area).replace(/\bhotel setup\b/g, area.toLowerCase());
-	if (w.hotel) return out;
-	out = out.replace(HOTEL_WORD, (_m, h: string, s: string) =>
-		h === "H" ? (s ? w.Places : w.Place) : s ? w.places : w.place,
-	);
-	return out;
+	// The setup's name is put in last, so "Hotel setup" at a mixed business's hotel is not reworded to "Location setup".
+	let out = text.replace(/\bHotel setup\b/g, "\u0001").replace(/\bhotel setup\b/g, "\u0002");
+	if (!w.hotel)
+		out = out.replace(HOTEL_WORD, (_m, h: string, s: string) =>
+			h === "H" ? (s ? w.Places : w.Place) : s ? w.places : w.place,
+		);
+	return out.replaceAll("\u0001", area).replaceAll("\u0002", area.toLowerCase());
 }

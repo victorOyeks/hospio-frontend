@@ -5,8 +5,13 @@ export const whatsNewWeek = "Week of 15 November 2026";
 
 export const whatsNew: WhatsNewItem[] = [
 	{
+		title: "Receipts go on WhatsApp",
+		body: "When you take a payment the receipt choice is now “WhatsApp” (to the guest's phone) or “Don't send”. Receipts are no longer printed or emailed, and the Print receipt buttons are gone. To send one again, open the payment (My payments, Payments or the sale) and tap “Send receipt on WhatsApp”. Managers and owners can still keep a receipt as a PDF from Payments.",
+		audience: ["EVERYONE"],
+	},
+	{
 		title: "Waiters and cashiers",
-		body: "Two new roles for restaurants, bars and lounges (hotels can use them too). A waiter opens tabs at their tables, sends orders to the bar and kitchen and marks them served; they see only their own tabs. A cashier takes payment for any open tab or sale, keeps the cashier till and prints receipts. Add them in Staff → Add staff. Hotel setup → “Restaurant & bar” decides whether waiters may take payment themselves.",
+		body: "Two new roles for restaurants, bars and lounges (hotels can use them too). A waiter opens tabs at their tables, sends orders to the bar and kitchen and marks them served; they see only their own tabs. A cashier takes payment for any open tab or sale, keeps the cashier till and sends receipts on WhatsApp. Add them in Staff → Add staff. Hotel setup → “Restaurant & bar” decides whether waiters may take payment themselves.",
 		audience: ["MANAGER", "OWNER"],
 	},
 	{

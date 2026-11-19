@@ -1,9 +1,10 @@
 "use client";
 
-import { AppWindowIcon, ArrowUpRightIcon, DownloadIcon, ShareIcon, SquarePlusIcon, XIcon } from "lucide-react";
+import { ArrowUpRightIcon, DownloadIcon, ShareIcon, SquarePlusIcon, XIcon } from "lucide-react";
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { APP_NAME } from "@hospio/api/app";
+import { HospioIcon } from "@hospio/ui/brand/logo";
 import { useInstallPrompt } from "@hospio/ui/hooks/use-install-prompt";
 import { DropdownMenuItem } from "@hospio/ui/primitives/dropdown-menu";
 import { Modal } from "@hospio/ui/shared/modal";
@@ -160,9 +161,7 @@ export function InstallBanner() {
 						"pb-[max(12px,env(safe-area-inset-bottom))]",
 					)}
 				>
-					<span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-brand text-white">
-						<DownloadIcon className="size-5" />
-					</span>
+					<HospioIcon className="size-10 rounded-xl" />
 					<div className="min-w-0 flex-1 text-[13px]">
 						<p className="font-semibold text-ink">Install {APP_NAME}</p>
 						<p className="text-ink-2">
@@ -250,9 +249,7 @@ export function OpenInAppBanner() {
 			data-open-in-app-banner
 			className="fixed inset-x-3 bottom-3 z-50 mx-auto flex max-w-[560px] flex-wrap items-center gap-3 rounded-xl border border-brand/20 bg-card px-4 py-3 pb-[max(12px,env(safe-area-inset-bottom))] shadow-lg"
 		>
-			<span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-brand text-white">
-				<AppWindowIcon className="size-5" />
-			</span>
+			<HospioIcon className="size-10 rounded-xl" />
 			<div className="min-w-0 flex-1 text-[13px]">
 				<p className="font-semibold text-ink">{APP_NAME} is installed on this device.</p>
 				{hint ? (

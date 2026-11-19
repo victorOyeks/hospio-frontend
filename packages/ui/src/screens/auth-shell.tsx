@@ -10,28 +10,10 @@ import {
 	type RememberedBrand,
 	HOSPIO_MAROON,
 } from "@hospio/api/brand";
+import { BuildingIcon } from "lucide-react";
+import { HospioWordmark } from "../brand/logo";
 import { ForgetBrand } from "../shared/remember-brand";
 import { cn } from "../utils";
-
-/** The bed mark of the Hospio360 wordmark (the same drawing as the landing page's). */
-function Mark({ className }: { className?: string }) {
-	return (
-		<svg
-			viewBox="0 0 20 20"
-			fill="none"
-			aria-hidden="true"
-			className={className}
-		>
-			<path
-				d="M1.667 16.667v-3.334m0 0V10a1.667 1.667 0 0 1 1.666-1.667H5m-3.333 5h16.666M5 8.333h5m-5 0v-2.5A.833.833 0 0 1 5.833 5h3.334a.833.833 0 0 1 .833.833v2.5m0 0h6.667A1.667 1.667 0 0 1 18.333 10v3.333m0 0v3.334"
-				stroke="currentColor"
-				strokeWidth="2.2"
-				strokeLinecap="round"
-				strokeLinejoin="round"
-			/>
-		</svg>
-	);
-}
 
 export function Wordmark({
 	light = false,
@@ -45,6 +27,14 @@ export function Wordmark({
 	name?: string | null;
 	logoUrl?: string | null;
 }) {
+	// No remembered hotel: Hospio360's own wordmark (brand/logo.tsx). A remembered hotel keeps its logo (or a building
+	// mark) and its name: the sign-in is then that hotel's, not Hospio360's.
+	if (!name && !logoUrl)
+		return (
+			<span className={cn("flex items-center", className)}>
+				<HospioWordmark className={cn("h-[30px]", light ? "text-white" : "text-brand")} />
+			</span>
+		);
 	return (
 		<span className={cn("flex items-center gap-[10px]", className)}>
 			{logoUrl ? (
@@ -63,7 +53,7 @@ export function Wordmark({
 							: "bg-brand text-brand-foreground",
 					)}
 				>
-					<Mark className="size-5" />
+					<BuildingIcon className="size-5" aria-hidden="true" />
 				</span>
 			)}
 			<span
@@ -110,14 +100,15 @@ function Glimpse({ admin }: { admin: boolean }) {
 				["Fees collected", "92%"],
 			]
 		: [
-				["Arrivals", "12"],
-				["In house", "46"],
-				["Departures", "9"],
+				// For hotels, lounges, bars and restaurants alike (docs/plan-venue-type.md, phase 5).
+				["Sales today", "86"],
+				["Open tabs", "7"],
+				["Guests in house", "46"],
 			];
 	const rows: [string, string, string][] = admin
 		? [
 				["Setup", "Business details · step 2 of 4", "bg-amber-400"],
-				["Live", "First booking taken", "bg-emerald-400"],
+				["Live", "First sale taken", "bg-emerald-400"],
 			]
 		: [
 				["Room 204", "Cleaned · ready for arrival", "bg-emerald-400"],
@@ -213,7 +204,7 @@ function Glimpse({ admin }: { admin: boolean }) {
 						{admin ? "Statement paid" : "Payment received"}
 					</p>
 					<p className="text-[12px] text-ink-3">
-						{admin ? "June fees · ₦240,000" : "Folio 1042 · ₦85,000"}
+						{admin ? "June fees · ₦240,000" : "Receipt 1042 · ₦85,000"}
 					</p>
 				</div>
 			</div>
@@ -375,12 +366,7 @@ function AdminAuthShell({ children }: PropsWithChildren) {
 			</aside>
 			<section className="flex min-h-full flex-1 flex-col items-center justify-center px-4 py-10">
 				<div className="mb-8 flex flex-col items-center gap-3 lg:hidden">
-					<span className="flex items-center gap-[10px]">
-						<span className="flex size-9 items-center justify-center rounded-[10px] bg-brand text-brand-foreground">
-							<Mark className="size-5" />
-						</span>
-						<span className="text-[20px] font-bold text-brand">Hospio360</span>
-					</span>
+					<HospioWordmark className="h-[30px] text-brand" />
 					<span className="rounded-pill bg-brand-soft px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.08em] text-brand">
 						Platform console
 					</span>

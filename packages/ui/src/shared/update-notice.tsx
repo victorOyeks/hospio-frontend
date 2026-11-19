@@ -1,7 +1,7 @@
 "use client";
 
-import { RefreshCwIcon } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
+import { HospioIcon } from "../brand/logo";
 import { toast } from "sonner";
 
 /**
@@ -94,7 +94,7 @@ export function UpdateNotice() {
 			onPointerDown={(e) => e.stopPropagation()}
 			className="pointer-events-auto fixed inset-x-0 top-3 z-[100] mx-auto flex w-[min(640px,calc(100%-24px))] items-center gap-3 rounded-xl border border-brand/20 bg-card px-4 py-3 shadow-lg"
 		>
-			<RefreshCwIcon className="size-5 shrink-0 text-brand" />
+			<HospioIcon className="size-8 rounded-lg" />
 			<div className="min-w-0 flex-1 text-[13px]">
 				<p className="font-semibold text-ink">Reload Hospio360 to carry on</p>
 				<p className="text-ink-2">

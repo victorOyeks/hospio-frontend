@@ -198,7 +198,7 @@ export function FoliosScreen({
 							disabled: row.original.balance <= 0,
 						},
 						{
-							label: "Print / email",
+							label: "Email / copy",
 							onClick: () => {
 								setOpenId(row.original.id);
 								setAction("print");

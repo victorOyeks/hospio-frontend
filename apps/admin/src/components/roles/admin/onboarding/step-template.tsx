@@ -48,7 +48,7 @@ let seq = 0;
 /** What the built-in venue template sets, in the admin's words. */
 const VENUE_SETS: [string, string][] = [
 	["Tabs", "On · limit ₦100,000 · flagged when open over 4 hours · a tab needs a name or a table"],
-	["Payments", "Cash, card and transfer · till float ₦10,000 · receipts printed · waiters don't take payment (the cashier does)"],
+	["Payments", "Cash, card and transfer · till float ₦10,000 · receipts on WhatsApp · waiters don't take payment (the cashier does)"],
 	["Taxes", "VAT 7.5 % included in prices · no service charge"],
 	["Guest messages", "Receipts only (no booking or arrival messages)"],
 	["Opening hours", "10:00 to 02:00 · day closes 04:00 (tills and open tabs only)"],

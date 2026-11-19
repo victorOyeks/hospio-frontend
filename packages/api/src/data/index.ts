@@ -165,6 +165,7 @@ export function toPaymentRow(p: z.infer<typeof PaymentResponse>): PaymentRow {
 		folioId: p.folioId ?? undefined,
 		bookingId: p.bookingId ?? undefined,
 		guestName: p.guestName ?? "Walk-in",
+		guestPhone: p.guestPhone ?? undefined,
 		role: p.role ?? "FRONT_OFFICE",
 		takenBy: p.requestedByName ?? p.requestedBy ?? "—",
 		method: p.method === "ORGANIZATION" ? "TRANSFER" : p.method,

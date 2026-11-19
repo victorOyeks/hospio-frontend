@@ -1,11 +1,12 @@
 import { ImageResponse } from "next/og";
+import { svgDataUrl, wordmarkSvg } from "@hospio/ui/brand/logo-paths";
 
 export const alt =
 	"Hospio360 · Hotel, lounge, bar and restaurant management in Nigeria";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
-/** The share card: the brand maroon with the wordmark and the one-line pitch. */
+/** The share card: the brand maroon with the wordmark (brand/logo-paths.ts) and the one-line pitch. */
 export default function OpengraphImage() {
 	return new ImageResponse(
 		<div
@@ -20,9 +21,7 @@ export default function OpengraphImage() {
 				color: "white",
 			}}
 		>
-			<div style={{ fontSize: 40, fontWeight: 700, letterSpacing: "0.16em" }}>
-				Hospio360
-			</div>
+			<img src={svgDataUrl(wordmarkSvg("#FFFFFF"))} width={302} height={60} alt="Hospio360" />
 			<div
 				style={{
 					marginTop: 32,

@@ -25,6 +25,7 @@ import {
 } from "@hospio/api/actions/payment";
 import { useAction } from "@hospio/api/actions/use-action";
 import { BigButton, ShiftPill } from "./tablet";
+import { WhatsAppReceiptButton } from "@/components/receipt/whatsapp-receipt";
 
 const tone: Record<
 	PaymentRow["status"],
@@ -308,15 +309,13 @@ export function MyPaymentsScreen({
 								</BigButton>
 							)}
 						{current.status === "APPROVED" && (
-							// The receipt page prints it or emails it to the address the guest gives (resend is for managers and finance).
-							<a
-								href={`/receipt?payment=${encodeURIComponent(current.id)}`}
-								target="_blank"
-								rel="noopener"
-								className="flex h-14 items-center justify-center gap-2 rounded-control border border-line bg-card px-5 text-[15px] font-semibold text-ink hover:bg-subtle"
-							>
-								Print or email receipt
-							</a>
+							// The receipt goes to the guest on WhatsApp only: receipts are not printed or emailed.
+							<WhatsAppReceiptButton
+								paymentId={current.id}
+								phone={current.guestPhone}
+								guestName={current.guestName}
+								className="h-14 justify-center text-[15px]"
+							/>
 						)}
 					</div>
 				)}

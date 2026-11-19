@@ -77,12 +77,12 @@ export const laundryHelp: HelpModule = {
 				"Open the order from “Jobs” and tap “Take payment”.",
 				"Pick the method: “Card on the POS”, “Bank transfer” or “Cash”.",
 				"For card, pick the terminal and let the guest tap or insert. A transfer also goes to the POS: the guest chooses transfer there. For cash, enter what you received.",
-				"Under “Receipt”, keep “Email” and check the guest's email, then tap “Email receipt & record”. Or pick “Print” and tap “Record payment”, or tap “Skip receipt”.",
+"Under “Receipt”, “WhatsApp” is picked when the guest's phone is known: check the “Guest's WhatsApp number” and tap “Send on WhatsApp & record”. Or pick “Don't send” and tap “Record payment”, or tap “Skip receipt”.",
 				"Tap “Back to the orders”. The order shows “Paid” and can now be delivered.",
 			],
 			goodToKnow: [
 				"If a card payment is still processing, the order says so. Tap “Check it now” later to record it.",
-				"The receipt is emailed when you pick “Email” (the default when the guest has an email), or printed. The WhatsApp button is greyed out, but a guest with no email gets the receipt by WhatsApp.",
+				"The receipt goes to the guest on WhatsApp when you pick “WhatsApp” (the default when the guest's phone is known). Receipts are not printed or emailed.",
 			],
 			route: "/dashboard",
 			screen: "Jobs",
@@ -242,7 +242,7 @@ export const laundryHelp: HelpModule = {
 				"Use the “To verify” tab to see payments not yet confirmed.",
 				"Tap a payment to open it.",
 				"For a stuck one, tap “Check with provider”. For a declined card payment, tap “Try again on the POS”.",
-				"For an approved one, tap “Print or email receipt” if the guest needs it again: the receipt page prints it or emails it to the address they give.",
+				"For an approved one, tap “Send receipt on WhatsApp” if the guest needs it again, check the number and tap “Send on WhatsApp”.",
 			],
 			goodToKnow: [
 				"If the terminal never answered, check the last transaction on the POS before charging the guest again.",

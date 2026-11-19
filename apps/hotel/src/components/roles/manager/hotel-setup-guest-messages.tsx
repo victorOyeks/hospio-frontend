@@ -121,7 +121,7 @@ export function GuestMessagesSection({ isOwner }: { isOwner: boolean }) {
 									: "Off · nothing is sent to guests"}
 							</p>
 							<p className="mt-1 text-[13px] text-ink-2">
-								{t("Each message is sent from your hotel's name and charged per")}
+								{t("Each message is sent from your hotel's name and charged per")}{" "}
 								message at the prices below. You get one invoice a month. Codes,
 								sign-in and staff messages are always free.
 							</p>

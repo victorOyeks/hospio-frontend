@@ -12,7 +12,8 @@ at all (own devices). See hospio-backend docs/plan-device-packages.md.
 
 ## 1. Catalogue (Super admin)
 
-1. Settings → **Device catalogue**: tablet ₦180,000, router ₦65,000, receipt printer ₦85,000, data plan ₦30,000 a month.
+1. Settings → **Device catalogue**: tablet ₦180,000, router ₦65,000, data plan ₦30,000 a month. The receipt printer is
+   switched off (Hospio360 doesn't supply printers since 19 Nov 2026) and is never offered for a new package; see 71.
 2. **Add item** with an empty name or price: Save stays disabled. A negative price is refused.
 3. **Change** a price; **Hide** an item: it is no longer offered for new packages (old packages keep their prices).
 

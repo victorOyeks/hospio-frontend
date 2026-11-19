@@ -1,5 +1,6 @@
 import { ImageResponse } from "next/og";
 import { HOSPIO_MAROON, mix, normalizeHex, onColour } from "@hospio/api/brand";
+import { svgDataUrl, wordmarkSvg } from "@hospio/ui/brand/logo-paths";
 
 /**
  * A hotel's WhatsApp banner (hospio-backend docs/sms-whatsapp.md): the image at the top of its booking WhatsApp messages, in
@@ -66,11 +67,14 @@ export function GET(req: Request) {
 					left: 110,
 					bottom: 56,
 					display: "flex",
+					alignItems: "center",
+					gap: 14,
 					fontSize: 24,
 					color: faint,
 				}}
 			>
-				Booked with Hospio360
+				Booked with
+				<img src={svgDataUrl(wordmarkSvg(on))} width={136} height={27} alt="Hospio360" style={{ opacity: 0.85 }} />
 			</div>
 		</div>,
 		{

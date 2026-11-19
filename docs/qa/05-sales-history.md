@@ -88,8 +88,8 @@ rooms**. **Unpaid** includes open tabs and tickets still being cooked. Cancelled
 2. **Do:** **Collect the balance** → Cash → **Count cash** → **Cash received** → **Skip receipt** → **Back
    to the orders**. **Expect:** Paid; two payments (Cash ₦1,000, Cash
    ₦1,400). (A transfer now goes to the POS like a card and is approved when the POS confirms it.)
-   **Do:** on that paid sale's panel → **Print receipt**. **Expect:** the receipt opens in a new tab with both
-   payments; "Email receipt" there sends it to the address typed (sent for real; use `@hospio-qa.test`).
+   **Do:** on that paid sale's panel → each payment under **Payment** has **WhatsApp receipt** (no Print receipt).
+   (Changed 19 Nov 2026: see 71-whatsapp-receipts-no-printing.md.)
 3. **Do:** make an unpaid sale, open it → **Charge to room** → Hotel guest **A107 · QA LM Guest 2120**.
    **Expect:** "What happens: ₦… goes on QA LM Guest 2120's folio". **Charge to room** → **Expect:** "₦… charged to
    room A107"; the sale shows **Room A107**, a Payment line "Charged to room A107 · QA LM Guest 2120 · By Segun

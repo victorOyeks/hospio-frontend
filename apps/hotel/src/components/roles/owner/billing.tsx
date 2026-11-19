@@ -222,11 +222,11 @@ export function BillingScreen({
 				)}
 			</SectionCard>
 			<p className="text-[12px] text-ink-3">
-				How it works: the invoice is issued on the 1st at 07:00 for the month before and is due on the 8th. Reminders go to the owner by email.
-				{words.stays
+				How it works: the invoice is issued on the 1st at 07:00 for the month before and is due on the 8th. Reminders go to the owner by email.{" "}
+				{words.anyStays
 					? "If it isn't paid by the 11th, card/transfer POS payments, new sales and new bookings pause from 06:00 on the 12th; check-out, cash on existing bills and tabs, reports and paying the invoice still work."
 					: "If it isn't paid by the 11th, card/transfer POS payments and new sales pause from 06:00 on the 12th; cash on existing bills and tabs, reports and paying the invoice still work."}{" "}
-				 A month under ₦1,000 is carried into the next one. No VAT is charged.
+				A month under ₦1,000 is carried into the next one. No VAT is charged.
 			</p>
 
 			<SidePanel
