@@ -63,7 +63,7 @@ import {
 	StaffOutletsLine,
 	worksOutlets,
 } from "@hospio/ui/shared/staff-outlets";
-import { usePlaceText } from "@hospio/ui/shared/wording";
+import { usePlaceText, useWording } from "@hospio/ui/shared/wording";
 
 export const ROLE_OPTIONS = [
 	{ value: "MANAGER", label: "Manager" },
@@ -509,6 +509,7 @@ export function StaffFormPanel({
 	/** False at a lounge, bar or restaurant: no Front office role to give. */
 	accommodation?: boolean;
 }) {
+	const words = useWording();
 	const t = usePlaceText();
 	const router = useRouter();
 	const { run, pending: saving } = useAction();
@@ -682,7 +683,7 @@ export function StaffFormPanel({
 							type="email"
 							value={form.email}
 							onChange={(v) => set("email", v)}
-							placeholder="name@hotel.com"
+							placeholder="name@example.com"
 							required={!editing}
 							hint={editing ? undefined : "They sign in with this"}
 						/>
@@ -693,7 +694,7 @@ export function StaffFormPanel({
 								label="Job title"
 								value={form.jobTitle}
 								onChange={(v) => set("jobTitle", v)}
-								placeholder="Room attendant"
+								placeholder={words.stays ? "Room attendant" : "Head waiter"}
 							/>
 							<Note tone="info">
 								Role and access are changed in Roles &amp; Permissions; the
@@ -753,7 +754,7 @@ export function StaffFormPanel({
 									label="Job title"
 									value={form.jobTitle}
 									onChange={(v) => set("jobTitle", v)}
-									placeholder="Room attendant"
+									placeholder={words.stays ? "Room attendant" : "Head waiter"}
 								/>
 								<SelectField
 									label="Shift"

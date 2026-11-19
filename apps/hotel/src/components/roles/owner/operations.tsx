@@ -69,6 +69,7 @@ export function OwnerOperations({
 	activity: Activity[];
 	changes: OwnerChangeRow[];
 }) {
+	const words = useWording();
 	const { biz } = useWording();
 	const tb = useBizText();
 	const [tab] = useTabParam<Tab>("hotels");
@@ -298,7 +299,7 @@ export function OwnerOperations({
 							<SearchBox
 								value={search}
 								onChange={setSearch}
-								placeholder="Who, what, room"
+								placeholder={words.anyStays ? "Who, what, room" : "Who, what"}
 							/>
 						}
 						right={

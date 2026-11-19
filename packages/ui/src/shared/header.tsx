@@ -50,6 +50,7 @@ export function Header({
 	setupHotels?: DeviceSetupHotel[];
 	activeHotelId?: string;
 }) {
+	const words = useWording();
 	const { biz } = useWording();
 	const [pending, startTransition] = useTransition();
 	const [setupOpen, setSetupOpen] = useState(false);
@@ -68,7 +69,7 @@ export function Header({
 						<SearchIcon className="size-[18px] text-ink-3" />
 						<input
 							type="search"
-							placeholder="Search bookings, guests, branches…"
+							placeholder={words.stays ? "Search bookings, guests, branches…" : "Search sales, staff, branches…"}
 							className="min-w-0 flex-1 bg-transparent text-sm text-ink outline-none placeholder:text-ink-3"
 						/>
 						<kbd className="rounded-md bg-subtle px-[6px] py-[2px] text-[11px] font-medium text-ink-2">⌘ K</kbd>
