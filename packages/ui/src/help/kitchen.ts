@@ -334,9 +334,9 @@ export const kitchenHelp: HelpModule = {
 			when: "Guests on one tab want to pay separately.",
 			topic: "Payments",
 			steps: [
-				"Open the tab or sale and open its bill.",
-				"Choose how to split it: equally between a number of people, by item (each person's own items) or by amount.",
-				"Take payment for each part in turn.",
+				"Open the tab or sale and tap Split or discount to open its bill.",
+				"Tap Split the bill and choose Equally (how many people), By item (tap who pays for each item; an item tapped for two guests is shared) or By amount.",
+				"Tap Pay on each part in turn. What is still to pay stays at the top of the bill.",
 				"The sale closes when every part is paid.",
 			],
 			goodToKnow: [
@@ -351,7 +351,7 @@ export const kitchenHelp: HelpModule = {
 			when: "Something has to come off a bill, or an item is on the house.",
 			topic: "Payments",
 			steps: [
-				"Open the tab or sale and open its bill.",
+				"Open the tab or sale and tap Split or discount to open its bill.",
 				"Pick one item, or the whole bill.",
 				"Enter the discount as a percentage or an amount, or mark the item complimentary.",
 				"Pick or type the reason and confirm.",
@@ -370,7 +370,7 @@ export const kitchenHelp: HelpModule = {
 			when: "An item already sent, or a whole sale, has to come off.",
 			topic: "Payments",
 			steps: [
-				"Open the tab or sale and open its bill.",
+				"Open the tab or sale and tap Split or discount to open its bill.",
 				"Pick the item (or the whole sale) and ask for a void.",
 				"Pick or type the reason and send the request.",
 				"A manager approves it from their dashboard. If one is beside you, they can approve on your screen: they pick their name and type their own PIN.",

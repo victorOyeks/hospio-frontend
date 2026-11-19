@@ -66,8 +66,8 @@ export const waiterHelp: HelpModule = {
 			when: "Guests on one tab want to pay separately.",
 			topic: "Payments",
 			steps: [
-				"Open the tab or sale and open its bill.",
-				"Choose how to split it: equally between a number of people, by item (each person's own items) or by amount.",
+				"Open the tab or sale and tap Split or discount to open its bill.",
+				"Tap Split the bill and choose Equally (how many people), By item (tap who pays for each item; an item tapped for two guests is shared) or By amount.",
 				"Each part is then paid in turn. Where your venue lets waiters take payment you take it. Otherwise the cashier does.",
 				"The sale closes when every part is paid.",
 			],
@@ -85,7 +85,7 @@ export const waiterHelp: HelpModule = {
 			when: "Something has to come off a bill, or an item is on the house.",
 			topic: "Payments",
 			steps: [
-				"Open the tab or sale and open its bill.",
+				"Open the tab or sale and tap Split or discount to open its bill.",
 				"Pick one item, or the whole bill.",
 				"Enter the discount as a percentage or an amount, or mark the item complimentary.",
 				"Pick or type the reason and confirm.",
@@ -106,7 +106,7 @@ export const waiterHelp: HelpModule = {
 			when: "An item already sent, or a whole sale, has to come off.",
 			topic: "Payments",
 			steps: [
-				"Open the tab or sale and open its bill.",
+				"Open the tab or sale and tap Split or discount to open its bill.",
 				"Pick the item (or the whole sale) and ask for a void.",
 				"Pick or type the reason and send the request.",
 				"A manager approves it from their dashboard. If one is beside you, they can approve on your screen: they pick their name and type their own PIN.",
