@@ -10,9 +10,11 @@ disk space left, database, Kafka, Redis), so he knows if the server is running o
 - a banner (**All good** / **Warning** / **Problem** with the reasons), five tiles (disk space left, memory, CPU, services up,
   database), the services table (problems first), the server's disks and memory, the database (with **No scheduled backup**
   in red), Kafka, Redis, TLS certificates, 24 h / 7 day trends and the alert limits;
-- **alerts**: the Super admins get the bell and an email when a disk fills, memory runs out, a service is down for 2 minutes, a
-  certificate is near expiry, Kafka is stuck or the database runs out of connections; once when it starts, once if worse, once
-  when it clears. The limits are in **Settings → System health**.
+- **alerts**: the Super admins get the bell and an email when a disk fills, memory runs out (15 minutes), a service is down for
+  2 minutes, a certificate is near expiry, Kafka is stuck or the database runs out of connections; once when it starts, once if
+  worse, once when it clears; **at most one email an hour** (more in that hour come as one digest). An **Alerts** on/off switch
+  (with Email and Bell) is on the page; it is **off on staging** (off by default on staging, on in production). The limits are in
+  **Settings → System health**.
 
 Contract: hospio-backend `docs/system-health.md` (what each number means, the limits, how to act).
 
@@ -89,13 +91,24 @@ to see the alert is done by the developer, not QA (step 6 checks the result).
    with **Open** (goes to System health) and Dismiss; after the problem cleared the alert is gone on its own.
 2. The bell (Notifications) of amoria@hospio360.com: "Problem: maintenance-service is down" and later "Recovered: …"; the link
    opens System health.
-3. Expected: one notification when it started and one when it cleared, never one per minute.
+3. Expected: one notification when it started and one when it cleared, never one per minute; with alerts off, the Dashboard
+   alert still appears but no bell or email.
+
+## 6b. Alerts switch
+
+1. As amoria, System health → **Alerts** card: **Alerts** off ("Off" / "Off by default on staging"), **Email** and **Bell**
+   switches; under the banner a grey line **"Alerts are off — nothing is emailed or sent to the bell"**.
+2. Don't switch alerts on unless the developer asks (on staging they email the owner). If asked: switch **Alerts** on → toast
+   "Alerts are on", the grey line goes; switch it off again → "Alerts are off: nothing will be emailed or sent to the bell".
+3. Changes by Hospio360 → **Activity**: a line "System health alerts: switched off (nothing emailed or sent to the bell)" by the
+   person who switched it.
+4. As Support (kola): the three switches are greyed out and "Only a Super admin switches alerts." shows.
 
 ## 7. Settings → System health (limits)
 
 1. As amoria: Settings → **System health** tab. Expected fields: Disk warning 85, Disk critical 95, Memory 90, Swap 75, Memory
-   minutes 10, Service down minutes 2, Certificate days 14, Database connections 80, Kafka messages 500, no progress 10, and
-   **Email the Super admins as well as the bell** (on).
+   minutes 15, Service down minutes 2, Certificate days 14, Database connections 80, Kafka messages 500, no progress 10, and the
+   switches **Alerts** (off on staging), **Email the Super admins**, **Ring the Super admins' bell**.
 2. Set **Disk warning** to 96 (above critical) → Save.
    - Expected: "The disk warning level must be under the critical level"; nothing saved.
 3. Set **Service down for** to 0 → Save → "Service down for (minutes) must be between 1 and 1440". Reload: values unchanged.

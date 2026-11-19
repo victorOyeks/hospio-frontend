@@ -2,6 +2,7 @@
 
 import {
 	AlertTriangleIcon,
+	BellOffIcon,
 	CheckCircle2Icon,
 	DatabaseIcon,
 	HardDriveIcon,
@@ -14,6 +15,7 @@ import {
 import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
+import { saveSettings } from "@hospio/api/actions/platform-admin";
 import { loadSystemHealth } from "@hospio/api/actions/system-health";
 import type {
 	SystemHealthData,
@@ -23,6 +25,7 @@ import type {
 	SystemHealthService,
 } from "@hospio/api/data/admin-types";
 import { EmptyState } from "@hospio/ui/shared/empty-state";
+import { ToggleField } from "@hospio/ui/shared/field";
 import { fmtDate } from "@hospio/ui/shared/format";
 import { PageHeader } from "@hospio/ui/shared/page-header";
 import { ProgressBar } from "@hospio/ui/shared/progress-bar";
@@ -176,6 +179,15 @@ export function SystemHealthScreen({ initial, superAdmin }: { initial: SystemHea
 						</p>
 					)}
 					<Banner report={report} />
+					{report.thresholds && !report.thresholds.alertsOn && (
+						<p className="flex items-start gap-2 rounded-control border border-line bg-subtle px-4 py-2 text-[13px] text-ink-2">
+							<BellOffIcon className="mt-[2px] size-4 shrink-0 text-ink-3" />
+							<span>
+								<span className="font-semibold text-ink">Alerts are off</span> — nothing is emailed or sent to the bell. Problems still show
+								here and on the Dashboard.
+							</span>
+						</p>
+					)}
 					<Headlines report={report} />
 					<Services services={report.services} />
 					<div className="grid min-w-0 gap-4 xl:grid-cols-2 [&>*]:min-w-0">
@@ -188,7 +200,7 @@ export function SystemHealthScreen({ initial, superAdmin }: { initial: SystemHea
 						<CertsCard report={report} />
 					</div>
 					<HistoryCard report={report} />
-					<LimitsCard report={report} superAdmin={superAdmin} />
+					<LimitsCard report={report} superAdmin={superAdmin} onSaved={() => void reload(true)} />
 				</div>
 			)}
 		</>
@@ -922,15 +934,35 @@ function HistoryCard({ report }: { report: SystemHealthReport }) {
 	);
 }
 
-// ---- the limits in force --------------------------------------------------------------------------------
+// ---- alerts: the switches and the limits in force --------------------------------------------------------
 
-function LimitsCard({ report, superAdmin }: { report: SystemHealthReport; superAdmin: boolean }) {
+function LimitsCard({ report, superAdmin, onSaved }: { report: SystemHealthReport; superAdmin: boolean; onSaved: () => void }) {
 	const t = report.thresholds;
+	const [saving, setSaving] = useState(false);
 	if (!t) return null;
+	const save = async (values: Record<string, boolean>, done: string) => {
+		setSaving(true);
+		try {
+			const r = await saveSettings("system", values);
+			if (r.ok) {
+				toast.success(done);
+				onSaved();
+			} else toast.error(r.error);
+		} catch {
+			toast.error("The switch couldn't be saved. Try again.");
+		} finally {
+			setSaving(false);
+		}
+	};
+	const env = t.environment ?? "this environment";
 	return (
 		<SectionCard
 			title="Alerts"
-			subtitle={`Super admins get the bell${t.emailAlerts ? " and an email" : ""} once when one of these starts, once if it gets worse and once when it clears`}
+			subtitle={
+				t.alertsOn
+					? `On · Super admins get ${[t.bellAlerts && "the bell", t.emailAlerts && "an email (at most one an hour)"].filter(Boolean).join(" and ") || "nothing (both channels off)"} once when a problem starts and once when it clears`
+					: "Off · nothing is emailed or sent to the bell"
+			}
 			headerRight={
 				superAdmin ? (
 					<Link href="/dashboard/settings?tab=system" className={cn(btn.secondary, btn.small, "flex items-center gap-1")}>
@@ -938,8 +970,40 @@ function LimitsCard({ report, superAdmin }: { report: SystemHealthReport; superA
 					</Link>
 				) : undefined
 			}
-			bodyClassName="pt-1"
+			bodyClassName="gap-3 pt-1"
 		>
+			<div className="grid gap-x-6 gap-y-1 md:grid-cols-3">
+				<ToggleField
+					label="Alerts"
+					disabled={!superAdmin || saving}
+					hint={
+						t.alertsSaved
+							? t.alertsOn
+								? "On"
+								: "Off"
+							: `${t.alertsDefault ? "On" : "Off"} by default on ${env}`
+					}
+					checked={t.alertsOn}
+					onChange={(v) =>
+						superAdmin && !saving && void save({ alertsOn: v }, v ? "Alerts are on" : "Alerts are off: nothing will be emailed or sent to the bell")
+					}
+				/>
+				<ToggleField
+					label="Email"
+					disabled={!superAdmin || saving}
+					hint="To every Super admin"
+					checked={t.emailAlerts}
+					onChange={(v) => superAdmin && !saving && void save({ emailAlerts: v }, v ? "Alert emails on" : "Alert emails off")}
+				/>
+				<ToggleField
+					label="Bell"
+					disabled={!superAdmin || saving}
+					hint="In-app notification"
+					checked={t.bellAlerts}
+					onChange={(v) => superAdmin && !saving && void save({ bellAlerts: v }, v ? "Bell alerts on" : "Bell alerts off")}
+				/>
+			</div>
+			{!superAdmin && <p className="text-xs text-ink-3">Only a Super admin switches alerts.</p>}
 			<ul className="grid gap-x-6 gap-y-1 text-[13px] text-ink-2 md:grid-cols-2">
 				<li>Disk at {t.diskWarnPct}% (warning) and {t.diskCriticalPct}% (critical)</li>
 				<li>
@@ -952,8 +1016,9 @@ function LimitsCard({ report, superAdmin }: { report: SystemHealthReport; superA
 				</li>
 				<li>Database connections over {t.dbConnectionsPct}%</li>
 			</ul>
-			<p className="mt-2 text-xs text-ink-3">
-				Open alerts also show on the Dashboard under System alerts. Never by SMS or WhatsApp. Checked {fmtDate(report.at, "h:mm:ssaaa")} in{" "}
+			<p className="text-xs text-ink-3">
+				Open problems also show on the Dashboard under System alerts, whether alerts are on or off. Never by SMS or WhatsApp. Switching
+				alerts on tells only about problems still there two minutes later. Checked {fmtDate(report.at, "h:mm:ssaaa")} in{" "}
 				{report.collectSeconds ?? "—"} s.
 			</p>
 		</SectionCard>

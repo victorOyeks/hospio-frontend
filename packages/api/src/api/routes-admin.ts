@@ -781,6 +781,12 @@ export const SystemHealthReport = z.object({
 			kafkaStuckMinutes: z.number(),
 			dbConnectionsPct: z.number(),
 			emailAlerts: z.boolean(),
+			/** The switch in force: the saved one, else on only in production. Off: nothing is emailed or sent to the bell. */
+			alertsOn: z.boolean().nullish().transform((v) => v ?? true),
+			bellAlerts: z.boolean().nullish().transform((v) => v ?? true),
+			alertsSaved: z.boolean().nullish().transform((v) => v ?? false),
+			alertsDefault: z.boolean().nullish().transform((v) => v ?? true),
+			environment: str,
 		})
 		.nullish(),
 	otherApps: z
