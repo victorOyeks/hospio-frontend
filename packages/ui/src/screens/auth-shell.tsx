@@ -355,7 +355,7 @@ function AdminAuthShell({ children }: PropsWithChildren) {
 				<div className="relative flex flex-col gap-4">
 					<h2 className="max-w-[460px] text-[34px] font-bold leading-[1.12] tracking-[-0.02em]">Hospio360 platform console</h2>
 					<p className="max-w-[440px] text-[16px] leading-[1.55] text-white/70">
-						For Hospio360 staff: businesses from sign-up to live, support, fees and marketers. Business teams sign in at the Hospio360 app instead.
+						For Hospio360 staff: businesses from sign-up to live, support, fees and marketers. Business accounts signed in here are taken to the Hospio360 app.
 					</p>
 					<div className="mt-2 flex flex-wrap gap-2 [@media(max-height:820px)]:hidden">
 						{["Businesses", "Support", "Fees", "Marketers"].map((a) => (

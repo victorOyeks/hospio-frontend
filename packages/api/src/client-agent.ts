@@ -9,8 +9,15 @@ import { headers } from "next/headers";
  */
 export async function clientAgentHeaders(): Promise<Record<string, string>> {
 	try {
-		const ua = (await headers()).get("user-agent");
-		return ua ? { "X-Client-Agent": ua.slice(0, 400) } : {};
+		const h = await headers();
+		const ua = h.get("user-agent");
+		const out: Record<string, string> = ua ? { "X-Client-Agent": ua.slice(0, 400) } : {};
+		// The browser's address as the first X-Forwarded-For hop (the API's nginx appends this server's). Identity limits
+		// sign-in attempts per address; without it every sign-in from both apps counted against this one server, so a busy
+		// minute answered "Too many attempts" for everyone (hospio-backend docs/sign-in.md).
+		const ip = h.get("x-forwarded-for")?.split(",")[0]?.trim() || h.get("x-real-ip")?.trim();
+		if (ip && /^[0-9a-fA-F:.]{2,64}$/.test(ip)) out["X-Forwarded-For"] = ip;
+		return out;
 	} catch {
 		return {};
 	}
@@ -22,6 +29,7 @@ export async function clientAgentHeaders(): Promise<Record<string, string>> {
  */
 export async function clientMetaHeaders(): Promise<Record<string, string>> {
 	const out = await clientAgentHeaders();
+	delete out["X-Forwarded-For"];
 	try {
 		const h = await headers();
 		const ip = h.get("x-forwarded-for")?.split(",")[0]?.trim() || h.get("x-real-ip")?.trim();

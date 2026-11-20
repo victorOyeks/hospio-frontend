@@ -1217,6 +1217,24 @@ export const schema = createSchema({
 		output: envelope(AuthResponse),
 	},
 	"@post/identity/auth/logout": { output: envelope(z.null()) },
+	// Single sign-in across the two apps (hospio-backend docs/sign-in.md): a one-time code for the other app, and its exchange there.
+	"@post/identity/auth/handoff": {
+		input: z.object({ target: z.enum(["hotel", "admin"]), next: z.string().max(512).optional(), endSession: z.boolean().optional() }),
+		output: envelope(z.object({ url: z.string(), target: z.string(), expiresIn: z.number() })),
+	},
+	"@post/identity/auth/handoff/exchange": {
+		input: z.object({ code: z.string().max(100), target: z.enum(["hotel", "admin"]) }),
+		output: envelope(
+			z.object({
+				accessToken: z.string(),
+				refreshToken: z.string(),
+				expiresIn: z.number(),
+				roles: z.array(z.string()),
+				mustChangePassword: z.boolean(),
+				next: z.string().nullable().optional(),
+			}),
+		),
+	},
 	"@post/identity/auth/sign-up": {
 		input: z.object({
 			fullName: z.string(),

@@ -1,5 +1,5 @@
 import { type NextRequest, NextResponse } from "next/server";
-import { APP, APP_ROLES, isAppRole, OTHER_APP_URL } from "./app";
+import { APP, APP_ROLES, belongsElsewhere, isAppRole } from "./app";
 import { DEMO_AUTH } from "./demo/mode";
 import { rolePaths } from "./roles";
 import { safeAppPath } from "./safe-path";
@@ -10,6 +10,7 @@ const PUBLIC = [
 	"/auth",
 	"/lock",
 	"/auth/support",
+	"/auth/handoff",
 	"/forgot-password",
 	"/reset-password",
 	"/sign-up",
@@ -17,10 +18,12 @@ const PUBLIC = [
 ];
 /**
  * Public screens a signed-in user may still open: the invite flow signs a different user in, and the
- * support link (/auth/support?token=) replaces whatever session the browser holds with the owner view.
+ * support link (/auth/support?token=) replaces whatever session the browser holds with the owner view, and a hand-over from
+ * the other app (/auth/handoff?code=, hospio-backend docs/sign-in.md) replaces it with the person arriving.
  */
 const PUBLIC_WHEN_SIGNED_IN = [
 	"/auth/support",
+	"/auth/handoff",
 	"/reset-password",
 	"/sign-up",
 	"/accept-invite",
@@ -141,7 +144,7 @@ async function gate(request: NextRequest) {
 
 	if (startsWithAny(pathname, PUBLIC)) {
 		// Already signed in: straight to the page the sign-in link asked for (a page of this app only), else the dashboard.
-		const from = safeAppPath(request.nextUrl.searchParams.get("from"));
+		const from = safeAppPath(request.nextUrl.searchParams.get("from") ?? request.nextUrl.searchParams.get("next"));
 		return session && !startsWithAny(pathname, PUBLIC_WHEN_SIGNED_IN)
 			? NextResponse.redirect(new URL(from ?? "/dashboard", request.url))
 			: next(request);
@@ -159,14 +162,14 @@ async function gate(request: NextRequest) {
 		return NextResponse.redirect(new URL("/dashboard", request.url));
 
 	const mine = session.roleSet.filter((r) => isAppRole(r));
-	if (mine.length === 0 && session.roleSet.length > 0) {
-		// Signed in on the wrong app: hand over with the session cookie's twin on the other host.
-		return NextResponse.redirect(
-			new URL(
-				`/auth?switch=${encodeURIComponent(session.email)}`,
-				OTHER_APP_URL,
-			),
-		);
+	if (mine.length === 0 && belongsElsewhere(session.roleSet)) {
+		// A session of the other app's account (a cookie from before single sign-in): never redirect to the other host from here.
+		// /api/session/handoff ends it and hands it over once with a one-time code; a second try lands on this app's sign-in
+		// (hospio-backend docs/sign-in.md). Until 20 Nov 2026 this redirected to the other app's /auth, and two such cookies
+		// bounced the browser between the apps until it gave up ("redirected you too many times").
+		const handoff = new URL("/api/session/handoff", request.url);
+		if (pathname.startsWith(PREFIX)) handoff.searchParams.set("next", pathname + request.nextUrl.search);
+		return NextResponse.redirect(handoff);
 	}
 
 	const role = request.cookies.get(COOKIES.role)?.value;
