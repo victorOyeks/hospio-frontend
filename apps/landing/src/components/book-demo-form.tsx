@@ -405,41 +405,34 @@ export function BookDemoForm({ referralCode }: { referralCode?: string }) {
 					errors.monthlySales ? `${id("monthlySales")}-error` : `${id("monthlySales")}-hint`
 				}
 			>
-				<legend className="mb-[10px] text-[13px] font-medium text-ink-2">
-					Average monthly sales (all outlets combined)
-				</legend>
-				<div className="grid grid-cols-1 gap-[10px] sm:grid-cols-2">
-					{MONTHLY_SALES.map((m, i) => {
-						const on = sales === m.value;
-						return (
-							<label
-								key={m.value}
-								className={cn(
-									"flex cursor-pointer items-center justify-center rounded-control border px-3 py-[11px] text-center text-sm font-semibold transition-colors has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-brand/40",
-									on
-										? "border-brand bg-brand text-white"
-										: errors.monthlySales
-											? "border-status-bad bg-card text-ink hover:bg-subtle"
-											: "border-line bg-card text-ink hover:bg-subtle",
-								)}
-							>
-								<input
-									type="radio"
-									name="monthlySales"
-									value={m.value}
-									checked={on}
-									data-field={i === 0 ? "monthlySales" : undefined}
-									onChange={() => {
-										setSales(m.value);
-										clear("monthlySales");
-									}}
-									className="sr-only"
-								/>
-								{m.label}
-							</label>
-						);
-					})}
+				<legend className="mb-[10px] text-[13px] font-medium text-ink-2">Average monthly sales</legend>
+				<div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+					{MONTHLY_SALES.filter((m) => m.value !== "PREFER_NOT").map((m, i) => (
+						<SalesOption
+							key={m.value}
+							value={m.value}
+							label={m.label}
+							on={sales === m.value}
+							invalid={Boolean(errors.monthlySales)}
+							first={i === 0}
+							onPick={() => {
+								setSales(m.value);
+								clear("monthlySales");
+							}}
+						/>
+					))}
 				</div>
+				<SalesOption
+					value="PREFER_NOT"
+					label="Prefer not to say"
+					quiet
+					on={sales === "PREFER_NOT"}
+					invalid={Boolean(errors.monthlySales)}
+					onPick={() => {
+						setSales("PREFER_NOT");
+						clear("monthlySales");
+					}}
+				/>
 				{errors.monthlySales ? (
 					<p id={`${id("monthlySales")}-error`} className="text-xs text-status-bad">
 						{errors.monthlySales}
@@ -584,5 +577,63 @@ export function BookDemoForm({ referralCode }: { referralCode?: string }) {
 				{pending ? "Sending…" : "Book my demo"}
 			</button>
 		</form>
+	);
+}
+
+/** One "Average monthly sales" choice: a radio dot and the band, a soft maroon tint when picked. `quiet` is the plain
+ * "Prefer not to say" line under the bands. */
+function SalesOption({
+	value,
+	label,
+	on,
+	invalid,
+	first,
+	quiet,
+	onPick,
+}: {
+	value: string;
+	label: string;
+	on: boolean;
+	invalid: boolean;
+	first?: boolean;
+	quiet?: boolean;
+	onPick: () => void;
+}) {
+	return (
+		<label
+			className={cn(
+				"flex cursor-pointer items-center gap-[10px] transition-colors has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-brand/40",
+				quiet
+					? "w-fit rounded-control px-1 py-1 text-[13px] text-ink-2 hover:text-ink"
+					: cn(
+							"rounded-control border px-[14px] py-[11px] text-[13.5px] font-medium",
+							on
+								? "border-brand bg-brand/[0.06] text-brand"
+								: invalid
+									? "border-status-bad bg-card text-ink hover:border-brand/40"
+									: "border-line bg-card text-ink hover:border-brand/40 hover:bg-subtle",
+						),
+			)}
+		>
+			<input
+				type="radio"
+				name="monthlySales"
+				value={value}
+				checked={on}
+				data-field={first ? "monthlySales" : undefined}
+				onChange={onPick}
+				className="sr-only"
+			/>
+			<span
+				aria-hidden
+				className={cn(
+					"flex size-4 shrink-0 items-center justify-center rounded-full border transition-colors",
+					on ? "border-brand" : "border-line-strong bg-card",
+				)}
+			>
+				{on && <span className="size-2 rounded-full bg-brand" />}
+			</span>
+			<span className="leading-tight">{label}</span>
+		</label>
 	);
 }
