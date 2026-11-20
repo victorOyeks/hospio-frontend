@@ -27,7 +27,7 @@ export const HEARD_FROM = [
 ] as const;
 
 /**
- * "Average monthly sales (all outlets combined)": required, information for the call only (nothing is scored on it). The words
+ * "Average monthly sales": required, information for the call only (nothing is scored on it). The words
  * are platform-service's (MonthlySales) and the admin portal's.
  */
 export const MONTHLY_SALES = [

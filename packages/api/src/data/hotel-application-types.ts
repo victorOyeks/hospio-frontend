@@ -41,7 +41,7 @@ export const HEARD_FROM_LABELS: Record<string, string> = {
 };
 
 /**
- * "Average monthly sales (all outlets combined)" from the Book a demo form, highest band first (the order the list sorts by).
+ * "Average monthly sales" from the Book a demo form, highest band first (the order the list sorts by).
  * Information for the call only. Requests sent before 21 Nov 2026 have none: "Not asked".
  */
 export const MONTHLY_SALES_BANDS: { value: string; label: string }[] = [

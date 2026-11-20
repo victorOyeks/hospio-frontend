@@ -145,7 +145,7 @@ email.
 
 ## 9 · Average monthly sales (added 21 Nov 2026)
 
-The form asks **"Average monthly sales (all outlets combined)"**, required, with five choices: Under ₦1 million · ₦1 million –
+The form asks **"Average monthly sales"** (bands as radio cards, two per row, "Prefer not to say" as a plain line underneath), required, with five choices: Under ₦1 million · ₦1 million –
 ₦5 million · ₦5 million – ₦20 million · Above ₦20 million · Prefer not to say. It is information for the call only: nothing is
 scored or declined on it. Requests sent before 21 Nov have no answer and show **Not asked**.
 
