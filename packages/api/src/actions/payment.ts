@@ -349,11 +349,14 @@ export async function paymentStatus(
 
 /**
  * Cash at the front office, bar or kitchen goes into that desk's till, and payment-service refuses it while the till is closed.
+ * A manager's or owner's cash goes into the till of the desk where it is taken (the sale's outlet, else the front office).
  * The payment step asks first so it can say "Open your till first" and open it in place. When the answer can't be read the
  * step lets the desk carry on (payment-service still checks).
  */
 export async function cashTill(
 	role?: string,
+	/** The outlet sale being paid: a manager's or owner's cash goes into that outlet's till (the front office's without one). */
+	orderId?: string,
 ): Promise<
 	ActionResult<{
 		role: string;
@@ -364,12 +367,14 @@ export async function cashTill(
 		openedByName?: string | null;
 		openedAt?: string | null;
 		stale?: boolean | null;
+		manager?: boolean | null;
+		takenAs?: string | null;
 	}>
 > {
 	if (!live("payment")) return { ok: true, data: { role: role ?? "FRONT_OFFICE", needed: false, open: true } };
 	const { data, error } = await api("@get/payment/payments/cash-till", {
 		...(await withSession()),
-		query: role ? { role } : {},
+		query: { ...(role ? { role } : {}), ...(orderId ? { orderId } : {}) },
 	});
 	if (error || !data)
 		return { ok: false, error: errorMessage(error, "Could not check the till") };

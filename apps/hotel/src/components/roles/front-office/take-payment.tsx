@@ -162,6 +162,8 @@ function defaultTerminal(
 
 /** The desk's Till page (the dashboard routes it to the signed-in desk's own till). */
 const TILL_PAGE = "/dashboard/till";
+/** A manager counts and closes a desk's till in Financials → Tills (owners have no tills page: the desk or a manager closes it). */
+const MANAGER_TILLS = "/dashboard/financials?tab=tills";
 
 function deskLabel(role: string) {
 	return role === "FRONT_OFFICE" ? "Front office" : role.charAt(0) + role.slice(1).toLowerCase();
@@ -232,12 +234,17 @@ export function usePaymentSteps(
 		tillRole?: string | null;
 		openedByName?: string | null;
 		stale?: boolean | null;
+		/** A manager or owner taking cash: it goes into the desk's till (`role`); `takenAs` is MANAGER or OWNER. */
+		manager?: boolean | null;
+		takenAs?: string | null;
 	} | null>(null);
 	const [tillFloat, setTillFloat] = useState<number | "">("");
 	const [openingTill, setOpeningTill] = useState(false);
 	const tillBlocked = method === "CASH" && !!till?.needed && !till.open;
 	// Where the cash goes, said plainly on the Cash choice and the done screen: "the bar till (opened by Segun Ajayi)".
 	const tillName = till?.needed ? `the ${deskLabel(till.tillRole ?? till.role).toLowerCase()} till` : null;
+	// Where the "count and close" link goes: the desk's Till page for staff, Financials → Tills for a manager, none for an owner.
+	const tillPage = !till?.manager ? TILL_PAGE : till.takenAs === "MANAGER" ? MANAGER_TILLS : null;
 
 	/** Restart the steps for a new target (or the "who" step when there is none). */
 	function begin(t?: PaymentTarget | null) {
@@ -266,7 +273,7 @@ export function usePaymentSteps(
 	useEffect(() => {
 		if (step !== "method" || method !== "CASH") return;
 		let stale = false;
-		cashTill(tgt?.role)
+		cashTill(tgt?.role, tgt?.orderId)
 			.then((r) => {
 				if (!stale) setTill(r.ok ? r.data : null);
 			})
@@ -274,7 +281,7 @@ export function usePaymentSteps(
 		return () => {
 			stale = true;
 		};
-	}, [step, method, tgt?.role]);
+	}, [step, method, tgt?.role, tgt?.orderId]);
 
 	async function openMyTill() {
 		if (!till) return;
@@ -285,7 +292,7 @@ export function usePaymentSteps(
 		}).catch(() => null);
 		setOpeningTill(false);
 		if (!r?.ok) {
-			const again = await cashTill(tgt?.role).catch(() => null);
+			const again = await cashTill(tgt?.role, tgt?.orderId).catch(() => null);
 			if (again?.ok && again.data.open) {
 				setTill(again.data);
 				return;
@@ -521,8 +528,8 @@ export function usePaymentSteps(
 				setSending(false);
 				toast.error(r.error);
 				// The till was closed meanwhile: back to the method step, which offers to open it.
-				if (method === "CASH" && r.error.startsWith("Open your till first")) {
-					const again = await cashTill(tgt?.role).catch(() => null);
+				if (method === "CASH" && /^Open (your|the [a-z ]+) till first/.test(r.error)) {
+					const again = await cashTill(tgt?.role, tgt?.orderId).catch(() => null);
 					if (again?.ok) setTill(again.data);
 					setStep("method");
 				}
@@ -611,7 +618,13 @@ export function usePaymentSteps(
 							type="button"
 							className={btn.primary}
 							disabled={amt <= 0 || (toPos && !terminal) || tillBlocked}
-							title={tillBlocked ? "Open your till first" : undefined}
+							title={
+								tillBlocked
+									? till?.manager
+										? `Open the ${deskLabel(till.role).toLowerCase()} till first`
+										: "Open your till first"
+									: undefined
+							}
 							onClick={() => setStep(toPos ? "card" : "cash")}
 						>
 							{toPos ? "Send to POS" : "Count cash"}
@@ -883,22 +896,39 @@ export function usePaymentSteps(
 								{till.message ??
 									`${tillName ?? "This till"} was left open from an earlier day and takes no cash until it is counted and closed.`}
 							</p>
-							<a
-								href={TILL_PAGE}
-								className="mt-2 inline-block text-[13px] font-semibold text-brand underline"
-							>
-								Go to the Till page
-							</a>
+							{tillPage && (
+								<a
+									href={tillPage}
+									className="mt-2 inline-block text-[13px] font-semibold text-brand underline"
+								>
+									{till.manager ? "Go to Financials → Tills" : "Go to the Till page"}
+								</a>
+							)}
 						</Note>
 					)}
 					{tillBlocked && till && !till.stale && (
 						<Note tone="warning">
-							<p className="font-semibold text-ink">Open your till first</p>
-							<p className="mt-1">
-								Cash taken at the {deskLabel(till.role).toLowerCase()} goes into the{" "}
-								{deskLabel(till.role).toLowerCase()} till, and it isn't open. Count the float
-								in the drawer and open it here, or take card or transfer instead.
+							<p className="font-semibold text-ink">
+								{till.manager
+									? `Open the ${deskLabel(till.role).toLowerCase()} till first`
+									: "Open your till first"}
 							</p>
+							{till.manager ? (
+								<p className="mt-1">
+									Your cash goes into the till of the desk where it is taken:{" "}
+									{till.role === "FRONT_OFFICE"
+										? "the front office for a folio, booking or walk-in"
+										: `the ${deskLabel(till.role).toLowerCase()} for this sale`}
+									, and that till isn't open. Count the float in its drawer and open it here, or
+									take card or transfer instead.
+								</p>
+							) : (
+								<p className="mt-1">
+									Cash taken at the {deskLabel(till.role).toLowerCase()} goes into the{" "}
+									{deskLabel(till.role).toLowerCase()} till, and it isn't open. Count the float
+									in the drawer and open it here, or take card or transfer instead.
+								</p>
+							)}
 							<div className="mt-3 flex flex-wrap items-end gap-2">
 								<div className="min-w-[160px] flex-1">
 									<MoneyField
@@ -917,12 +947,14 @@ export function usePaymentSteps(
 									{openingTill ? "Opening…" : `Open the ${deskLabel(till.role).toLowerCase()} till`}
 								</button>
 							</div>
-							<a
-								href={TILL_PAGE}
-								className="mt-2 inline-block text-[13px] font-semibold text-brand underline"
-							>
-								Go to the Till page
-							</a>
+							{!till.manager && (
+								<a
+									href={TILL_PAGE}
+									className="mt-2 inline-block text-[13px] font-semibold text-brand underline"
+								>
+									Go to the Till page
+								</a>
+							)}
 						</Note>
 					)}
 					{toPos && (
