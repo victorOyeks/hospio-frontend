@@ -259,8 +259,8 @@ export function ManagerStep({
 							</div>
 						</div>
 						<div className="rounded-xl bg-subtle/70 px-4 py-3">
-							<div className="flex items-center">
-								<p className="flex-1 text-[13px] font-semibold text-ink">
+							<div className="flex flex-wrap items-baseline gap-x-3 gap-y-0.5">
+								<p className="flex-1 whitespace-nowrap text-[13px] font-semibold text-ink">
 									What needs your OK
 								</p>
 								<span className="text-xs text-ink-3">

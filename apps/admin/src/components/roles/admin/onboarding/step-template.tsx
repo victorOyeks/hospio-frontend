@@ -255,7 +255,7 @@ export function TemplateStep({ ctx }: { ctx: WizardCtx }) {
 				ctx.editable && appliedTo.length > 0 ? (
 					<button
 						type="button"
-						className="text-[13px] font-semibold text-brand hover:underline"
+						className="inline-flex min-h-[44px] items-center whitespace-nowrap px-1 text-[13px] font-semibold text-brand hover:underline"
 						onClick={skip}
 						disabled={pending}
 					>

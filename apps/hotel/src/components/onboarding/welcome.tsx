@@ -119,7 +119,7 @@ export function WelcomeChecklist({
 				</p>
 				<Link
 					href={stepHref(next)}
-					className={cn(btn.primary, "flex items-center gap-2")}
+					className={cn(btn.primary, "flex min-h-[44px] items-center gap-2")}
 				>
 					<ArrowRightIcon className="size-4" />{" "}
 					{next === "done"

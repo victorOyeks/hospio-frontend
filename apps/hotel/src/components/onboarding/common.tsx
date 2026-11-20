@@ -32,7 +32,7 @@ export function StepPage({
 				aside && "xl:grid-cols-[1fr_300px]",
 			)}
 		>
-			<div className="flex flex-col gap-5">{children}</div>
+			<div className="flex min-w-0 flex-col gap-5">{children}</div>
 			{aside && <div className="flex flex-col gap-4">{aside}</div>}
 		</div>
 	);
@@ -55,7 +55,7 @@ export function StepCard({
 	return (
 		<section
 			className={cn(
-				"flex flex-col gap-5 rounded-card border border-line bg-card px-7 py-6",
+				"flex min-w-0 flex-col gap-5 rounded-card border border-line bg-card px-5 py-5 sm:px-7 sm:py-6",
 				className,
 			)}
 		>
@@ -65,7 +65,7 @@ export function StepCard({
 						Step {n} of {OWNER_ONBOARDING_STEPS.length}
 					</p>
 				)}
-				<h1 className="mt-1 text-2xl font-bold tracking-[-0.01em] text-ink">
+				<h1 className="mt-1 text-xl font-bold sm:text-2xl tracking-[-0.01em] text-ink">
 					{title}
 				</h1>
 				{intro && <p className="mt-1 text-[13px] text-ink-2">{intro}</p>}
@@ -75,7 +75,11 @@ export function StepCard({
 	);
 }
 
-/** Back on the left, an optional skip, and the primary action on the right. */
+/**
+ * Back on the left, an optional skip, and the primary action on the right. On a phone the note comes first, the primary
+ * action takes the full width under it, and Back / Skip share the last row (they wrapped into a ragged column before).
+ * Every action is at least 44 px tall.
+ */
 export function StepFooter({
 	back,
 	skip,
@@ -98,16 +102,26 @@ export function StepFooter({
 			{back && (
 				<Link
 					href={back}
-					className={cn(btn.secondary, "flex items-center gap-2")}
+					className={cn(
+						btn.secondary,
+						"order-3 flex min-h-[44px] items-center gap-2 sm:order-none",
+					)}
 				>
 					<ArrowLeftIcon className="size-4" /> Back
 				</Link>
 			)}
-			<span className="flex-1 text-xs text-ink-3">{info}</span>
+			<span
+				className={cn(
+					"order-1 basis-full text-xs text-ink-3 sm:order-none sm:min-w-[140px] sm:flex-1 sm:basis-0",
+					!info && "hidden sm:block",
+				)}
+			>
+				{info}
+			</span>
 			{skip && (
 				<Link
 					href={skip.href}
-					className="text-[13px] font-semibold text-ink-2 hover:text-ink"
+					className="order-4 ml-auto inline-flex min-h-[44px] items-center whitespace-nowrap rounded-control px-2 text-[13px] font-semibold text-ink-2 hover:text-ink sm:order-none sm:ml-0"
 				>
 					{skip.label ?? "Skip for now"}
 				</Link>
@@ -115,7 +129,10 @@ export function StepFooter({
 			{onContinue && (
 				<Button
 					type="submit"
-					className={cn(btn.primary, "flex items-center gap-2")}
+					className={cn(
+						btn.primary,
+						"order-2 flex min-h-[44px] w-full items-center justify-center gap-2 whitespace-nowrap sm:order-none sm:w-auto",
+					)}
 					disabled={pending || disabled}
 					// The button submits its form (Enter in a field still works), but the step's own handler runs once: without
 					// preventDefault the click ran onContinue and the form's onSubmit ran it again (two outlets, "already has a hotel called").

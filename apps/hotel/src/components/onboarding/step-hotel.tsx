@@ -258,7 +258,7 @@ export function HotelStep({
 							hint="Optional"
 						/>
 						{rooms ? (
-							<FieldRow>
+							<FieldRow className="grid-cols-2">
 								<TextField
 									label="Check-in from"
 									type="time"

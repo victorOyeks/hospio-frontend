@@ -223,7 +223,7 @@ export function DoneStep({
 									<p className="text-xs text-ink-3">{it.detail}</p>
 								</div>
 								{it.href && (
-									<Link href={it.href} className={cn(btn.secondary, btn.small)}>
+									<Link href={it.href} className={cn(btn.secondary, btn.small, "inline-flex min-h-[44px] items-center")}>
 										{it.action ?? (it.done ? "Review" : "Add")}
 									</Link>
 								)}

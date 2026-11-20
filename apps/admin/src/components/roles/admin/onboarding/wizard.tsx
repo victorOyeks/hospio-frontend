@@ -343,19 +343,38 @@ function StepRail({
 	done: boolean;
 	onPick: (step: AdminOnboardingStep) => void;
 }) {
+	const listRef = useRef<HTMLOListElement>(null);
+	// Re-centred when the open step changes (`current`).
+	useEffect(() => {
+		const centre = () => {
+			const list = listRef.current;
+			const el = list?.querySelector<HTMLElement>('[aria-current="step"]');
+			if (!list || !el || list.scrollWidth <= list.clientWidth) return;
+			list.scrollLeft = el.offsetLeft - (list.clientWidth - el.offsetWidth) / 2;
+		};
+		centre();
+		// A tablet turned between portrait and landscape keeps the open step in view.
+		window.addEventListener("resize", centre);
+		return () => window.removeEventListener("resize", centre);
+	}, [current]);
 	return (
-		<nav className="h-fit rounded-card border border-line bg-card p-4 lg:sticky lg:top-6">
-			<ol className="flex flex-col gap-1">
+		// Below lg the rail is one scrolling row of steps (the open one scrolled into view): as a list it pushed the form
+		// about 570 px down on a tablet.
+		<nav className="h-fit min-w-0 rounded-card border border-line bg-card p-2 lg:sticky lg:top-6 lg:p-4">
+			<ol
+				ref={listRef}
+				className="relative flex gap-1 overflow-x-auto [scrollbar-width:thin] lg:flex-col lg:overflow-visible"
+			>
 				{ADMIN_ONBOARDING_STEPS.map((s, i) => {
 					const isCurrent = s === current;
 					const isDone = done || completed.includes(s);
 					return (
-						<li key={s}>
+						<li key={s} className="shrink-0">
 							<button
 								type="button"
 								onClick={() => onPick(s)}
 								className={cn(
-									"flex w-full items-center gap-3 rounded-[10px] px-3 py-[10px] text-left text-[13px] transition-colors",
+									"flex min-h-[44px] w-max items-center gap-2 whitespace-nowrap rounded-[10px] px-3 py-[10px] text-left text-[13px] transition-colors lg:w-full lg:gap-3 lg:whitespace-normal",
 									isCurrent
 										? "bg-brand-soft font-semibold text-brand"
 										: isDone
@@ -380,7 +399,7 @@ function StepRail({
 										i + 1
 									)}
 								</span>
-								<span className="min-w-0 flex-1">{stepLabel(s, venue)}</span>
+								<span className="lg:min-w-0 lg:flex-1">{stepLabel(s, venue)}</span>
 								{s === "rooms" && venue.noRooms && (
 									<span className="text-[11px] font-medium text-ink-3">
 										Not needed

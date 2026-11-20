@@ -324,30 +324,45 @@ export function StepFrame({
 				</p>
 			</div>
 			<div className="flex flex-col gap-4">{children}</div>
-			<div className="mt-2 flex flex-wrap items-center gap-3 border-t border-line pt-4">
-				{onBack && (
-					<button
-						type="button"
-						className={cn(btn.secondary, "flex items-center gap-2")}
-						onClick={onBack}
-						disabled={pending}
-					>
-						<ArrowLeftIcon className="size-4" /> Back
-					</button>
+			{/* The note has its own line above the buttons: inline it was squeezed into a narrow column between Back and two
+			    buttons on a tablet (owner's tablet test, 20 Nov 2026). On a phone the primary action is full width on top. */}
+			<div className="mt-2 flex flex-col gap-3 border-t border-line pt-4">
+				{footerNote && (
+					<div className="min-w-0 text-xs text-ink-3">{footerNote}</div>
 				)}
-				<div className="min-w-0 flex-1 text-xs text-ink-3">{footerNote}</div>
-				{extra}
-				{onContinue && (
-					<button
-						type="button"
-						className={cn(btn.primary, "flex items-center gap-2")}
-						onClick={onContinue}
-						disabled={pending || continueDisabled}
-					>
-						{pending ? <Loader2Icon className="size-4 animate-spin" /> : null}
-						{continueLabel}
-					</button>
-				)}
+				<div className="flex flex-col-reverse gap-3 sm:flex-row sm:items-start sm:justify-between">
+					{onBack ? (
+						<button
+							type="button"
+							className={cn(
+								btn.secondary,
+								"flex min-h-[44px] w-fit shrink-0 items-center gap-2",
+							)}
+							onClick={onBack}
+							disabled={pending}
+						>
+							<ArrowLeftIcon className="size-4" /> Back
+						</button>
+					) : (
+						<span className="hidden sm:block" />
+					)}
+					{/* Extra buttons and the primary one stay together on the right; when they wrap, the primary one ends the
+					    last line on the right. On a phone they stack full width with the primary one on top. */}
+					<div className="flex flex-col-reverse gap-3 sm:min-w-0 sm:flex-1 sm:flex-row sm:flex-wrap sm:items-center sm:justify-end [&>button]:min-h-[44px] [&>button]:justify-center">
+						{extra}
+						{onContinue && (
+							<button
+								type="button"
+								className={cn(btn.primary, "flex items-center gap-2")}
+								onClick={onContinue}
+								disabled={pending || continueDisabled}
+							>
+								{pending ? <Loader2Icon className="size-4 animate-spin" /> : null}
+								{continueLabel}
+							</button>
+						)}
+					</div>
+				</div>
 			</div>
 		</div>
 	);
