@@ -157,13 +157,13 @@ export function OutletsStep({
 					)}
 					{rows.length > 0 && (
 						<div className="flex flex-col gap-2">
-							<div className={cn("grid grid-cols-[1fr_160px_36px] gap-2", gridHead)}>
+							<div className={cn("grid grid-cols-[minmax(0,1fr)_120px_44px] gap-2 sm:grid-cols-[minmax(0,1fr)_160px_44px]", gridHead)}>
 								<span>Outlet name</span>
 								<span>Kind</span>
 								<span />
 							</div>
 							{rows.map((r) => (
-								<div key={r.key} className="grid grid-cols-[1fr_160px_36px] gap-2">
+								<div key={r.key} className="grid grid-cols-[minmax(0,1fr)_120px_44px] gap-2 sm:grid-cols-[minmax(0,1fr)_160px_44px]">
 									<input
 										aria-label="Outlet name"
 										className={inputCls}
@@ -200,7 +200,7 @@ export function OutletsStep({
 									<button
 										type="button"
 										aria-label="Remove outlet"
-										className="flex items-center justify-center text-ink-3 hover:text-ink"
+										className="flex min-h-[44px] items-center justify-center text-ink-3 hover:text-ink"
 										onClick={() => setRows((rs) => rs.filter((x) => x.key !== r.key))}
 									>
 										<Trash2Icon className="size-4" />

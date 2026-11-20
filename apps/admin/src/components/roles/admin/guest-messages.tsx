@@ -139,6 +139,34 @@ export function GuestMessagePlans({
 	const nameOf = (p: CommPlanView) => hotels.find((h) => h.id === p.hotelId)?.name ?? p.hotelName ?? "Hotel";
 	const link = "text-[13px] font-semibold text-brand hover:underline";
 
+	// Prices · Put on hold… / Lift hold…: the same links in the table and on the narrow cards.
+	const actions = (p: CommPlanView) => (
+		<>
+			<button type="button" className={link} onClick={() => setEditing(p)}>
+				Prices
+			</button>
+			{(p.suspended || p.enabled) && <span className="text-ink-3"> · </span>}
+			{p.suspended ? (
+				<button type="button" className={link} onClick={() => setLifting(p)}>
+					Lift hold…
+				</button>
+			) : (
+				p.enabled && (
+					<button
+						type="button"
+						className={link}
+						onClick={() => {
+							setReason(p.outstanding > 0 ? `Unpaid guest-message invoices (${naira(p.outstanding)})` : "");
+							setHolding(p);
+						}}
+					>
+						Put on hold…
+					</button>
+				)
+			)}
+		</>
+	);
+
 	return (
 		<SectionCard title={title} subtitle={subtitle} flush>
 			<p className="mx-5 mb-4 text-[12px] leading-relaxed text-ink-3">
@@ -153,7 +181,53 @@ export function GuestMessagePlans({
 			) : plans.length === 0 ? (
 				<p className="px-5 pb-5 text-[13px] text-ink-3">Add the business's hotels first.</p>
 			) : (
-				<div className="overflow-x-auto">
+				// A table where there is room for it (820 px); narrower (the onboarding step on a tablet, the hotel drawer) each
+				// location is a card, so Prices and Put on hold… are not scrolled off the right edge.
+				<div className="@container">
+				<ul className="flex flex-col @[820px]:hidden">
+					{plans.map((p) => {
+						const st = sendingState(p);
+						return (
+							<li key={p.hotelId} className="flex flex-col gap-3 border-t border-line px-5 py-4">
+								<div className="flex flex-wrap items-start justify-between gap-2">
+									<span className="text-[13px] font-semibold text-ink">{nameOf(p)}</span>
+									<StatusPill tone={st.tone}>{st.label}</StatusPill>
+								</div>
+								<span className="-mt-2 block text-xs text-ink-3">{st.detail}</span>
+								{!p.enabled && p.suspended && (
+									<span className="-mt-2 block text-xs text-danger">Also on hold: {holdDetail(p)}</span>
+								)}
+								<div className="flex flex-wrap gap-x-6 gap-y-2 text-[13px] text-ink-2">
+									<span className="flex min-h-[44px] items-center gap-2">
+										<Switch checked={waOn(p)} onCheckedChange={(on) => void toggle(p, "WHATSAPP", on)} aria-label={`${nameOf(p)} WhatsApp guest messages`} />
+										WhatsApp {waOn(p) ? "on" : "off"}
+									</span>
+									<span className="flex min-h-[44px] items-center gap-2">
+										<Switch checked={emOn(p)} onCheckedChange={(on) => void toggle(p, "EMAIL", on)} aria-label={`${nameOf(p)} email guest messages`} />
+										Email {emOn(p) ? "on" : "off"}
+									</span>
+								</div>
+								<dl className="grid grid-cols-3 gap-2 text-xs">
+									<div>
+										<dt className="text-ink-3">Email · WhatsApp</dt>
+										<dd className="text-[13px] text-ink">{naira(p.prices.email)} · {naira(p.prices.whatsapp)}</dd>
+										<dd className="text-ink-3">{p.customPrices ? "Own prices" : "Default prices"}</dd>
+									</div>
+									<div>
+										<dt className="text-ink-3">This month</dt>
+										<dd className="text-[13px] text-ink">{naira(p.thisMonth.total)}</dd>
+									</div>
+									<div>
+										<dt className="text-ink-3">Unpaid</dt>
+										<dd className={cn("text-[13px] text-ink", p.outstanding > 0 && "font-semibold text-danger")}>{naira(p.outstanding)}</dd>
+									</div>
+								</dl>
+								<div className="flex flex-wrap items-center gap-x-1 [&>button]:min-h-[44px]">{actions(p)}</div>
+							</li>
+						);
+					})}
+				</ul>
+				<div className="hidden overflow-x-auto @[820px]:block">
 					<table className="w-full min-w-[820px]">
 						<thead className={tableHead}>
 							<tr>
@@ -198,34 +272,14 @@ export function GuestMessagePlans({
 										<td className={cn(cell, "text-right")}>{naira(p.thisMonth.total)}</td>
 										<td className={cn(cell, "text-right", p.outstanding > 0 && "font-semibold text-danger")}>{naira(p.outstanding)}</td>
 										<td className={cn(cell, "whitespace-nowrap text-right")}>
-											<button type="button" className={link} onClick={() => setEditing(p)}>
-												Prices
-											</button>
-											{(p.suspended || p.enabled) && <span className="text-ink-3"> · </span>}
-											{p.suspended ? (
-												<button type="button" className={link} onClick={() => setLifting(p)}>
-													Lift hold…
-												</button>
-											) : (
-												p.enabled && (
-													<button
-														type="button"
-														className={link}
-														onClick={() => {
-															setReason(p.outstanding > 0 ? `Unpaid guest-message invoices (${naira(p.outstanding)})` : "");
-															setHolding(p);
-														}}
-													>
-														Put on hold…
-													</button>
-												)
-											)}
+											{actions(p)}
 										</td>
 									</tr>
 								);
 							})}
 						</tbody>
 					</table>
+				</div>
 				</div>
 			)}
 			<PricesModal

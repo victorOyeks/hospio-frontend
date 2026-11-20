@@ -399,7 +399,7 @@ export function RoomsStep({
 				<div className="overflow-hidden rounded-xl border border-line">
 					<div
 						className={cn(
-							"grid grid-cols-[1.6fr_0.7fr_0.7fr_1fr_0.9fr_36px] gap-2 border-b border-line bg-subtle/70 px-3 py-2",
+							"hidden grid-cols-[1.6fr_0.7fr_0.7fr_1fr_0.9fr_44px] gap-2 border-b border-line bg-subtle/70 px-3 py-2 sm:grid",
 							gridHead,
 						)}
 					>
@@ -410,84 +410,111 @@ export function RoomsStep({
 						<span>First room no.</span>
 						<span />
 					</div>
-					<div className="flex flex-col gap-2 p-3">
+					<div className="flex flex-col gap-3 p-3 sm:gap-2">
 						{rows.map((r, idx) => {
 							const locked = !!r.roomTypeId;
 							return (
 								<div
 									key={r.key}
-									className="grid grid-cols-[1.6fr_0.7fr_0.7fr_1fr_0.9fr_36px] items-center gap-2"
+									// On a phone each type is a small card: the name and remove on top, then two pairs of fields with
+									// their own labels (the six-column row squeezed every box to a sliver below 640 px).
+									className="grid grid-cols-[1fr_1fr_44px] items-end gap-2 border-b border-line pb-3 last-of-type:border-b-0 sm:grid-cols-[1.6fr_0.7fr_0.7fr_1fr_0.9fr_44px] sm:items-center sm:border-b-0 sm:pb-0"
 								>
-									<input
-										aria-label="Room type"
-										value={r.name}
-										onChange={(e) => update(r.key, { name: e.target.value })}
-										disabled={locked}
-										placeholder="e.g. Regular"
-										className={cn(inputCls, "py-2")}
-									/>
-									<input
-										aria-label="Guests"
-										value={r.guests}
-										onChange={(e) =>
-											update(r.key, {
-												guests: e.target.value.replace(/\D/g, ""),
-											})
-										}
-										disabled={locked}
-										inputMode="numeric"
-										placeholder="e.g. 2"
-										className={cn(inputCls, "py-2")}
-									/>
-									<input
-										aria-label="How many"
-										value={r.count}
-										onChange={(e) =>
-											update(r.key, {
-												count: e.target.value.replace(/\D/g, ""),
-											})
-										}
-										disabled={locked}
-										inputMode="numeric"
-										placeholder="e.g. 20"
-										className={cn(inputCls, "py-2")}
-									/>
-									<div className="relative">
-										<span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-sm text-ink-3">
-											₦
+									<div className="flex min-w-0 flex-col gap-1 col-span-2 sm:col-span-1">
+										<span aria-hidden className={cn("sm:hidden", gridHead)}>
+											Room type
 										</span>
 										<input
-											aria-label="Price per night"
-											value={
-												locked
-													? Number(r.price).toLocaleString("en-NG")
-													: r.price
-											}
+											aria-label="Room type"
+											value={r.name}
+											onChange={(e) => update(r.key, { name: e.target.value })}
+											disabled={locked}
+											placeholder="e.g. Regular"
+											className={cn(inputCls, "py-2")}
+										/>
+									</div>
+									<div className="flex min-w-0 flex-col gap-1">
+										<span aria-hidden className={cn("sm:hidden", gridHead)}>
+											Guests
+										</span>
+										<input
+											aria-label="Guests"
+											value={r.guests}
 											onChange={(e) =>
 												update(r.key, {
-													price: e.target.value.replace(/[^\d.]/g, ""),
+													guests: e.target.value.replace(/\D/g, ""),
 												})
 											}
 											disabled={locked}
-											inputMode="decimal"
-											placeholder="e.g. 45000"
-											className={cn(inputCls, "py-2 pl-7")}
+											inputMode="numeric"
+											placeholder="e.g. 2"
+											className={cn(inputCls, "py-2")}
 										/>
 									</div>
-									<input
-										aria-label="First room number"
-										value={r.start}
-										onChange={(e) => update(r.key, { start: e.target.value })}
-										disabled={locked || !numberForMe}
-										placeholder={`e.g. ${(idx + 1) * 100 + 1}`}
-										className={cn(inputCls, "py-2")}
-									/>
+									<div className="flex min-w-0 flex-col gap-1">
+										<span aria-hidden className={cn("sm:hidden", gridHead)}>
+											How many
+										</span>
+										<input
+											aria-label="How many"
+											value={r.count}
+											onChange={(e) =>
+												update(r.key, {
+													count: e.target.value.replace(/\D/g, ""),
+												})
+											}
+											disabled={locked}
+											inputMode="numeric"
+											placeholder="e.g. 20"
+											className={cn(inputCls, "py-2")}
+										/>
+									</div>
+									<div className="flex min-w-0 flex-col gap-1 col-start-1 sm:col-start-auto">
+										<span aria-hidden className={cn("sm:hidden", gridHead)}>
+											Price / night
+										</span>
+										<div className="relative">
+											<span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-sm text-ink-3">
+												₦
+											</span>
+											<input
+												aria-label="Price per night"
+												value={
+													locked
+														? Number(r.price).toLocaleString("en-NG")
+														: r.price
+												}
+												onChange={(e) =>
+													update(r.key, {
+														price: e.target.value.replace(/[^\d.]/g, ""),
+													})
+												}
+												disabled={locked}
+												inputMode="decimal"
+												placeholder="e.g. 45000"
+												className={cn(inputCls, "py-2 pl-7")}
+											/>
+										</div>
+									</div>
+									<div className="flex min-w-0 flex-col gap-1">
+										<span aria-hidden className={cn("sm:hidden", gridHead)}>
+											First room no.
+										</span>
+										<input
+											aria-label="First room number"
+											value={r.start}
+											onChange={(e) => update(r.key, { start: e.target.value })}
+											disabled={locked || !numberForMe}
+											placeholder={`e.g. ${(idx + 1) * 100 + 1}`}
+											className={cn(inputCls, "py-2")}
+										/>
+									</div>
 									<button
 										type="button"
 										aria-label="Remove room type"
 										disabled={locked || rows.length === 1}
 										onClick={() => remove(r.key)}
-										className="flex size-9 items-center justify-center rounded-lg text-ink-3 hover:bg-danger-soft hover:text-danger disabled:opacity-30"
+										className="col-start-3 row-start-1 flex size-[44px] items-center justify-center self-end rounded-lg text-ink-3 hover:bg-danger-soft hover:text-danger disabled:opacity-30 sm:col-start-auto sm:row-start-auto sm:self-center"
 									>
 										<Trash2Icon className="size-4" />
 									</button>
