@@ -228,10 +228,16 @@ export function usePaymentSteps(
 		needed: boolean;
 		open: boolean;
 		message?: string | null;
+		/** The drawer the cash goes into (a waiter's: the cashier's), who opened it, and whether it was left open from an earlier day. */
+		tillRole?: string | null;
+		openedByName?: string | null;
+		stale?: boolean | null;
 	} | null>(null);
 	const [tillFloat, setTillFloat] = useState<number | "">("");
 	const [openingTill, setOpeningTill] = useState(false);
 	const tillBlocked = method === "CASH" && !!till?.needed && !till.open;
+	// Where the cash goes, said plainly on the Cash choice and the done screen: "the bar till (opened by Segun Ajayi)".
+	const tillName = till?.needed ? `the ${deskLabel(till.tillRole ?? till.role).toLowerCase()} till` : null;
 
 	/** Restart the steps for a new target (or the "who" step when there is none). */
 	function begin(t?: PaymentTarget | null) {
@@ -861,11 +867,31 @@ export function usePaymentSteps(
 								value: "CASH",
 								label: "Cash",
 								// Only the front office, bar and kitchen desks have a till; laundry hands cash in.
-								hint: tgt?.role === "LAUNDRY" ? "Count it and hand it in" : "Goes into your till",
+								hint:
+									tgt?.role === "LAUNDRY"
+										? "Count it and hand it in"
+										: tillName && till?.open
+											? `Goes into ${tillName}${till.openedByName ? ` (opened by ${till.openedByName})` : ""}`
+											: "Goes into your desk's till",
 							},
 						]}
 					/>
-					{tillBlocked && till && (
+					{tillBlocked && till?.stale && (
+						<Note tone="danger">
+							<p className="font-semibold text-ink">Count and close the old till first</p>
+							<p className="mt-1">
+								{till.message ??
+									`${tillName ?? "This till"} was left open from an earlier day and takes no cash until it is counted and closed.`}
+							</p>
+							<a
+								href={TILL_PAGE}
+								className="mt-2 inline-block text-[13px] font-semibold text-brand underline"
+							>
+								Go to the Till page
+							</a>
+						</Note>
+					)}
+					{tillBlocked && till && !till.stale && (
 						<Note tone="warning">
 							<p className="font-semibold text-ink">Open your till first</p>
 							<p className="mt-1">
@@ -1129,7 +1155,13 @@ export function usePaymentSteps(
 						{recorded && recorded.status !== "APPROVED"
 							? `It shows in My payments as processing until it is confirmed; ${guestName}'s folio updates then.`
 							: `${guestName}'s folio is updated and the payment is in My payments.`}{" "}
-						{method === "CASH" ? "The cash is counted in your till." : ""}
+						{method === "CASH"
+							? tillName
+								? `The cash is in ${tillName}.`
+								: tgt?.role === "LAUNDRY"
+									? "Hand the cash in."
+									: ""
+							: ""}
 					</p>
 					{doneExtra}
 				</div>

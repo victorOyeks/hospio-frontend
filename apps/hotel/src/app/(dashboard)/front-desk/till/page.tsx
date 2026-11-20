@@ -15,7 +15,7 @@ export default async function FrontDeskTillPage() {
 	if (!user) redirect("/auth");
 	const isDemo = !live("finance");
 	const [till, payments, staff, settings] = await Promise.all([
-		data.finance.myTill(),
+		data.finance.myTill("FRONT_OFFICE"),
 		// Today's cash at this desk is all the till reads (bounded by the day).
 		data.payments.list({ today: true, method: "CASH" }),
 		data.staff.list(),
@@ -23,7 +23,7 @@ export default async function FrontDeskTillPage() {
 	]);
 	const [entries, past] = await Promise.all([
 		till && !isDemo ? data.finance.tillEntries(till.id) : Promise.resolve([]),
-		data.finance.myClosedTills(),
+		data.finance.myClosedTills("FRONT_OFFICE"),
 	]);
 	return (
 		<TillScreen

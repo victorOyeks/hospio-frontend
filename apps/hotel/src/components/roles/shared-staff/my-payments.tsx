@@ -126,7 +126,12 @@ export function MyPaymentsScreen({
 					label="Cash"
 					value={nairaShort(byMethod("CASH"))}
 					icon={CreditCardIcon}
-					hint="In your till"
+					// Each desk's cash goes into that desk's till (shared by everyone at the desk); laundry hands its cash in.
+					hint={
+						roleTitle === "Laundry"
+							? "Handed in"
+							: `Into the ${roleTitle.toLowerCase()} till`
+					}
 				/>
 			</div>
 			{toVerify > 0 && (

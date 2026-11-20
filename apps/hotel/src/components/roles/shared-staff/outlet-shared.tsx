@@ -22,10 +22,11 @@ import { BigButton } from "./tablet";
  */
 export function useOrderRows(initial: OrderRow[]) {
 	const [rows, setRows] = useState(initial);
-	useEffect(() => setRows(initial), [initial]);
 	// The server's rows win; an order this screen already holds that the refreshed board no longer has (it was
 	// just paid, charged to a room or cancelled, so it left the open board) is kept, so the Sale done panel
 	// and Recent sales still have it. A ticket from another outlet that left the board was served there: it goes.
+	// (A plain setRows(initial) here as well ran first and threw the kept order away: the refresh after a cash payment
+	// unmounted the Sale done panel within a second, 20 Nov 2026.)
 	useEffect(
 		() =>
 			setRows((prev) => [

@@ -114,7 +114,14 @@ export function TillsScreen({ tills: initial }: { tills: TillRow[] }) {
 									<p className="font-semibold text-ink">{humanize(t.role)}</p>
 									<p className="text-xs text-ink-3">{t.openedBy}</p>
 								</td>
-								<td className="py-3 text-ink-2">{fmtWhen(t.openedAt)}</td>
+								<td className="py-3 text-ink-2">
+									{fmtWhen(t.openedAt)}
+									{t.stale && (
+										<p className="mt-1">
+											<StatusPill tone="danger">Left open from an earlier day</StatusPill>
+										</p>
+									)}
+								</td>
 								<td className="py-3 text-right">{naira(t.openingFloat)}</td>
 								<td className="py-3 text-right">{naira(t.cashIn)}</td>
 								<td className="py-3 text-right font-semibold">

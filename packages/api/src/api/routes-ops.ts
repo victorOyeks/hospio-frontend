@@ -105,6 +105,8 @@ export const TillItem = z.object({
 	expectedCash: z.number(),
 	/** Cash tips in the drawer, held for staff (inside expectedCash; phase 4). Missing or 0 where tips are not recorded. */
 	cashTips: num,
+	/** Open, but left open from an earlier day (finance-service Till.staleAt): no cash goes in until it is counted and closed. */
+	stale: z.boolean().nullable().optional(),
 	countedCash: num,
 	variance: num,
 	status: z.string(),
@@ -437,8 +439,14 @@ export const opsRoutes = {
 
 	// finance · tills and deposits
 	"@get/finance/tills": { output: envelope(z.array(TillItem)) },
-	"@get/finance/tills/mine": { output: envelope(TillItem.nullable()) },
-	"@get/finance/tills/mine/closed": { output: envelope(z.array(TillItem)) },
+	"@get/finance/tills/mine": {
+		query: z.object({ role: z.string() }).partial().optional(),
+		output: envelope(TillItem.nullable()),
+	},
+	"@get/finance/tills/mine/closed": {
+		query: z.object({ role: z.string() }).partial().optional(),
+		output: envelope(z.array(TillItem)),
+	},
 	"@post/finance/tills": {
 		input: z.object({
 			role: z.string(),

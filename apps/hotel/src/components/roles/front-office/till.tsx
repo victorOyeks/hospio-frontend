@@ -18,7 +18,7 @@ import {
 	TextField,
 	TextareaField,
 } from "@hospio/ui/shared/field";
-import { fmtWhen, naira } from "@hospio/ui/shared/format";
+import { fmtWhen, naira, nairaExact } from "@hospio/ui/shared/format";
 import { KpiCard } from "@hospio/ui/shared/kpi-card";
 import { Modal } from "@hospio/ui/shared/modal";
 import { PageHeader } from "@hospio/ui/shared/page-header";
@@ -94,7 +94,11 @@ export function TillScreen({
 	const tipsHeld = open?.cashTips ?? 0;
 	const tipsLine = `Cash tips held ${naira(tipsHeld)} (in the drawer, not takings)`;
 	const variance =
-		open && typeof counted === "number" ? counted - open.expected : 0;
+		open && typeof counted === "number" ? tillVariance(counted, open.expected) : 0;
+	// Which drawer this page is: each desk has its own till, shared by everyone working that desk (hospio-backend
+	// docs/operating-day.md "One till per desk"). The page names it and who opened it, so nobody counts someone else's.
+	const desk = deskWord(role);
+	const mine = !!open && open.openedBy === me;
 	// The colleague and the note of a half-done handover come back after the lock screen for the same person; the cash is
 	// counted again (amounts are never kept).
 	const handoverDraft = useDraft(
@@ -123,8 +127,8 @@ export function TillScreen({
 				title="Till"
 				subtitle={
 					open
-						? `Open since ${fmtWhen(open.openedAt)} by ${open.openedBy}`
-						: "Your till is closed · open it before taking cash"
+						? `${capital(desk)} till · open since ${fmtWhen(open.openedAt)} · opened by ${mine ? "you" : open.openedBy}`
+						: `The ${desk} till is closed · open it before taking cash`
 				}
 			>
 				{open ? (
@@ -146,7 +150,12 @@ export function TillScreen({
 						<button
 							type="button"
 							className={btn.primary}
-							onClick={() => setModal("close")}
+							disabled={pending}
+							onClick={() => {
+								setCounted("");
+								setNote("");
+								setModal("close");
+							}}
 						>
 							<LockIcon className="mr-1 inline size-4" /> Count & close
 						</button>
@@ -195,6 +204,23 @@ export function TillScreen({
 					}
 				/>
 			</div>
+			{open?.stale && (
+				<Note tone="danger">
+					<p className="font-semibold text-ink">
+						Left open since {fmtWhen(open.openedAt)}
+					</p>
+					<p className="mt-1">
+						This {desk} till was opened on an earlier day and never closed, so it takes no cash. Count &amp; close it now,
+						then open today&apos;s till before taking cash.
+					</p>
+				</Note>
+			)}
+			{open && !open.stale && !mine && (
+				<Note tone="info">
+					This is the {desk} till: everyone working the {desk} shares it and their cash goes into it.{" "}
+					{open.openedBy} opened it. Count &amp; close closes this till.
+				</Note>
+			)}
 			{open && tipsHeld > 0 && <Note tone="info">{tipsLine}</Note>}
 			<div className="grid gap-4 xl:grid-cols-2">
 				<SectionCard
@@ -302,16 +328,16 @@ export function TillScreen({
 								<span
 									className={cn(
 										"font-semibold",
-										(t.variance ?? 0) < 0
+										tillVariance(t.variance ?? 0, 0) < 0
 											? "text-danger"
-											: (t.variance ?? 0) > 0
+											: tillVariance(t.variance ?? 0, 0) > 0
 												? "text-warning"
 												: "text-success",
 									)}
 								>
-									{!t.variance
+									{!tillVariance(t.variance ?? 0, 0)
 										? "matches"
-										: `${t.variance > 0 ? "over" : "short"} ${naira(Math.abs(t.variance))}`}
+										: `${(t.variance ?? 0) > 0 ? "over" : "short"} ${nairaExact(Math.abs(t.variance ?? 0))}`}
 								</span>
 							</li>
 						))}
@@ -484,9 +510,11 @@ export function TillScreen({
 			<Modal
 				open={modal === "close"}
 				onOpenChange={(o) => !o && setModal(null)}
-				title="Count & close the till"
+				title={`Count & close the ${desk} till`}
 				subtitle={
-					open ? `Should be ${naira(open.expected)} in the drawer` : undefined
+					open
+						? `Opened by ${mine ? "you" : open.openedBy} ${fmtWhen(open.openedAt)} · should be ${nairaExact(open.expected)} in the drawer`
+						: undefined
 				}
 				icon={LockIcon}
 				footer={
@@ -518,7 +546,7 @@ export function TillScreen({
 										),
 									variance === 0
 										? "Till closed · counts match"
-										: `Till closed · ${variance > 0 ? "over" : "short"} ${naira(Math.abs(variance))} · manager told`,
+										: `Till closed · ${variance > 0 ? "over" : "short"} ${nairaExact(Math.abs(variance))} · manager told`,
 									(row) => {
 										setPast((xs) => [{ ...open, ...row }, ...xs]);
 										setOpen(null);
@@ -547,7 +575,7 @@ export function TillScreen({
 								...(tipsHeld > 0 ? [{ label: "Cash tips held", value: naira(tipsHeld) }] : []),
 								{
 									label: "Expected",
-									value: naira(open.expected),
+									value: nairaExact(open.expected),
 									strong: true,
 								},
 							]}
@@ -565,7 +593,7 @@ export function TillScreen({
 							<Note tone="success">Counts match.</Note>
 						) : (
 							<Note tone={variance < 0 ? "danger" : "warning"}>
-								{variance < 0 ? "Short" : "Over"} by {naira(Math.abs(variance))}
+								{variance < 0 ? "Short" : "Over"} by {nairaExact(Math.abs(variance))}
 								.
 							</Note>
 						))}
@@ -717,4 +745,22 @@ export function TillScreen({
  */
 function saysSomething(text: string) {
 	return (text.match(/\p{L}/gu) ?? []).length >= 3;
+}
+
+/** The desk a till belongs to, as people say it: "front office", "bar", "kitchen", "cashier". */
+function deskWord(role: string) {
+	return role === "FRONT_OFFICE" ? "front office" : role.toLowerCase().replace(/_/g, " ");
+}
+
+function capital(s: string) {
+	return s.charAt(0).toUpperCase() + s.slice(1);
+}
+
+/**
+ * Counted minus expected, to the kobo. Under ₦1 either way is a match: split bills leave kobo in what the drawer should
+ * hold (₦3,333.33) and there are no kobo coins to count. finance-service applies the same rule (TillMath.variance).
+ */
+export function tillVariance(counted: number, expected: number) {
+	const v = Math.round((counted - expected) * 100) / 100;
+	return Math.abs(v) < 1 ? 0 : v;
 }

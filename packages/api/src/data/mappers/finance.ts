@@ -68,6 +68,7 @@ export function toTillRow(t: TillItem): TillRow {
 		closedAt: t.closedAt ?? undefined,
 		entries: t.entries ?? undefined,
 		note: t.note ?? undefined,
+		stale: t.stale === true && t.status !== "CLOSED" ? true : undefined,
 	};
 }
 

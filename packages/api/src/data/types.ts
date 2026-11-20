@@ -500,6 +500,8 @@ export type TillRow = {
 	entries?: number;
 	note?: string;
 	openedById?: Id;
+	/** Open, but left open from an earlier day: it takes no cash until it is counted and closed. */
+	stale?: boolean;
 };
 export type TillEntryRow = {
 	id: Id;

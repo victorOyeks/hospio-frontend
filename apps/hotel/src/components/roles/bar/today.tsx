@@ -649,7 +649,7 @@ export function BarTodayScreen({
 					if (!current) return;
 					const how =
 						p.status === "APPROVED"
-							? `Paid by ${p.method.toLowerCase()} · receipt sent`
+							? `Paid by ${p.method.toLowerCase()}`
 							: `${naira(p.amount)} by ${p.method.toLowerCase()} is processing`;
 					void readOrder(current.id, outletName).then((r) => {
 						if (r.ok && r.data) {
