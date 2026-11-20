@@ -303,7 +303,13 @@ export function usePaymentSteps(
 		toast.success(`${deskLabel(till.role)} till opened`, {
 			description: `Float ${naira(r.data.openingFloat)} · now take the cash`,
 		});
-		setTill({ ...till, open: true, message: null });
+		// Read it again so the Cash choice names who opened it ("Goes into the bar till (opened by …)").
+		const fresh = await cashTill(tgt?.role, tgt?.orderId).catch(() => null);
+		setTill(
+			fresh?.ok && fresh.data.open
+				? fresh.data
+				: { ...till, open: true, message: null, openedByName: r.data.openedBy ?? till.openedByName },
+		);
 	}
 
 	// Card: send the request to payment-service and show what the terminal answered. Each attempt is sent exactly once

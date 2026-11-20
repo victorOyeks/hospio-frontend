@@ -369,6 +369,7 @@ export async function cashTill(
 		stale?: boolean | null;
 		manager?: boolean | null;
 		takenAs?: string | null;
+		noWalkInCash?: boolean | null;
 	}>
 > {
 	if (!live("payment")) return { ok: true, data: { role: role ?? "FRONT_OFFICE", needed: false, open: true } };

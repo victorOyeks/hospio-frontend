@@ -54,6 +54,14 @@ export function CashTillNote({
 	useEffect(() => onBlocked(blocked), [blocked, onBlocked]);
 
 	if (!active || !till?.needed) return null;
+	// A lounge, bar or restaurant with no rooms has no front office: walk-in cash is taken on the outlet's sale screen.
+	if (till.noWalkInCash)
+		return (
+			<Note tone="warning">
+				<p className="font-semibold text-ink">Take this cash on the sale screen</p>
+				<p className="mt-1">{till.message}</p>
+			</Note>
+		);
 	const name = `${deskName(till.tillRole ?? till.role)} till`;
 	if (till.open)
 		return (
