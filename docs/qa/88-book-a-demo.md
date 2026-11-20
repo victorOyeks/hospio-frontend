@@ -150,7 +150,7 @@ The form asks **"Average monthly sales (all outlets combined)"**, required, with
 scored or declined on it. Requests sent before 21 Nov have no answer and show **Not asked**.
 
 1. **Do:** on `/book-a-demo`, look under "Number of rooms" (or the state, for a lounge). **Expect:** the question as five
-   maroon-outlined cards (two per row on a laptop, one per row on a narrow window) and the hint "An estimate is fine. It helps
+   cards (two per row on a laptop, one per row on a narrow window; the chosen one turns maroon) and the hint "An estimate is fine. It helps
    us prepare for your call." No copy mentions phones.
 2. **Do:** fill everything else and press **Book my demo** without choosing a band. **Expect:** it is not sent: "Please check the
    highlighted fields.", the cards get a red outline and "Choose your average monthly sales (an estimate is fine)", and the
