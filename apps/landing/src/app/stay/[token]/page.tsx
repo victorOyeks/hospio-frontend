@@ -13,6 +13,7 @@ import { brandStyle, normalizeHex } from "@hospio/api/brand";
 import { btn } from "@hospio/ui/shared/ui";
 import { cn } from "@hospio/ui/utils";
 import { CONTACT_EMAIL, Wordmark } from "@/components/site";
+import { API_URL } from "@/config/env";
 
 /**
  * The guest's booking page, opened from "View booking" on a Hospio360 WhatsApp message (hospio-backend docs/sms-whatsapp.md).
@@ -24,9 +25,6 @@ export const metadata: Metadata = {
 	robots: { index: false, follow: false },
 };
 
-const API_URL = (
-	process.env.NEXT_PUBLIC_API_URL ?? "https://api-staging.hospio360.com"
-).replace(/\/+$/, "");
 
 type Hotel = {
 	name: string;

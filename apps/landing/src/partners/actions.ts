@@ -12,10 +12,8 @@ import {
 	RECEIVED_MESSAGE,
 	type SubmitResult,
 } from "./schema";
+import { API_URL } from "@/config/env";
 
-const API_URL = (
-	process.env.NEXT_PUBLIC_API_URL ?? "https://api-staging.hospio360.com"
-).replace(/\/+$/, "");
 
 /** platform-service's answer: the envelope, with a message per field under `data` on a 400. */
 const Answer = z.object({
