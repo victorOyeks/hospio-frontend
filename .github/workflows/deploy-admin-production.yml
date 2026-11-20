@@ -1,3 +1,4 @@
+# Deploys on push to production (changes reach it by PR from staging). workflow_dispatch needs this file on the default branch, so first runs are started by a push.
 name: Deploy Admin portal (production)
 
 # One deploy per app. A change under apps/admin or packages/ redeploys this app; the other apps have their own workflow.
