@@ -3,10 +3,13 @@
 import { CheckIcon } from "lucide-react";
 import { useState } from "react";
 import type { AdminOnboardingStep } from "@hospio/api/types";
+import { Note } from "@hospio/ui/shared/detail-list";
 import { TextareaField } from "@hospio/ui/shared/field";
+import { fmtLongDate } from "@hospio/ui/shared/format";
 import { ProgressBar } from "@hospio/ui/shared/progress-bar";
 import { cn } from "@hospio/ui/utils";
 import { hasAccommodation } from "@hospio/api/venue";
+import { useChargesStart } from "../business/charges-start";
 import { GuestMessagePlans } from "../guest-messages";
 import type { WizardCtx } from "./wizard";
 import {
@@ -134,6 +137,11 @@ export function GoLiveStep({ ctx }: { ctx: WizardCtx }) {
 	const { pending, busy } = useWizardSave();
 	const done = checks.filter((c) => c.done).length;
 	const ready = done === checks.length;
+	// Charges start on is optional by design (empty = free), so the review says plainly when it is not set.
+	const charges = useChargesStart(ctx.business.id);
+	const chargesStartOn = charges.view
+		? charges.view.chargesStartOn
+		: ctx.business.contractStartsOn;
 
 	const save = () =>
 		busy(async () => {
@@ -218,6 +226,23 @@ export function GoLiveStep({ ctx }: { ctx: WizardCtx }) {
 						</li>
 					))}
 				</ul>
+				{(charges.view || charges.error) &&
+					(chargesStartOn ? (
+						<Note tone="info">
+							Charges start: {fmtLongDate(chargesStartOn)}
+						</Note>
+					) : (
+						<button
+							type="button"
+							onClick={() => ctx.goTo("fee")}
+							className="text-left"
+						>
+							<Note tone="warning">
+								Charges start: not set (free). No platform fee until a date is
+								set; devices are still billed. Set it in Fee &amp; contract.
+							</Note>
+						</button>
+					))}
 			</StepCard>
 			<StepCard
 				title="Notes for the handover"

@@ -1441,6 +1441,8 @@ export const schema = createSchema({
 			step: z.number(),
 			data: JsonObject,
 			nextAction: z.string().nullable().optional(),
+			/** Keep the form without completing the step (Save and finish later, the board's next action). */
+			draft: z.boolean().optional(),
 		}),
 		output: envelope(Onboarding),
 	},

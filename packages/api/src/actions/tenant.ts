@@ -334,6 +334,8 @@ export async function saveOnboardingStep<K extends AdminOnboardingStep>(
 	step: K | number,
 	data: NonNullable<AdminOnboardingData[K]>,
 	nextAction?: string,
+	/** True: keep the form without completing the step; the step's required fields are not asked for (tenant docs/onboarding.md). */
+	draft?: boolean,
 ): Promise<ActionResult<OnboardingRow>> {
 	const key =
 		typeof step === "number" ? ADMIN_ONBOARDING_STEPS[step - 1] : step;
@@ -349,9 +351,12 @@ export async function saveOnboardingStep<K extends AdminOnboardingStep>(
 				businessId,
 				businessName: "New business",
 				source: "BACK_OFFICE",
-				step: Math.min(number + 1, 10),
+				step: draft ? number : Math.min(number + 1, 10),
 				totalSteps: 10,
-				completedSteps: ADMIN_ONBOARDING_STEPS.slice(0, number),
+				completedSteps: ADMIN_ONBOARDING_STEPS.slice(
+					0,
+					draft ? number - 1 : number,
+				),
 				assignedTo: "You",
 				startedAt: new Date().toISOString(),
 				updatedAt: new Date().toISOString(),
@@ -370,6 +375,7 @@ export async function saveOnboardingStep<K extends AdminOnboardingStep>(
 				step: number,
 				data: data as Record<string, unknown>,
 				nextAction: nextAction ?? null,
+				...(draft ? { draft: true } : {}),
 			},
 		},
 	);

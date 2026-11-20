@@ -357,6 +357,8 @@ function OnboardingDetails({
 					step,
 					stepData,
 					nextAction.trim() || undefined,
+					// Only the next action changes: a draft save never asks for a step's required fields again.
+					true,
 				),
 			"Next action saved",
 			(saved) => onSaved(saved),

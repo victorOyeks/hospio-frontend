@@ -68,7 +68,11 @@ export function Field({
 	// Setup links are live only for the manager and the owner (front office has no Hotel setup: the link was a 404).
 	const canSetup = useContext(SetupLinksContext);
 	return (
-		<div className={cn("flex flex-col gap-[6px]", className)}>
+		// data-invalid: a form can scroll to and focus the first field with a message (focusFirstError in the admin wizard).
+		<div
+			className={cn("flex flex-col gap-[6px]", className)}
+			data-invalid={error ? "true" : undefined}
+		>
 			<div className="flex items-center justify-between gap-3">
 				<span className="text-[13px] font-medium text-ink-2">
 					{label}
@@ -152,6 +156,7 @@ export function TextField({
 					placeholder={placeholder}
 					disabled={disabled}
 					aria-label={label}
+					aria-invalid={error ? true : undefined}
 					className={cn(
 						inputCls,
 						prefix && "pl-8",

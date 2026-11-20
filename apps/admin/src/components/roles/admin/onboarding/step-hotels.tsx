@@ -29,6 +29,7 @@ import {
 import { cn } from "@hospio/ui/utils";
 import type { WizardCtx } from "./wizard";
 import {
+	focusFirstError,
 	nextStep,
 	prevStep,
 	ResultLine,
@@ -40,7 +41,8 @@ import {
 
 /**
  * J5 · step 4: the business's hotels, each created on tenant with `businessId`; the step saves `{hotelIds}`. A hotel needs
- * a name with letters (one name per business), a real city and both times; address, phone and email are checked when typed.
+ * a name with letters (one name per business), a real city, a street address and both times; phone and email are checked when
+ * typed. Continue needs an address on every location (one saved before 21 Nov 2026 may have none: its row says so).
  */
 
 const toWizardHotel = (h: Hotel, prev?: WizardHotel): WizardHotel => ({
@@ -66,9 +68,16 @@ export function HotelsStep({ ctx }: { ctx: WizardCtx }) {
 	const word = ctx.venue.locations ? "location" : "hotel";
 	const [panel, setPanel] = useState<"new" | WizardHotel | null>(null);
 	const { pending, busy } = useWizardSave();
+	// Every location needs an address to continue (tester report, 21 Nov 2026; tenant refuses the step the same way).
+	const noAddress = hotels.filter((h) => !h.address?.trim());
+	const [tried, setTried] = useState(false);
 
 	const save = () =>
 		busy(async () => {
+			if (noAddress.length) {
+				setTried(true);
+				return;
+			}
 			const row = await ctx.saveStep("hotels", {
 				hotelIds: hotels.map((h) => h.id),
 			});
@@ -87,9 +96,19 @@ export function HotelsStep({ ctx }: { ctx: WizardCtx }) {
 			continueDisabled={hotels.length === 0}
 			pending={pending}
 			footerNote={
-				hotels.length === 0
-					? `Add at least one ${word} to continue.`
-					: `Currency ${business.currency ?? "NGN"} · time zone ${business.timezone ?? "Africa/Lagos"}.`
+				hotels.length === 0 ? (
+					`Add at least one ${word} to continue.`
+				) : noAddress.length ? (
+					<span
+						className={cn(tried && "font-medium text-danger")}
+						role={tried ? "alert" : undefined}
+					>
+						Add an address to {noAddress.map((h) => h.name).join(", ")} to
+						continue: press Edit on {noAddress.length === 1 ? "it" : "each"}.
+					</span>
+				) : (
+					`Currency ${business.currency ?? "NGN"} · time zone ${business.timezone ?? "Africa/Lagos"}.`
+				)
 			}
 		>
 			<DataTable
@@ -108,9 +127,14 @@ export function HotelsStep({ ctx }: { ctx: WizardCtx }) {
 					{
 						accessorKey: "address",
 						header: "Address",
-						cell: ({ row }) => (
-							<span className="text-ink-2">{row.original.address || "—"}</span>
-						),
+						cell: ({ row }) =>
+							row.original.address?.trim() ? (
+								<span className="text-ink-2">{row.original.address}</span>
+							) : (
+								<span className="font-medium text-danger">
+									Missing · required
+								</span>
+							),
 					},
 					{
 						id: "times",
@@ -329,14 +353,17 @@ function HotelForm({
 						? `This business already has a hotel called ${twin.name}. Give this one a different name`
 						: undefined),
 				city: checkCity(city),
-				address: checkAddress(address, false),
+				address: checkAddress(address),
 				phone: checkPhone(phone, false),
 				email: checkEmail(email, false),
 				checkIn: stays ? checkTime(checkIn, "check-in") : undefined,
 				checkOut: stays ? checkTime(checkOut, "check-out") : undefined,
 			});
 			setErrors(found);
-			if (Object.keys(found).length) return;
+			if (Object.keys(found).length) {
+				focusFirstError();
+				return;
+			}
 			const input = {
 				name: name.trim(),
 				city: city.trim(),
@@ -400,6 +427,7 @@ function HotelForm({
 						value={address}
 						onChange={edit(setAddress, "address")}
 						placeholder="e.g. Plot 41 Aminu Kano Cres, Wuse 2"
+						required
 						error={errors.address}
 					/>
 				</FieldRow>
@@ -419,6 +447,7 @@ function HotelForm({
 						value={email}
 						onChange={edit(setEmail, "email")}
 						placeholder="e.g. wuse@zumaheights.example.ng"
+						hint="Optional"
 						error={errors.email}
 					/>
 				</FieldRow>
