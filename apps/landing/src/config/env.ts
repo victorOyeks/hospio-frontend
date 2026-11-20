@@ -2,7 +2,7 @@
  * Every address the landing site links to or calls, from build-time env (Next inlines NEXT_PUBLIC_* when it builds). The
  * fallbacks are staging, so a staging build needs nothing set. Production sets (deploy workflow variables):
  *
- * - NEXT_PUBLIC_HOTEL_APP_URL  https://app.hospio360.com          sign-in, create an account (header, hero, pricing, footer)
+ * - NEXT_PUBLIC_HOTEL_APP_URL  https://app.hospio360.com          sign-in (header, closing call to action, footer)
  * - NEXT_PUBLIC_ADMIN_APP_URL  https://backoffice.hospio360.com   the admin console (Hospio360 staff)
  * - NEXT_PUBLIC_API_URL        https://api-prod.hospio360.com     partner applications, the guest booking page (/stay)
  * - NEXT_PUBLIC_SITE_URL       https://hospio360.com              canonical links, sitemap, robots

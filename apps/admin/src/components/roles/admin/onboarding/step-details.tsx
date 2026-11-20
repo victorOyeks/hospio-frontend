@@ -1,5 +1,6 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { setChargesStart } from "@hospio/api/actions/billing";
@@ -50,6 +51,8 @@ import {
 	nextStep,
 	refreshBusiness,
 	prevStep,
+	focusFirstError,
+	SaveLaterButton,
 	StepCard,
 	StepFrame,
 	useWizardSave,
@@ -60,7 +63,25 @@ import {
  * J2–J4 · steps 1–3 write the business (PUT /tenant/businesses/{id}, only the step's own fields) then save the step's
  * form. Every field is checked before saving (names with letters, a real city, address, email, phone, a CAC number,
  * a share from 0 to 100) and the API refuses the same; a refusal about one field shows under it.
+ *
+ * Required to continue (tester report, 21 Nov 2026; hospio-backend docs/onboarding.md "Back-office required fields"): step 1 the
+ * registered name, business type, head office address, city and a business email or phone; step 2 the owner's phone and, when a
+ * second contact is started, their name plus a phone or email. The CAC number and Charges start on stay optional. "Save and
+ * finish later" keeps what is typed (only the format of a typed value is checked) without completing the step.
  */
+
+/** Where "Save and finish later" leaves the admin. */
+const BOARD = "/dashboard/onboarding";
+
+/** A draft save sends only what is typed: a blank is not a value to clear (the API asks for a name or city when one is sent). */
+function typedOnly<T extends Record<string, unknown>>(patch: T): Partial<T> {
+	return Object.fromEntries(
+		Object.entries(patch).filter(([, v]) => v !== "" && v !== undefined),
+	) as Partial<T>;
+}
+
+const CONTACT_NEEDED =
+	"Enter the business email or phone (at least one) so statements and notices reach them";
 
 const BUSINESS_TYPES = [
 	"Limited company",
@@ -118,7 +139,8 @@ type BusinessField =
 	| "address"
 	| "city"
 	| "email"
-	| "phone";
+	| "phone"
+	| "businessType";
 
 export function BusinessStep({ ctx }: { ctx: WizardCtx }) {
 	const { business, data } = ctx;
@@ -149,22 +171,37 @@ export function BusinessStep({ ctx }: { ctx: WizardCtx }) {
 	const [errors, setErrors] = useState<Errors<BusinessField>>({});
 	const edit = editor(errors, setErrors);
 	const { pending, busy } = useWizardSave();
+	const router = useRouter();
+	const noContact = !email.trim() && !phone.trim();
 
-	const save = () =>
+	/** `complete`: Continue (every required field); false: Save and finish later (only what is typed is checked). */
+	const save = (complete: boolean) =>
 		busy(async () => {
 			const found = only({
-				name: checkName(name, "the trading name"),
-				legalName: checkName(legalName, "the registered name", 120, false),
+				name: checkName(name, "the trading name", 120, complete),
+				legalName: checkName(legalName, "the registered name", 120, complete),
 				registrationNumber: checkRegistration(registrationNumber),
-				address: checkAddress(address, false),
-				city: checkCity(city),
-				email: checkEmail(email, false),
-				phone: checkPhone(phone, false),
+				businessType:
+					complete && !businessType ? "Choose the business type" : undefined,
+				address:
+					complete && !address.trim()
+						? "Enter the head office address"
+						: checkAddress(address, false),
+				city: checkCity(city, complete),
+				email:
+					checkEmail(email, false) ??
+					(complete && noContact ? CONTACT_NEEDED : undefined),
+				phone:
+					checkPhone(phone, false) ??
+					(complete && noContact ? "Or enter the business phone" : undefined),
 			});
 			setErrors(found);
-			if (Object.keys(found).length) return;
+			if (Object.keys(found).length) {
+				focusFirstError();
+				return;
+			}
 			// Blank optional fields are sent as "" so a cleared value is cleared; the API refuses anything meaningless.
-			const patch = {
+			const full = {
 				name: name.trim(),
 				legalName: legalName.trim(),
 				registrationNumber: registrationNumber.trim(),
@@ -176,46 +213,67 @@ export function BusinessStep({ ctx }: { ctx: WizardCtx }) {
 				phone: phone.trim(),
 				timezone,
 			};
+			const patch = complete ? full : typedOnly(full);
 			const b = await saveFields<BusinessField>(
 				ctx,
 				patch,
 				(m) =>
-					/CAC/i.test(m)
-						? "registrationNumber"
-						: /registered name/i.test(m)
-							? "legalName"
-							: /trading name|business called/i.test(m)
-								? "name"
-								: /address/i.test(m)
-									? "address"
-									: /city/i.test(m)
-										? "city"
-										: /email/i.test(m)
-											? "email"
-											: /phone/i.test(m)
-												? "phone"
-												: null,
-				setErrors,
+					/business type/i.test(m)
+						? "businessType"
+						: /CAC/i.test(m)
+							? "registrationNumber"
+							: /registered name/i.test(m)
+								? "legalName"
+								: /trading name|business called/i.test(m)
+									? "name"
+									: /address/i.test(m)
+										? "address"
+										: /city/i.test(m)
+											? "city"
+											: /email/i.test(m)
+												? "email"
+												: /phone/i.test(m)
+													? "phone"
+													: null,
+				(e) => {
+					setErrors(e);
+					focusFirstError();
+				},
 			);
 			if (!b) return;
-			const row = await ctx.saveStep("business", {
-				name: b.name,
-				legalName: b.legalName ?? undefined,
-				registrationNumber: b.registrationNumber ?? undefined,
-				businessType: b.businessType ?? undefined,
-				address: b.address ?? undefined,
-				city: b.city ?? undefined,
-				country: business.country ?? "NG",
-				timezone,
-			});
-			if (row) ctx.goTo(nextStep("business"));
+			const row = await ctx.saveStep(
+				"business",
+				{
+					name: b.name,
+					legalName: b.legalName ?? undefined,
+					registrationNumber: b.registrationNumber ?? undefined,
+					businessType: b.businessType ?? undefined,
+					address: b.address ?? undefined,
+					city: b.city ?? undefined,
+					country: business.country ?? "NG",
+					timezone,
+				},
+				complete ? undefined : "Finish step 1 · Business & legal",
+				!complete,
+			);
+			if (!row) return;
+			if (complete) ctx.goTo(nextStep("business"));
+			else {
+				toast.success("Saved. Pick it up again from Onboarding.");
+				router.push(BOARD);
+			}
 		});
 
 	return (
 		<StepFrame
 			venue={ctx.venue}
 			step="business"
-			onContinue={ctx.editable ? save : undefined}
+			onContinue={ctx.editable ? () => save(true) : undefined}
+			extra={
+				ctx.editable ? (
+					<SaveLaterButton onClick={() => save(false)} pending={pending} />
+				) : undefined
+			}
 			pending={pending}
 			footerNote={
 				Object.keys(errors).length
@@ -246,7 +304,8 @@ export function BusinessStep({ ctx }: { ctx: WizardCtx }) {
 						value={legalName}
 						onChange={edit(setLegalName, "legalName")}
 						placeholder="e.g. Zuma Heights Hotels Ltd"
-						hint="As on the CAC certificate"
+						hint="As on the CAC certificate; not registered yet? Use the trading name"
+						required
 						error={errors.legalName}
 					/>
 				</FieldRow>
@@ -256,15 +315,17 @@ export function BusinessStep({ ctx }: { ctx: WizardCtx }) {
 						value={registrationNumber}
 						onChange={edit(setReg, "registrationNumber")}
 						placeholder="e.g. RC 1873402"
-						hint="RC, BN or IT and the digits; one business per number"
+						hint="Optional: RC, BN or IT and the digits. Not registered yet? Add it later from the business page"
 						error={errors.registrationNumber}
 					/>
 					<SelectField
 						label="Business type"
 						value={businessType}
-						onChange={setType}
+						onChange={edit(setType, "businessType")}
 						options={BUSINESS_TYPES}
 						placeholder="Choose…"
+						required
+						error={errors.businessType}
 					/>
 				</FieldRow>
 				<TextField
@@ -272,6 +333,7 @@ export function BusinessStep({ ctx }: { ctx: WizardCtx }) {
 					value={address}
 					onChange={edit(setAddress, "address")}
 					placeholder="e.g. Plot 41 Aminu Kano Crescent, Wuse 2, Abuja"
+					required
 					error={errors.address}
 				/>
 				<FieldRow>
@@ -293,22 +355,41 @@ export function BusinessStep({ ctx }: { ctx: WizardCtx }) {
 			</StepCard>
 			<StepCard
 				title="Business contact"
-				subtitle="Where statements and notices go. The owner's own contact is the next step."
+				subtitle="Where statements and notices go: an email or a phone, or both. The owner's own contact is the next step."
 			>
 				<FieldRow>
 					<TextField
 						label="Email"
 						type="email"
 						value={email}
-						onChange={edit(setEmail, "email")}
+						onChange={(v) => {
+							setEmail(v);
+							// Either one satisfies "at least one": typing here clears the pair's message.
+							if (errors.email || errors.phone)
+								setErrors((e) => ({
+									...e,
+									email: undefined,
+									phone: undefined,
+								}));
+						}}
 						placeholder="e.g. accounts@zumaheights.example.ng"
+						hint="Email or phone required"
 						error={errors.email}
 					/>
 					<TextField
 						label="Phone"
 						value={phone}
-						onChange={edit(setPhone, "phone")}
+						onChange={(v) => {
+							setPhone(v);
+							if (errors.email || errors.phone)
+								setErrors((e) => ({
+									...e,
+									email: undefined,
+									phone: undefined,
+								}));
+						}}
 						placeholder="e.g. +234 803 555 0192"
+						hint="Email or phone required"
 						error={errors.phone}
 					/>
 				</FieldRow>
@@ -343,25 +424,49 @@ export function OwnerStep({ ctx }: { ctx: WizardCtx }) {
 	const [errors, setErrors] = useState<Errors<OwnerField>>({});
 	const edit = editor(errors, setErrors);
 	const { pending, busy } = useWizardSave();
+	const router = useRouter();
 
-	const save = () =>
+	/** `complete`: Continue (every required field); false: Save and finish later (only what is typed is checked). */
+	const save = (complete: boolean) =>
 		busy(async () => {
-			// The second contact is optional: blank is fine, anything typed must be real.
+			// The second contact is optional: all blank is fine; once started it needs a name plus a phone or an email.
+			const contactStarted = !!(
+				contactName.trim() ||
+				contactEmail.trim() ||
+				contactPhone.trim()
+			);
+			const noReach = !contactEmail.trim() && !contactPhone.trim();
 			const found = only({
-				ownerName: checkName(ownerName, "the owner's full name"),
-				ownerEmail: checkEmail(ownerEmail),
-				ownerPhone: checkPhone(ownerPhone, false),
-				contactName: checkName(contactName, "the contact's name", 120, false),
+				ownerName: checkName(ownerName, "the owner's full name", 120, complete),
+				ownerEmail: checkEmail(ownerEmail, complete),
+				ownerPhone:
+					checkPhone(ownerPhone, false) ??
+					(complete && !ownerPhone.trim()
+						? "Enter the owner's phone: it is used for sign-in checks and WhatsApp"
+						: undefined),
+				contactName:
+					checkName(contactName, "the contact's name", 120, false) ??
+					(complete && contactStarted && !contactName.trim()
+						? "Enter the contact's name, or clear their phone and email"
+						: undefined),
 				contactEmail: checkEmail(contactEmail, false),
-				contactPhone: checkPhone(contactPhone, false),
+				contactPhone:
+					checkPhone(contactPhone, false) ??
+					(complete && contactStarted && noReach
+						? "Enter a phone or an email for this contact, or clear their name"
+						: undefined),
 			});
 			setErrors(found);
-			if (Object.keys(found).length) return;
-			const patch = {
+			if (Object.keys(found).length) {
+				focusFirstError();
+				return;
+			}
+			const full = {
 				ownerName: ownerName.trim(),
 				ownerEmail: ownerEmail.trim().toLowerCase(),
 				ownerPhone: ownerPhone.trim(),
 			};
+			const patch = complete ? full : typedOnly(full);
 			const b = await saveFields<OwnerField>(
 				ctx,
 				patch,
@@ -373,19 +478,32 @@ export function OwnerStep({ ctx }: { ctx: WizardCtx }) {
 							: /name/i.test(m)
 								? "ownerName"
 								: null,
-				setErrors,
+				(e) => {
+					setErrors(e);
+					focusFirstError();
+				},
 			);
 			if (!b) return;
 			const stepData: NonNullable<WizardData["owner"]> = {
-				ownerName: patch.ownerName,
-				ownerEmail: patch.ownerEmail,
-				ownerPhone: patch.ownerPhone || undefined,
+				ownerName: full.ownerName,
+				ownerEmail: full.ownerEmail,
+				ownerPhone: full.ownerPhone || undefined,
 				contactName: contactName.trim() || undefined,
 				contactEmail: contactEmail.trim() || undefined,
 				contactPhone: contactPhone.trim() || undefined,
 			};
-			const row = await ctx.saveStep("owner", stepData);
-			if (row) ctx.goTo(nextStep("owner"));
+			const row = await ctx.saveStep(
+				"owner",
+				stepData,
+				complete ? undefined : "Finish step 2 · Owner & contacts",
+				!complete,
+			);
+			if (!row) return;
+			if (complete) ctx.goTo(nextStep("owner"));
+			else {
+				toast.success("Saved. Pick it up again from Onboarding.");
+				router.push(BOARD);
+			}
 		});
 
 	return (
@@ -393,7 +511,12 @@ export function OwnerStep({ ctx }: { ctx: WizardCtx }) {
 			venue={ctx.venue}
 			step="owner"
 			onBack={() => ctx.goTo(prevStep("owner"))}
-			onContinue={ctx.editable ? save : undefined}
+			onContinue={ctx.editable ? () => save(true) : undefined}
+			extra={
+				ctx.editable ? (
+					<SaveLaterButton onClick={() => save(false)} pending={pending} />
+				) : undefined
+			}
 			pending={pending}
 			footerNote={
 				Object.keys(errors).length
@@ -428,6 +551,8 @@ export function OwnerStep({ ctx }: { ctx: WizardCtx }) {
 						value={ownerPhone}
 						onChange={edit(setOwnerPhone, "ownerPhone")}
 						placeholder="e.g. +234 803 555 0192"
+						hint="Used for sign-in checks and WhatsApp"
+						required
 						error={errors.ownerPhone}
 					/>
 				</FieldRow>
@@ -440,7 +565,7 @@ export function OwnerStep({ ctx }: { ctx: WizardCtx }) {
 			</StepCard>
 			<StepCard
 				title="Second contact"
-				subtitle="Optional · a co-owner or general manager we can call. Kept on the onboarding notes only."
+				subtitle="Optional · a co-owner or general manager we can call. Leave it all blank, or give a name plus a phone or an email. Kept on the onboarding notes only."
 			>
 				<TextField
 					label="Full name"
@@ -597,7 +722,15 @@ export function FeeStep({ ctx }: { ctx: WizardCtx }) {
 						disabled={!canSetCharges}
 						hint={
 							<>
-								Leave empty = free: no platform fee until a date is set. Devices are still billed.
+								{/* Empty is allowed by design (free until a date is set), so the note says so in warning colour. */}
+								<span
+									className={cn(
+										!contractStartsOn && "font-medium text-warning",
+									)}
+								>
+									Leave empty to keep this business free until you set a date.
+									Devices are still billed.
+								</span>
 								{charges.view && !charges.view.canEdit && " Only a Super admin or Finance admin can change it."}
 								{charges.view && (
 									<span className="mt-1 block">

@@ -2,7 +2,7 @@ import { ArrowRightIcon, ChevronDownIcon } from "lucide-react";
 import Link from "next/link";
 import { cn } from "@hospio/ui/utils";
 import { SingleOpen } from "@/components/single-open";
-import { container, DEMO_MAILTO, SectionHeader } from "@/components/site";
+import { BOOK_DEMO_URL, container, SectionHeader } from "@/components/site";
 
 /**
  * Every question, the most important first: the home page shows the first HOME_FAQ_COUNT, /features#faq shows them all.
@@ -19,11 +19,11 @@ export const FAQS: { q: string; a: string }[] = [
 	},
 	{
 		q: "Do we need new hardware?",
-		a: "No special hardware. Hospio360 runs in the browser on a computer or tablet, and a shared tablet can be used by several staff, each signing in with their own PIN. Card terminals come from your POS provider and are assigned to each role in setup.",
+		a: "No special hardware. Hospio360 runs in the browser on a laptop or tablet, and a shared tablet can be used by several staff, each signing in with their own PIN. Card terminals come from your POS provider and are assigned to each role in setup.",
 	},
 	{
 		q: "Who sets everything up?",
-		a: "You can: sign up and follow the four setup steps. Or the Hospio360 team sets up your business, locations, rooms or outlets and staff with you, then hands it over with your logins.",
+		a: "The Hospio360 team. Book a demo and we call you within 1 working day; after a meeting to agree what you need, we set up your business, locations, rooms or outlets and staff with you, then send your login by email.",
 	},
 	{
 		q: "Can one location see another location’s data?",
@@ -107,7 +107,7 @@ export function Faq({ limit }: { limit?: number }) {
 						</Link>
 					)}
 					<a
-						href={DEMO_MAILTO}
+						href={BOOK_DEMO_URL}
 						className="text-brand underline underline-offset-2"
 					>
 						Ask us on a demo

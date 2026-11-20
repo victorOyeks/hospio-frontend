@@ -20,7 +20,7 @@ import { HospioWordmark } from "@hospio/ui/brand/logo";
 import Link from "next/link";
 import { btn } from "@hospio/ui/shared/ui";
 import { cn } from "@hospio/ui/utils";
-import { btnLg, container, DEMO_MAILTO, SIGN_UP_URL } from "@/components/site";
+import { BOOK_DEMO_URL, btnLg, container } from "@/components/site";
 import { type PillTone, shotShadow, softTileTones, StatusPill } from "./shared";
 
 const trust: { icon: LucideIcon; text: string }[] = [
@@ -141,26 +141,26 @@ export function Hero() {
 				</p>
 				<div className="flex flex-wrap items-center justify-center gap-3">
 					<a
-						href={SIGN_UP_URL}
+						href={BOOK_DEMO_URL}
 						className={cn(
 							btn.primary,
 							btnLg,
 							"inline-flex items-center gap-[6px]",
 						)}
 					>
-						<ArrowRightIcon className="size-[15px]" strokeWidth={2.5} />
-						Get started
+						<CalendarDaysIcon className="size-[15px]" strokeWidth={2.5} />
+						Book a demo
 					</a>
 					<a
-						href={DEMO_MAILTO}
+						href="/features"
 						className={cn(
 							btn.secondary,
 							btnLg,
 							"inline-flex items-center gap-[6px]",
 						)}
 					>
-						<CalendarDaysIcon className="size-[15px]" strokeWidth={2.5} />
-						Book a demo
+						<ArrowRightIcon className="size-[15px]" strokeWidth={2.5} />
+						See all features
 					</a>
 				</div>
 				<ul className="hidden flex-wrap items-center justify-center gap-x-7 gap-y-2 sm:flex">

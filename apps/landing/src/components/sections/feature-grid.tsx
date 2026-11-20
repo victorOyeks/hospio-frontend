@@ -24,7 +24,7 @@ const features: { id: string; icon: LucideIcon; title: string; text: string }[] 
 			id: "product",
 			icon: LayoutDashboardIcon,
 			title: "A view for every role",
-			text: "Owner, manager and staff each see their own work, on a computer or a shared tablet.",
+			text: "Owner, manager and staff each see their own work, on a laptop or a shared tablet.",
 		},
 		{
 			id: "folio",

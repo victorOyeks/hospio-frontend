@@ -4,7 +4,7 @@ import {
 	CreditCardIcon,
 	LandmarkIcon,
 	LoaderCircleIcon,
-	SmartphoneIcon,
+	TabletIcon,
 	XIcon,
 } from "lucide-react";
 import { btn } from "@hospio/ui/shared/ui";
@@ -146,7 +146,7 @@ function TakePaymentMock() {
 					<span
 						className={cn(btn.secondary, "inline-flex items-center gap-[6px]")}
 					>
-						<SmartphoneIcon className="size-[15px]" />
+						<TabletIcon className="size-[15px]" />
 						Minimise · keep working
 					</span>
 					<span className={btn.danger}>Cancel</span>

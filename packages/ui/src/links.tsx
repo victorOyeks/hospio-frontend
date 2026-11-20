@@ -50,7 +50,7 @@ export type NavLink = {
 	url: string;
 	icon: LucideIcon;
 	/** A count shown on the link (the shell fills it): unpaid sales for the bar and kitchen, unread staff messages for the Inbox. */
-	badge?: "unpaidSales" | "inbox" | "approvals";
+	badge?: "unpaidSales" | "inbox" | "approvals" | "applications";
 	/** Shown only to a housekeeping supervisor (Full access) or a manager, the rule the service applies. */
 	supervisorOnly?: boolean;
 	/** A heading the link sits under (admin portal); menus without groups show one flat list. */
@@ -303,6 +303,13 @@ export const adminLinks: NavLink[] = [
 	{ title: "Changes by Hospio360", url: "/dashboard/changes", icon: BookOpenIcon, group: "Operations" },
 	{ title: "Fees & billing", url: "/dashboard/fees", icon: CoinsIcon, group: "Money" },
 	{ title: "Payments & POS", url: "/dashboard/payments", icon: CreditCardIcon, group: "Money" },
+	{
+		title: "Hotel applications",
+		url: "/dashboard/hotel-applications",
+		icon: CalendarCheckIcon,
+		group: "Growth",
+		badge: "applications",
+	},
 	{ title: "Marketers", url: "/dashboard/marketers", icon: MegaphoneIcon, group: "Growth" },
 	{
 		title: "Integrations",

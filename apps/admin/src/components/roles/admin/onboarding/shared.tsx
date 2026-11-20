@@ -285,6 +285,46 @@ export function useWizardSave() {
 	return { pending, call, busy };
 }
 
+/**
+ * After a refused Continue: scrolls to the first field showing a message (Field marks itself `data-invalid`) and puts the cursor
+ * in it, so a missing field below the fold is never missed (tester report, 21 Nov 2026). Runs after the messages render.
+ */
+export function focusFirstError() {
+	if (typeof window === "undefined") return;
+	window.requestAnimationFrame(() =>
+		window.requestAnimationFrame(() => {
+			const field = document.querySelector<HTMLElement>(
+				'[data-invalid="true"]',
+			);
+			if (!field) return;
+			field.scrollIntoView({ block: "center", behavior: "smooth" });
+			field
+				.querySelector<HTMLElement>("input, textarea, button")
+				?.focus({ preventScroll: true });
+		}),
+	);
+}
+
+/** "Save and finish later": keeps what is typed without completing the step. */
+export function SaveLaterButton({
+	onClick,
+	pending,
+}: {
+	onClick: () => void;
+	pending?: boolean;
+}) {
+	return (
+		<button
+			type="button"
+			className={cn(btn.secondary, "flex items-center gap-2")}
+			onClick={onClick}
+			disabled={pending}
+		>
+			Save and finish later
+		</button>
+	);
+}
+
 /** The right-hand column of the wizard: "Step n of 10 · Label", the step's body and its footer. */
 export function StepFrame({
 	step,

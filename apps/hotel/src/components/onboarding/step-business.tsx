@@ -20,6 +20,7 @@ import {
 	checkEmail,
 	checkName,
 	checkPhone,
+	checkRegistration,
 	only,
 } from "./validate";
 
@@ -77,6 +78,8 @@ export function BusinessStep({
 			legalName: form.legalName.trim()
 				? checkName(form.legalName, "the registered name", 160)
 				: undefined,
+			// Optional (many lounges and bars are not registered yet); a typed number must look like one, as in the admin wizard.
+			registrationNumber: checkRegistration(form.registrationNumber),
 			email: checkEmail(form.email),
 			phone: checkPhone(form.phone),
 			address: checkAddress(form.address),
@@ -257,7 +260,8 @@ export function BusinessStep({
 							value={form.registrationNumber}
 							onChange={(v) => set("registrationNumber", v)}
 							placeholder="RC 1458823"
-							hint="Optional"
+							hint="Optional: RC, BN or IT and the digits"
+							error={errors.registrationNumber}
 						/>
 						<SelectField
 							label="Business type"

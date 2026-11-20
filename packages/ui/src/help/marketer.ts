@@ -29,7 +29,7 @@ export const marketerHelp: HelpModule = {
 		{
 			id: "mkt-share-link",
 			title: "Accept the agreement and share your referral link",
-			when: "You want a business owner to sign up themselves and still count as your referral.",
+			when: "You want a business owner to book a demo themselves and still count as your referral.",
 			topic: "Referrals",
 			steps: [
 				"On your dashboard, read the “Referral Partner Agreement”, tick the box and tap “Accept”.",
@@ -39,7 +39,7 @@ export const marketerHelp: HelpModule = {
 			],
 			goodToKnow: [
 				"Your link and the share buttons appear once you accept the agreement.",
-				"Anyone who signs up through your link is yours; the sign-up page shows your first name.",
+				"Anyone who books a demo through your link is yours: the request is recorded with your name, and our team sets the business up with you as its marketer.",
 				"You earn your share of the platform fee collected from each business you refer, for the agreed months from its first collected fee.",
 				"Your link stops working if your agreement is ended.",
 			],

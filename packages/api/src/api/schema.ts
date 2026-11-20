@@ -18,6 +18,7 @@ import { profileRoutes } from "./routes-profile";
 import { venueRoutes } from "./routes-venue";
 import { billRoutes } from "./routes-bill";
 import { partnerRoutes } from "./routes-partner";
+import { hotelApplicationRoutes } from "./routes-hotel-applications";
 import { pagedOf, pageParams } from "./paged";
 
 /**
@@ -1211,6 +1212,7 @@ export const schema = createSchema({
 	...venueRoutes,
 	...billRoutes,
 	...partnerRoutes,
+	...hotelApplicationRoutes,
 	// identity
 	"@post/identity/auth/refresh": {
 		input: z.object({ refreshToken: z.string() }),
@@ -1441,6 +1443,8 @@ export const schema = createSchema({
 			step: z.number(),
 			data: JsonObject,
 			nextAction: z.string().nullable().optional(),
+			/** Keep the form without completing the step (Save and finish later, the board's next action). */
+			draft: z.boolean().optional(),
 		}),
 		output: envelope(Onboarding),
 	},

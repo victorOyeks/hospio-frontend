@@ -55,6 +55,7 @@ jobs:
           DOMAIN_URL: app.hospio360.com
           NEXT_PUBLIC_API_URL: https://api-prod.hospio360.com
           NEXT_PUBLIC_BUILD_ID: ${{ github.sha }}
+          NEXT_PUBLIC_SITE_URL: https://hospio360.com
           NEXT_PUBLIC_API_LOG: "false"
           NEXT_PUBLIC_ADMIN_APP_URL: https://backoffice.hospio360.com
           NEXT_PUBLIC_DEMO_MODE: "false"

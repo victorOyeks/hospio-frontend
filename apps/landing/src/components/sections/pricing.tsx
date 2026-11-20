@@ -1,8 +1,8 @@
-import { ArrowRightIcon } from "lucide-react";
+import { CalendarDaysIcon } from "lucide-react";
 import Link from "next/link";
 import { btn } from "@hospio/ui/shared/ui";
 import { cn } from "@hospio/ui/utils";
-import { btnLg, Section, SIGN_UP_URL } from "@/components/site";
+import { BOOK_DEMO_URL, btnLg, Section } from "@/components/site";
 import { VideoEmbed } from "@/components/video-embed";
 import { VIDEOS } from "@/config/videos";
 import { CheckItem } from "./shared";
@@ -54,15 +54,15 @@ export function Pricing() {
 					</p>
 					<div className="mt-auto flex flex-wrap items-center gap-x-5 gap-y-3 pt-1">
 						<a
-							href={SIGN_UP_URL}
+							href={BOOK_DEMO_URL}
 							className={cn(
 								btn.primary,
 								btnLg,
 								"inline-flex items-center gap-[6px]",
 							)}
 						>
-							<ArrowRightIcon className="size-[15px]" strokeWidth={2.5} />
-							Get started
+							<CalendarDaysIcon className="size-[15px]" strokeWidth={2.5} />
+							Book a demo
 						</a>
 						<Link
 							href="/legal/fees"

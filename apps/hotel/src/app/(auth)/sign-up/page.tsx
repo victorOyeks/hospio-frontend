@@ -1,9 +1,11 @@
-import { loadLegalDocuments } from "@hospio/api/actions/legal";
-import { SignUpForm } from "@/components/auth/sign-up-form";
+import { redirect } from "next/navigation";
+import { bookDemoUrl } from "@hospio/api/app";
 
 /**
- * Self-serve onboarding, step 0: the owner creates the account and the business (Figma 3163:16114). A marketer's link
- * carries `?ref=<code>`, which prefills the referral code.
+ * Self sign-up is off (hospio-backend docs/onboarding.md, "Applications"): businesses book a demo on the landing site and the team
+ * onboards them, and the owner gets the usual invite. Old links (a marketer's `?ref=<code>` link, bookmarks) land on the Book a demo
+ * form with the code kept. The form this page used to show (components/auth/sign-up-form.tsx) is kept for the day the server's
+ * SELF_SIGNUP_ENABLED switch is turned back on. Owners already part-way through their own setup sign in and carry on at /onboarding.
  */
 export default async function SignUpPage({
 	searchParams,
@@ -11,7 +13,5 @@ export default async function SignUpPage({
 	searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
 	const ref = (await searchParams).ref;
-	const code = (Array.isArray(ref) ? ref[0] : ref)?.trim().toUpperCase();
-	const debit = (await loadLegalDocuments()).find((d) => d.key === "DEBIT");
-	return <SignUpForm referralCode={code ? code.slice(0, 20) : undefined} debitRatePct={debit?.ratePct} />;
+	redirect(bookDemoUrl(Array.isArray(ref) ? ref[0] : ref));
 }

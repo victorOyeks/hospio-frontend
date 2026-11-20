@@ -8,5 +8,6 @@ export {
 	checkEmail,
 	checkName,
 	checkPhone,
+	checkRegistration,
 	only,
 } from "@hospio/ui/shared/validate";

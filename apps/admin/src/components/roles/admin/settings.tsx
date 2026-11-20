@@ -2,6 +2,7 @@
 
 import { PlugIcon } from "lucide-react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useQueryState } from "nuqs";
 import { DeviceCatalogueSettings } from "./devices/devices-admin";
 import { useState } from "react";
@@ -18,6 +19,7 @@ import {
 	TextField,
 	ToggleField,
 } from "@hospio/ui/shared/field";
+import { ConfirmModal } from "@hospio/ui/shared/modal";
 import { PageHeader } from "@hospio/ui/shared/page-header";
 import { PillTabs } from "@hospio/ui/shared/pill-tabs";
 import { SectionCard } from "@hospio/ui/shared/section-card";
@@ -34,10 +36,15 @@ const bool = (v: unknown) => v === true || v === "true";
 export function SettingsScreen({
 	role,
 	settings: initial,
+	myTwoStepOn = null,
 }: {
 	role: AdminRole;
 	settings: PlatformSettingsData;
+	/** Whether the person looking has 2-step on (null: unknown); turning "Require 2-step" on without it asks first. */
+	myTwoStepOn?: boolean | null;
 }) {
+	const router = useRouter();
+	const [ask2Step, setAsk2Step] = useState(false);
 	const [tab, setTab] = useQueryState("tab");
 	const [s, setS] = useState(initial);
 	const [dirty, setDirty] = useState<Partial<Record<SettingsGroup, boolean>>>(
@@ -274,19 +281,21 @@ export function SettingsScreen({
 				>
 					<ToggleField
 						label="Require 2-step sign-in for every admin"
-						hint="Authenticator app"
+						hint="Super admins, support and finance (not marketers or hotel accounts). Anyone without it sets it up before they can use the console"
 						checked={bool(sec.require2Step)}
-						onChange={(v) => editable && set("security", "require2Step", v)}
+						onChange={(v) => {
+							if (!editable) return;
+							// Never lock out the person turning it on: they hear what happens to them first (docs/sign-in.md).
+							if (v && myTwoStepOn === false) setAsk2Step(true);
+							else set("security", "require2Step", v);
+						}}
 					/>
-					<ToggleField
-						label="Only allow admin sign-in from office IPs"
-						hint="Off · remote team"
-						checked={bool(sec.adminIpAllowlist)}
-						onChange={(v) => editable && set("security", "adminIpAllowlist", v)}
-					/>
+					{/* "Only allow admin sign-in from office IPs" (adminIpAllowlist) is hidden: the team is remote and there is no IP list,
+					    so it was never enforced. The field stays in the settings record (hospio-backend docs/admin-portal.md). */}
 					<FieldRow>
 						<SelectField
 							label="Session length"
+							hint="Hospio360 staff sign in again after this. Hotel accounts are not affected"
 							value={str(sec.sessionHours, "12")}
 							onChange={(v) => set("security", "sessionHours", num(v))}
 							options={[
@@ -311,6 +320,29 @@ export function SettingsScreen({
 						/>
 					</FieldRow>
 					{save("security")}
+					<ConfirmModal
+						open={ask2Step}
+						onOpenChange={setAsk2Step}
+						title="You don't use 2-step sign-in yet"
+						subtitle="Once this is saved, every admin without 2-step sign-in sets it up before they can use the console. That includes you."
+						confirmLabel="Turn on"
+						onConfirm={() => {
+							set("security", "require2Step", true);
+							setAsk2Step(false);
+						}}
+						alternative={{
+							label: "Set up now",
+							onClick: () => {
+								setAsk2Step(false);
+								router.push("/dashboard/profile?tab=security");
+							},
+						}}
+					>
+						<p className="text-sm text-ink-2">
+							You&apos;ll be asked to set it up on your next sign-in (or when your session renews, within the hour). Or set it up
+							now from My profile, then come back and turn this on.
+						</p>
+					</ConfirmModal>
 				</SectionCard>
 			)}
 

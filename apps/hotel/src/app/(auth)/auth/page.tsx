@@ -1,5 +1,6 @@
 import { cookies } from "next/headers";
 import Link from "next/link";
+import { bookDemoUrl } from "@hospio/api/app";
 import { DEMO_AUTH } from "@hospio/api/demo/mode";
 import { AuthForm } from "@hospio/ui/screens/auth-form";
 
@@ -32,14 +33,16 @@ export default async function AuthPage({
 				</p>
 			)}
 			<AuthForm from={from ?? next} email={email} reason={reason} />
+			{/* No self sign-up: our team sets accounts up after a demo (hospio-backend docs/onboarding.md, "Applications"). */}
 			<p className="mt-6 text-center text-[13px] text-ink-2">
-				New here?{" "}
-				<Link
-					href="/sign-up"
+				New to Hospio360?{" "}
+				<a
+					href={bookDemoUrl()}
 					className="font-semibold text-brand hover:underline"
 				>
-					Create your account
-				</Link>
+					Book a demo
+				</a>{" "}
+				and our team sets your business up with you.
 			</p>
 			{DEMO_AUTH && (
 				<p className="mt-6 rounded-[10px] bg-info-soft px-4 py-3 text-xs text-info">

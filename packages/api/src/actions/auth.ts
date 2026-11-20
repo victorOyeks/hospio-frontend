@@ -14,7 +14,8 @@ import type { HotelRole } from "@hospio/api/roles";
 import { lockDevice } from "@hospio/api/actions/devices";
 import { clientAgentHeaders } from "@hospio/api/client-agent";
 import { getDeviceToken } from "@hospio/api/device";
-import { createSession, decodeSession, deleteSession, setActiveHotel, setActiveRole } from "@hospio/api/session";
+import { cookies } from "next/headers";
+import { COOKIES, createSession, decodeSession, deleteSession, setActiveHotel, setActiveRole } from "@hospio/api/session";
 
 export type ActionResult<T = null> = { ok: true; data: T } | { ok: false; error: string };
 
@@ -155,4 +156,19 @@ export async function startSupportSession(token: string): Promise<ActionResult<n
 	await setActiveRole("OWNER");
 	if (session.hotels.length >= 1) await setActiveHotel(session.hotels[0]);
 	redirect("/dashboard");
+}
+
+/**
+ * "Require 2-step sign-in for every admin" (hospio-backend docs/sign-in.md): once the admin has turned 2-step on from the
+ * "Set up 2-step sign-in" screen, the session limited to that setup is swapped for a full one (POST /auth/refresh with the refresh
+ * cookie; identity issues the limited kind only while 2-step is off). `stillLimited` when the server still limits it.
+ */
+export async function renewAfterTwoStepSetup(): Promise<ActionResult<{ stillLimited: boolean }>> {
+	if (DEMO_AUTH) return { ok: true, data: { stillLimited: false } };
+	const refreshToken = (await cookies()).get(COOKIES.refresh)?.value;
+	if (!refreshToken) return { ok: false, error: "Your session has ended. Sign in again" };
+	const { data, error } = await api("@post/identity/auth/refresh", { body: { refreshToken } });
+	if (error || !data?.data?.accessToken) return { ok: false, error: errorMessage(error, "Your session has ended. Sign in again") };
+	const session = await createSession(data.data.accessToken, data.data.refreshToken);
+	return { ok: true, data: { stillLimited: session.setup === "TWO_STEP" } };
 }

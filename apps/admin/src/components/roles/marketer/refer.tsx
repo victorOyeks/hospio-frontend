@@ -154,7 +154,7 @@ export function MarketerRefer({
 
 				<SectionCard
 					title="Your link"
-					subtitle="Anyone who signs up through it is yours"
+					subtitle="Anyone who books a demo through it is yours"
 					bodyClassName="gap-3 pt-2"
 				>
 					{me.agreementAccepted ? (

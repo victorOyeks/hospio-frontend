@@ -20,6 +20,11 @@ export type SessionClaims = {
 	scope: "hotel" | "business" | "platform" | "marketer";
 	/** Support access ("View as owner"): the platform admin acting as the business's owner, read only. */
 	act?: string;
+	/**
+	 * "TWO_STEP": a Hospio360 staff session that may only set up 2-step sign-in ("Require 2-step sign-in for every admin",
+	 * hospio-backend docs/sign-in.md). The middleware sends it to /setup-two-step; every service refuses it elsewhere.
+	 */
+	setup?: string;
 	iat: number;
 	exp: number;
 };

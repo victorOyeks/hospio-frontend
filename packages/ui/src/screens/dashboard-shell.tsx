@@ -30,6 +30,7 @@ import {
 	getUser,
 } from "@hospio/api/dal";
 import { live } from "@hospio/api/data/live";
+import { hotelApplicationsData } from "@hospio/api/data/hotel-applications";
 import {
 	isHousekeepingSupervisor,
 	seesAllOutlets,
@@ -122,6 +123,7 @@ export async function DashboardShell({ children }: PropsWithChildren) {
 		unpaidSales,
 		inbox,
 		approvals,
+		applications,
 		brand,
 		desk,
 		legal,
@@ -146,6 +148,10 @@ export async function DashboardShell({ children }: PropsWithChildren) {
 					.page({ tab: "waiting", size: 1 })
 					.then((r) => (r.ok ? (r.data.counts?.waiting ?? r.data.total) : null))
 					.catch(() => null)
+			: Promise.resolve(null),
+		// The admin portal: new "Book a demo" requests next to Hotel applications.
+		APP === "admin" && role !== "MARKETER"
+			? hotelApplicationsData.newCount().catch(() => null)
 			: Promise.resolve(null),
 		// Hotel setup → Brand & colours: the hotel's colour, sidebar, short name and logo on every screen.
 		APP === "hotel" && activeHotel
@@ -201,6 +207,7 @@ export async function DashboardShell({ children }: PropsWithChildren) {
 		...(unpaidSales ? { unpaidSales } : {}),
 		...(inbox ? { inbox } : {}),
 		...(approvals ? { approvals } : {}),
+		...(applications ? { applications } : {}),
 	};
 
 	return (

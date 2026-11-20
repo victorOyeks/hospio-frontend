@@ -67,11 +67,15 @@ export type WizardCtx = {
 	setTerminals: (hotelId: string, rows: TerminalRow[]) => void;
 	templates: SetupTemplateRow[];
 	admins: AdminUserRow[];
-	/** Saves one step's form to the draft and marks it complete. Null when the save failed (already toasted). */
+	/**
+	 * Saves one step's form to the draft and marks it complete. Null when the save failed (already toasted). `draft`: keep the
+	 * form without completing the step (Save and finish later).
+	 */
 	saveStep: <K extends AdminOnboardingStep>(
 		step: K,
 		data: NonNullable<WizardData[K]>,
 		nextAction?: string,
+		draft?: boolean,
 	) => Promise<OnboardingRow | null>;
 	goTo: (step: AdminOnboardingStep) => void;
 	/** Venue words (hospio-backend docs/plan-venue-type.md): "Locations" for a non-hotel business, no rooms where none. */
@@ -204,13 +208,14 @@ export function OnboardingWizard({
 	);
 
 	const saveStep = useCallback<WizardCtx["saveStep"]>(
-		async (s, data, nextAction) => {
+		async (s, data, nextAction, draft) => {
 			try {
 				const result = await saveOnboardingStep(
 					business.id,
 					s,
 					data as unknown as NonNullable<AdminOnboardingData[typeof s]>,
 					nextAction,
+					draft,
 				);
 				if (!result.ok) {
 					toast.error(result.error, { duration: 8000 });
