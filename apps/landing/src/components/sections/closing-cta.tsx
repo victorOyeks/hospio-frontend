@@ -2,11 +2,11 @@ import { ArrowRightIcon, CalendarDaysIcon, MailIcon } from "lucide-react";
 import { btn } from "@hospio/ui/shared/ui";
 import { cn } from "@hospio/ui/utils";
 import {
+	BOOK_DEMO_URL,
 	btnLg,
 	CONTACT_EMAIL,
 	container,
-	DEMO_MAILTO,
-	SIGN_UP_URL,
+	SIGN_IN_URL,
 } from "@/components/site";
 
 export function ClosingCta() {
@@ -18,27 +18,27 @@ export function ClosingCta() {
 						Bring every location onto one screen.
 					</h2>
 					<p className="max-w-[620px] text-[15px] leading-[1.55] text-nav-foreground md:text-[17px]">
-						Create your account and set up your first location today, or ask us
-						for a demo on a business like yours.
+						Book a demo on a business like yours. Our team calls you within 1
+						working day, then sets your business up with you.
 					</p>
 					<div className="flex flex-wrap items-center justify-center gap-3">
 						<a
-							href={SIGN_UP_URL}
+							href={BOOK_DEMO_URL}
 							className={cn(
 								btn.secondary,
 								btnLg,
 								"inline-flex items-center gap-[6px]",
 							)}
 						>
-							<ArrowRightIcon className="size-[15px]" strokeWidth={2.5} />
-							Get started
-						</a>
-						<a
-							href={DEMO_MAILTO}
-							className="inline-flex items-center gap-[6px] rounded-control border border-white/80 px-4 py-[13px] text-[15px] font-semibold text-white hover:bg-white/10"
-						>
 							<CalendarDaysIcon className="size-[15px]" strokeWidth={2.5} />
 							Book a demo
+						</a>
+						<a
+							href={SIGN_IN_URL}
+							className="inline-flex items-center gap-[6px] rounded-control border border-white/80 px-4 py-[13px] text-[15px] font-semibold text-white hover:bg-white/10"
+						>
+							<ArrowRightIcon className="size-[15px]" strokeWidth={2.5} />
+							Sign in
 						</a>
 					</div>
 					<a

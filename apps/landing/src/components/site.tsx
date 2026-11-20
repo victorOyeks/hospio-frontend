@@ -9,7 +9,11 @@ import { HOTEL_APP_URL, SITE_URL } from "@/config/env";
 
 /** Every environment-specific address is in config/env.ts (build-time env, staging fallbacks). */
 export { HOTEL_APP_URL, SITE_URL };
-export const SIGN_UP_URL = `${HOTEL_APP_URL}/sign-up`;
+/**
+ * Every "get started" call to action: self sign-up is off, so businesses book a demo and the Hospio360 team sets them up
+ * (hospio-backend docs/onboarding.md, "Applications").
+ */
+export const BOOK_DEMO_URL = "/book-a-demo";
 export const SIGN_IN_URL = `${HOTEL_APP_URL}/auth`;
 /**
  * Where demo requests, sales and support questions go: Oyeks Global's inbox, the same address the legal pages give for notices
@@ -20,7 +24,6 @@ export const CONTACT_EMAIL =
 
 /** Where Oyeks Global Ltd is (footer, legal pages, notices clause of the Terms). */
 export const REGISTERED_OFFICE = "Lagos, Nigeria";
-export const DEMO_MAILTO = `mailto:${CONTACT_EMAIL}?subject=${encodeURIComponent("Hospio360 demo request")}&body=${encodeURIComponent("Business name:\nType (hotel, lounge, bar or restaurant):\nCity:\nBest phone number:\n")}`;
 /** Search engines index the site only when NEXT_PUBLIC_SITE_INDEXABLE=true (production); staging stays noindex. */
 export const SITE_INDEXABLE = process.env.NEXT_PUBLIC_SITE_INDEXABLE === "true";
 
@@ -86,9 +89,9 @@ export function SiteHeader() {
 					>
 						Sign in
 					</a>
-					<a href={SIGN_UP_URL} className={btn.primary}>
-						Get started
-					</a>
+					<Link href={BOOK_DEMO_URL} className={btn.primary}>
+						Book a demo
+					</Link>
 					<MobileMenu />
 				</div>
 			</div>
@@ -147,9 +150,8 @@ const footerColumns: {
 	{
 		title: "Get started",
 		links: [
-			{ href: SIGN_UP_URL, label: "Create an account" },
+			{ href: BOOK_DEMO_URL, label: "Book a demo" },
 			{ href: SIGN_IN_URL, label: "Sign in" },
-			{ href: DEMO_MAILTO, label: "Book a demo" },
 		],
 	},
 	{

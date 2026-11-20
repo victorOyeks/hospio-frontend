@@ -1,25 +1,25 @@
-import { Section } from "@/components/site";
+import { BOOK_DEMO_URL, Section } from "@/components/site";
 
 const steps: { title: string; text: string }[] = [
 	{
-		title: "Create your account",
-		text: "Sign up as the owner and confirm your phone number.",
+		title: "Book a demo",
+		text: "Tell us about your business. We call you within 1 working day.",
 	},
 	{
-		title: "Add your business",
-		text: "Its details and your first location.",
+		title: "Meet our team",
+		text: "We show you Hospio360 on a laptop or tablet and agree what you need.",
 	},
 	{
-		title: "Rooms or outlets, and prices",
-		text: "Rooms for a hotel; outlets for a lounge, bar or restaurant.",
+		title: "We set you up",
+		text: "Your business, locations, rooms or outlets, prices and staff.",
 	},
 	{
-		title: "Invite your manager",
-		text: "The person who runs it day to day. Then you’re live.",
+		title: "Sign in and go live",
+		text: "Your login comes by email. Then you’re live.",
 	},
 ];
 
-/** The four sign-up steps as one compact row of numbered chips (on a phone: the step names only). */
+/** The four steps from a demo to live, as one compact row of numbered chips (on a small screen: the step names only). */
 export function Onboarding() {
 	return (
 		<Section
@@ -49,7 +49,10 @@ export function Onboarding() {
 				))}
 			</ol>
 			<p className="-mt-2 text-center text-[13px] leading-[1.5] text-ink-2 md:-mt-3 md:text-sm">
-				Prefer to hand it over? The Hospio360 team can set it all up for you.
+				No forms to fill in on your own: the Hospio360 team sets it all up with you.{" "}
+				<a href={BOOK_DEMO_URL} className="font-semibold text-brand underline underline-offset-2">
+					Book a demo
+				</a>
 			</p>
 		</Section>
 	);

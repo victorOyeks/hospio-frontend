@@ -4,7 +4,7 @@ import type { ColumnDef } from "@tanstack/react-table";
 import { BuildingIcon, UserPlusIcon } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useQueryState } from "nuqs";
-import { useEffect, useState } from "react";
+import { type ReactNode, useEffect, useState } from "react";
 import { toast } from "sonner";
 import { DataTable, TwoLine } from "@hospio/ui/shared/data-table";
 import { FieldRow, SelectField, TextField } from "@hospio/ui/shared/field";
@@ -275,27 +275,41 @@ export function NewBusinessPanel({
 	onCreated,
 	marketers,
 	admins = [],
+	initial,
+	note,
 }: {
 	open: boolean;
 	onOpenChange: (o: boolean) => void;
 	/** Called with the new business; the parent closes the panel and opens the wizard. */
-	onCreated?: (business: { id: string }) => void;
+	onCreated?: (business: { id: string }) => void | Promise<void>;
 	marketers: MarketerRow[];
 	admins?: AdminUserRow[];
+	/** Values to start from (Hotel applications · Start onboarding); remount the panel (key) to apply new ones. */
+	initial?: {
+		name?: string;
+		owner?: string;
+		email?: string;
+		phone?: string;
+		city?: string;
+		kind?: BusinessKindKey;
+		marketerId?: string;
+	};
+	/** Shown at the top of the form (where the values came from). */
+	note?: ReactNode;
 }) {
 	const router = useRouter();
 	const [pending, setPending] = useState(false);
-	const [name, setName] = useState("");
-	const [owner, setOwner] = useState("");
-	const [email, setEmail] = useState("");
-	const [phone, setPhone] = useState("");
-	const [city, setCity] = useState("");
+	const [name, setName] = useState(initial?.name ?? "");
+	const [owner, setOwner] = useState(initial?.owner ?? "");
+	const [email, setEmail] = useState(initial?.email ?? "");
+	const [phone, setPhone] = useState(initial?.phone ?? "");
+	const [city, setCity] = useState(initial?.city ?? "");
 	// What kind of business (docs/plan-venue-type.md): a lounge, bar or restaurant starts without rooms and with its own setup.
-	const [kind, setKind] = useState<BusinessKindKey>("HOTEL");
+	const [kind, setKind] = useState<BusinessKindKey>(initial?.kind ?? "HOTEL");
 	// One fee model: a % of each day's sales, billed on the business's monthly invoice. Only the rate varies.
 	// Fee lock: the platform default unless a signed addendum says otherwise.
 	const lock = useFeeLock(null, null);
-	const [marketer, setMarketer] = useState("");
+	const [marketer, setMarketer] = useState(initial?.marketerId ?? "");
 	const [manager, setManager] = useState("");
 	const [errors, setErrors] = useState<NewBusinessErrors>({});
 	const adminOptions = admins
@@ -355,7 +369,7 @@ export function NewBusinessPanel({
 			// The panel must close before the page changes (an open Sheet leaves `pointer-events: none`
 			// on <body> when it unmounts mid-navigation, and nothing on the wizard can be clicked), but
 			// not through the URL: clearing `?new=1` with nuqs a moment later cancels the push.
-			if (onCreated) onCreated(result.data);
+			if (onCreated) await onCreated(result.data);
 			else {
 				onOpenChange(false);
 				router.push(`/dashboard/onboarding/${result.data.id}`);
@@ -400,6 +414,7 @@ export function NewBusinessPanel({
 			}
 		>
 			<div className="flex flex-col gap-5">
+				{note}
 				{Object.keys(errors).length > 0 && (
 					<p className="text-xs font-medium text-danger" role="alert">
 						Fix the fields marked in red to create the business.

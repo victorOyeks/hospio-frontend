@@ -18,6 +18,7 @@ import { profileRoutes } from "./routes-profile";
 import { venueRoutes } from "./routes-venue";
 import { billRoutes } from "./routes-bill";
 import { partnerRoutes } from "./routes-partner";
+import { hotelApplicationRoutes } from "./routes-hotel-applications";
 import { pagedOf, pageParams } from "./paged";
 
 /**
@@ -1211,6 +1212,7 @@ export const schema = createSchema({
 	...venueRoutes,
 	...billRoutes,
 	...partnerRoutes,
+	...hotelApplicationRoutes,
 	// identity
 	"@post/identity/auth/refresh": {
 		input: z.object({ refreshToken: z.string() }),

@@ -12,6 +12,7 @@ import { fmtLongDate } from "@hospio/ui/shared/format";
 import type { PillTone } from "@hospio/ui/shared/status-pill";
 import { copyText } from "@hospio/ui/shared/invite-card";
 import { cn } from "@hospio/ui/utils";
+import { bookDemoUrl } from "@hospio/api/app";
 
 export const stageTone: Record<string, PillTone> = {
 	LEAD: "grey",
@@ -129,14 +130,14 @@ export function agreementTerms(me: MarketerMeData) {
 	];
 }
 
-const HOTEL_APP =
-	process.env.NEXT_PUBLIC_HOTEL_APP_URL ?? "https://web-staging.hospio360.com";
-
-/** The sign-up link that credits this marketer: the hotel app's sign-up with their referral code. */
+/**
+ * The link that credits this marketer: the landing site's Book a demo form with their referral code (self sign-up is off; older
+ * hotel-app /sign-up?ref= links redirect there with the code kept).
+ */
 export function referralLink(me: MarketerProfileRow) {
 	const code =
 		me.referralCode ?? me.fullName.toLowerCase().replace(/\s+/g, "-");
-	return `${HOTEL_APP}/sign-up?ref=${encodeURIComponent(code)}`;
+	return bookDemoUrl(code);
 }
 
 /** The link in a grey bar with a real copy button. */
@@ -182,6 +183,6 @@ export function ReferralLinkBox({
 }
 
 export function whatsappShare(me: MarketerProfileRow) {
-	const text = `Hi! I work with Hospio360, the management system for hotels, lounges, bars and restaurants. Sign your business up through my link and we'll set you up: ${referralLink(me)}`;
+	const text = `Hi! I work with Hospio360, the management system for hotels, lounges, bars and restaurants. Book a demo through my link and the Hospio360 team will set your business up with you: ${referralLink(me)}`;
 	return `https://wa.me/?text=${encodeURIComponent(text)}`;
 }

@@ -1,4 +1,4 @@
-import { ArrowRightIcon, CalendarDaysIcon } from "lucide-react";
+import { CalendarDaysIcon, MailIcon } from "lucide-react";
 import type { Metadata } from "next";
 import { btn } from "@hospio/ui/shared/ui";
 import { cn } from "@hospio/ui/utils";
@@ -12,10 +12,10 @@ import { RolesStrip } from "@/components/sections/roles-strip";
 import { ThreeApps } from "@/components/sections/three-apps";
 import { YourBrand } from "@/components/sections/your-brand";
 import {
+	BOOK_DEMO_URL,
 	btnLg,
+	CONTACT_EMAIL,
 	container,
-	DEMO_MAILTO,
-	SIGN_UP_URL,
 	SiteFooter,
 	SiteHeader,
 } from "@/components/site";
@@ -69,26 +69,26 @@ export default function FeaturesPage() {
 						</p>
 						<div className="flex flex-wrap items-center justify-center gap-3">
 							<a
-								href={SIGN_UP_URL}
+								href={BOOK_DEMO_URL}
 								className={cn(
 									btn.primary,
 									btnLg,
 									"inline-flex items-center gap-[6px]",
 								)}
 							>
-								<ArrowRightIcon className="size-[15px]" strokeWidth={2.5} />
-								Get started
+								<CalendarDaysIcon className="size-[15px]" strokeWidth={2.5} />
+								Book a demo
 							</a>
 							<a
-								href={DEMO_MAILTO}
+								href={`mailto:${CONTACT_EMAIL}`}
 								className={cn(
 									btn.secondary,
 									btnLg,
 									"inline-flex items-center gap-[6px]",
 								)}
 							>
-								<CalendarDaysIcon className="size-[15px]" strokeWidth={2.5} />
-								Book a demo
+								<MailIcon className="size-[15px]" strokeWidth={2.5} />
+								Email us
 							</a>
 						</div>
 						<nav

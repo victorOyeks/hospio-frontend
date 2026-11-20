@@ -18,6 +18,7 @@ const badgeWord: Record<NonNullable<NavLink["badge"]>, string> = {
 	inbox: "unread",
 	unpaidSales: "unpaid",
 	approvals: "waiting",
+	applications: "new",
 };
 
 /**
