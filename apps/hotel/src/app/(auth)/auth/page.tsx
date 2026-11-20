@@ -6,9 +6,9 @@ import { AuthForm } from "@hospio/ui/screens/auth-form";
 export default async function AuthPage({
 	searchParams,
 }: {
-	searchParams: Promise<{ from?: string; saved?: string; email?: string; shared?: string; reason?: string }>;
+	searchParams: Promise<{ from?: string; next?: string; saved?: string; email?: string; shared?: string; reason?: string }>;
 }) {
-	const { from, saved, email, reason } = await searchParams;
+	const { from, next, saved, email, reason } = await searchParams;
 	// A shared device (docs/shared-devices.md): this is still the one sign-in page, with a way back to the lock screen.
 	const onDevice = !!(await cookies()).get("hms.device")?.value;
 	return (
@@ -31,7 +31,7 @@ export default async function AuthPage({
 					Your setup is saved. Sign in any time to carry on where you stopped.
 				</p>
 			)}
-			<AuthForm from={from} email={email} />
+			<AuthForm from={from ?? next} email={email} reason={reason} />
 			<p className="mt-6 text-center text-[13px] text-ink-2">
 				New here?{" "}
 				<Link

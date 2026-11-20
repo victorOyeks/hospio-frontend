@@ -7,19 +7,27 @@ import { getHotels } from "@hospio/api/dal";
 import { BUSINESS_ID, demoHotels } from "@hospio/api/demo/fixtures/hotel";
 import { DEMO_AUTH, demoDelay } from "@hospio/api/demo/mode";
 import { mintDemoToken, nameFromEmail } from "@hospio/api/demo/token";
-import { APP_ROLES, isAppRole } from "@hospio/api/app";
+import { accountKind, type AccountKind, APP_ROLES, belongsElsewhere, isAppRole } from "@hospio/api/app";
+import { requestHandoff } from "@hospio/api/handoff";
+import { settleSignIn } from "@hospio/api/sign-in";
 import type { HotelRole } from "@hospio/api/roles";
 import { lockDevice } from "@hospio/api/actions/devices";
 import { clientAgentHeaders } from "@hospio/api/client-agent";
-import { askForPin, getDeviceToken, getSharedDevice } from "@hospio/api/device";
+import { getDeviceToken } from "@hospio/api/device";
 import { createSession, decodeSession, deleteSession, setActiveHotel, setActiveRole } from "@hospio/api/session";
 
 export type ActionResult<T = null> = { ok: true; data: T } | { ok: false; error: string };
 
 /** `userId` decides where the sign-in page goes next: back to the page only for the person who was on it (packages/ui/src/shared/draft.tsx). */
-export type SignInResult = { mustChangePassword: boolean; roles: string[]; userId: string; twoStepToken?: undefined } | { twoStepToken: string; mustChangePassword?: undefined; roles?: undefined; userId?: undefined };
+export type SignedIn = { mustChangePassword: boolean; roles: string[]; userId: string; twoStepToken?: undefined; handoff?: undefined };
+/**
+ * The account belongs on the other app (hospio-backend docs/sign-in.md): no session was kept here; the browser goes to `url`, the
+ * other app's /auth/handoff with a one-time code, and arrives signed in. `kind` words the line shown meanwhile.
+ */
+export type HandedOver = { handoff: { url: string; kind: AccountKind }; twoStepToken?: undefined; mustChangePassword?: undefined; roles?: undefined; userId?: undefined };
+export type SignInResult = SignedIn | HandedOver | { twoStepToken: string; mustChangePassword?: undefined; roles?: undefined; userId?: undefined; handoff?: undefined };
 
-export async function login(input: { email: string; password: string }): Promise<ActionResult<SignInResult>> {
+export async function login(input: { email: string; password: string; next?: string | null }): Promise<ActionResult<SignInResult>> {
 	if (DEMO_AUTH) {
 		// Any email and password sign in, with every role, so the whole UI can be walked through.
 		await demoDelay(400);
@@ -28,7 +36,10 @@ export async function login(input: { email: string; password: string }): Promise
 		await setActiveHotel(demoHotels[0].id);
 		return { ok: true, data: { mustChangePassword: false, roles: [...APP_ROLES], userId: decodeSession(token)?.sub ?? "" } };
 	}
-	const { data, error } = await api("@post/identity/auth/sign-in", { body: input, headers: await clientAgentHeaders() });
+	const { data, error } = await api("@post/identity/auth/sign-in", {
+		body: { email: input.email, password: input.password },
+		headers: await clientAgentHeaders(),
+	});
 	if (error || !data) return { ok: false, error: errorMessage(error, "Email or password is wrong") };
 	// 2-step sign-in is on (docs/profile.md): no tokens yet, the code step comes next.
 	if (data.data.twoStepRequired && !data.data.accessToken) {
@@ -36,11 +47,11 @@ export async function login(input: { email: string; password: string }): Promise
 		return { ok: true, data: { twoStepToken: data.data.twoStepToken } };
 	}
 	if (!data.data.accessToken) return { ok: false, error: "Email or password is wrong" };
-	return { ok: true, data: await settleSignIn(data.data.accessToken, data.data.refreshToken, data.data.mustChangePassword, data.data.roles) };
+	return finish(data.data.accessToken, data.data.refreshToken, data.data.mustChangePassword, data.data.roles, input.next);
 }
 
 /** The code step of 2-step sign-in: an authenticator code or a recovery code, then the same landing as a normal sign-in. */
-export async function loginWithCode(input: { twoStepToken: string; code: string }): Promise<ActionResult<{ mustChangePassword: boolean; roles: string[]; userId: string }>> {
+export async function loginWithCode(input: { twoStepToken: string; code: string; next?: string | null }): Promise<ActionResult<SignedIn | HandedOver>> {
 	if (DEMO_AUTH) return { ok: false, error: "2-step sign-in needs the live services" };
 	const code = input.code.trim();
 	if (!code) return { ok: false, error: "Enter the code from your authenticator app" };
@@ -49,20 +60,29 @@ export async function loginWithCode(input: { twoStepToken: string; code: string 
 		headers: await clientAgentHeaders(),
 	});
 	if (error || !data) return { ok: false, error: errorMessage(error, "That code is wrong") };
-	return { ok: true, data: await settleSignIn(data.data.accessToken, data.data.refreshToken, data.data.mustChangePassword, data.data.roles) };
+	return finish(data.data.accessToken, data.data.refreshToken, data.data.mustChangePassword, data.data.roles, input.next);
 }
 
-async function settleSignIn(accessToken: string, refreshToken: string | null, mustChangePassword: boolean, roles: string[]) {
-	const session = await createSession(accessToken, refreshToken);
-	// One role: skip the picker. The chosen hotel defaults to the first granted.
-	const mine = session.roleSet.filter((r) => isAppRole(r));
-	if (mine.length === 1) await setActiveRole(mine[0]);
-	if (session.hotels.length >= 1) await setActiveHotel(session.hotels[0]);
-	// The PIN prompt after a sign-in on a shared device (that hotel first) or a first sign-in (docs/shared-devices.md).
-	const { device } = await getSharedDevice();
-	if (device && session.hotels.includes(device.hotelId)) await setActiveHotel(device.hotelId);
-	if (device || mustChangePassword) await askForPin();
-	return { mustChangePassword, roles, userId: session.sub };
+/**
+ * After the password (and any 2-step code): an account with this app's roles is signed in here; one that belongs on the other
+ * app gets no session here at all (so nothing can bounce between the apps) and is handed over with a one-time code, with the
+ * page it asked for. hospio-backend docs/sign-in.md.
+ */
+async function finish(
+	accessToken: string,
+	refreshToken: string | null,
+	mustChangePassword: boolean,
+	roles: string[],
+	next: string | null | undefined,
+): Promise<ActionResult<SignedIn | HandedOver>> {
+	const kind = accountKind(roles);
+	if (belongsElsewhere(roles) && kind) {
+		const handoff = await requestHandoff(accessToken, next, true);
+		if (!handoff.ok) return { ok: false, error: handoff.error };
+		return { ok: true, data: { handoff: { url: handoff.url, kind } } };
+	}
+	const session = await settleSignIn(accessToken, refreshToken, mustChangePassword);
+	return { ok: true, data: { mustChangePassword, roles, userId: session.sub } };
 }
 
 /** Signs out. `notice: "saved"` (onboarding's "Save and finish later") tells the sign-in page to say the setup was kept. */

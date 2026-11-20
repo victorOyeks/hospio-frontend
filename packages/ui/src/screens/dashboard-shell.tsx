@@ -19,7 +19,7 @@ import { loadMyLegal } from "@hospio/api/actions/legal";
 import { billingStatus } from "@hospio/api/actions/billing";
 import { BillingBanner } from "@hospio/ui/shared/billing-banner";
 import { logout } from "@hospio/api/actions/auth";
-import { APP } from "@hospio/api/app";
+import { APP, belongsElsewhere } from "@hospio/api/app";
 import { data } from "@hospio/api/data";
 import {
 	getActiveHotel,
@@ -83,6 +83,9 @@ export async function DashboardShell({ children }: PropsWithChildren) {
 		getHotels(),
 		getActiveHotel(),
 	]);
+	// Never render this app for an account that belongs on the other one (no hotel or business to load for a platform admin,
+	// no console for a hotel user): hand it over once instead (packages/api/src/handoff.ts, hospio-backend docs/sign-in.md).
+	if (!DEMO_AUTH && belongsElsewhere(session.roleSet)) redirect("/api/session/handoff");
 	// "View as owner" from the admin portal: a read-only session with the admin in `act`.
 	const support = session.actedBy ? { endsAt: session.exp } : null;
 	if (!DEMO_AUTH && live("identity")) {
