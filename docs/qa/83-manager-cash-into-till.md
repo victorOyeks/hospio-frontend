@@ -58,7 +58,7 @@ Set-up: Bisi opens a bar sale and leaves it unpaid (**New sale** → a drink →
 ## 2. The manager opens the bar till and takes the cash: it is in the bar till
 
 1. **Do:** in that note enter a float (e.g. ₦1,000) → **Open the bar till**. **Expect:** toast "Bar till opened · Float ₦1,000 · now
-   take the cash"; the Cash choice now says "Goes into the bar till (opened by <manager>)"; **Count cash** works.
+   take the cash"; the note goes and the Cash choice says "Goes into the bar till"; **Count cash** works.
 2. **Do:** **Count cash** → the amount → **Cash received** → **Don't send** → **Record payment**. **Expect:** "Payment recorded … The
    cash is in the bar till."
 3. **Do:** Bisi → **Till**. **Expect:** "Bar till · open since … · opened by <manager>"; **Cash taken** and **Should be in the
