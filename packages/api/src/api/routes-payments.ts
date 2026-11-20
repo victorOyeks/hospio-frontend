@@ -92,6 +92,8 @@ export const CashTill = z.object({
 	/** A manager or owner taking cash: it goes into the desk's till (`role`); `takenAs` is MANAGER or OWNER. */
 	manager: z.boolean().nullable().optional(),
 	takenAs: str,
+	/** A manager's or owner's walk-in cash at a location with no accommodation: refused (taken on the outlet's sale screen). */
+	noWalkInCash: z.boolean().nullable().optional(),
 });
 
 export const paymentRoutes = {

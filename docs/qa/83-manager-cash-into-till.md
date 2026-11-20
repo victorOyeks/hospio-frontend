@@ -12,7 +12,7 @@ Now it goes into **the till of the desk where the sale or payment happens**, the
 |---|---|
 | A bar sale (Main Bar, VIP Lounge) | the bar till |
 | A kitchen or restaurant sale | the kitchen till |
-| A folio, a booking (deposit, check-in, check-out) or a walk-in on Payments → Record a payment | the front office till |
+| A folio, a booking (deposit, check-in, check-out) or a walk-in on Payments → Record a payment | the front office till; at a location with no rooms walk-in cash is refused (take it on the sale screen) |
 | Cashier and waiter screens | the cashier's till (as for staff; a manager sees these screens only if they also hold that role) |
 
 - The cash counts in that till's **Should be in the drawer**, its **Cash in this till** list and its **Count & close**.
@@ -58,7 +58,7 @@ Set-up: Bisi opens a bar sale and leaves it unpaid (**New sale** → a drink →
 ## 2. The manager opens the bar till and takes the cash: it is in the bar till
 
 1. **Do:** in that note enter a float (e.g. ₦1,000) → **Open the bar till**. **Expect:** toast "Bar till opened · Float ₦1,000 · now
-   take the cash"; the note goes and the Cash choice says "Goes into the bar till"; **Count cash** works.
+   take the cash"; the note goes and the Cash choice says "Goes into the bar till (opened by <you>)"; **Count cash** works.
 2. **Do:** **Count cash** → the amount → **Cash received** → **Don't send** → **Record payment**. **Expect:** "Payment recorded … The
    cash is in the bar till."
 3. **Do:** Bisi → **Till**. **Expect:** "Bar till · open since … · opened by <manager>"; **Cash taken** and **Should be in the
@@ -79,13 +79,27 @@ Set-up: Bisi opens a bar sale and leaves it unpaid (**New sale** → a drink →
 
 ## 4. Front desk: folio, booking and walk-in cash go into the front office till
 
-1. **Do:** Manager → **Payments → Record a payment** → no folio, a walk-in name → **Cash**. **Expect:** with the front office till
-   closed, an amber note **Open the front office till first** ("… the front office for a folio, booking or walk-in …"), a float box
+1. **Do:** at a **hotel** (a location with rooms; at QA Lounge see 4b), Manager → **Payments → Record a payment** → no folio, a
+   walk-in name → **Cash**. **Expect:** with the front office till closed, an amber note **Open the front office till first** ("… the front office for a folio, booking or walk-in …"), a float box
    and **Open the front office till**; **Record payment** is greyed out.
 2. **Do:** open it with a float → **Record payment**. **Expect:** recorded; the note becomes "The cash goes into the front office
    till (opened by <you>)" before you record. The front office till (Financials → Tills) expects the float plus the cash.
 3. **Do:** at a hotel, a folio's **Record payment** and check-in/check-out cash. **Expect:** the same front office till rules.
 4. **Bug if:** a folio or walk-in cash payment by a manager lands in no till or in an outlet's till.
+
+## 4b. A location with no rooms: walk-in cash is refused
+
+QA Lounge has no rooms, so it has no front office.
+
+1. **Do:** Manager (or owner) → **Payments → Record a payment** → no folio, a walk-in name → **Cash**. **Expect:** amber note
+   **Take this cash on the sale screen**: "Cash at a lounge is taken on the bar or kitchen sale screen, where it goes into that
+   outlet's till. Open the sale there and take the cash. Card and transfer still work here". No float box or open button; **Record
+   payment** is greyed out.
+2. **Do:** send the cash anyway (API). **Expect:** 400 with the same sentence; nothing recorded, no till opened.
+3. **Do:** pick **Card · POS** or **Transfer** instead. **Expect:** allowed as before (don't send a card to a real POS).
+4. **Do:** a bar sale on Outlet sales with cash. **Expect:** unchanged: it goes into the bar till (section 2).
+5. **Do:** at a hotel (a location with rooms) the same walk-in cash. **Expect:** the front office till rules in section 4.
+6. **Bug if:** a lounge, bar or restaurant without rooms asks to open a front office till for walk-in cash.
 
 ## 5. Kitchen and other checks
 
