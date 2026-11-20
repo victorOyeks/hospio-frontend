@@ -1217,6 +1217,8 @@ export const schema = createSchema({
 		output: envelope(AuthResponse),
 	},
 	"@post/identity/auth/logout": { output: envelope(z.null()) },
+	// Sign out everywhere: every session of the person, every device, both apps (hospio-backend docs/sign-in.md).
+	"@post/identity/auth/logout-everywhere": { output: envelope(z.null()) },
 	// Single sign-in across the two apps (hospio-backend docs/sign-in.md): a one-time code for the other app, and its exchange there.
 	"@post/identity/auth/handoff": {
 		input: z.object({ target: z.enum(["hotel", "admin"]), next: z.string().max(512).optional(), endSession: z.boolean().optional() }),

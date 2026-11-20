@@ -35,6 +35,7 @@ const REASONS: Record<string, string> = {
 	handoff: "That sign-in link has expired or was already used. Sign in again.",
 	"wrong-app": "Sign in again to continue.",
 	"access-changed": "You were signed out. Sign in again to continue.",
+	"signed-out-everywhere": "You're signed out on every device.",
 };
 
 const schema = z.object({

@@ -1,6 +1,6 @@
 "use client";
 
-import { BellIcon, ChevronDownIcon, CircleHelpIcon, LogOutIcon, SearchIcon, TabletSmartphoneIcon, UserIcon } from "lucide-react";
+import { BellIcon, ChevronDownIcon, CircleHelpIcon, LogOutIcon, MonitorSmartphoneIcon, SearchIcon, TabletSmartphoneIcon, UserIcon } from "lucide-react";
 import Link from "next/link";
 import { useState, useTransition } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@hospio/ui/primitives/avatar";
@@ -15,7 +15,17 @@ import {
 } from "@hospio/ui/primitives/dropdown-menu";
 import { SidebarTrigger } from "@hospio/ui/primitives/sidebar";
 import type { Me } from "@hospio/api/api/schema";
-import { logout } from "@hospio/api/actions";
+import { logout, logoutEverywhere } from "@hospio/api/actions";
+import {
+	AlertDialog,
+	AlertDialogAction,
+	AlertDialogCancel,
+	AlertDialogContent,
+	AlertDialogDescription,
+	AlertDialogFooter,
+	AlertDialogHeader,
+	AlertDialogTitle,
+} from "@hospio/ui/primitives/alert-dialog";
 import { APP } from "@hospio/api/app";
 import { PLATFORM_ROLES, roleLabel, type HotelRole } from "@hospio/api/roles";
 import { AdminSearch } from "@hospio/ui/shared/admin-search";
@@ -54,6 +64,7 @@ export function Header({
 	const { biz } = useWording();
 	const [pending, startTransition] = useTransition();
 	const [setupOpen, setSetupOpen] = useState(false);
+	const [everywhereOpen, setEverywhereOpen] = useState(false);
 	const subtitle = `${roleLabel(role, biz.hotel)}${hotelCount > 0 ? ` · ${hotelCount} ${hotelCount === 1 ? "branch" : "branches"}` : ""}`;
 
 	return (
@@ -134,10 +145,42 @@ export function Header({
 						>
 							<LogOutIcon /> {device ? "Lock" : "Sign out"}
 						</DropdownMenuItem>
+						{/* "Sign out" ends this browser's sessions in both apps; this ends every device (hospio-backend docs/sign-in.md). */}
+						<DropdownMenuItem
+							className="rounded-lg text-danger focus:text-danger"
+							disabled={pending}
+							onSelect={() => setEverywhereOpen(true)}
+						>
+							<MonitorSmartphoneIcon /> Sign out everywhere
+						</DropdownMenuItem>
 					</DropdownMenuContent>
 				</DropdownMenu>
 				<InstallBanner />
 				<OpenInAppBanner />
+				<AlertDialog open={everywhereOpen} onOpenChange={setEverywhereOpen}>
+					<AlertDialogContent>
+						<AlertDialogHeader>
+							<AlertDialogTitle>Sign out everywhere?</AlertDialogTitle>
+							<AlertDialogDescription>
+								You'll be signed out on every phone, computer and browser where you use Hospio360, in the hotel app and the admin
+								console. Shared devices go back to their lock screen. You'll need your password to sign in again.
+							</AlertDialogDescription>
+						</AlertDialogHeader>
+						<AlertDialogFooter>
+							<AlertDialogCancel disabled={pending}>Cancel</AlertDialogCancel>
+							<AlertDialogAction
+								disabled={pending}
+								className="bg-danger text-white hover:bg-danger/90"
+								onClick={() => {
+									forgetEverything();
+									startTransition(() => logoutEverywhere());
+								}}
+							>
+								Sign out everywhere
+							</AlertDialogAction>
+						</AlertDialogFooter>
+					</AlertDialogContent>
+				</AlertDialog>
 				{setupHotels.length > 0 && (
 					<SetupDeviceModal open={setupOpen} onOpenChange={setSetupOpen} hotels={setupHotels} activeHotelId={activeHotelId} activeRole={role} />
 				)}

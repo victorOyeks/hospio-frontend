@@ -10,7 +10,8 @@ Anyone can now sign in at either address and ends up in the right app, already s
 
 Signing in at the "wrong" address shows a line such as **"This is a hotel account. Taking you to your hotel app"** and opens
 the right app about a second later. The move uses a one-time pass that works once, for 30 seconds, for that person and that
-app only. Signing out of either app signs you out of both.
+app only. **Sign out** ends your sessions in this browser in both apps (other devices stay signed in); **Sign out everywhere**
+in the profile menu ends every device.
 
 Two bugs are fixed:
 
@@ -75,14 +76,24 @@ For each account in the table, do both rows below in a fresh private window.
 3. **Do:** open https://web-staging.hospio360.com/auth?next=https://example.com and sign in as support.
    **Expect:** the admin dashboard; nothing ever opens example.com (or any other site). The same for `next=//example.com`.
 
-## 4 · Sign out from either app signs you out of both
+## 4 · Sign out (this browser, both apps) and Sign out everywhere
 
-1. **Do:** in window A sign in as the owner at web-staging; in window B (another private window or browser) sign in as the
-   owner at admin-staging (handed to the hotel app). Sign out in A. Refresh B.
-   **Expect:** B shows the sign-in page.
-2. **Do:** the same with support: A at admin-staging, B at web-staging (handed to admin). Sign out in B, refresh A.
-   **Expect:** A shows the sign-in page.
-3. **Expect:** after signing out, opening either address shows sign-in (not a dashboard).
+"Sign out" ends your sessions **in this browser**, in both apps. Your other phones and computers stay signed in. "Sign out
+everywhere" (profile menu, top right) ends every session on every device. Use two different browsers (or a normal and a
+private window) as "laptop" and "phone".
+
+1. **Do:** laptop: sign in as the owner at admin-staging (handed to the hotel app). Phone: sign in as the owner at web-staging.
+   On the laptop, **Sign out**. **Expect:** the laptop shows sign-in; opening admin-staging or web-staging on the laptop shows
+   sign-in. On the phone, refresh: **still signed in**, the dashboard works.
+2. **Do:** the same with support (laptop at web-staging, handed to the admin console; phone at admin-staging). Sign out on
+   the laptop. **Expect:** laptop signed out at both addresses; phone still works.
+3. **Do:** laptop and phone both signed in as the owner. On the phone open the menu under your name → **Sign out everywhere**.
+   **Expect:** a confirm "Sign out everywhere?" explaining every device is signed out. **Cancel** keeps you signed in.
+   Confirm: the phone shows sign-in with "You're signed out on every device." Refresh the laptop: sign-in ("You were signed
+   out").
+4. **Do:** the same as support or marketer in the admin console. **Expect:** the same item and confirm; every device signed out.
+5. **Expect:** forced sign-outs as before: a manager pausing a staff member, or a password change in My profile, still ends
+   that person's other sessions.
 
 ## 5 · The one-time pass can't be reused
 

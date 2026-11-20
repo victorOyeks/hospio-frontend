@@ -98,6 +98,19 @@ export async function logout(notice?: unknown) {
 	redirect(notice === "saved" ? "/auth?saved=1" : "/auth");
 }
 
+/**
+ * "Sign out everywhere" (profile menu, behind a confirm): every session of the person ends, on every device and in both apps
+ * (hospio-backend docs/sign-in.md). "Sign out" above ends only this browser's sessions in both apps. On a shared device the lock
+ * screen opens afterwards, as for Lock.
+ */
+export async function logoutEverywhere() {
+	const { auth } = await withSession();
+	if (auth && !DEMO_AUTH) await api("@post/identity/auth/logout-everywhere", { auth }).catch(() => undefined);
+	await deleteSession();
+	if (!DEMO_AUTH && (await getDeviceToken())) redirect("/lock");
+	redirect("/auth?reason=signed-out-everywhere");
+}
+
 export async function selectRole(role: string) {
 	if (!isAppRole(role)) return;
 	await setActiveRole(role as HotelRole);
