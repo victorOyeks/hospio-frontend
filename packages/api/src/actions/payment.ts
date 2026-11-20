@@ -354,7 +354,18 @@ export async function paymentStatus(
  */
 export async function cashTill(
 	role?: string,
-): Promise<ActionResult<{ role: string; needed: boolean; open: boolean; message?: string | null }>> {
+): Promise<
+	ActionResult<{
+		role: string;
+		needed: boolean;
+		open: boolean;
+		message?: string | null;
+		tillRole?: string | null;
+		openedByName?: string | null;
+		openedAt?: string | null;
+		stale?: boolean | null;
+	}>
+> {
 	if (!live("payment")) return { ok: true, data: { role: role ?? "FRONT_OFFICE", needed: false, open: true } };
 	const { data, error } = await api("@get/payment/payments/cash-till", {
 		...(await withSession()),

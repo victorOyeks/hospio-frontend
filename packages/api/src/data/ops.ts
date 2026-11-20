@@ -369,30 +369,32 @@ export const opsData = {
 			if (error || !res) return failed("finance-service tills", error, []);
 			return res.data.map(toTillRow);
 		},
-		/** The open till of the caller's paying role, or null. */
+		/** The open till of one desk (the Till page's own: BAR, KITCHEN, CASHIER, FRONT_OFFICE), or null. */
 		myTill: async (role = "FRONT_OFFICE"): Promise<TillRow | null> => {
 			if (!live("finance"))
 				return give(
 					ops.demoTills.find((t) => t.role === role && t.status === "OPEN") ??
 						null,
 				);
-			const { data: res, error } = await api(
-				"@get/finance/tills/mine",
-				await withSession(),
-			);
+			// The desk is always named: without it finance answers the first desk the person works with a till open (a bar
+			// attendant who also views the front office was shown the front office till).
+			const { data: res, error } = await api("@get/finance/tills/mine", {
+				...(await withSession()),
+				query: { role },
+			});
 			if (error || !res) return failed("finance-service my till", error, null);
 			return res.data ? toTillRow(res.data) : null;
 		},
-		/** The caller's role's tills closed in the last 7 days. */
+		/** That desk's tills closed in the last 7 days. */
 		myClosedTills: async (role = "FRONT_OFFICE"): Promise<TillRow[]> => {
 			if (!live("finance"))
 				return give(
 					ops.demoTills.filter((t) => t.role === role && t.status === "CLOSED"),
 				);
-			const { data: res, error } = await api(
-				"@get/finance/tills/mine/closed",
-				await withSession(),
-			);
+			const { data: res, error } = await api("@get/finance/tills/mine/closed", {
+				...(await withSession()),
+				query: { role },
+			});
 			if (error || !res)
 				return failed("finance-service my closed tills", error, []);
 			return res.data.map(toTillRow);

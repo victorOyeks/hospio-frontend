@@ -21,7 +21,7 @@ export default async function FrontDeskTodayPage({
 		data.rooms.list(),
 		data.folios.summaries(),
 		data.payments.terminals(),
-		data.finance.myTill(),
+		data.finance.myTill("FRONT_OFFICE"),
 		data.staff.clock(),
 	]);
 	return (

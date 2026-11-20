@@ -83,6 +83,12 @@ export const CashTill = z.object({
 	needed: z.boolean(),
 	open: z.boolean(),
 	message: str,
+	/** The drawer the cash goes into (a waiter's: the cashier's), who opened it and when; `stale` when left open from an earlier day. */
+	tillRole: str,
+	tillId: str,
+	openedByName: str,
+	openedAt: str,
+	stale: z.boolean().nullable().optional(),
 });
 
 export const paymentRoutes = {
