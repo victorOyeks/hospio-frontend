@@ -38,6 +38,8 @@ export const HotelApplication = z.object({
 	city: str,
 	state: str,
 	rooms: z.number().nullable().optional(),
+	monthlySales: str,
+	monthlySalesLabel: str,
 	heardFrom: str,
 	preferredTime: str,
 	message: str,
@@ -73,6 +75,8 @@ export const hotelApplicationRoutes = {
 				status: z.string(),
 				q: z.string(),
 				assigneeId: z.string(),
+				monthlySales: z.string(),
+				sort: z.string(),
 				page: z.number(),
 				size: z.number(),
 			})

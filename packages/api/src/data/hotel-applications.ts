@@ -9,6 +9,7 @@ import type {
 	HotelApplicationRow,
 	HotelApplicationStatus,
 } from "./hotel-application-types";
+import { MONTHLY_SALES_NOT_ASKED, monthlySalesRank } from "./hotel-application-types";
 import { live } from "./live";
 import { failedPage, type PageResult, slicePage, toPaged } from "./paging";
 
@@ -32,6 +33,7 @@ export const toHotelApplicationRow = (a: HotelApplication): HotelApplicationRow 
 	city: a.city ?? "",
 	state: a.state ?? "",
 	rooms: a.rooms ?? undefined,
+	monthlySales: a.monthlySales ?? undefined,
 	heardFrom: a.heardFrom ?? undefined,
 	preferredTime: a.preferredTime ?? undefined,
 	message: a.message ?? undefined,
@@ -71,6 +73,7 @@ const demoApplications: HotelApplicationRow[] = [
 		city: "Ikeja",
 		state: "Lagos",
 		rooms: 24,
+		monthlySales: "FROM_5M_TO_20M",
 		heardFrom: "MARKETER",
 		preferredTime: "MORNING",
 		message: "We have 24 rooms and a small bar.",
@@ -97,17 +100,34 @@ const demoApplications: HotelApplicationRow[] = [
 ];
 
 export const hotelApplicationsData = {
-	/** GET /platform/admin/hotel-applications: newest first; `counts` per status (and OPEN), `newTotal` for the badge. */
+	/**
+	 * GET /platform/admin/hotel-applications: newest first, or `sort: "SALES"` (highest monthly sales band first, Prefer not to say
+	 * then Not asked last); `monthlySales` filters by band (or NOT_ASKED); `counts` per status (and OPEN) follow the search and band,
+	 * `newTotal` for the badge.
+	 */
 	list: async (
-		query: { status?: string; q?: string; assigneeId?: string; page?: number; size?: number } = {},
+		query: {
+			status?: string;
+			q?: string;
+			assigneeId?: string;
+			monthlySales?: string;
+			sort?: string;
+			page?: number;
+			size?: number;
+		} = {},
 	): Promise<PageResult<HotelApplicationRow>> => {
 		if (!live("platform")) {
 			const open = (a: HotelApplicationRow) => a.status !== "ONBOARDED" && a.status !== "DECLINED";
+			const band = (a: HotelApplicationRow) =>
+				!query.monthlySales ||
+				(query.monthlySales === MONTHLY_SALES_NOT_ASKED ? !a.monthlySales : a.monthlySales === query.monthlySales);
 			const rows = demoApplications.filter(
 				(a) =>
 					(!query.status || (query.status === "OPEN" ? open(a) : a.status === query.status)) &&
+					band(a) &&
 					(!query.q || `${a.ownerName} ${a.businessName} ${a.city}`.toLowerCase().includes(query.q.toLowerCase())),
 			);
+			if (query.sort === "SALES") rows.sort((x, y) => monthlySalesRank(x.monthlySales) - monthlySalesRank(y.monthlySales));
 			const counts: Record<string, number> = { all: demoApplications.length, OPEN: demoApplications.filter(open).length };
 			for (const s of STATUSES) counts[s] = demoApplications.filter((a) => a.status === s).length;
 			counts.newTotal = counts.NEW ?? 0;
@@ -119,6 +139,8 @@ export const hotelApplicationsData = {
 				...(query.status ? { status: query.status } : {}),
 				...(query.q?.trim() ? { q: query.q.trim() } : {}),
 				...(query.assigneeId ? { assigneeId: query.assigneeId } : {}),
+				...(query.monthlySales ? { monthlySales: query.monthlySales } : {}),
+				...(query.sort ? { sort: query.sort } : {}),
 				page: query.page ?? 0,
 				size: query.size ?? 25,
 			},

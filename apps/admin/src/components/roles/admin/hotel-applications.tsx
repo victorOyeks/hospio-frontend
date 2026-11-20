@@ -28,6 +28,9 @@ import {
 	HEARD_FROM_LABELS,
 	HOTEL_APPLICATION_STATUSES,
 	type HotelApplicationPermissions,
+	MONTHLY_SALES_BANDS,
+	MONTHLY_SALES_NOT_ASKED,
+	monthlySalesLabel,
 	type HotelApplicationRow,
 	type HotelApplicationStatus,
 	venueKindOf,
@@ -43,7 +46,7 @@ import { PageHeader } from "@hospio/ui/shared/page-header";
 import { PillTabs } from "@hospio/ui/shared/pill-tabs";
 import { PanelSection, SidePanel } from "@hospio/ui/shared/side-panel";
 import { type PillTone, StatusPill } from "@hospio/ui/shared/status-pill";
-import { SearchBox, Toolbar } from "@hospio/ui/shared/toolbar";
+import { FilterSelect, SearchBox, Toolbar } from "@hospio/ui/shared/toolbar";
 import { btn } from "@hospio/ui/shared/ui";
 import { cn } from "@hospio/ui/utils";
 import { NewBusinessPanel } from "./businesses";
@@ -96,7 +99,7 @@ export function HotelApplicationsScreen({
 	admins: AdminUserRow[];
 }) {
 	const router = useRouter();
-	const list = useListParams();
+	const list = useListParams({ extra: ["sales"] });
 	const [appId, setAppId] = useQueryState("app", { shallow: false });
 	const [onboarding, setOnboarding] = useState<HotelApplicationRow | null>(null);
 	const page = result.data;
@@ -131,6 +134,15 @@ export function HotelApplicationsScreen({
 				) : (
 					<span className="text-ink-3">—</span>
 				),
+		},
+		{
+			accessorKey: "monthlySales",
+			header: "Monthly sales",
+			cell: ({ row }) => (
+				<span className={cn("whitespace-nowrap", (!row.original.monthlySales || row.original.monthlySales === "PREFER_NOT") && "text-ink-3")}>
+					{monthlySalesLabel(row.original.monthlySales)}
+				</span>
+			),
 		},
 		{
 			accessorKey: "assigneeName",
@@ -178,7 +190,21 @@ export function HotelApplicationsScreen({
 					/>
 				}
 				right={
-					<SearchBox value={list.search} onChange={list.setSearch} placeholder="Search business, owner, phone, city, code…" />
+					<>
+						<FilterSelect
+							value={list.params.sales ?? ""}
+							onChange={(v) => list.set({ sales: v })}
+							all="Any monthly sales"
+							options={[...MONTHLY_SALES_BANDS, { value: MONTHLY_SALES_NOT_ASKED, label: "Not asked" }]}
+						/>
+						<FilterSelect
+							value={list.sort === "SALES" ? "SALES" : ""}
+							onChange={(v) => list.setSort(v || null)}
+							all="Newest first"
+							options={[{ value: "SALES", label: "Monthly sales: highest first" }]}
+						/>
+						<SearchBox value={list.search} onChange={list.setSearch} placeholder="Search business, owner, phone, city, code…" />
+					</>
 				}
 			/>
 			<DataTable
@@ -340,6 +366,15 @@ function ApplicationPanel({
 								{ label: "Kind", value: applicationTypeLabel(row.businessType) },
 								{ label: "City / state", value: `${row.city}, ${row.state}` },
 								{ label: "Rooms", value: row.rooms ?? "—" },
+								{
+									label: "Monthly sales",
+									value: (
+										<span className={row.monthlySales ? "" : "text-ink-3"}>
+											{monthlySalesLabel(row.monthlySales)}
+											{row.monthlySales && row.monthlySales !== "PREFER_NOT" ? " (all outlets, the applicant’s estimate)" : ""}
+										</span>
+									),
+								},
 							]}
 						/>
 					</PanelSection>

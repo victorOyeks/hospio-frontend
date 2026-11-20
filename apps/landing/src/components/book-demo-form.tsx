@@ -25,6 +25,7 @@ import {
 	HEARD_FROM,
 	MAX_ROOMS,
 	MESSAGE_MAX,
+	MONTHLY_SALES,
 	RECEIVED_MESSAGE,
 	STATES,
 	WITH_ROOMS,
@@ -41,6 +42,7 @@ const ORDER: DemoField[] = [
 	"city",
 	"state",
 	"rooms",
+	"monthlySales",
 	"heardFrom",
 	"preferredTime",
 	"message",
@@ -108,6 +110,7 @@ export function BookDemoForm({ referralCode }: { referralCode?: string }) {
 	const [city, setCity] = useState("");
 	const [state, setState] = useState("");
 	const [rooms, setRooms] = useState("");
+	const [sales, setSales] = useState("");
 	const [heard, setHeard] = useState(referralCode ? "MARKETER" : "");
 	const [time, setTime] = useState("");
 	const [message, setMessage] = useState("");
@@ -143,6 +146,7 @@ export function BookDemoForm({ referralCode }: { referralCode?: string }) {
 			city,
 			state,
 			rooms: hasRooms ? roomsNumber : undefined,
+			monthlySales: sales,
 			heardFrom: heard,
 			preferredTime: time || undefined,
 			message: message || undefined,
@@ -394,6 +398,58 @@ export function BookDemoForm({ referralCode }: { referralCode?: string }) {
 					})}
 				</Labelled>
 			)}
+
+			<fieldset
+				className="flex min-w-0 flex-col gap-[10px]"
+				aria-describedby={
+					errors.monthlySales ? `${id("monthlySales")}-error` : `${id("monthlySales")}-hint`
+				}
+			>
+				<legend className="mb-[10px] text-[13px] font-medium text-ink-2">
+					Average monthly sales (all outlets combined)
+				</legend>
+				<div className="grid grid-cols-1 gap-[10px] sm:grid-cols-2">
+					{MONTHLY_SALES.map((m, i) => {
+						const on = sales === m.value;
+						return (
+							<label
+								key={m.value}
+								className={cn(
+									"flex cursor-pointer items-center justify-center rounded-control border px-3 py-[11px] text-center text-sm font-semibold transition-colors has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-brand/40",
+									on
+										? "border-brand bg-brand text-white"
+										: errors.monthlySales
+											? "border-status-bad bg-card text-ink hover:bg-subtle"
+											: "border-line bg-card text-ink hover:bg-subtle",
+								)}
+							>
+								<input
+									type="radio"
+									name="monthlySales"
+									value={m.value}
+									checked={on}
+									data-field={i === 0 ? "monthlySales" : undefined}
+									onChange={() => {
+										setSales(m.value);
+										clear("monthlySales");
+									}}
+									className="sr-only"
+								/>
+								{m.label}
+							</label>
+						);
+					})}
+				</div>
+				{errors.monthlySales ? (
+					<p id={`${id("monthlySales")}-error`} className="text-xs text-status-bad">
+						{errors.monthlySales}
+					</p>
+				) : (
+					<p id={`${id("monthlySales")}-hint`} className="text-xs text-ink-3">
+						An estimate is fine. It helps us prepare for your call.
+					</p>
+				)}
+			</fieldset>
 
 			<Labelled id={id("heardFrom")} label="How did you hear about us?" error={errors.heardFrom}>
 				<select
