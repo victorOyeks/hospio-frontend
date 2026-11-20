@@ -1,15 +1,9 @@
 name: Deploy Landing site (staging)
 
-# One deploy per app. A change under apps/landing or packages/ redeploys this app; the other apps have their own workflow.
+# There is one landing site: production's (hospio360.com, deploy-landing-production.yml from the production branch). Landing changes
+# reach it only through the staging -> production pull request, so pushes to staging no longer deploy it. Kept as a manual run only,
+# for the staging box's copy while it still serves hospio360.com (until DNS points at production).
 on:
-  push:
-    branches: [staging]
-    paths:
-      - "apps/landing/**"
-      - "packages/**"
-      - "package.json"
-      - "bun.lock"
-      - ".github/workflows/deploy-landing-staging.yml"
   workflow_dispatch:
 
 concurrency:
