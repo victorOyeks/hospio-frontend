@@ -1,5 +1,5 @@
 import { type NextRequest, NextResponse } from "next/server";
-import { APP, APP_ROLES, belongsElsewhere, isAppRole } from "./app";
+import { APP, APP_ROLES, belongsElsewhere, bookDemoUrl, isAppRole } from "./app";
 import { DEMO_AUTH } from "./demo/mode";
 import { rolePaths } from "./roles";
 import { safeAppPath } from "./safe-path";
@@ -90,6 +90,10 @@ function renew(refreshToken: string): Promise<Tokens | null> {
  */
 export async function appMiddleware(request: NextRequest) {
 	const { pathname } = request.nextUrl;
+	// No self sign-up (hospio-backend docs/onboarding.md, "Applications"): the hotel app's /sign-up is a real 307 to the website's
+	// Book a demo form, keeping a marketer's ?ref= (the page redirects too, for anything that reaches it).
+	if (APP === "hotel" && (pathname === "/sign-up" || pathname.startsWith("/sign-up/")))
+		return NextResponse.redirect(bookDemoUrl(request.nextUrl.searchParams.get("ref")), 307);
 	const token = request.cookies.get(COOKIES.token)?.value;
 	const refreshToken = request.cookies.get(COOKIES.refresh)?.value;
 	let fresh: Tokens | null = null;
