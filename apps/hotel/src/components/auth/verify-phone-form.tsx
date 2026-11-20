@@ -189,9 +189,9 @@ export function VerifyPhoneForm({
 			{error && <p className="text-xs text-danger">{error}</p>}
 			{staging && (
 				<p className="rounded-[10px] bg-info-soft px-4 py-3 text-xs text-info">
-					<span className="font-semibold">Staging accepts 123456.</span> Only
-					test numbers get a real SMS here; the code also shows in the notice at
-					the top of the screen.
+					<span className="font-semibold">Every code on staging is 159753.</span>{" "}
+					Only the test number gets a real SMS here; on any other number just
+					type 159753.
 				</p>
 			)}
 
