@@ -233,7 +233,7 @@ export function NewPaymentPanel({ open, folios, preselect, onClose, onSaved }: {
 				<SelectField label="Folio" value={folioId} onChange={(v) => { setFolioId(v); const f = folios.find((x) => x.id === v); if (f) setAmount(f.balance); setReceipt(defaultReceipt(f?.guestPhone)); }} placeholder="No folio · walk-in" options={folios.map((f) => ({ value: f.id, label: `${f.guestName} · ${f.roomNumber}`, hint: `${naira(f.balance)} due` }))} />
 				{!folio && <TextField label="Who is paying" value={payer} onChange={setPayer} placeholder="Walk-in guest name" required />}
 				<TextField label="For" value={desc} onChange={setDesc} />
-				<ChoiceCards label="Paid by" value={method} onChange={setMethod} columns={3} options={[{ value: "CARD", label: "Card · POS", hint: "Front desk POS" }, { value: "TRANSFER", label: "Transfer", hint: "Seen in the hotel's account" }, { value: "CASH", label: "Cash", hint: "Into the front office till" }]} />
+				<ChoiceCards label="Paid by" value={method} onChange={setMethod} columns={3} options={[{ value: "CARD", label: "Card · POS", hint: "Front desk POS" }, { value: "TRANSFER", label: "Transfer", hint: "Seen in the hotel's account" }, { value: "CASH", label: "Cash", hint: "Into the till of the desk where it is taken" }]} />
 				<CashTillNote active={open && method === "CASH"} onBlocked={setTillBlocked} />
 				<MoneyField label="Amount" value={amount} onChange={setAmount} required />
 				<ChoiceCards label="Receipt" value={receipt} onChange={setReceipt} columns={2} options={receiptOptions(folio?.guestPhone)} />
