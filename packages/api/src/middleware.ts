@@ -121,6 +121,24 @@ export async function appMiddleware(request: NextRequest) {
 	return response;
 }
 
+/** The screen a staff session limited to setting up 2-step sign-in is kept on (apps/admin). */
+const TWO_STEP_SETUP = "/setup-two-step";
+
+/** A first sign-in with a temporary password (GET /identity/users/me says changedPassword false); false when it can't tell. */
+async function mustChangePassword(token: string | undefined) {
+	try {
+		const res = await fetch(
+			`${process.env.NEXT_PUBLIC_API_URL}/identity/users/me`,
+			{ headers: { Authorization: `Bearer ${token}` } },
+		);
+		if (!res.ok) return false;
+		const body = await res.json();
+		return body?.data?.changedPassword === false;
+	} catch {
+		return false;
+	}
+}
+
 /** Passes the request on with its (possibly renewed) cookies. */
 const next = (request: NextRequest) =>
 	NextResponse.next({ request: { headers: request.headers } });
@@ -161,6 +179,15 @@ async function gate(request: NextRequest) {
 	if (pathname === "/")
 		return NextResponse.redirect(new URL("/dashboard", request.url));
 
+	// "Require 2-step sign-in for every admin" (hospio-backend docs/sign-in.md): a staff session limited to setting up 2-step goes
+	// to the setup screen, after a first-password change (the bootstrap super admin). The services refuse it everywhere else too.
+	if (session.setup === "TWO_STEP") {
+		if (pathname === TWO_STEP_SETUP) return next(request);
+		if (!DEMO_AUTH && (await mustChangePassword(token))) return NextResponse.redirect(new URL("/reset-password", request.url));
+		return NextResponse.redirect(new URL(TWO_STEP_SETUP, request.url));
+	}
+	if (pathname === TWO_STEP_SETUP) return NextResponse.redirect(new URL("/dashboard", request.url));
+
 	const mine = session.roleSet.filter((r) => isAppRole(r));
 	if (mine.length === 0 && belongsElsewhere(session.roleSet)) {
 		// A session of the other app's account (a cookie from before single sign-in): never redirect to the other host from here.
@@ -178,19 +205,8 @@ async function gate(request: NextRequest) {
 		if (DEMO_AUTH)
 			return NextResponse.redirect(new URL("/select-role", request.url));
 		// First sign-in with a temporary password: change it before anything else.
-		try {
-			const res = await fetch(
-				`${process.env.NEXT_PUBLIC_API_URL}/identity/users/me`,
-				{ headers: { Authorization: `Bearer ${token}` } },
-			);
-			if (res.ok) {
-				const body = await res.json();
-				if (body?.data?.changedPassword === false)
-					return NextResponse.redirect(new URL("/reset-password", request.url));
-			}
-		} catch {
-			// fall through to the role picker
-		}
+		if (await mustChangePassword(token))
+			return NextResponse.redirect(new URL("/reset-password", request.url));
 		return NextResponse.redirect(new URL("/select-role", request.url));
 	}
 
