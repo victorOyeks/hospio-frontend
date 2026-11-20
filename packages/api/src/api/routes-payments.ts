@@ -89,11 +89,14 @@ export const CashTill = z.object({
 	openedByName: str,
 	openedAt: str,
 	stale: z.boolean().nullable().optional(),
+	/** A manager or owner taking cash: it goes into the desk's till (`role`); `takenAs` is MANAGER or OWNER. */
+	manager: z.boolean().nullable().optional(),
+	takenAs: str,
 });
 
 export const paymentRoutes = {
 	"@get/payment/payments/cash-till": {
-		query: z.object({ role: z.string().optional() }),
+		query: z.object({ role: z.string().optional(), orderId: z.string().optional() }),
 		output: envelope(CashTill),
 	},
 	"@get/payment/terminals/assignments": {

@@ -15,6 +15,7 @@ import { btn } from "@hospio/ui/shared/ui";
 import { giveDiscount, moveLines, postCharge, sendFolio, staySummary } from "@hospio/api/actions/folio";
 import { withDeliveries } from "@hospio/ui/shared/deliveries-store";
 import { receiptOutlook, recordPayment } from "@hospio/api/actions/payment";
+import { CashTillNote } from "../../shared-staff/cash-till-note";
 import { useAction } from "@hospio/api/actions/use-action";
 import { GuestMessagesOffNote, useGuestMessagesOutlook, useRecordedWords } from "@hospio/ui/shared/receipt-outlook";
 import type { FolioLine, FolioRow, PaymentMethod } from "@hospio/api/data/types";
@@ -93,15 +94,18 @@ function FolioPaymentModal({ f, onClose, onPatch }: { f: FolioRow; onClose: () =
 	const [amount, setAmount] = useState<number | "">(f.balance > 0 ? f.balance : "");
 	const [method, setMethod] = useState<PaymentMethod>("CARD");
 	const [receipt, setReceipt] = useState<ReceiptChoice>(defaultReceipt(f.guestPhone));
+	// Cash goes into the front office till: held while that till is closed (hospio-backend docs/operating-day.md "Manager and owner cash").
+	const [tillBlocked, setTillBlocked] = useState(false);
 	// Guest messages off: said under the receipt choice before paying, and in the toast (hospio-backend docs/whatsapp-receipts.md).
 	const guestMessages = useGuestMessagesOutlook(() => receiptOutlook(), true);
 	const recordedWords = useRecordedWords();
 	return (
 		<Modal open onOpenChange={(o) => !o && onClose()} title="Record payment" subtitle={`${f.guestName} · ${f.roomNumber} · ${naira(f.balance)} due`} icon={CreditCardIcon} size="form"
-			footer={<><Button variant="outline" className={btn.secondary} onClick={onClose}>Cancel</Button><Button className={btn.primary} disabled={pending || amount === "" || amount <= 0} onClick={() => amount !== "" && run(() => recordPayment({ method, amount, folioId: f.id, bookingId: f.bookingId || undefined, guestName: f.guestName, guestPhone: f.guestPhone, guestEmail: f.guestEmail, description: `Folio ${f.reference} · ${f.roomNumber}`, receipt }), method === "CARD" ? `${naira(amount)} sent to the POS` : (r) => recordedWords(`${naira(amount)} recorded by ${method.toLowerCase()}`, r.status === "APPROVED" && r.receipt ? { ...r.receipt, sentTo: f.guestPhone } : null), (p) => { if (p.status === "APPROVED") onPatch(f.id, (x) => addLine(x, { id: p.id, kind: "PAYMENT", description: `Payment by ${method.toLowerCase()}`, category: "Payment", amount, tax: 0, postedAt: now(), postedBy: "You", source: "PAYMENT" })); onClose(); })}>{method === "CARD" ? "Send to POS" : "Record payment"}</Button></>}
+			footer={<><Button variant="outline" className={btn.secondary} onClick={onClose}>Cancel</Button><Button className={btn.primary} disabled={pending || amount === "" || amount <= 0 || (method === "CASH" && tillBlocked)} onClick={() => amount !== "" && run(() => recordPayment({ method, amount, folioId: f.id, bookingId: f.bookingId || undefined, guestName: f.guestName, guestPhone: f.guestPhone, guestEmail: f.guestEmail, description: `Folio ${f.reference} · ${f.roomNumber}`, receipt }), method === "CARD" ? `${naira(amount)} sent to the POS` : (r) => recordedWords(`${naira(amount)} recorded by ${method.toLowerCase()}`, r.status === "APPROVED" && r.receipt ? { ...r.receipt, sentTo: f.guestPhone } : null), (p) => { if (p.status === "APPROVED") onPatch(f.id, (x) => addLine(x, { id: p.id, kind: "PAYMENT", description: `Payment by ${method.toLowerCase()}`, category: "Payment", amount, tax: 0, postedAt: now(), postedBy: "You", source: "PAYMENT" })); onClose(); })}>{method === "CARD" ? "Send to POS" : "Record payment"}</Button></>}
 		>
 			<div className="flex flex-col gap-4">
-				<ChoiceCards label="Paid by" value={method} onChange={setMethod} columns={3} options={[{ value: "CARD", label: "Card · POS" }, { value: "TRANSFER", label: "Transfer" }, { value: "CASH", label: "Cash" }]} />
+				<ChoiceCards label="Paid by" value={method} onChange={setMethod} columns={3} options={[{ value: "CARD", label: "Card · POS" }, { value: "TRANSFER", label: "Transfer" }, { value: "CASH", label: "Cash", hint: "Into the front office till" }]} />
+				<CashTillNote active={method === "CASH"} onBlocked={setTillBlocked} />
 				<MoneyField label="Amount" value={amount} onChange={setAmount} required />
 				<ChoiceCards label="Receipt" value={receipt} onChange={setReceipt} columns={2} options={receiptOptions(f.guestPhone)} />
 				{receipt === "WHATSAPP" && <GuestMessagesOffNote outlook={guestMessages} />}
