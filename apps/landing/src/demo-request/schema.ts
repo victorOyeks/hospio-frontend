@@ -26,6 +26,18 @@ export const HEARD_FROM = [
 	{ value: "OTHER", label: "Other" },
 ] as const;
 
+/**
+ * "Average monthly sales (all outlets combined)": required, information for the call only (nothing is scored on it). The words
+ * are platform-service's (MonthlySales) and the admin portal's.
+ */
+export const MONTHLY_SALES = [
+	{ value: "UNDER_1M", label: "Under ₦1 million" },
+	{ value: "FROM_1M_TO_5M", label: "₦1 million – ₦5 million" },
+	{ value: "FROM_5M_TO_20M", label: "₦5 million – ₦20 million" },
+	{ value: "ABOVE_20M", label: "Above ₦20 million" },
+	{ value: "PREFER_NOT", label: "Prefer not to say" },
+] as const;
+
 export const CALL_TIMES = [
 	{ value: "MORNING", label: "Morning (9am–12pm)" },
 	{ value: "AFTERNOON", label: "Afternoon (12pm–4pm)" },
@@ -90,6 +102,10 @@ export const DemoRequest = z
 			.min(1, "Enter the number of rooms, or leave it empty")
 			.max(MAX_ROOMS, `Enter up to ${MAX_ROOMS} rooms`)
 			.optional(),
+		monthlySales: z.enum(
+			MONTHLY_SALES.map((m) => m.value),
+			"Choose your average monthly sales (an estimate is fine)",
+		),
 		heardFrom: z.enum(
 			HEARD_FROM.map((h) => h.value),
 			"Tell us how you heard about Hospio360",

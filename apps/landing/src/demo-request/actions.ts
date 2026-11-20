@@ -29,6 +29,7 @@ const FIELDS: DemoField[] = [
 	"city",
 	"state",
 	"rooms",
+	"monthlySales",
 	"heardFrom",
 	"preferredTime",
 	"message",

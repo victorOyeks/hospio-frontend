@@ -57,12 +57,13 @@ email.
 ## 2 · Send the form
 
 1. **Do:** open `/book-a-demo` and press **Book my demo** with nothing filled. **Expect:** "Please check the highlighted
-   fields." and red messages under full name, phone, email, business name, kind of business, city, state and "How did you
-   hear about us?"; the page scrolls to the first.
+   fields." and red messages under full name, phone, email, business name, kind of business, city, state, "Average monthly
+   sales" and "How did you hear about us?"; the page scrolls to the first.
 2. **Do:** type phone `12345`. **Expect:** "Enter a Nigerian phone number, like 0803 555 0192 or +234 803 555 0192".
 3. **Do:** pick **Lounge**. **Expect:** no "Number of rooms" box. Pick **Hotel** (or **Mixed**). **Expect:** "Number of rooms
    (optional)" appears and takes digits only.
-4. **Do:** fill everything with your test data: Hotel, 24 rooms, Ikeja / Lagos, heard from "Search (Google)", best time
+4. **Do:** fill everything with your test data: Hotel, 24 rooms, Ikeja / Lagos, monthly sales "₦5 million – ₦20 million",
+   heard from "Search (Google)", best time
    Morning, a short message. Press **Book my demo**. **Expect:** "Request received · Thanks — we've received your request.
    Our team will call you within 1 working day." and a Back to the home page button.
 5. **Do:** send the form again with the **same email** and a new message. **Expect:** the same "received" screen. In the admin
@@ -142,10 +143,40 @@ email.
 3. **Do:** hidden-field check (developer): a request with the `website` field filled is answered "received" and nothing is
    stored.
 
+## 9 · Average monthly sales (added 21 Nov 2026)
+
+The form asks **"Average monthly sales (all outlets combined)"**, required, with five choices: Under ₦1 million · ₦1 million –
+₦5 million · ₦5 million – ₦20 million · Above ₦20 million · Prefer not to say. It is information for the call only: nothing is
+scored or declined on it. Requests sent before 21 Nov have no answer and show **Not asked**.
+
+1. **Do:** on `/book-a-demo`, look under "Number of rooms" (or the state, for a lounge). **Expect:** the question as five
+   cards (two per row on a laptop, one per row on a narrow window; the chosen one turns maroon) and the hint "An estimate is fine. It helps
+   us prepare for your call." No copy mentions phones.
+2. **Do:** fill everything else and press **Book my demo** without choosing a band. **Expect:** it is not sent: "Please check the
+   highlighted fields.", the cards get a red outline and "Choose your average monthly sales (an estimate is fine)", and the
+   page scrolls to the question. Choosing a card clears the message.
+3. **Do:** send one request per band (5 requests, new QA emails `qa.sales.<band>.<n>@hospio-qa.test`; mind the 5-an-hour
+   limit per connection: wait or use a second connection). **Expect:** each gets the "Request received" screen.
+4. **Do:** in Hotel applications (support), look at the list. **Expect:** a **Monthly sales** column with the band's words;
+   older requests read "Not asked" (grey), "Prefer not to say" is grey too.
+5. **Do:** use the **Any monthly sales** filter: pick each band, then "Not asked". **Expect:** only matching requests; the tab
+   counts follow the filter; Clear filters brings everything back.
+6. **Do:** switch **Newest first** to **Monthly sales: highest first**. **Expect:** Above ₦20 million first, then ₦5–20 million,
+   ₦1–5 million, Under ₦1 million, then Prefer not to say, then Not asked; newest first within a band; paging keeps the order.
+7. **Do:** open a request. **Expect:** the Business section has **Monthly sales** with the band (e.g. "₦5 million – ₦20 million
+   (all outlets, the applicant’s estimate)"); an older request shows "Not asked".
+8. A developer confirms in the messaging records: the **"New demo request"** email to the support inbox has a line "Monthly
+   sales (all outlets): <band>"; the applicant's acknowledgement does **not** mention it.
+9. **Do:** send the form again from one of your emails with a **different** band. **Expect:** still one request; its note
+   "Sent the Book a demo form again" says "monthly sales: <new band>"; the request's own band is unchanged.
+10. **Clean up:** decline every test request with the reason "QA test".
+
 ## Expected vs bug
 
 - Expected: the acknowledgement to `@hospio-qa.test` shows SKIPPED; the website's 5-an-hour limit; staging `/sign-up` going to
   the production website address.
+- Bug: a request sent without a monthly sales band; a band shown on the applicant's acknowledgement; "Not asked" on a request sent
+  after 21 Nov; the Monthly sales sort putting "Prefer not to say" or "Not asked" above a band.
 - Bug: any "Get started", "Create an account" or "Start free" left on the website or the hotel app; a request that doesn't show
   in Hotel applications; a status that changes without a line in Notes; Start onboarding opening an empty panel; an onboarded
   request not linked to its business; a staff or owner invite that fails.

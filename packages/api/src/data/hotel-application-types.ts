@@ -40,6 +40,27 @@ export const HEARD_FROM_LABELS: Record<string, string> = {
 	OTHER: "Other",
 };
 
+/**
+ * "Average monthly sales (all outlets combined)" from the Book a demo form, highest band first (the order the list sorts by).
+ * Information for the call only. Requests sent before 21 Nov 2026 have none: "Not asked".
+ */
+export const MONTHLY_SALES_BANDS: { value: string; label: string }[] = [
+	{ value: "ABOVE_20M", label: "Above ₦20 million" },
+	{ value: "FROM_5M_TO_20M", label: "₦5 million – ₦20 million" },
+	{ value: "FROM_1M_TO_5M", label: "₦1 million – ₦5 million" },
+	{ value: "UNDER_1M", label: "Under ₦1 million" },
+	{ value: "PREFER_NOT", label: "Prefer not to say" },
+];
+/** The list filter for requests sent before the question existed. */
+export const MONTHLY_SALES_NOT_ASKED = "NOT_ASKED";
+export const monthlySalesLabel = (code?: string) =>
+	(code && MONTHLY_SALES_BANDS.find((b) => b.value === code)?.label) || "Not asked";
+/** The list's sort: highest band first, Prefer not to say then Not asked last (the server's SALES order). */
+export const monthlySalesRank = (code?: string) => {
+	const i = MONTHLY_SALES_BANDS.findIndex((b) => b.value === code);
+	return i < 0 ? MONTHLY_SALES_BANDS.length : i;
+};
+
 export const CALL_TIME_LABELS: Record<string, string> = {
 	MORNING: "Morning (9am–12pm)",
 	AFTERNOON: "Afternoon (12pm–4pm)",
@@ -67,6 +88,8 @@ export type HotelApplicationRow = {
 	city: string;
 	state: string;
 	rooms?: number;
+	/** A MONTHLY_SALES_BANDS code; undefined when the request came before the question ("Not asked"). */
+	monthlySales?: string;
 	heardFrom?: string;
 	preferredTime?: string;
 	message?: string;

@@ -10,16 +10,24 @@ export const dynamic = "force-dynamic";
 
 /**
  * Admin · Hotel applications: the "Book a demo" requests (hospio-backend docs/onboarding.md, "Applications"), paged by
- * platform-service (`?status=&q=&page=`, Open by default), and the one in `?app=` with its timeline.
+ * platform-service (`?status=&q=&sales=&sort=&page=`, Open by default, newest first or `sort=SALES`), and the one in `?app=` with
+ * its timeline.
  */
 export default async function HotelApplicationsPage({ searchParams }: { searchParams: SearchParams }) {
 	const sp = await searchParams;
-	const query = listQueryFrom(sp);
+	const query = listQueryFrom(sp, ["sales"]);
 	const status = query.status === "ALL" ? undefined : (query.status ?? "OPEN");
 	const appId = param(sp, "app");
 	const [role, result, opened, marketers, admins] = await Promise.all([
 		getActiveRole(),
-		hotelApplicationsData.list({ status, q: query.q, page: query.page, size: 25 }),
+		hotelApplicationsData.list({
+			status,
+			q: query.q,
+			monthlySales: typeof query.sales === "string" && query.sales ? query.sales : undefined,
+			sort: query.sort === "SALES" ? "SALES" : undefined,
+			page: query.page,
+			size: 25,
+		}),
 		appId ? hotelApplicationsData.get(appId) : Promise.resolve(null),
 		data.platform.marketers(),
 		data.platform.adminUsers(),
