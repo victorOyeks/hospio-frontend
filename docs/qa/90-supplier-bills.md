@@ -125,12 +125,18 @@ Segun, Mariam, Amoria, Victor or Tobi, and don't pay or cancel a bill you didn't
 4. **API:** front office → `GET /finance/bills/owed` → 403; Jide → `GET /finance/bills/delivery/{id}` → 200, `GET /finance/bills` →
    403.
 
+## Owner decisions (21 Nov 2026)
+
+1. **No backfill.** Deliveries received before this release have no bill; they are paid by hand (production had no real
+   deliveries yet).
+2. **Full payment only** for now: no part payments on a bill.
+3. The category stays **Stock purchases**.
+4. **Paying a bill needs no approval** (as for every bill): only a manager, the owner or Finance with Can edit can pay one.
+5. **Received = good units.** The receive form says so; damaged units are not stocked or billed. Stock handling is unchanged.
+
 ## Known limits
 
-- Pay in full only: no part payments on a bill.
 - A bill made from a delivery is changed (amount, due date) or cancelled in Finance; editing the delivery doesn't change it.
-- Deliveries received before 21 Nov 2026 have no bill (an owner decision whether to backfill them).
-- Paying a bill isn't routed for approval (as for every bill): only a manager, the owner or Finance with Can edit can pay one.
 - The hint looks at supplier bills from deliveries in the last 30 days only.
 
 ## Run on staging (21 Nov 2026)

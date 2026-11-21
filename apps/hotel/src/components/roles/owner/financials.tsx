@@ -1009,16 +1009,34 @@ function OwnerBills({
 	owed: OwedView | null;
 }) {
 	const [open, setOpen] = useState<BillRow | null>(null);
+	const [adding, setAdding] = useState(false);
 	const total = bills.reduce((s, b) => s + b.amount, 0);
 	return (
 		<div className="grid grid-cols-1 gap-4 xl:grid-cols-2">
 		<SectionCard
 			title="Bills to pay"
 			subtitle={`${hotelName} · ${bills.length ? `${naira(total)} in the next bills` : "nothing waiting"} · bank balance and payroll are not connected`}
+			headerRight={
+				bills.length > 0 ? (
+					<Button variant="outline" className={btn.secondary} onClick={() => setAdding(true)}>
+						Add bill
+					</Button>
+				) : undefined
+			}
 			bodyClassName="pt-1"
 		>
-			<BillsCard bills={bills} onOpen={setOpen} onAdd={() => undefined} />
-			<BillPanel bill={open} adding={false} categories={categories} canWrite inventoryLinks onClose={() => setOpen(null)} />
+			<BillsCard bills={bills} onOpen={setOpen} onAdd={() => setAdding(true)} />
+			<BillPanel
+				bill={open}
+				adding={adding}
+				categories={categories}
+				canWrite
+				inventoryLinks
+				onClose={() => {
+					setOpen(null);
+					setAdding(false);
+				}}
+			/>
 		</SectionCard>
 		<OwedToSuppliers owed={owed} tabs={false} />
 		</div>
