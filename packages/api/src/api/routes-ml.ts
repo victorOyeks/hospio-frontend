@@ -66,6 +66,42 @@ export const Bill = z.object({
 	nextBillId: str,
 	createdByName: str,
 	createdAt: str,
+	/** Set on a supplier bill made from a delivery received in Inventory. */
+	supplierId: str,
+	deliveryId: str,
+	purchaseOrderId: str,
+	invoiceNumber: str,
+});
+
+/** Owed to suppliers: bills grouped per payee. */
+export const Owed = z.object({
+	status: z.string(),
+	suppliers: z.array(
+		z.object({
+			payee: z.string(),
+			supplierId: str,
+			bills: z.number(),
+			total: money,
+			overdueBills: z.number(),
+			overdue: money,
+			oldestDue: str,
+			lastPaidAt: str,
+		}),
+	),
+	total: money,
+	overdue: money,
+	bills: z.number(),
+});
+
+/** The bill made from a delivery, as the store sees it. */
+export const DeliveryBill = z.object({
+	id: z.string(),
+	status: z.string(),
+	overdue: bool,
+	amount: money,
+	dueDate: z.string(),
+	paidAt: str,
+	paidFrom: str,
 });
 
 const BillInput = z.object({
@@ -136,6 +172,21 @@ export const mlRoutes = {
 		output: envelope(pagedOf(Bill)),
 	},
 	"@post/finance/bills": { input: BillInput, output: envelope(Bill) },
+	/** Owed to suppliers: status UNPAID (default), OVERDUE, PAID (last 90 days). */
+	"@get/finance/bills/owed": {
+		query: z.object({ status: z.string() }).partial(),
+		output: envelope(Owed),
+	},
+	/** The Record expense hint: unpaid supplier bills of about this amount (q may name the supplier). */
+	"@get/finance/bills/matches": {
+		query: z.object({ amount: z.number(), q: z.string() }).partial(),
+		output: envelope(z.array(Bill)),
+	},
+	/** The bill made from a delivery, or null while there is none. */
+	"@get/finance/bills/delivery/:deliveryId": {
+		params: z.object({ deliveryId: z.string() }),
+		output: envelope(DeliveryBill.nullable()),
+	},
 	"@put/finance/bills/:id": {
 		params: id,
 		input: BillInput,
@@ -206,4 +257,6 @@ export const mlRoutes = {
 export type ExpenseCategoryItem = z.infer<typeof ExpenseCategory>;
 export type BudgetOverviewItem = z.infer<typeof BudgetOverview>;
 export type BillItem = z.infer<typeof Bill>;
+export type OwedItem = z.infer<typeof Owed>;
+export type DeliveryBillItem = z.infer<typeof DeliveryBill>;
 export type ReceiptItem = z.infer<typeof Receipt>;

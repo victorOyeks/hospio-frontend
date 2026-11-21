@@ -7,7 +7,11 @@ import "server-only";
  */
 
 import { api, errorMessage } from "@hospio/api/api/client";
-import type { BillItem, ReceiptItem } from "@hospio/api/api/routes-ml";
+import type {
+	BillItem,
+	OwedItem,
+	ReceiptItem,
+} from "@hospio/api/api/routes-ml";
 import { withSession } from "@hospio/api/api/server";
 import { demoDelay } from "@hospio/api/demo/mode";
 import * as ops from "@hospio/api/demo/fixtures/ops";
@@ -95,11 +99,15 @@ import type {
 	BillRow,
 	ExpenseCategoryRow,
 	BudgetView,
+	OwedView,
 	ReceiptRow,
 } from "./ml-types";
 
 export type {
 	BillRow,
+	DeliveryBillRow,
+	OwedView,
+	SupplierOwedRow,
 	BudgetRow,
 	BudgetView,
 	ExpenseCategoryRow,
@@ -124,6 +132,27 @@ export const toBillRow = (b: BillItem): BillRow => ({
 	expenseId: b.expenseId ?? undefined,
 	createdBy: b.createdByName ?? undefined,
 	createdAt: b.createdAt ?? undefined,
+	supplierId: b.supplierId ?? undefined,
+	deliveryId: b.deliveryId ?? undefined,
+	purchaseOrderId: b.purchaseOrderId ?? undefined,
+	invoiceNumber: b.invoiceNumber ?? undefined,
+});
+
+export const toOwed = (o: OwedItem): OwedView => ({
+	status: o.status === "OVERDUE" || o.status === "PAID" ? o.status : "UNPAID",
+	suppliers: o.suppliers.map((r) => ({
+		payee: r.payee,
+		supplierId: r.supplierId ?? undefined,
+		bills: r.bills,
+		total: r.total,
+		overdueBills: r.overdueBills,
+		overdue: r.overdue,
+		oldestDue: r.oldestDue ?? undefined,
+		lastPaidAt: r.lastPaidAt ?? undefined,
+	})),
+	total: o.total,
+	overdue: o.overdue,
+	bills: o.bills,
 });
 
 export const toReceiptRow = (r: ReceiptItem): ReceiptRow => ({
@@ -279,6 +308,20 @@ export const mlData = {
 				return failedPage(errorMessage(error, "Bills didn't load"), q.size);
 			}
 			return { ok: true, data: toPaged(res.data, toBillRow) };
+		},
+		/** Owed to suppliers: bills grouped per payee (UNPAID, OVERDUE or PAID in the last 90 days); null when it didn't load. */
+		owed: async (status?: string): Promise<OwedView | null> => {
+			if (!live("finance"))
+				return give({ status: "UNPAID", suppliers: [], total: 0, overdue: 0, bills: 0 });
+			const { data: res, error } = await api("@get/finance/bills/owed", {
+				...(await withSession()),
+				query: status ? { status } : {},
+			});
+			if (error || !res) {
+				console.error("finance-service owed:", error);
+				return null;
+			}
+			return toOwed(res.data);
 		},
 	},
 	housekeeping: {

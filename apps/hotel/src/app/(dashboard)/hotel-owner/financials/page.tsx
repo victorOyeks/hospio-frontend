@@ -37,6 +37,7 @@ export default async function Page() {
 		budget,
 		dueBills,
 		categories,
+		owed,
 	] = await Promise.all([
 		data.owner.hotels(),
 		data.finance.transactions(),
@@ -55,6 +56,7 @@ export default async function Page() {
 		data.finance.budget(lagosDay(0).slice(0, 7)),
 		data.finance.bills({ status: "UNPAID", size: 6, sort: "dueDate,asc" }),
 		data.finance.categories(true),
+		data.finance.owed(),
 	]);
 	const worth = await data.hotels.worth(hotels, approvals);
 	return (
@@ -81,6 +83,7 @@ export default async function Page() {
 				outletSales={outletSales}
 				budget={budget}
 				dueBills={dueBills.data.content}
+				owed={owed}
 				categories={categories}
 			/>
 			<LaundryMaintenanceMoney

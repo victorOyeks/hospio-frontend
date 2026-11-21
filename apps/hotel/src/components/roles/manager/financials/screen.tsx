@@ -14,7 +14,7 @@ import {
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useQueryState } from "nuqs";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@hospio/ui/primitives/button";
 import { DataTable, TwoLine } from "@hospio/ui/shared/data-table";
@@ -60,6 +60,7 @@ import type {
 	BillRow,
 	BudgetView,
 	ExpenseCategoryRow,
+	OwedView,
 } from "@hospio/api/data/ml-types";
 import {
 	BillPanel,
@@ -67,6 +68,7 @@ import {
 	BillsTab,
 	BudgetList,
 	CategoriesBudgetsPanel,
+	OwedToSuppliers,
 } from "../../shared-staff/budgets-bills";
 import { cn } from "@hospio/ui/utils";
 import {
@@ -112,6 +114,8 @@ export type FinancialsProps = {
 	dueBills: BillRow[];
 	/** The Bills tab's page (only loaded on that tab). */
 	bills: PageResult<BillRow> | null;
+	/** Owed to suppliers (only loaded on the Bills tab; `?owed=`). */
+	owed?: OwedView | null;
 	week: SeriesPointRow[];
 	/** The hotel's expense categories, archived ones included (finance-service). */
 	categories: ExpenseCategoryRow[];
@@ -145,6 +149,13 @@ export function FinancialsScreen(p: FinancialsProps) {
 	});
 	const [billOpen, setBillOpen] = useState<BillRow | null>(null);
 	const [addingBill, setAddingBill] = useState(false);
+	// `?bill=` opens a bill on the Bills tab (the Record expense hint links to it).
+	const [billParam, setBillParam] = useQueryState("bill");
+	useEffect(() => {
+		if (!billParam) return;
+		const b = p.bills?.data.content.find((x) => x.id === billParam);
+		if (b) setBillOpen(b);
+	}, [billParam, p.bills]);
 	const activeCategories = p.categories
 		.filter((c) => c.active)
 		.map((c) => c.label);
@@ -926,6 +937,12 @@ export function FinancialsScreen(p: FinancialsProps) {
 							<PlusIcon className="size-4" /> Add bill
 						</Button>
 					</div>
+					<OwedToSuppliers
+						owed={p.owed ?? null}
+						onPick={(payee) =>
+							list.set({ q: payee, status: null, tab: "bills" })
+						}
+					/>
 					{p.bills && <BillsTab result={p.bills} onOpen={setBillOpen} />}
 				</>
 			)}
@@ -1007,9 +1024,11 @@ export function FinancialsScreen(p: FinancialsProps) {
 				adding={addingBill}
 				categories={p.categories}
 				canWrite
+				inventoryLinks
 				onClose={() => {
 					setBillOpen(null);
 					setAddingBill(false);
+					if (billParam) void setBillParam(null);
 				}}
 			/>
 			<RecordExpensePanel

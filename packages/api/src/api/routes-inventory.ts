@@ -176,6 +176,9 @@ export const InvDelivery = z.object({
 	summary: str,
 	receivedByName: str,
 	receivedAt: str,
+	/** Only on the receive answer: the supplier bill Finance gets (null when nothing is billed). */
+	billAmount: num,
+	billDueOn: str,
 });
 
 export const InvOrder = z.object({

@@ -21,6 +21,8 @@ import { StatusPill } from "@hospio/ui/shared/status-pill";
 import { SearchBox, Toolbar } from "@hospio/ui/shared/toolbar";
 import { btn, input } from "@hospio/ui/shared/ui";
 import { receiveDelivery } from "@hospio/api/actions/inventory";
+import { deliveryBill } from "@hospio/api/actions/ml";
+import type { DeliveryBillRow } from "@hospio/api/data/ml-types";
 import { useAction } from "@hospio/api/actions/use-action";
 import type { PageResult } from "@hospio/api/data/paging";
 import type {
@@ -298,6 +300,11 @@ export function DeliveriesScreen({
 								{ label: "Invoice", value: shown.invoiceNumber ?? "—" },
 							]}
 						/>
+						<DeliveryBillLine
+							deliveryId={shown.id}
+							worth={shown.total}
+							receivedAt={shown.receivedAt}
+						/>
 						{shown.note && <Note tone="info">{shown.note}</Note>}
 					</div>
 				)}
@@ -454,9 +461,16 @@ function ReceivePanel({
 											})),
 									}),
 								(d) =>
-									d.summary
-										? `Delivery received · ${d.summary}`
-										: "Delivery received · stock updated",
+									[
+										d.summary
+											? `Delivery received · ${d.summary}`
+											: "Delivery received · stock updated",
+										d.billAmount
+											? `Bill of ${naira(d.billAmount)} added for Finance, due ${d.billDueOn ? fmtDay(d.billDueOn) : "now"}`
+											: "",
+									]
+										.filter(Boolean)
+										.join(" · "),
 								onDone,
 							)
 						}
@@ -636,6 +650,12 @@ function ReceivePanel({
 						{ label: "Received now", value: naira(total), strong: true },
 					]}
 				/>
+				<p className="text-xs text-ink-3">
+					Received is the good units: they go into stock and onto the
+					supplier's bill. Damaged units are noted for the supplier, not
+					stocked or billed. Finance gets a bill of {naira(total)}, due by the
+					supplier's payment terms.
+				</p>
 				<FieldRow>
 					<TextField
 						label="Invoice number"
@@ -653,5 +673,65 @@ function ReceivePanel({
 				/>
 			</div>
 		</SidePanel>
+	);
+}
+
+/**
+ * The supplier bill Finance made from this delivery (finance-service): "Unpaid · due 5 Dec", "Overdue", "Paid 22 Nov · from bank".
+ * Nothing for a delivery worth nothing; "Waiting for Finance" for a fresh one the bill isn't made for yet.
+ */
+function DeliveryBillLine({
+	deliveryId,
+	worth,
+	receivedAt,
+}: {
+	deliveryId: string;
+	worth: number;
+	receivedAt: string;
+}) {
+	const [bill, setBill] = useState<DeliveryBillRow | null | undefined>(
+		undefined,
+	);
+	useEffect(() => {
+		let gone = false;
+		setBill(undefined);
+		void deliveryBill(deliveryId).then((r) => {
+			if (!gone) setBill(r.ok ? r.data : null);
+		});
+		return () => {
+			gone = true;
+		};
+	}, [deliveryId]);
+	if (bill === undefined) return null;
+	if (!bill) {
+		if (!(worth > 0)) return null;
+		const fresh = Date.now() - new Date(receivedAt).getTime() < 10 * 60_000;
+		return (
+			<Note tone="info">
+				{fresh
+					? "Supplier bill: waiting for Finance to add it"
+					: "No supplier bill for this delivery (received before bills were made automatically)"}
+			</Note>
+		);
+	}
+	return (
+		<div className="flex items-center justify-between rounded-control border border-line px-3 py-2 text-[13px]">
+			<span className="text-ink-3">Supplier bill</span>
+			<span className="flex items-center gap-2" data-testid="delivery-bill">
+				<span className="font-semibold text-ink">{naira(bill.amount)}</span>
+				{bill.status === "PAID" ? (
+					<StatusPill tone="success">
+						Paid {bill.paidAt ? fmtDay(bill.paidAt.slice(0, 10)) : ""}
+						{bill.paidFrom ? ` · from ${bill.paidFrom.toLowerCase()}` : ""}
+					</StatusPill>
+				) : bill.status === "CANCELLED" ? (
+					<StatusPill tone="grey">Cancelled</StatusPill>
+				) : bill.overdue ? (
+					<StatusPill tone="danger">Unpaid · overdue since {fmtDay(bill.dueDate)}</StatusPill>
+				) : (
+					<StatusPill tone="warning">Unpaid · due {fmtDay(bill.dueDate)}</StatusPill>
+				)}
+			</span>
+		</div>
 	);
 }

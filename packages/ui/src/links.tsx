@@ -270,6 +270,7 @@ export const financeLinks: NavLink[] = [
 	{ title: "Today's money", url: "/dashboard", icon: CoinsIcon },
 	{ title: "Month", url: "/dashboard/month", icon: BarChart3Icon },
 	{ title: "Expenses", url: "/dashboard/expenses", icon: ReceiptIcon },
+	{ title: "Bills", url: "/dashboard/bills", icon: FileTextIcon },
 	{ title: "Outlet sales", url: "/dashboard/sales", icon: WineIcon },
 	{ title: "Tills", url: "/dashboard/tills", icon: WalletIcon },
 	{ title: "Night audit", url: "/dashboard/night-audit", icon: MoonIcon },

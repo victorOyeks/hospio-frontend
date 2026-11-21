@@ -53,6 +53,7 @@ export default async function FinancialsPage({
 		budget,
 		dueBills,
 		bills,
+		owed,
 	] = await Promise.all([
 		getActiveHotel(),
 		data.finance.expensesPage(onBills ? { size: 1 } : listQuery),
@@ -80,6 +81,9 @@ export default async function FinancialsPage({
 					status: query.status,
 					page: query.page,
 				})
+			: null,
+		onBills
+			? data.finance.owed(typeof sp.owed === "string" ? sp.owed : undefined)
 			: null,
 	]);
 	const label = <T extends { category: string; categoryCode?: string }>(
@@ -111,6 +115,7 @@ export default async function FinancialsPage({
 				income={income}
 				dueBills={dueBills.data.content}
 				bills={bills}
+				owed={owed}
 				week={week}
 				categories={categories}
 				rules={{

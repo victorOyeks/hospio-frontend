@@ -45,8 +45,8 @@ import { StatusPill } from "@hospio/ui/shared/status-pill";
 import { FilterSelect, SearchBox, Toolbar } from "@hospio/ui/shared/toolbar";
 import { btn } from "@hospio/ui/shared/ui";
 import { useNotConnectedAction } from "@hospio/api/demo/actions";
-import type { BillRow, BudgetView, ExpenseCategoryRow } from "@hospio/api/data/ml-types";
-import { BillPanel, BillsCard, BudgetList } from "../shared-staff/budgets-bills";
+import type { BillRow, BudgetView, ExpenseCategoryRow, OwedView } from "@hospio/api/data/ml-types";
+import { BillPanel, BillsCard, BudgetList, OwedToSuppliers } from "../shared-staff/budgets-bills";
 import type {
 	ApprovalRow,
 	AtHotel,
@@ -129,6 +129,8 @@ export type FinancialsProps = {
 	budget?: BudgetView | null;
 	/** The active hotel's next unpaid bills. */
 	dueBills?: BillRow[];
+	/** Owed to suppliers for the active hotel (unpaid, per supplier). */
+	owed?: OwedView | null;
 	categories?: ExpenseCategoryRow[];
 };
 
@@ -254,6 +256,7 @@ export function OwnerFinancials(props: FinancialsProps) {
 							hotelName={props.hotelName}
 							bills={props.dueBills ?? []}
 							categories={props.categories ?? []}
+							owed={props.owed ?? null}
 						/>
 					)}
 					<div className="grid grid-cols-1 gap-4 xl:grid-cols-[minmax(0,1fr)_380px]">
@@ -998,22 +1001,27 @@ function OwnerBills({
 	hotelName,
 	bills,
 	categories,
+	owed,
 }: {
 	hotelName: string;
 	bills: BillRow[];
 	categories: ExpenseCategoryRow[];
+	owed: OwedView | null;
 }) {
 	const [open, setOpen] = useState<BillRow | null>(null);
 	const total = bills.reduce((s, b) => s + b.amount, 0);
 	return (
+		<div className="grid grid-cols-1 gap-4 xl:grid-cols-2">
 		<SectionCard
 			title="Bills to pay"
 			subtitle={`${hotelName} · ${bills.length ? `${naira(total)} in the next bills` : "nothing waiting"} · bank balance and payroll are not connected`}
 			bodyClassName="pt-1"
 		>
 			<BillsCard bills={bills} onOpen={setOpen} onAdd={() => undefined} />
-			<BillPanel bill={open} adding={false} categories={categories} canWrite onClose={() => setOpen(null)} />
+			<BillPanel bill={open} adding={false} categories={categories} canWrite inventoryLinks onClose={() => setOpen(null)} />
 		</SectionCard>
+		<OwedToSuppliers owed={owed} tabs={false} />
+		</div>
 	);
 }
 

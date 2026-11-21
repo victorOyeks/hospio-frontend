@@ -36,6 +36,39 @@ export type BillRow = {
 	expenseId?: string;
 	createdBy?: string;
 	createdAt?: string;
+	/** A supplier bill made from a delivery received in Inventory. */
+	supplierId?: string;
+	deliveryId?: string;
+	purchaseOrderId?: string;
+	invoiceNumber?: string;
+};
+/** Owed to suppliers: one row per payee. */
+export type SupplierOwedRow = {
+	payee: string;
+	supplierId?: string;
+	bills: number;
+	total: number;
+	overdueBills: number;
+	overdue: number;
+	oldestDue?: string;
+	lastPaidAt?: string;
+};
+export type OwedView = {
+	status: "UNPAID" | "OVERDUE" | "PAID";
+	suppliers: SupplierOwedRow[];
+	total: number;
+	overdue: number;
+	bills: number;
+};
+/** A delivery's bill as the store sees it. */
+export type DeliveryBillRow = {
+	id: string;
+	status: "UNPAID" | "PAID" | "CANCELLED";
+	overdue: boolean;
+	amount: number;
+	dueDate: string;
+	paidAt?: string;
+	paidFrom?: string;
 };
 export type ReceiptRow = {
 	number: string;
