@@ -35,6 +35,7 @@ import type {
 } from "@hospio/api/data/types";
 import { withDeliveries } from "@hospio/ui/shared/deliveries-store";
 import { usePlaceText } from "@hospio/ui/shared/wording";
+import { UnpaidBillHint } from "../../shared-staff/budgets-bills";
 
 /** Who decides what, from the hotel's own settings (Hotel setup → Approval limits). */
 export type SpendRules = { limits: ApprovalLimits; ownerName: string };
@@ -206,6 +207,13 @@ export function RecordExpensePanel({
 					value={form.supplier}
 					onChange={(v) => set("supplier", v)}
 					placeholder="Allen Avenue Fuel Station"
+				/>
+				<UnpaidBillHint
+					amount={amount}
+					text={`${form.supplier} ${form.description} ${form.note}`}
+					hrefFor={(b) =>
+						`/dashboard/financials?tab=bills&bill=${b.id}&q=${encodeURIComponent(b.payee)}`
+					}
 				/>
 				<TextareaField
 					label="Note"

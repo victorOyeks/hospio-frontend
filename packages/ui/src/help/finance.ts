@@ -4,7 +4,7 @@ export const financeHelp: HelpModule = {
 	audience: "FINANCE",
 	label: "Finance",
 	intro:
-		"Today's money, the month, expenses, outlet sales, tills, the night audit and company accounts.",
+		"Today's money, the month, expenses, supplier bills, outlet sales, tills, the night audit and company accounts.",
 	guides: [
 		{
 			id: "fin-today",
@@ -43,6 +43,27 @@ export const financeHelp: HelpModule = {
 			],
 			route: "/dashboard",
 			screen: "Today's money",
+		},
+		{
+			id: "fin-supplier-bills",
+			title: "Pay a supplier bill",
+			when: "The store received a delivery and Finance has a bill to pay.",
+			topic: "Money",
+			steps: [
+				"Open “Bills”.",
+				"Read “Owed to suppliers”: each supplier's total, how much is overdue and the oldest due date. Switch between “Unpaid”, “Overdue” and “Paid”.",
+				"Tap a supplier to see only their bills, then tap a bill.",
+				"Check the amount, due date, the supplier's invoice and the delivery in the note.",
+				"Tap “Mark paid”, pick “Bank”, “Cash” or “A till”, and tap “Mark paid”.",
+			],
+			goodToKnow: [
+				"A bill is added by itself when the store receives a delivery: the good units received times their cost, due by the supplier's payment terms.",
+				"Paying records a paid expense under “Stock purchases”; it shows in Expenses and in Today's money “Paid out”.",
+				"Bills are paid in full. Nothing is ever paid automatically.",
+				"With View only you can see bills but not add or pay them.",
+			],
+			route: "/dashboard/bills",
+			screen: "Bills",
 		},
 		{
 			id: "fin-month",

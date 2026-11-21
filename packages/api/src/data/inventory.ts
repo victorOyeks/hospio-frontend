@@ -131,6 +131,8 @@ export function toDeliveryRow(d: z.infer<typeof InvDelivery>): DeliveryRow {
 		note: s(d.note),
 		invoiceNumber: s(d.invoiceNumber),
 		summary: s(d.summary),
+		billAmount: d.billAmount ?? undefined,
+		billDueOn: s(d.billDueOn),
 	};
 }
 

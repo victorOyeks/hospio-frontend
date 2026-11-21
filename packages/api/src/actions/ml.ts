@@ -8,7 +8,7 @@ import { env } from "@hospio/api/env";
 import { live } from "@hospio/api/data/live";
 import { toLostFoundRow } from "@hospio/api/data/mappers/housekeeping";
 import { mlData, toBillRow } from "@hospio/api/data/ml";
-import type { BillRow } from "@hospio/api/data/ml-types";
+import type { BillRow, DeliveryBillRow } from "@hospio/api/data/ml-types";
 import type { ActivityRow, LostFoundRow } from "@hospio/api/data/types";
 import { deliveriesOf, revalidateOps } from "./ops-helpers";
 
@@ -325,6 +325,47 @@ export async function cancelBill(id: string): Promise<ActionResult> {
 	if (error || !data) return fail(error, "The bill could not be cancelled");
 	revalidateOps();
 	return { ok: true, data: null };
+}
+
+/** The Record expense hint: unpaid supplier bills (from deliveries, last 30 days) of about this amount; empty when none or not allowed. */
+export async function billMatches(
+	amount: number,
+	text?: string,
+): Promise<ActionResult<BillRow[]>> {
+	if (!live("finance")) return { ok: true, data: [] };
+	const { data, error } = await api("@get/finance/bills/matches", {
+		...(await withSession()),
+		query: { amount, ...(text?.trim() ? { q: text.trim() } : {}) },
+	});
+	if (error || !data) return { ok: true, data: [] };
+	return { ok: true, data: data.data.map(toBillRow) };
+}
+
+/** The bill Finance made from a delivery (null while there is none). */
+export async function deliveryBill(
+	deliveryId: string,
+): Promise<ActionResult<DeliveryBillRow | null>> {
+	if (!live("finance")) return { ok: true, data: null };
+	const { data, error } = await api("@get/finance/bills/delivery/:deliveryId", {
+		...(await withSession()),
+		params: { deliveryId },
+	});
+	if (error || !data) return fail(error, "The delivery's bill didn't load");
+	const b = data.data;
+	return {
+		ok: true,
+		data: b
+			? {
+					id: b.id,
+					status: b.status === "PAID" || b.status === "CANCELLED" ? b.status : "UNPAID",
+					overdue: !!b.overdue,
+					amount: b.amount,
+					dueDate: b.dueDate,
+					paidAt: b.paidAt ?? undefined,
+					paidFrom: b.paidFrom ?? undefined,
+				}
+			: null,
+	};
 }
 
 // ---- receipts -------------------------------------------------------------------------------------------

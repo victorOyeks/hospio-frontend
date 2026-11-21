@@ -735,55 +735,64 @@ function OrderPanel({
 						</p>
 					)}
 					{lines.map((l, idx) => (
-						<div
-							key={l.itemId}
-							className="flex items-center gap-2 rounded-control border border-line px-3 py-2"
-						>
-							<div className="min-w-0 flex-1">
-								<p className="truncate text-[13px] font-medium text-ink">
-									{l.name}
-								</p>
-								<p className="text-xs text-ink-3">per {l.unit}</p>
+						<div key={l.itemId} className="rounded-control border border-line px-3 py-[10px]">
+							{/* Name, unit and line total on top; the shared `input` class is w-full, so the two boxes
+							    sit in their own grid row underneath instead of squeezing the name. */}
+							<div className="flex items-start gap-2">
+								<div className="min-w-0 flex-1">
+									<p className="truncate text-[13px] font-medium text-ink" title={l.name}>
+										{l.name}
+									</p>
+									<p className="text-xs text-ink-3">per {l.unit}</p>
+								</div>
+								<span className="shrink-0 text-[13px] font-semibold text-ink">
+									{naira(Number(l.quantity || 0) * Number(l.unitCost || 0))}
+								</span>
+								<button
+									type="button"
+									onClick={() => setLines((ls) => ls.filter((_, i) => i !== idx))}
+									className="shrink-0 text-ink-3 hover:text-danger"
+									aria-label={`Remove ${l.name}`}
+								>
+									<Trash2Icon className="size-4" />
+								</button>
 							</div>
-							<input
-								type="number"
-								min={0}
-								aria-label={`Quantity of ${l.name}`}
-								value={l.quantity}
-								onChange={(e) =>
-									setLines((ls) =>
-										ls.map((x, i) =>
-											i === idx ? { ...x, quantity: e.target.value } : x,
-										),
-									)
-								}
-								className={`${input} w-20 py-1 text-right`}
-							/>
-							<input
-								type="number"
-								min={0}
-								aria-label={`Unit cost of ${l.name}`}
-								value={l.unitCost}
-								onChange={(e) =>
-									setLines((ls) =>
-										ls.map((x, i) =>
-											i === idx ? { ...x, unitCost: e.target.value } : x,
-										),
-									)
-								}
-								className={`${input} w-24 py-1 text-right`}
-							/>
-							<span className="w-24 text-right text-[13px] font-semibold">
-								{naira(Number(l.quantity || 0) * Number(l.unitCost || 0))}
-							</span>
-							<button
-								type="button"
-								onClick={() => setLines((ls) => ls.filter((_, i) => i !== idx))}
-								className="text-ink-3 hover:text-danger"
-								aria-label={`Remove ${l.name}`}
-							>
-								<Trash2Icon className="size-4" />
-							</button>
+							<div className="mt-2 grid grid-cols-2 gap-2">
+								<label className="flex min-w-0 flex-col gap-1">
+									<span className="text-[11px] font-medium text-ink-3">Quantity ({l.unit})</span>
+									<input
+										type="number"
+										min={0}
+										aria-label={`Quantity of ${l.name}`}
+										value={l.quantity}
+										onChange={(e) =>
+											setLines((ls) =>
+												ls.map((x, i) =>
+													i === idx ? { ...x, quantity: e.target.value } : x,
+												),
+											)
+										}
+										className={`${input} py-[7px] text-right`}
+									/>
+								</label>
+								<label className="flex min-w-0 flex-col gap-1">
+									<span className="text-[11px] font-medium text-ink-3">Unit cost (₦)</span>
+									<input
+										type="number"
+										min={0}
+										aria-label={`Unit cost of ${l.name}`}
+										value={l.unitCost}
+										onChange={(e) =>
+											setLines((ls) =>
+												ls.map((x, i) =>
+													i === idx ? { ...x, unitCost: e.target.value } : x,
+												),
+											)
+										}
+										className={`${input} py-[7px] text-right`}
+									/>
+								</label>
+							</div>
 						</div>
 					))}
 					<SelectField

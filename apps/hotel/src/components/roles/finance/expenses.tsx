@@ -42,6 +42,7 @@ import {
 	type SpendRules,
 } from "../manager/financials/panels";
 import { usePlaceText } from "@hospio/ui/shared/wording";
+import { UnpaidBillHint } from "../shared-staff/budgets-bills";
 
 export const expenseTone: Record<
 	ExpenseRow["status"],
@@ -633,6 +634,13 @@ export function RecordExpensePanel({
 					value={amount}
 					onChange={setAmount}
 					required
+				/>
+				<UnpaidBillHint
+					amount={amt}
+					text={`${desc} ${note}`}
+					hrefFor={(b) =>
+						`/dashboard/bills?bill=${b.id}&q=${encodeURIComponent(b.payee)}`
+					}
 				/>
 				<Note tone="warning">
 					{level === "owner"

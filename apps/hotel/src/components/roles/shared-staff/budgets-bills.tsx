@@ -8,6 +8,7 @@ import {
 	RotateCcwIcon,
 	WalletIcon,
 } from "lucide-react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Button } from "@hospio/ui/primitives/button";
@@ -25,6 +26,7 @@ import {
 import { fmtDay, naira, nairaShort, plural } from "@hospio/ui/shared/format";
 import { ConfirmModal, Modal } from "@hospio/ui/shared/modal";
 import { PillTabs } from "@hospio/ui/shared/pill-tabs";
+import { SectionCard } from "@hospio/ui/shared/section-card";
 import { ProgressBar } from "@hospio/ui/shared/progress-bar";
 import {
 	PanelSection,
@@ -39,6 +41,7 @@ import {
 	addExpenseCategory,
 	cancelBill,
 	changeExpenseCategory,
+	billMatches,
 	payBill,
 	saveBill,
 	saveBudget,
@@ -48,6 +51,7 @@ import type {
 	BillRow,
 	BudgetView,
 	ExpenseCategoryRow,
+	OwedView,
 } from "@hospio/api/data/ml-types";
 import type { PageResult } from "@hospio/api/data/paging";
 import { cn } from "@hospio/ui/utils";
@@ -574,12 +578,15 @@ export function BillPanel({
 	adding,
 	categories,
 	canWrite,
+	inventoryLinks = false,
 	onClose,
 }: {
 	bill: BillRow | null;
 	adding: boolean;
 	categories: ExpenseCategoryRow[];
 	canWrite: boolean;
+	/** Managers and the owner have Inventory: link a supplier bill to its delivery and order there. */
+	inventoryLinks?: boolean;
 	onClose: () => void;
 }) {
 	const t = usePlaceText();
@@ -779,6 +786,12 @@ export function BillPanel({
 								<span className="text-ink-3">Repeats</span>
 								<span className="text-ink">{REPEATS[bill.repeats]}</span>
 							</li>
+							{bill.invoiceNumber && (
+								<li className="flex justify-between">
+									<span className="text-ink-3">Supplier's invoice</span>
+									<span className="text-ink">{bill.invoiceNumber}</span>
+								</li>
+							)}
 							{bill.note && (
 								<li className="flex justify-between gap-4">
 									<span className="text-ink-3">Note</span>
@@ -804,6 +817,31 @@ export function BillPanel({
 								</li>
 							)}
 						</ul>
+						{bill.deliveryId && (
+							<Note tone="info">
+								Made from a delivery received in Inventory
+								{bill.createdBy ? ` by ${bill.createdBy}` : ""}: the value of
+								the good units received, damaged ones left out. Paid in full.
+								{inventoryLinks && (
+									<span className="mt-1 flex flex-wrap gap-3">
+										<Link
+											href={`/dashboard/inventory?screen=deliveries&open=${bill.deliveryId}`}
+											className="font-semibold underline"
+										>
+											Open the delivery
+										</Link>
+										{bill.purchaseOrderId && (
+											<Link
+												href={`/dashboard/inventory?screen=orders&open=${bill.purchaseOrderId}`}
+												className="font-semibold underline"
+											>
+												Open the purchase order
+											</Link>
+										)}
+									</span>
+								)}
+							</Note>
+						)}
 						{bill.status === "PAID" && (
 							<Note tone="success">
 								Recorded as a paid expense of {naira(bill.amount)} under{" "}
@@ -897,5 +935,154 @@ export function BillPanel({
 				}
 			/>
 		</>
+	);
+}
+
+const OWED_TABS = [
+	{ key: "UNPAID", label: "Unpaid" },
+	{ key: "OVERDUE", label: "Overdue" },
+	{ key: "PAID", label: "Paid" },
+] as const;
+
+/**
+ * Owed to suppliers: every payee's bills as one row (total, how much is overdue, the oldest due date), most owed first. The tabs
+ * (Unpaid, Overdue, Paid in the last 90 days) are the `owed` URL parameter, read by the page's loader; picking a row filters the
+ * bills list to that supplier.
+ */
+export function OwedToSuppliers({
+	owed,
+	tabs = true,
+	onPick,
+}: {
+	owed: OwedView | null;
+	/** Show the Unpaid / Overdue / Paid tabs (the owner's overview shows unpaid only). */
+	tabs?: boolean;
+	onPick?: (payee: string) => void;
+}) {
+	const list$ = useListParams({ extra: ["owed", "tab"] });
+	const status = owed?.status ?? "UNPAID";
+	const paid = status === "PAID";
+	const subtitle = !owed
+		? "Didn't load · try again in a moment"
+		: owed.suppliers.length === 0
+			? paid
+				? "Nothing paid in the last 90 days"
+				: status === "OVERDUE"
+					? "Nothing overdue"
+					: "Nothing owed"
+			: paid
+				? `${naira(owed.total)} paid to ${plural(owed.suppliers.length, "supplier")} in the last 90 days`
+				: `${naira(owed.total)} owed to ${plural(owed.suppliers.length, "supplier")}${owed.overdue > 0 ? ` · ${naira(owed.overdue)} overdue` : ""}`;
+	return (
+		<SectionCard
+			title="Owed to suppliers"
+			subtitle={subtitle}
+			headerRight={
+				tabs ? (
+					<PillTabs
+						tabs={OWED_TABS.map((t) => ({ key: t.key, label: t.label }))}
+						value={status}
+						onChange={(k) =>
+							list$.set({ owed: k === "UNPAID" ? null : k })
+						}
+					/>
+				) : undefined
+			}
+			bodyClassName="pt-1"
+		>
+			{owed && owed.suppliers.length > 0 && (
+				<ul className="flex flex-col" data-testid="owed-suppliers">
+					{owed.suppliers.map((r) => (
+						<li key={r.payee} className="border-b border-line last:border-b-0">
+							<button
+								type="button"
+								disabled={!onPick}
+								onClick={() => onPick?.(r.payee)}
+								className="flex w-full items-center justify-between gap-3 py-2 text-left text-[13px] enabled:hover:bg-subtle/40"
+							>
+								<div className="min-w-0">
+									<p className="truncate font-medium text-ink">{r.payee}</p>
+									<p className="text-xs text-ink-3">
+										{plural(r.bills, "bill")}
+										{paid
+											? r.lastPaidAt
+												? ` · last paid ${fmtDay(r.lastPaidAt.slice(0, 10))}`
+												: ""
+											: r.oldestDue
+												? ` · oldest due ${fmtDay(r.oldestDue)}`
+												: ""}
+									</p>
+								</div>
+								<div className="shrink-0 text-right">
+									<p className="font-semibold text-ink">{naira(r.total)}</p>
+									{!paid && r.overdue > 0 && (
+										<p className="text-xs font-semibold text-danger">
+											{naira(r.overdue)} overdue
+										</p>
+									)}
+								</div>
+							</button>
+						</li>
+					))}
+				</ul>
+			)}
+		</SectionCard>
+	);
+}
+
+/**
+ * The Record expense form's double-payment hint: an unpaid supplier bill (from a delivery, the last 30 days) of about the amount being
+ * recorded, or naming the supplier in the text. "There's an unpaid bill for CleanPro Supplies ₦12,520 from delivery … — pay that
+ * instead?" with a link to the bill. Only a hint: the expense can still be recorded.
+ */
+export function UnpaidBillHint({
+	amount,
+	text,
+	hrefFor,
+}: {
+	amount: number;
+	text: string;
+	hrefFor: (b: BillRow) => string;
+}) {
+	const [matches, setMatches] = useState<BillRow[]>([]);
+	useEffect(() => {
+		if (!(amount > 0)) {
+			setMatches([]);
+			return;
+		}
+		let gone = false;
+		const t = setTimeout(() => {
+			void billMatches(amount, text).then((r) => {
+				if (!gone) setMatches(r.ok ? r.data : []);
+			});
+		}, 400);
+		return () => {
+			gone = true;
+			clearTimeout(t);
+		};
+	}, [amount, text]);
+	const b = matches[0];
+	if (!b) return null;
+	return (
+		<Note tone="info" className="flex flex-col gap-1">
+			<span data-testid="unpaid-bill-hint">
+				There&apos;s an unpaid bill for {b.payee} {naira(b.amount)}
+				{b.note ? ` from ${b.note.replace(/^Delivery/, "delivery")}` : ""} —
+				pay that instead?
+			</span>
+			<span className="flex flex-wrap gap-3">
+				{matches.map((m) => (
+					<Link
+						key={m.id}
+						href={hrefFor(m)}
+						className="font-semibold underline"
+					>
+						{matches.length > 1
+							? `${m.payee} ${naira(m.amount)}`
+							: "Open the bill"}
+					</Link>
+				))}
+			</span>
+		</Note>
 	);
 }

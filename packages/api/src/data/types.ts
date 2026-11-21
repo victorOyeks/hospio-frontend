@@ -794,6 +794,9 @@ export type DeliveryRow = {
 	invoiceNumber?: string;
 	/** "2 short · 1 damaged" */
 	summary?: string;
+	/** Only right after Receive: the supplier bill Finance gets and when it is due. */
+	billAmount?: number;
+	billDueOn?: string;
 	items?: {
 		itemId: string;
 		name: string;
