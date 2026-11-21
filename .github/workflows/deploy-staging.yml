@@ -1,0 +1,218 @@
+name: Deploy (staging)
+
+# One run per push to staging: preflight -> detect (which apps changed) -> one deploy job per changed app ("hotel", "admin", "landing").
+# What counts as a change is decided by scripts/ci/detect-apps.py (rules in its header and in the README, "Deployment").
+# [deploy-all] in a commit message deploys hotel and admin. The landing site has one copy, production's, so a push to staging
+# never deploys it; run this workflow by hand with apps=landing (or all) for the staging box's copy.
+on:
+  push:
+    branches: [staging]
+    paths-ignore:
+      - "**/*.md"
+      - "docs/**"
+  workflow_dispatch:
+    inputs:
+      apps:
+        description: "Apps to deploy: all, or a comma list of hotel, admin, landing (landing deploys on staging only this way)"
+        required: false
+        default: all
+
+# Per-app values for the deploy matrix. dir = ~/apps/<dir> on the box, unit = its systemd unit, domain = the unit's DOMAIN_URL.
+env:
+  APPS_CONFIG: >-
+    {
+      "hotel":   {"label": "Hotel app",    "dir": "his-fe-staging",         "unit": "his-fe-staging",         "port": 3001, "domain": "web-staging.hospio360.com"},
+      "admin":   {"label": "Admin portal", "dir": "hospio-admin-staging",   "unit": "hospio-admin-staging",   "port": 3002, "domain": "admin-staging.hospio360.com"},
+      "landing": {"label": "Landing site", "dir": "hospio-landing-staging", "unit": "hospio-landing-staging", "port": 3003, "domain": "hospio360.com"}
+    }
+
+jobs:
+  # Fails fast, before anything is built or copied, when the staging box's secrets are not set.
+  preflight:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check staging secrets
+        env:
+          HOST: ${{ secrets.VPS_HOST }}
+          USER_NAME: ${{ secrets.VPS_USER }}
+          KEY: ${{ secrets.VPS_SSH_KEY }}
+        run: |
+          missing=""
+          [ -n "$HOST" ] || missing="$missing VPS_HOST"
+          [ -n "$USER_NAME" ] || missing="$missing VPS_USER"
+          [ -n "$KEY" ] || missing="$missing VPS_SSH_KEY"
+          if [ -n "$missing" ]; then
+            echo "::error::Staging secrets missing in the repository's Actions secrets:$missing. Nothing was built or deployed. Set them, then run this workflow by hand."
+            exit 1
+          fi
+          echo "Staging secrets present."
+
+  detect:
+    needs: preflight
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.pick.outputs.matrix }}
+      apps: ${{ steps.pick.outputs.apps }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - id: pick
+        env:
+          DEPLOY_ENV: staging
+          EVENT_NAME: ${{ github.event_name }}
+          REQUESTED: ${{ github.event.inputs.apps }}
+          BEFORE: ${{ github.event.before }}
+          SHA: ${{ github.sha }}
+          WORKFLOW_FILE: .github/workflows/deploy-staging.yml
+        run: python3 -I scripts/ci/detect-apps.py
+
+  deploy:
+    needs: detect
+    if: ${{ needs.detect.outputs.apps != '' }}
+    name: ${{ matrix.app }}
+    runs-on: ubuntu-latest
+    strategy:
+      # One app failing must not cancel the others mid-deploy ("The operation was canceled").
+      fail-fast: false
+      matrix:
+        include: ${{ fromJSON(needs.detect.outputs.matrix) }}
+    # One deploy per app at a time; a newer run waits for the running one instead of cancelling it.
+    concurrency:
+      group: deploy-${{ matrix.app }}-staging
+      cancel-in-progress: false
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          # Pinned: resolving "latest" through GitHub's release API returned 504 on consecutive runs.
+          bun-version: "1.4.4"
+
+      - run: bun install --frozen-lockfile --ignore-scripts
+
+      - name: Build apps/hotel
+        if: ${{ matrix.app == 'hotel' }}
+        working-directory: apps/hotel
+        run: bun run build
+        env:
+          DOMAIN_URL: ${{ secrets.STAGING_DOMAIN_URL }}
+          NEXT_PUBLIC_API_URL: ${{ vars.NEXT_PUBLIC_API_URL || 'https://api-staging.hospio360.com' }}
+          NEXT_PUBLIC_BUILD_ID: ${{ github.sha }}
+          NEXT_PUBLIC_SITE_URL: ${{ vars.NEXT_PUBLIC_SITE_URL || 'https://hospio360.com' }}
+          NEXT_PUBLIC_API_LOG: "true"
+          NEXT_PUBLIC_ADMIN_APP_URL: ${{ vars.NEXT_PUBLIC_ADMIN_APP_URL || 'https://admin-staging.hospio360.com' }}
+          NEXT_PUBLIC_DEMO_MODE: ${{ vars.NEXT_PUBLIC_DEMO_MODE || 'true' }}
+          NEXT_PUBLIC_DEMO_AUTH: ${{ vars.NEXT_PUBLIC_DEMO_AUTH || 'false' }}
+          NEXT_PUBLIC_LIVE_DOMAINS: ${{ vars.NEXT_PUBLIC_LIVE_DOMAINS || 'property,reservation,folio,payment,tenant,identity,hotel-config,platform,finance,housekeeping,messaging,fnb,inventory,maintenance' }}
+
+      - name: Build apps/admin
+        if: ${{ matrix.app == 'admin' }}
+        working-directory: apps/admin
+        run: bun run build
+        env:
+          DOMAIN_URL: ${{ secrets.STAGING_DOMAIN_URL }}
+          NEXT_PUBLIC_API_URL: ${{ vars.NEXT_PUBLIC_API_URL || 'https://api-staging.hospio360.com' }}
+          NEXT_PUBLIC_BUILD_ID: ${{ github.sha }}
+          NEXT_PUBLIC_SITE_URL: ${{ vars.NEXT_PUBLIC_SITE_URL || 'https://hospio360.com' }}
+          NEXT_PUBLIC_API_LOG: "true"
+          NEXT_PUBLIC_HOTEL_APP_URL: ${{ vars.NEXT_PUBLIC_HOTEL_APP_URL || 'https://web-staging.hospio360.com' }}
+          NEXT_PUBLIC_DEMO_MODE: ${{ vars.NEXT_PUBLIC_DEMO_MODE || 'true' }}
+          NEXT_PUBLIC_DEMO_AUTH: ${{ vars.NEXT_PUBLIC_DEMO_AUTH || 'false' }}
+          NEXT_PUBLIC_LIVE_DOMAINS: ${{ vars.NEXT_PUBLIC_LIVE_DOMAINS || 'property,reservation,folio,payment,tenant,identity,hotel-config,platform,finance,housekeeping,messaging,fnb,inventory,maintenance' }}
+
+      - name: Build apps/landing
+        if: ${{ matrix.app == 'landing' }}
+        working-directory: apps/landing
+        run: bun run build
+        env:
+          DOMAIN_URL: ${{ secrets.STAGING_DOMAIN_URL }}
+          NEXT_PUBLIC_HOTEL_APP_URL: ${{ vars.NEXT_PUBLIC_HOTEL_APP_URL || 'https://web-staging.hospio360.com' }}
+          # The guest booking page (/stay/<token>) reads the booking from the API.
+          NEXT_PUBLIC_API_URL: ${{ vars.NEXT_PUBLIC_API_URL || 'https://api-staging.hospio360.com' }}
+          NEXT_PUBLIC_ADMIN_APP_URL: ${{ vars.NEXT_PUBLIC_ADMIN_APP_URL || 'https://admin-staging.hospio360.com' }}
+          # The landing site's own address, its contact inbox, and whether search engines may index it (staging: no).
+          NEXT_PUBLIC_SITE_URL: ${{ vars.NEXT_PUBLIC_SITE_URL || 'https://hospio360.com' }}
+          NEXT_PUBLIC_CONTACT_EMAIL: ${{ vars.NEXT_PUBLIC_CONTACT_EMAIL || 'hello@oyeksglobal.com' }}
+          NEXT_PUBLIC_SITE_INDEXABLE: ${{ vars.LANDING_SITE_INDEXABLE || 'false' }}
+
+      # The standalone bundle is rooted at the workspace: apps/<app>/server.js plus the hoisted node_modules.
+      - name: Prepare standalone bundle
+        run: |
+          app=${{ matrix.app }}
+          out=apps/$app/.next/standalone
+          mkdir -p "$out/apps/$app/.next"
+          cp -r apps/$app/.next/static "$out/apps/$app/.next/static"
+          [ -d apps/$app/public ] && cp -r apps/$app/public "$out/apps/$app/public"
+          # The commit this bundle was built from, for Platform → System health ("version deployed").
+          echo "${{ github.sha }}" > "$out/.sha"
+          tar -czf bundle.tar.gz -C "$out" .
+
+      - name: Copy bundle to server
+        env:
+          VPS_HOST: ${{ secrets.VPS_HOST }}
+          VPS_USER: ${{ secrets.VPS_USER }}
+          VPS_SSH_KEY: ${{ secrets.VPS_SSH_KEY }}
+        run: |
+          mkdir -p ~/.ssh
+          echo "$VPS_SSH_KEY" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          ssh-keyscan -H "$VPS_HOST" >> ~/.ssh/known_hosts 2>/dev/null
+          remote() { for i in 1 2 3; do "$@" && return 0; echo "attempt $i failed, retrying in $((i*8))s"; sleep $((i*8)); done; return 1; }
+          remote ssh -i ~/.ssh/deploy_key -o ConnectTimeout=30 "$VPS_USER@$VPS_HOST" "mkdir -p apps/${{ matrix.dir }}"
+          remote scp -i ~/.ssh/deploy_key -o ConnectTimeout=30 bundle.tar.gz "$VPS_USER@$VPS_HOST:apps/${{ matrix.dir }}/bundle.tar.gz"
+          rm -f ~/.ssh/deploy_key
+
+      - uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          script: |
+            set -e
+            APP_DIR="$HOME/apps/${{ matrix.dir }}"
+            cd "$APP_DIR"
+
+            # The unit is (re)written on every deploy so a layout change ships with the code.
+            NODE_BIN="$(command -v node || true)"
+            [ -n "$NODE_BIN" ] || { echo "node is not on PATH for $USER"; exit 1; }
+            printf '%s\n' \
+              "[Unit]" \
+              "Description=Hospio360 ${{ matrix.label }} (staging)" \
+              "After=network.target" \
+              "" \
+              "[Service]" \
+              "Type=simple" \
+              "User=$USER" \
+              "WorkingDirectory=$APP_DIR/current/apps/${{ matrix.app }}" \
+              "Environment=NODE_ENV=production" \
+              "Environment=PORT=${{ matrix.port }}" \
+              "Environment=HOSTNAME=0.0.0.0" \
+              "Environment=DOMAIN_URL=${{ matrix.domain }}" \
+              "ExecStart=$NODE_BIN $APP_DIR/current/apps/${{ matrix.app }}/server.js" \
+              "Restart=always" \
+              "RestartSec=5" \
+              "" \
+              "[Install]" \
+              "WantedBy=multi-user.target" \
+              | sudo tee /etc/systemd/system/${{ matrix.unit }}.service >/dev/null
+            sudo systemctl daemon-reload
+            sudo systemctl enable -q ${{ matrix.unit }}.service
+
+            if [ -d current ]; then rm -rf previous; mv current previous; fi
+            mkdir -p current
+            tar -xzf bundle.tar.gz -C current
+            rm -f bundle.tar.gz
+
+            sudo systemctl stop ${{ matrix.unit }}.service || true
+            sleep 1
+            sudo fuser -k ${{ matrix.port }}/tcp 2>/dev/null || true
+            sudo systemctl start ${{ matrix.unit }}.service
+            for i in $(seq 1 20); do
+              sleep 2
+              if curl -fsS -o /dev/null "http://127.0.0.1:${{ matrix.port }}/"; then echo "${{ matrix.label }} is up on :${{ matrix.port }}"; rm -rf previous; exit 0; fi
+            done
+            echo "${{ matrix.label }} did not answer on :${{ matrix.port }} — rolling back"
+            journalctl -u ${{ matrix.unit }}.service -n 40 --no-pager || true
+            if [ -d previous ]; then rm -rf current; mv previous current; sudo systemctl restart ${{ matrix.unit }}.service; fi
+            exit 1

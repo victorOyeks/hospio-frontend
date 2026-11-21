@@ -1,0 +1,201 @@
+name: Deploy (production)
+
+# Deploys on push to production (changes reach it by PR from staging). Same shape as deploy-staging.yml: preflight -> detect
+# (which apps changed, scripts/ci/detect-apps.py) -> one deploy job per changed app ("hotel", "admin", "landing").
+# [deploy-all] in any merged commit message deploys every app. workflow_dispatch needs this file on the default branch,
+# so first runs are started by a push.
+# Server details are secrets of the GitHub environment "production" (PROD_VPS_HOST, PROD_VPS_USER, PROD_VPS_SSH_KEY), named apart from
+# staging's VPS_* so a missing one can never fall back to the staging box. Build values are fixed here, not read from Actions variables.
+on:
+  push:
+    branches: [production]
+    paths-ignore:
+      - "**/*.md"
+      - "docs/**"
+  workflow_dispatch:
+    inputs:
+      apps:
+        description: "Apps to deploy: all, or a comma list of hotel, admin, landing"
+        required: false
+        default: all
+
+# Per-app values for the deploy matrix. dir = ~/apps/<dir> on the box, unit = its systemd unit.
+env:
+  APPS_CONFIG: >-
+    {
+      "hotel":   {"label": "Hotel app",    "dir": "his-fe-production",         "unit": "his-fe-production",         "port": 3001},
+      "admin":   {"label": "Admin portal", "dir": "hospio-admin-production",   "unit": "hospio-admin-production",   "port": 3002},
+      "landing": {"label": "Landing site", "dir": "hospio-landing-production", "unit": "hospio-landing-production", "port": 3003}
+    }
+
+jobs:
+  # Fails fast, before anything is built or copied, when the production environment's secrets are not set yet.
+  preflight:
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - name: Check production secrets
+        env:
+          HOST: ${{ secrets.PROD_VPS_HOST }}
+          USER_NAME: ${{ secrets.PROD_VPS_USER }}
+          KEY: ${{ secrets.PROD_VPS_SSH_KEY }}
+        run: |
+          missing=""
+          [ -n "$HOST" ] || missing="$missing PROD_VPS_HOST"
+          [ -n "$USER_NAME" ] || missing="$missing PROD_VPS_USER"
+          [ -n "$KEY" ] || missing="$missing PROD_VPS_SSH_KEY"
+          if [ -n "$missing" ]; then
+            echo "::error::Production secrets missing in the GitHub environment 'production':$missing. Nothing was built or deployed. Set them, then run this workflow by hand."
+            exit 1
+          fi
+          echo "Production secrets present."
+
+  detect:
+    needs: preflight
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.pick.outputs.matrix }}
+      apps: ${{ steps.pick.outputs.apps }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - id: pick
+        env:
+          DEPLOY_ENV: production
+          EVENT_NAME: ${{ github.event_name }}
+          REQUESTED: ${{ github.event.inputs.apps }}
+          BEFORE: ${{ github.event.before }}
+          SHA: ${{ github.sha }}
+          WORKFLOW_FILE: .github/workflows/deploy-production.yml
+        run: python3 -I scripts/ci/detect-apps.py
+
+  deploy:
+    needs: detect
+    if: ${{ needs.detect.outputs.apps != '' }}
+    name: ${{ matrix.app }}
+    runs-on: ubuntu-latest
+    strategy:
+      # One app failing must not cancel the others mid-deploy ("The operation was canceled").
+      fail-fast: false
+      matrix:
+        include: ${{ fromJSON(needs.detect.outputs.matrix) }}
+    environment: production
+    # One deploy per app at a time; a newer run waits for the running one instead of cancelling it, so a production deploy
+    # is never stopped midway.
+    concurrency:
+      group: deploy-${{ matrix.app }}-production
+      cancel-in-progress: false
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          # Pinned: resolving "latest" through GitHub's release API returned 504 on consecutive runs.
+          bun-version: "1.4.4"
+
+      - run: bun install --frozen-lockfile --ignore-scripts
+
+      - name: Build apps/hotel
+        if: ${{ matrix.app == 'hotel' }}
+        working-directory: apps/hotel
+        run: bun run build
+        env:
+          DOMAIN_URL: app.hospio360.com
+          NEXT_PUBLIC_API_URL: https://api-prod.hospio360.com
+          NEXT_PUBLIC_BUILD_ID: ${{ github.sha }}
+          NEXT_PUBLIC_SITE_URL: https://hospio360.com
+          NEXT_PUBLIC_API_LOG: "false"
+          NEXT_PUBLIC_ADMIN_APP_URL: https://backoffice.hospio360.com
+          NEXT_PUBLIC_DEMO_MODE: "false"
+          NEXT_PUBLIC_DEMO_AUTH: "false"
+          NEXT_PUBLIC_SHOW_DELIVERIES: "false"
+          NEXT_PUBLIC_LIVE_DOMAINS: property,reservation,folio,payment,tenant,identity,hotel-config,platform,finance,housekeeping,messaging,fnb,inventory,maintenance
+
+      - name: Build apps/admin
+        if: ${{ matrix.app == 'admin' }}
+        working-directory: apps/admin
+        run: bun run build
+        env:
+          DOMAIN_URL: backoffice.hospio360.com
+          NEXT_PUBLIC_API_URL: https://api-prod.hospio360.com
+          NEXT_PUBLIC_BUILD_ID: ${{ github.sha }}
+          NEXT_PUBLIC_SITE_URL: https://hospio360.com
+          NEXT_PUBLIC_API_LOG: "false"
+          NEXT_PUBLIC_HOTEL_APP_URL: https://app.hospio360.com
+          NEXT_PUBLIC_DEMO_MODE: "false"
+          NEXT_PUBLIC_DEMO_AUTH: "false"
+          NEXT_PUBLIC_SHOW_DELIVERIES: "false"
+          NEXT_PUBLIC_LIVE_DOMAINS: property,reservation,folio,payment,tenant,identity,hotel-config,platform,finance,housekeeping,messaging,fnb,inventory,maintenance
+
+      - name: Build apps/landing
+        if: ${{ matrix.app == 'landing' }}
+        working-directory: apps/landing
+        run: bun run build
+        env:
+          DOMAIN_URL: hospio360.com
+          NEXT_PUBLIC_HOTEL_APP_URL: https://app.hospio360.com
+          # The guest booking page (/stay/<token>) and the partner form read the API.
+          NEXT_PUBLIC_API_URL: https://api-prod.hospio360.com
+          NEXT_PUBLIC_ADMIN_APP_URL: https://backoffice.hospio360.com
+          NEXT_PUBLIC_SITE_URL: https://hospio360.com
+          NEXT_PUBLIC_CONTACT_EMAIL: hello@oyeksglobal.com
+          NEXT_PUBLIC_SITE_INDEXABLE: "true"
+
+      # The standalone bundle is rooted at the workspace: apps/<app>/server.js plus the hoisted node_modules.
+      - name: Prepare standalone bundle
+        run: |
+          app=${{ matrix.app }}
+          out=apps/$app/.next/standalone
+          mkdir -p "$out/apps/$app/.next"
+          cp -r apps/$app/.next/static "$out/apps/$app/.next/static"
+          [ -d apps/$app/public ] && cp -r apps/$app/public "$out/apps/$app/public"
+          # The commit this bundle was built from, for Platform → System health ("version deployed").
+          echo "${{ github.sha }}" > "$out/.sha"
+          tar -czf bundle.tar.gz -C "$out" .
+
+      - name: Copy bundle to server
+        env:
+          VPS_HOST: ${{ secrets.PROD_VPS_HOST }}
+          VPS_USER: ${{ secrets.PROD_VPS_USER }}
+          VPS_SSH_KEY: ${{ secrets.PROD_VPS_SSH_KEY }}
+        run: |
+          mkdir -p ~/.ssh
+          echo "$VPS_SSH_KEY" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          ssh-keyscan -H "$VPS_HOST" >> ~/.ssh/known_hosts 2>/dev/null
+          remote() { for i in 1 2 3; do "$@" && return 0; echo "attempt $i failed, retrying in $((i*8))s"; sleep $((i*8)); done; return 1; }
+          remote ssh -i ~/.ssh/deploy_key -o ConnectTimeout=30 "$VPS_USER@$VPS_HOST" "mkdir -p apps/${{ matrix.dir }}"
+          remote scp -i ~/.ssh/deploy_key -o ConnectTimeout=30 bundle.tar.gz "$VPS_USER@$VPS_HOST:apps/${{ matrix.dir }}/bundle.tar.gz"
+          rm -f ~/.ssh/deploy_key
+
+      - uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.PROD_VPS_HOST }}
+          username: ${{ secrets.PROD_VPS_USER }}
+          key: ${{ secrets.PROD_VPS_SSH_KEY }}
+          script: |
+            set -e
+            APP_DIR="$HOME/apps/${{ matrix.dir }}"
+            cd "$APP_DIR"
+
+            # The unit is installed once on the server (scripts/vps/bootstrap-production.sh in hospio-backend); the deploy user may only
+            # stop, start and restart it, so CI never writes system files.
+
+            if [ -d current ]; then rm -rf previous; mv current previous; fi
+            mkdir -p current
+            tar -xzf bundle.tar.gz -C current
+            rm -f bundle.tar.gz
+
+            sudo systemctl stop ${{ matrix.unit }}.service || true
+            sleep 1
+            sudo fuser -k ${{ matrix.port }}/tcp 2>/dev/null || true
+            sudo systemctl start ${{ matrix.unit }}.service
+            for i in $(seq 1 20); do
+              sleep 2
+              if curl -fsS -o /dev/null "http://127.0.0.1:${{ matrix.port }}/"; then echo "${{ matrix.label }} is up on :${{ matrix.port }}"; rm -rf previous; exit 0; fi
+            done
+            echo "${{ matrix.label }} did not answer on :${{ matrix.port }} — rolling back"
+            journalctl -u ${{ matrix.unit }}.service -n 40 --no-pager || true
+            if [ -d previous ]; then rm -rf current; mv previous current; sudo systemctl restart ${{ matrix.unit }}.service; fi
+            exit 1
