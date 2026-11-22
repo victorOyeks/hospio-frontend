@@ -147,3 +147,21 @@ typing into a box that already held a number made a different total. Re-run it:
 - A stopped item is not listed anywhere; to stock it again, add it again as a new item (its old movements stay with the old one).
 - Count notices go to managers (not the owner); the owner still approves from Inventory → Stock counts.
 - A bar or kitchen counter's "count approved" notice has no link (their menus have no Stock counts page); the notice text is enough.
+
+## Run on staging (22 Nov 2026)
+
+All sections passed; screenshots 00–28 in "Hospio test screenshots/Samuel inventory fixes (22 Nov 2026)" (00 is the API button over
+Charge to room before the fix).
+
+- Suppliers: contact phone `0000000` and a contact name `0000000` refused on screen; "QA Contact Co SM7876" saved with Bola QA (0803
+  123 4567) and no items, then stopped (In use off).
+- New order: no pills under Lines, low items first marked "· low"; Rice line started empty ("e.g. 1"), Send asked "Enter how many";
+  Rice 150 × ₦1,800 from QA Contact Co → **PO-2026-00038** "Sent to the manager for approval", Needs approval, on Tunde's Approvals
+  and in his bell; Tunde declined it ("QA 91 test order, not needed") → Cancelled.
+- Count: Laundry store counted with no difference → Tunde's bell "Stock count to approve · Laundry store", its link opened the
+  count (/dashboard/inventory?screen=counts&open=…); approved → Jide's bell "Your count was approved · Laundry store" (link
+  /dashboard/counts?open=…).
+- On order: Jide ₦290,010 "6 orders still to arrive" = Femi ₦290,010 "6 orders still to arrive"; Stock value ₦6,399,162 on both.
+- Bed sheet (4 pcs in Housekeeping store): Stop stocking window "Bed sheet still has 4 pcs in Housekeeping store · count it out or
+  move it first", button greyed; "QA Stop test SM5475" (0 held) stopped. Minimum 10 / Reorder up to 5 refused on screen.
+- Segun's unpaid sale B-0012 and its Charge to room panel at 1024 and 1440 wide: nothing covers the buttons; API button bottom left.
