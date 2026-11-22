@@ -31,7 +31,8 @@ export const HotelApplicationNote = z.object({
 export const HotelApplication = z.object({
 	id: z.string(),
 	ownerName: z.string(),
-	email: z.string(),
+	/** Null when not given (the short form, 22 Nov 2026); so are city, state and heardFrom. */
+	email: str,
 	phone: str,
 	businessName: z.string(),
 	businessType: z.string(),

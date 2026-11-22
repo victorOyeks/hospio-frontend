@@ -27,7 +27,7 @@ export const HEARD_FROM = [
 ] as const;
 
 /**
- * "Average monthly sales": required, information for the call only (nothing is scored on it). The words
+ * "Average monthly sales": optional since the short form (22 Nov 2026), information for the call only (nothing is scored on it). The words
  * are platform-service's (MonthlySales) and the admin portal's.
  */
 export const MONTHLY_SALES = [
@@ -48,6 +48,9 @@ export const CALL_TIMES = [
 export { STATES };
 
 export const MESSAGE_MAX = 1000;
+
+/** Optional fields: blank (or only spaces) counts as not given. */
+const blank = (v: unknown) => (typeof v === "string" && v.trim() === "" ? undefined : v);
 export const MAX_ROOMS = 5000;
 
 export const DemoRequest = z
@@ -66,15 +69,19 @@ export const DemoRequest = z
 				isNigerianPhone,
 				"Enter a Nigerian phone number, like 0803 555 0192 or +234 803 555 0192",
 			),
-		email: z
-			.string()
-			.trim()
-			.min(1, "Enter your email address")
-			.max(255, "That email is too long")
-			.regex(
-				/^[A-Za-z0-9._%+-]{1,64}@[A-Za-z0-9](?:[A-Za-z0-9.-]*[A-Za-z0-9])?\.[A-Za-z]{2,24}$/,
-				"Enter a real email address, like ada@example.com",
-			),
+		// The short form (22 Nov 2026): only name, phone, business name and type are required; the rest is checked when filled.
+		email: z.preprocess(
+			blank,
+			z
+				.string()
+				.trim()
+				.max(255, "That email is too long")
+				.regex(
+					/^[A-Za-z0-9._%+-]{1,64}@[A-Za-z0-9](?:[A-Za-z0-9.-]*[A-Za-z0-9])?\.[A-Za-z]{2,24}$/,
+					"Enter a real email address, like ada@example.com",
+				)
+				.optional(),
+		),
 		businessName: z
 			.string()
 			.trim()
@@ -89,33 +96,49 @@ export const DemoRequest = z
 			BUSINESS_TYPES.map((t) => t.value),
 			"Choose what kind of business it is",
 		),
-		city: z
-			.string()
-			.trim()
-			.min(1, "Enter your city")
-			.max(100, "Keep the city to 100 characters")
-			.regex(/^[\p{L}\p{M}0-9 .,'’()/-]{2,}$/u, "Enter the name of your city"),
-		state: z.enum(STATES, "Choose your state"),
+		city: z.preprocess(
+			blank,
+			z
+				.string()
+				.trim()
+				.max(100, "Keep the city to 100 characters")
+				.regex(/^[\p{L}\p{M}0-9 .,'’()/-]{2,}$/u, "Enter the name of your city")
+				.optional(),
+		),
+		state: z.preprocess(blank, z.enum(STATES, "Choose your state").optional()),
 		rooms: z
 			.number()
 			.int("Enter a whole number of rooms")
 			.min(1, "Enter the number of rooms, or leave it empty")
 			.max(MAX_ROOMS, `Enter up to ${MAX_ROOMS} rooms`)
 			.optional(),
-		monthlySales: z.enum(
-			MONTHLY_SALES.map((m) => m.value),
-			"Choose your average monthly sales (an estimate is fine)",
+		monthlySales: z.preprocess(
+			blank,
+			z
+				.enum(
+					MONTHLY_SALES.map((m) => m.value),
+					"Choose your average monthly sales (an estimate is fine)",
+				)
+				.optional(),
 		),
-		heardFrom: z.enum(
-			HEARD_FROM.map((h) => h.value),
-			"Tell us how you heard about Hospio360",
+		heardFrom: z.preprocess(
+			blank,
+			z
+				.enum(
+					HEARD_FROM.map((h) => h.value),
+					"Tell us how you heard about Hospio360",
+				)
+				.optional(),
 		),
-		preferredTime: z.enum(CALL_TIMES.map((t) => t.value)).optional(),
-		message: z
-			.string()
-			.trim()
-			.max(MESSAGE_MAX, `Keep the message to ${MESSAGE_MAX} characters`)
-			.optional(),
+		preferredTime: z.preprocess(blank, z.enum(CALL_TIMES.map((t) => t.value)).optional()),
+		message: z.preprocess(
+			blank,
+			z
+				.string()
+				.trim()
+				.max(MESSAGE_MAX, `Keep the message to ${MESSAGE_MAX} characters`)
+				.optional(),
+		),
 		/** A marketer's code from the link (?ref=). */
 		referralCode: z.string().trim().max(20).optional(),
 		/** The hidden field: people never fill it. */
@@ -126,6 +149,17 @@ export const DemoRequest = z
 export type DemoRequest = z.input<typeof DemoRequest>;
 
 export type DemoField = keyof DemoRequest;
+/** The fields under "Tell us more (optional)": an error on one of them opens the section. */
+export const OPTIONAL_FIELDS: readonly DemoField[] = [
+	"email",
+	"city",
+	"state",
+	"rooms",
+	"monthlySales",
+	"heardFrom",
+	"preferredTime",
+	"message",
+];
 export type FieldErrors = Partial<Record<DemoField, string>>;
 
 /** The first message per field from a failed check. */

@@ -1,6 +1,13 @@
 "use client";
 
-import { CheckIcon, CircleAlertIcon, Loader2Icon, UserCheckIcon } from "lucide-react";
+import {
+	CheckIcon,
+	ChevronDownIcon,
+	CircleAlertIcon,
+	Loader2Icon,
+	MessageCircleIcon,
+	UserCheckIcon,
+} from "lucide-react";
 import Link from "next/link";
 import {
 	type FormEvent,
@@ -14,6 +21,8 @@ import {
 import { btn, input as inputCls } from "@hospio/ui/shared/ui";
 import { cn } from "@hospio/ui/utils";
 import { btnLg } from "@/components/site";
+import { SALES_WHATSAPP } from "@/config/env";
+import { trackMeta } from "@/lib/meta-pixel";
 import { submitDemoRequest } from "@/demo-request/actions";
 import {
 	BUSINESS_TYPES,
@@ -26,6 +35,7 @@ import {
 	MAX_ROOMS,
 	MESSAGE_MAX,
 	MONTHLY_SALES,
+	OPTIONAL_FIELDS,
 	RECEIVED_MESSAGE,
 	STATES,
 	WITH_ROOMS,
@@ -33,12 +43,13 @@ import {
 
 /** 16px text on small screens so iOS doesn't zoom into the field; the kit's 14px from the small breakpoint up. */
 const field = cn(inputCls, "text-base sm:text-sm");
+/** The order on screen: the four required questions, then "Tell us more (optional)". */
 const ORDER: DemoField[] = [
 	"ownerName",
 	"phone",
-	"email",
 	"businessName",
 	"businessType",
+	"email",
 	"city",
 	"state",
 	"rooms",
@@ -51,6 +62,11 @@ const chevron = {
 	backgroundImage:
 		"url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%236b7280' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E\")",
 };
+/** wa.me with the greeting filled in; only built when NEXT_PUBLIC_SALES_WHATSAPP is set. */
+const WHATSAPP_TEXT = "Hello Hospio360, I'd like a demo for my business";
+const whatsappHref = SALES_WHATSAPP
+	? `https://wa.me/${SALES_WHATSAPP}?text=${encodeURIComponent(WHATSAPP_TEXT)}`
+	: null;
 const selectCls =
 	"appearance-none bg-[length:16px] bg-[right_12px_center] bg-no-repeat pr-10";
 
@@ -90,7 +106,9 @@ function Labelled({
 }
 
 /**
- * The "Book a demo" form (hospio-backend docs/onboarding.md, "Applications"). Checked in the browser as you go and again on the
+ * The "Book a demo" form (hospio-backend docs/onboarding.md, "Applications"). The short form (22 Nov 2026): four questions (name,
+ * phone, business name and type) and the button; everything else is optional, under "Tell us more (optional)", closed until
+ * opened (or until one of its answers needs fixing). Checked in the browser as you go and again on the
  * server; sent through this site's own server action, never straight to the API. The `website` box is hidden from people: only a
  * script fills it. A marketer's code from the link (?ref=) goes with the request so the referral is recorded.
  */
@@ -115,6 +133,8 @@ export function BookDemoForm({ referralCode }: { referralCode?: string }) {
 	const [time, setTime] = useState("");
 	const [message, setMessage] = useState("");
 	const [website, setWebsite] = useState("");
+	const [more, setMore] = useState(false);
+	const [sentEmail, setSentEmail] = useState(false);
 	const hasRooms = WITH_ROOMS.includes(type);
 
 	const clear = (f: DemoField) =>
@@ -123,14 +143,16 @@ export function BookDemoForm({ referralCode }: { referralCode?: string }) {
 	const showErrors = (fields: FieldErrors) => {
 		setErrors(fields);
 		const first = ORDER.find((f) => fields[f]);
+		if (first && OPTIONAL_FIELDS.includes(first)) setMore(true);
 		if (first)
-			requestAnimationFrame(() => {
+			// After the optional section has opened, so the field can be scrolled to.
+			setTimeout(() => {
 				const el = formRef.current?.querySelector<HTMLElement>(
 					`[data-field="${first}"]`,
 				);
 				el?.scrollIntoView({ block: "center", behavior: "smooth" });
 				el?.focus({ preventScroll: true });
-			});
+			}, 50);
 	};
 
 	const onSubmit = (e: FormEvent) => {
@@ -164,6 +186,9 @@ export function BookDemoForm({ referralCode }: { referralCode?: string }) {
 		start(async () => {
 			const r = await submitDemoRequest(values);
 			if (r.ok) {
+				// The Meta Pixel's Lead, once per request sent (never any of the form's contents).
+				trackMeta("Lead", { content_name: "Book a demo" });
+				setSentEmail(email.trim() !== "");
 				setDone(r.message || RECEIVED_MESSAGE);
 				window.scrollTo({ top: 0, behavior: "smooth" });
 				return;
@@ -189,7 +214,7 @@ export function BookDemoForm({ referralCode }: { referralCode?: string }) {
 					{done}
 				</p>
 				<p className="max-w-[460px] text-sm leading-[1.55] text-ink-3">
-					We’ve sent a confirmation to your email. On the call we show you
+					{sentEmail && "We’ve sent a confirmation to your email. "}On the call we show you
 					Hospio360, agree what you need and set your business up with you;
 					your login comes by email once it is ready.
 				</p>
@@ -235,7 +260,7 @@ export function BookDemoForm({ referralCode }: { referralCode?: string }) {
 			<div className="flex flex-col gap-1">
 				<h2 className="text-[22px] font-bold text-ink">Tell us about your business</h2>
 				<p className="text-sm text-ink-2">
-					It takes about two minutes. Our team calls you within 1 working day.
+					Four quick questions. Our team calls you within 1 working day.
 				</p>
 			</div>
 
@@ -260,11 +285,10 @@ export function BookDemoForm({ referralCode }: { referralCode?: string }) {
 				</div>
 			)}
 
-			<Labelled id={id("ownerName")} label="Your full name" error={errors.ownerName}>
-				{text("ownerName", ownerName, setOwnerName, { autoComplete: "name", maxLength: 150 })}
-			</Labelled>
-
 			<div className="grid gap-6 sm:grid-cols-2">
+				<Labelled id={id("ownerName")} label="Your full name" error={errors.ownerName}>
+					{text("ownerName", ownerName, setOwnerName, { autoComplete: "name", maxLength: 150 })}
+				</Labelled>
 				<Labelled
 					id={id("phone")}
 					label="Phone"
@@ -276,16 +300,6 @@ export function BookDemoForm({ referralCode }: { referralCode?: string }) {
 						inputMode: "tel",
 						autoComplete: "tel",
 						maxLength: 20,
-					})}
-				</Labelled>
-				<Labelled id={id("email")} label="Email" error={errors.email}>
-					{text("email", email, setEmail, {
-						type: "email",
-						inputMode: "email",
-						autoComplete: "email",
-						autoCapitalize: "none",
-						spellCheck: false,
-						maxLength: 255,
 					})}
 				</Labelled>
 			</div>
@@ -347,193 +361,219 @@ export function BookDemoForm({ referralCode }: { referralCode?: string }) {
 				)}
 			</fieldset>
 
-			<div className="grid gap-6 sm:grid-cols-2">
-				<Labelled id={id("city")} label="City" error={errors.city}>
-					{text("city", city, setCity, { autoComplete: "address-level2", maxLength: 100 })}
-				</Labelled>
-				<Labelled id={id("state")} label="State" error={errors.state}>
-					<select
-						id={id("state")}
-						data-field="state"
-						name="state"
-						autoComplete="address-level1"
-						value={state}
-						onChange={(e) => {
-							setState(e.target.value);
-							clear("state");
-						}}
-						className={cn(
-							field,
-							selectCls,
-							!state && "text-ink-3",
-							errors.state && "border-status-bad",
-						)}
-						style={chevron}
-						{...invalid("state")}
-					>
-						<option value="">Choose…</option>
-						{STATES.map((s) => (
-							<option key={s} value={s}>
-								{s === "FCT" ? "FCT (Abuja)" : s}
-							</option>
-						))}
-					</select>
-				</Labelled>
-			</div>
-
-			{hasRooms && (
-				<Labelled
-					id={id("rooms")}
-					label="Number of rooms"
-					optional
-					error={errors.rooms}
-					hint="Roughly is fine"
-				>
-					{text("rooms", rooms, (v) => setRooms(v.replace(/\D/g, "").slice(0, 4)), {
-						type: "text",
-						inputMode: "numeric",
-						maxLength: 4,
-						placeholder: `1 to ${MAX_ROOMS}`,
-						className: cn(field, "sm:max-w-[200px]", errors.rooms && "border-status-bad"),
-					})}
-				</Labelled>
-			)}
-
-			<fieldset
-				className="flex min-w-0 flex-col gap-[10px]"
-				aria-describedby={
-					errors.monthlySales ? `${id("monthlySales")}-error` : `${id("monthlySales")}-hint`
-				}
+			<details
+				open={more}
+				onToggle={(e) => setMore(e.currentTarget.open)}
+				className="group rounded-control border border-line"
 			>
-				<legend className="mb-[10px] text-[13px] font-medium text-ink-2">Average monthly sales</legend>
-				<div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
-					{MONTHLY_SALES.filter((m) => m.value !== "PREFER_NOT").map((m, i) => (
+				<summary className="flex cursor-pointer list-none items-center justify-between gap-3 px-4 py-[13px] text-sm font-semibold text-ink [&::-webkit-details-marker]:hidden">
+					<span className="flex min-w-0 flex-col gap-[2px]">
+						<span>Tell us more (optional)</span>
+						<span className="text-xs font-normal text-ink-3">
+							Email, location, size, sales, best time to call
+						</span>
+					</span>
+					<ChevronDownIcon className="size-4 shrink-0 text-ink-3 transition-transform group-open:rotate-180" />
+				</summary>
+				<div className="flex flex-col gap-6 border-t border-line px-4 pt-5 pb-5">
+					<Labelled id={id("email")} label="Email" error={errors.email}>
+						{text("email", email, setEmail, {
+							type: "email",
+							inputMode: "email",
+							autoComplete: "email",
+							autoCapitalize: "none",
+							spellCheck: false,
+							maxLength: 255,
+						})}
+					</Labelled>
+
+					<div className="grid gap-6 sm:grid-cols-2">
+						<Labelled id={id("city")} label="City" error={errors.city}>
+							{text("city", city, setCity, { autoComplete: "address-level2", maxLength: 100 })}
+						</Labelled>
+						<Labelled id={id("state")} label="State" error={errors.state}>
+							<select
+								id={id("state")}
+								data-field="state"
+								name="state"
+								autoComplete="address-level1"
+								value={state}
+								onChange={(e) => {
+									setState(e.target.value);
+									clear("state");
+								}}
+								className={cn(
+									field,
+									selectCls,
+									!state && "text-ink-3",
+									errors.state && "border-status-bad",
+								)}
+								style={chevron}
+								{...invalid("state")}
+							>
+								<option value="">Choose…</option>
+								{STATES.map((s) => (
+									<option key={s} value={s}>
+										{s === "FCT" ? "FCT (Abuja)" : s}
+									</option>
+								))}
+							</select>
+						</Labelled>
+					</div>
+
+					{hasRooms && (
+						<Labelled
+							id={id("rooms")}
+							label="Number of rooms"
+							error={errors.rooms}
+							hint="Roughly is fine"
+						>
+							{text("rooms", rooms, (v) => setRooms(v.replace(/\D/g, "").slice(0, 4)), {
+								type: "text",
+								inputMode: "numeric",
+								maxLength: 4,
+								placeholder: `1 to ${MAX_ROOMS}`,
+								className: cn(field, "sm:max-w-[200px]", errors.rooms && "border-status-bad"),
+							})}
+						</Labelled>
+					)}
+
+					<fieldset
+						className="flex min-w-0 flex-col gap-[10px]"
+						aria-describedby={
+							errors.monthlySales ? `${id("monthlySales")}-error` : `${id("monthlySales")}-hint`
+						}
+					>
+						<legend className="mb-[10px] text-[13px] font-medium text-ink-2">Average monthly sales</legend>
+						<div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+							{MONTHLY_SALES.filter((m) => m.value !== "PREFER_NOT").map((m, i) => (
+								<SalesOption
+									key={m.value}
+									value={m.value}
+									label={m.label}
+									on={sales === m.value}
+									invalid={Boolean(errors.monthlySales)}
+									first={i === 0}
+									onPick={() => {
+										setSales(m.value);
+										clear("monthlySales");
+									}}
+								/>
+							))}
+						</div>
 						<SalesOption
-							key={m.value}
-							value={m.value}
-							label={m.label}
-							on={sales === m.value}
+							value="PREFER_NOT"
+							label="Prefer not to say"
+							quiet
+							on={sales === "PREFER_NOT"}
 							invalid={Boolean(errors.monthlySales)}
-							first={i === 0}
 							onPick={() => {
-								setSales(m.value);
+								setSales("PREFER_NOT");
 								clear("monthlySales");
 							}}
 						/>
-					))}
+						{errors.monthlySales ? (
+							<p id={`${id("monthlySales")}-error`} className="text-xs text-status-bad">
+								{errors.monthlySales}
+							</p>
+						) : (
+							<p id={`${id("monthlySales")}-hint`} className="text-xs text-ink-3">
+								An estimate is fine. It helps us prepare for your call.
+							</p>
+						)}
+					</fieldset>
+
+					<Labelled id={id("heardFrom")} label="How did you hear about us?" error={errors.heardFrom}>
+						<select
+							id={id("heardFrom")}
+							data-field="heardFrom"
+							name="heardFrom"
+							value={heard}
+							onChange={(e) => {
+								setHeard(e.target.value);
+								clear("heardFrom");
+							}}
+							className={cn(
+								field,
+								selectCls,
+								!heard && "text-ink-3",
+								errors.heardFrom && "border-status-bad",
+							)}
+							style={chevron}
+							{...invalid("heardFrom")}
+						>
+							<option value="">Choose…</option>
+							{HEARD_FROM.map((h) => (
+								<option key={h.value} value={h.value}>
+									{h.label}
+								</option>
+							))}
+						</select>
+					</Labelled>
+
+					<fieldset className="flex min-w-0 flex-col gap-[10px]">
+						<legend className="mb-[10px] text-[13px] font-medium text-ink-2">
+							Best time to call you
+						</legend>
+						<div className="grid grid-cols-2 gap-[10px] sm:grid-cols-4">
+							{CALL_TIMES.map((t, i) => {
+								const on = time === t.value;
+								return (
+									<label
+										key={t.value}
+										className={cn(
+											"flex cursor-pointer items-center justify-center rounded-control border px-2 py-[11px] text-center text-[13px] font-semibold transition-colors has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-brand/40",
+											on
+												? "border-brand bg-brand-soft text-brand"
+												: "border-line bg-card text-ink hover:bg-subtle",
+										)}
+									>
+										<input
+											type="radio"
+											name="preferredTime"
+											value={t.value}
+											checked={on}
+											data-field={i === 0 ? "preferredTime" : undefined}
+											onClick={() => {
+												// A second tap on the chosen time clears it: the question is optional.
+												if (on) setTime("");
+											}}
+											onChange={() => {
+												setTime(t.value);
+												clear("preferredTime");
+											}}
+											className="sr-only"
+										/>
+										{t.label}
+									</label>
+								);
+							})}
+						</div>
+					</fieldset>
+
+					<Labelled
+						id={id("message")}
+						label="Anything we should know?"
+						error={errors.message}
+						hint={`${message.length}/${MESSAGE_MAX} · e.g. how many locations, or what you use today`}
+					>
+						<textarea
+							id={id("message")}
+							data-field="message"
+							name="message"
+							rows={4}
+							maxLength={MESSAGE_MAX}
+							value={message}
+							onChange={(e) => {
+								setMessage(e.target.value.slice(0, MESSAGE_MAX));
+								clear("message");
+							}}
+							className={cn(field, "min-h-[104px] resize-y", errors.message && "border-status-bad")}
+							{...invalid("message")}
+						/>
+					</Labelled>
 				</div>
-				<SalesOption
-					value="PREFER_NOT"
-					label="Prefer not to say"
-					quiet
-					on={sales === "PREFER_NOT"}
-					invalid={Boolean(errors.monthlySales)}
-					onPick={() => {
-						setSales("PREFER_NOT");
-						clear("monthlySales");
-					}}
-				/>
-				{errors.monthlySales ? (
-					<p id={`${id("monthlySales")}-error`} className="text-xs text-status-bad">
-						{errors.monthlySales}
-					</p>
-				) : (
-					<p id={`${id("monthlySales")}-hint`} className="text-xs text-ink-3">
-						An estimate is fine. It helps us prepare for your call.
-					</p>
-				)}
-			</fieldset>
-
-			<Labelled id={id("heardFrom")} label="How did you hear about us?" error={errors.heardFrom}>
-				<select
-					id={id("heardFrom")}
-					data-field="heardFrom"
-					name="heardFrom"
-					value={heard}
-					onChange={(e) => {
-						setHeard(e.target.value);
-						clear("heardFrom");
-					}}
-					className={cn(
-						field,
-						selectCls,
-						!heard && "text-ink-3",
-						errors.heardFrom && "border-status-bad",
-					)}
-					style={chevron}
-					{...invalid("heardFrom")}
-				>
-					<option value="">Choose…</option>
-					{HEARD_FROM.map((h) => (
-						<option key={h.value} value={h.value}>
-							{h.label}
-						</option>
-					))}
-				</select>
-			</Labelled>
-
-			<fieldset className="flex min-w-0 flex-col gap-[10px]">
-				<legend className="mb-[10px] text-[13px] font-medium text-ink-2">
-					Best time to call you <span className="font-normal text-ink-3">(optional)</span>
-				</legend>
-				<div className="grid grid-cols-2 gap-[10px] sm:grid-cols-4">
-					{CALL_TIMES.map((t, i) => {
-						const on = time === t.value;
-						return (
-							<label
-								key={t.value}
-								className={cn(
-									"flex cursor-pointer items-center justify-center rounded-control border px-2 py-[11px] text-center text-[13px] font-semibold transition-colors has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-brand/40",
-									on
-										? "border-brand bg-brand-soft text-brand"
-										: "border-line bg-card text-ink hover:bg-subtle",
-								)}
-							>
-								<input
-									type="radio"
-									name="preferredTime"
-									value={t.value}
-									checked={on}
-									data-field={i === 0 ? "preferredTime" : undefined}
-									onClick={() => {
-										// A second tap on the chosen time clears it: the question is optional.
-										if (on) setTime("");
-									}}
-									onChange={() => {
-										setTime(t.value);
-										clear("preferredTime");
-									}}
-									className="sr-only"
-								/>
-								{t.label}
-							</label>
-						);
-					})}
-				</div>
-			</fieldset>
-
-			<Labelled
-				id={id("message")}
-				label="Anything we should know?"
-				optional
-				error={errors.message}
-				hint={`${message.length}/${MESSAGE_MAX} · e.g. how many locations, or what you use today`}
-			>
-				<textarea
-					id={id("message")}
-					data-field="message"
-					name="message"
-					rows={4}
-					maxLength={MESSAGE_MAX}
-					value={message}
-					onChange={(e) => {
-						setMessage(e.target.value.slice(0, MESSAGE_MAX));
-						clear("message");
-					}}
-					className={cn(field, "min-h-[104px] resize-y", errors.message && "border-status-bad")}
-					{...invalid("message")}
-				/>
-			</Labelled>
+			</details>
 
 			{/* Not for people: off screen, out of the tab order and hidden from screen readers. */}
 			<div
@@ -564,18 +604,35 @@ export function BookDemoForm({ referralCode }: { referralCode?: string }) {
 				.
 			</p>
 
-			<button
-				type="submit"
-				disabled={pending}
-				className={cn(
-					btn.primary,
-					btnLg,
-					"inline-flex w-full items-center justify-center gap-2 sm:w-auto sm:self-start",
+			<div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
+				<button
+					type="submit"
+					disabled={pending}
+					className={cn(
+						btn.primary,
+						btnLg,
+						"inline-flex w-full items-center justify-center gap-2 sm:w-auto",
+					)}
+				>
+					{pending && <Loader2Icon className="size-4 animate-spin" />}
+					{pending ? "Sending…" : "Book my demo"}
+				</button>
+				{whatsappHref && (
+					<a
+						href={whatsappHref}
+						target="_blank"
+						rel="noopener noreferrer"
+						onClick={() => trackMeta("Contact")}
+						className={cn(
+							btnLg,
+							"inline-flex w-full items-center justify-center gap-2 rounded-control border border-[#25D366] bg-card font-semibold text-[#128C7E] transition-colors hover:bg-[#25D366]/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#25D366]/40 sm:w-auto",
+						)}
+					>
+						<MessageCircleIcon className="size-[18px] fill-[#25D366] text-[#25D366]" />
+						Prefer WhatsApp? Chat with us
+					</a>
 				)}
-			>
-				{pending && <Loader2Icon className="size-4 animate-spin" />}
-				{pending ? "Sending…" : "Book my demo"}
-			</button>
+			</div>
 		</form>
 	);
 }

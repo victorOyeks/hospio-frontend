@@ -77,15 +77,22 @@ export type HotelApplicationNoteRow = {
 	createdAt: string;
 };
 
+/** "City, State", either alone, or "" when neither was given (both optional on the short form, 22 Nov 2026). */
+export const applicationPlace = (a: { city: string; state: string }) =>
+	[a.city, a.state].filter((s) => s?.trim()).join(", ");
+
 export type HotelApplicationRow = {
 	id: string;
 	ownerName: string;
+	/** "" when not given (optional since the short form, 22 Nov 2026). */
 	email: string;
 	phone: string;
 	businessName: string;
 	/** HOTEL, LOUNGE, BAR, RESTAURANT or MIXED. */
 	businessType: string;
+	/** "" when not given. */
 	city: string;
+	/** "" when not given. */
 	state: string;
 	rooms?: number;
 	/** A MONTHLY_SALES_BANDS code; undefined when the request came before the question ("Not asked"). */

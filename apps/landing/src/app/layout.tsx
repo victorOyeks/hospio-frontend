@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { DM_Sans } from "next/font/google";
 import { cn } from "@hospio/ui/utils";
+import { MetaPixel } from "@/components/meta-pixel";
 import { SITE_INDEXABLE, SITE_URL } from "@/components/site";
 import "./globals.css";
 
@@ -46,7 +47,10 @@ export const viewport: Viewport = {
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
 	return (
 		<html lang="en">
-			<body className={cn("min-h-screen bg-card font-sans text-ink antialiased", dmSans.variable)}>{children}</body>
+			<body className={cn("min-h-screen bg-card font-sans text-ink antialiased", dmSans.variable)}>
+				{children}
+				<MetaPixel />
+			</body>
 		</html>
 	);
 }

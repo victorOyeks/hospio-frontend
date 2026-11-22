@@ -10,6 +10,11 @@ Owner decision (21 Nov 2026): hotels, lounges, bars and restaurants **can no lon
    for them" panel already filled in, then the 10-step wizard.
 4. The owner gets the usual handover invite and signs in. Nobody signs up.
 
+> **Changed 22 Nov 2026 (QA 93, the short form):** only **full name, phone, business name and kind of business** are now
+> required. **Email, city, state, number of rooms, average monthly sales, how did you hear and best time to call** are optional,
+> under a closed "Tell us more (optional)" section, and checked only when filled. Where the steps below expect red messages under
+> email, city, state, monthly sales or "How did you hear", or a required monthly sales band (section 9), follow QA 93 instead.
+
 What changed:
 
 - **Website:** a new page `/book-a-demo`. Every "Get started" / "Create an account" button is now **Book a demo** (header,

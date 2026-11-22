@@ -22,6 +22,7 @@ import {
 } from "@hospio/api/actions/hotel-applications";
 import { useAction } from "@hospio/api/actions/use-action";
 import {
+	applicationPlace,
 	applicationStatusLabel,
 	applicationTypeLabel,
 	CALL_TIME_LABELS,
@@ -114,7 +115,7 @@ export function HotelApplicationsScreen({
 			cell: ({ row }) => (
 				<TwoLine
 					primary={row.original.businessName}
-					secondary={`${applicationTypeLabel(row.original.businessType)}${row.original.rooms ? ` · ${row.original.rooms} rooms` : ""} · ${row.original.city}, ${row.original.state}`}
+					secondary={`${applicationTypeLabel(row.original.businessType)}${row.original.rooms ? ` · ${row.original.rooms} rooms` : ""}${applicationPlace(row.original) ? ` · ${applicationPlace(row.original)}` : ""}`}
 				/>
 			),
 		},
@@ -253,7 +254,8 @@ export function HotelApplicationsScreen({
 					note={
 						<Note tone="info">
 							Filled from {onboarding.ownerName}’s request ({applicationTypeLabel(onboarding.businessType)}
-							{onboarding.rooms ? `, ${onboarding.rooms} rooms` : ""}, {onboarding.city}, {onboarding.state}). Check it, then
+							{onboarding.rooms ? `, ${onboarding.rooms} rooms` : ""}
+							{applicationPlace(onboarding) ? `, ${applicationPlace(onboarding)}` : ""}). Check it, then
 							Create business: the request is linked to the new business and marked Onboarded, and the wizard opens.
 						</Note>
 					}
@@ -313,7 +315,7 @@ function ApplicationPanel({
 			open={Boolean(row) || loading}
 			onOpenChange={(o) => !o && onClose()}
 			title={row?.businessName ?? "Hotel application"}
-			subtitle={row ? `Received ${fmtWhen(row.createdAt)} · ${row.city}, ${row.state}` : "Loading…"}
+			subtitle={row ? `Received ${fmtWhen(row.createdAt)}${applicationPlace(row) ? ` · ${applicationPlace(row)}` : ""}` : "Loading…"}
 			icon={CalendarCheckIcon}
 			width="md"
 			footer={
@@ -364,7 +366,7 @@ function ApplicationPanel({
 							items={[
 								{ label: "Business", value: row.businessName },
 								{ label: "Kind", value: applicationTypeLabel(row.businessType) },
-								{ label: "City / state", value: `${row.city}, ${row.state}` },
+								{ label: "City / state", value: applicationPlace(row) || <span className="text-ink-3">Not given</span> },
 								{ label: "Rooms", value: row.rooms ?? "—" },
 								{
 									label: "Monthly sales",
@@ -384,9 +386,12 @@ function ApplicationPanel({
 							items={[
 								{ label: "Full name", value: row.ownerName },
 								{ label: "Phone", value: <a href={`tel:${row.phone}`} className="underline">{row.phone}</a> },
-								{ label: "Email", value: <span className="break-all">{row.email}</span> },
+								{
+									label: "Email",
+									value: row.email ? <span className="break-all">{row.email}</span> : <span className="text-ink-3">Not given</span>,
+								},
 								{ label: "Best time to call", value: row.preferredTime ? CALL_TIME_LABELS[row.preferredTime] ?? row.preferredTime : "Any time" },
-								{ label: "Heard about us", value: row.heardFrom ? HEARD_FROM_LABELS[row.heardFrom] ?? row.heardFrom : "—" },
+								{ label: "Heard about us", value: row.heardFrom ? HEARD_FROM_LABELS[row.heardFrom] ?? row.heardFrom : <span className="text-ink-3">Not given</span> },
 							]}
 						/>
 						{row.message ? (
@@ -555,7 +560,8 @@ export function FromApplicationBanner({ application: a }: { application: HotelAp
 			<BuildingIcon className="size-4 shrink-0" />
 			<span className="min-w-0 flex-1">
 				From {a.ownerName}’s demo request: {applicationTypeLabel(a.businessType)}
-				{a.rooms ? `, ${a.rooms} rooms` : ""}, {a.city}, {a.state}
+				{a.rooms ? `, ${a.rooms} rooms` : ""}
+				{applicationPlace(a) ? `, ${applicationPlace(a)}` : ""}
 				{a.marketerName ? ` · referred by ${a.marketerName}` : ""}
 				{a.message ? ` · “${a.message.length > 120 ? `${a.message.slice(0, 120)}…` : a.message}”` : ""}
 			</span>

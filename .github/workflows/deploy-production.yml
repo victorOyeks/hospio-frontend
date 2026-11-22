@@ -141,6 +141,10 @@ jobs:
           NEXT_PUBLIC_SITE_URL: https://hospio360.com
           NEXT_PUBLIC_CONTACT_EMAIL: hello@oyeksglobal.com
           NEXT_PUBLIC_SITE_INDEXABLE: "true"
+          # Book a demo's "Prefer WhatsApp? Chat with us" (digits, e.g. 2348012345678); empty: no button.
+          NEXT_PUBLIC_SALES_WHATSAPP: ${{ vars.SALES_WHATSAPP }}
+          # The Meta Pixel (measuring the Meta adverts); production only, so staging and local builds never send events.
+          NEXT_PUBLIC_META_PIXEL_ID: ${{ vars.META_PIXEL_ID }}
 
       # The standalone bundle is rooted at the workspace: apps/<app>/server.js plus the hoisted node_modules.
       - name: Prepare standalone bundle
