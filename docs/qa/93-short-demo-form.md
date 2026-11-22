@@ -103,3 +103,20 @@ Owner decisions (22 Nov 2026):
 - The success screen promises a confirmation email when no email was given.
 - The WhatsApp button shows without the variable, or the pixel loads (any facebook.com request) without its id.
 - Copy on the page says Hospio360 is used on a phone (it is used on a laptop or tablet).
+
+## Run on 22 Nov 2026 (developer, local landing build against the staging API)
+
+- 390 × 844 with the Facebook in-app user agent: name and phone on the first screen, What happens next below the form; 820 the
+  same order; 1440 unchanged (form left, aside right). Empty send: only the four required messages; "Tell us more" closed.
+- Short request (`0803 555 0141`, Hotel): stored with email, city, state, heard_from and monthly_sales null; only the team email
+  ("New demo request: QA Short Demo Ltd", no city); success screen without the confirmation-email sentence. Repeat with
+  `+234 803 555 0141`: one row, note "Sent the Book a demo form again · business: QA Short Demo Two".
+- Full request (`0803 555 0142`, every optional answer): all stored; acknowledgement (SKIPPED, test address) and team email
+  "(Ikeja)"; success screen promises the confirmation email.
+- Backoffice (admin-staging, Kola): list "Hotel" with no place, detail Not given / Not asked, no "null"; search "QA Short" finds both.
+- WhatsApp (built with 2349035911994): `https://wa.me/2349035911994?text=Hello%20Hospio360%2C%20I'd%20like%20a%20demo%20for%20my%20business`,
+  new tab. Built without: no button.
+- Pixel (built with the id; `www.facebook.com` blocked in the test browser so nothing reached Meta): fbevents.js loaded,
+  PageView on load and on a header link to /features, one Lead per request (`content_name` Book a demo), Contact on the
+  WhatsApp button, no name / phone / email / business in any request. Built without the id: no facebook request at all.
+- QA rows deleted afterwards. Screenshots: `~/Desktop/Hospio test screenshots/Short demo form (22 Nov 2026)/` 01–15, 20.
