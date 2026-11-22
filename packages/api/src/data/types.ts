@@ -839,6 +839,8 @@ export type SupplierRow = {
 	id: Id;
 	name: string;
 	contactName: string;
+	/** The contact person's own number (optional). */
+	contactPhone?: string;
 	phone: string;
 	email?: string;
 	terms: string;
@@ -878,6 +880,8 @@ export type StockValue = {
 		supplierName?: string;
 	}[];
 	onOrder: number;
+	/** How many sent or part-received orders `onOrder` is still to arrive on. */
+	ordersOnTheWay: number;
 };
 
 /** GET /inventory/usage: what moved, at cost, per store and per team for a date range. */

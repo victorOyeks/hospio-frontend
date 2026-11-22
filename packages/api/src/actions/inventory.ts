@@ -227,6 +227,7 @@ export async function saveSupplier(input: {
 	id?: string;
 	name: string;
 	contactName?: string;
+	contactPhone?: string;
 	phone?: string;
 	email?: string;
 	paymentTerms?: string;
@@ -240,6 +241,7 @@ export async function saveSupplier(input: {
 	const body = {
 		name: input.name.trim(),
 		contactName: clean(input.contactName),
+		contactPhone: clean(input.contactPhone),
 		phone: clean(input.phone),
 		email: clean(input.email),
 		paymentTerms: clean(input.paymentTerms),

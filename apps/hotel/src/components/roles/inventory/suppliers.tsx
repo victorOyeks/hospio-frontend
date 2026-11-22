@@ -26,6 +26,7 @@ import { PanelSection, SidePanel } from "@hospio/ui/shared/side-panel";
 import { StatusPill } from "@hospio/ui/shared/status-pill";
 import { SearchBox, Toolbar } from "@hospio/ui/shared/toolbar";
 import { btn } from "@hospio/ui/shared/ui";
+import { checkPhone } from "@hospio/ui/shared/validate";
 import { saveSupplier } from "@hospio/api/actions/inventory";
 import { useAction } from "@hospio/api/actions/use-action";
 import type {
@@ -39,6 +40,7 @@ import { poTone } from "./orders";
 const EMPTY = {
 	name: "",
 	contact: "",
+	contactPhone: "",
 	phone: "",
 	email: "",
 	terms: "Pay on delivery",
@@ -195,7 +197,12 @@ export function SuppliersScreen({
 				title={sup?.name ?? ""}
 				subtitle={
 					sup
-						? [sup.contactName, sup.phone, sup.email]
+						? [
+								sup.contactName &&
+									`${sup.contactName}${sup.contactPhone ? ` (${sup.contactPhone})` : ""}`,
+								sup.phone,
+								sup.email,
+							]
 								.filter(Boolean)
 								.join(" · ")
 						: undefined
@@ -332,14 +339,29 @@ function SupplierPanel({
 }) {
 	const [form, setForm] = useState(EMPTY);
 	const [pick, setPick] = useState("");
+	// Messages show once Save was pressed (QA DEF-097): the same checks as inventory-service, so 0000000 never gets there.
+	const [tried, setTried] = useState(false);
 	const { run, pending } = useAction();
+	const phoneMsg = (v: string) =>
+		checkPhone(v, false) ? "Enter a phone number like 0803 123 4567" : undefined;
+	const errors = {
+		phone: phoneMsg(form.phone),
+		contactPhone: phoneMsg(form.contactPhone),
+		contact:
+			form.contact.trim() && !/\p{L}/u.test(form.contact)
+				? "Enter the contact person's name · their number goes under Contact phone"
+				: undefined,
+	};
+	const hasErrors = Object.values(errors).some(Boolean);
 	useEffect(() => {
 		if (!open) return;
+		setTried(false);
 		setForm(
 			supplier
 				? {
 						name: supplier.name,
 						contact: supplier.contactName,
+						contactPhone: supplier.contactPhone ?? "",
 						phone: supplier.phone,
 						email: supplier.email ?? "",
 						terms: supplier.terms || "Pay on delivery",
@@ -373,13 +395,16 @@ function SupplierPanel({
 						type="button"
 						className={btn.primary}
 						disabled={!form.name.trim() || pending}
-						onClick={() =>
+						onClick={() => {
+							setTried(true);
+							if (hasErrors) return;
 							void run(
 								() =>
 									saveSupplier({
 										id: supplier?.id,
 										name: form.name,
 										contactName: form.contact,
+										contactPhone: form.contactPhone,
 										phone: form.phone,
 										email: form.email,
 										paymentTerms: form.terms,
@@ -394,8 +419,8 @@ function SupplierPanel({
 										: `${form.name} stopped`
 									: `${form.name} added`,
 								(s) => onSaved(s.id),
-							)
-						}
+							);
+						}}
 					>
 						Save supplier
 					</button>
@@ -411,31 +436,41 @@ function SupplierPanel({
 				/>
 				<FieldRow>
 					<TextField
-						label="Contact person"
-						value={form.contact}
-						onChange={set("contact")}
-					/>
-					<TextField
 						label="Phone"
 						value={form.phone}
 						onChange={set("phone")}
 						placeholder="0803 123 4567"
+						error={tried ? errors.phone : undefined}
 					/>
-				</FieldRow>
-				<FieldRow>
 					<TextField
 						label="Email"
 						value={form.email}
 						onChange={set("email")}
 						hint="Purchase orders are emailed here"
 					/>
-					<SelectField
-						label="Payment terms"
-						value={form.terms}
-						onChange={set("terms")}
-						options={["Pay on delivery", "7 days", "14 days", "30 days"]}
+				</FieldRow>
+				<FieldRow>
+					<TextField
+						label="Contact person (optional)"
+						value={form.contact}
+						onChange={set("contact")}
+						placeholder="e.g. Bola Ade"
+						error={tried ? errors.contact : undefined}
+					/>
+					<TextField
+						label="Contact phone (optional)"
+						value={form.contactPhone}
+						onChange={set("contactPhone")}
+						placeholder="0803 123 4567"
+						error={tried ? errors.contactPhone : undefined}
 					/>
 				</FieldRow>
+				<SelectField
+					label="Payment terms"
+					value={form.terms}
+					onChange={set("terms")}
+					options={["Pay on delivery", "7 days", "14 days", "30 days"]}
+				/>
 				<TextField
 					label="Address"
 					value={form.address}
@@ -478,10 +513,15 @@ function SupplierPanel({
 								hint: i.supplierName ? `now from ${i.supplierName}` : undefined,
 							}))}
 						placeholder="Item they supply…"
+						hint={
+							form.itemIds.length === 0
+								? "None yet is fine · add them now or later. Until then an order to them can pick any item."
+								: "Each item has one usual supplier: adding it here moves it from its current one."
+						}
 					/>
 				</PanelSection>
 				<TextareaField
-					label="Notes"
+					label="Notes (optional)"
 					value={form.notes}
 					onChange={set("notes")}
 					rows={2}

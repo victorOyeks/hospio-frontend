@@ -1,5 +1,5 @@
 import { PackageIcon } from "lucide-react";
-import { naira } from "@hospio/ui/shared/format";
+import { naira, plural } from "@hospio/ui/shared/format";
 import { SectionCard } from "@hospio/ui/shared/section-card";
 import type { StockUsage, StockValue } from "@hospio/api/data/types";
 
@@ -25,7 +25,8 @@ export function StockMoney({
 				<Figure
 					label="Still on order"
 					value={naira(value.onOrder)}
-					hint="Sent to suppliers, not yet received"
+					// The same figure and line as the storekeeper's On order tile (QA DEF-106).
+					hint={`${plural(value.ordersOnTheWay, "order")} still to arrive`}
 				/>
 				<Figure
 					label="Used (30 days)"

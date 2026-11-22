@@ -123,6 +123,7 @@ export const InvSupplier = z.object({
 	id: z.string(),
 	name: z.string(),
 	contactName: str,
+	contactPhone: str,
 	phone: str,
 	email: str,
 	paymentTerms: str,
@@ -255,6 +256,7 @@ export const InvValue = z.object({
 		}),
 	),
 	onOrder: num,
+	ordersOnTheWay: num,
 });
 
 export const InvUsage = z.object({
@@ -393,6 +395,7 @@ export const inventoryRoutes = {
 		input: z.object({
 			name: z.string(),
 			contactName: z.string().nullable().optional(),
+			contactPhone: z.string().nullable().optional(),
 			phone: z.string().nullable().optional(),
 			email: z.string().nullable().optional(),
 			paymentTerms: z.string().nullable().optional(),
@@ -407,6 +410,7 @@ export const inventoryRoutes = {
 		input: z.object({
 			name: z.string(),
 			contactName: z.string().nullable().optional(),
+			contactPhone: z.string().nullable().optional(),
 			phone: z.string().nullable().optional(),
 			email: z.string().nullable().optional(),
 			paymentTerms: z.string().nullable().optional(),

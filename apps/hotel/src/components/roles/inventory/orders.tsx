@@ -25,6 +25,7 @@ import { PanelSection, SidePanel } from "@hospio/ui/shared/side-panel";
 import { StatusPill } from "@hospio/ui/shared/status-pill";
 import { SearchBox, Toolbar } from "@hospio/ui/shared/toolbar";
 import { btn, input } from "@hospio/ui/shared/ui";
+import { cn } from "@hospio/ui/utils";
 import { withDeliveries } from "@hospio/ui/shared/deliveries-store";
 import {
 	cancelOrder,
@@ -587,9 +588,14 @@ function OrderPanel({
 	const [pick, setPick] = useState("");
 	const [expected, setExpected] = useState("");
 	const [note, setNote] = useState("");
+	// The "Add an item" box is remounted after each pick so it shows its placeholder again (it stayed blank).
+	const [pickKey, setPickKey] = useState(0);
+	// Line messages show once Save draft or Send was pressed (QA DEF-099: a new line starts with an empty quantity).
+	const [tried, setTried] = useState(false);
 	const { run, pending } = useAction();
 	useEffect(() => {
 		if (!open) return;
+		setTried(false);
 		if (draft) {
 			setSupplierId(draft.supplierId ?? "");
 			setStoreId(draft.storeId ?? main?.id ?? "");
@@ -636,9 +642,10 @@ function OrderPanel({
 		(s, l) => s + Number(l.quantity || 0) * Number(l.unitCost || 0),
 		0,
 	);
-	const lowSuggestions = candidates.filter(
-		(i) => i.held <= i.minLevel && !lines.some((l) => l.itemId === i.id),
-	);
+	const isLow = (i: { held: number; minLevel: number }) => i.held <= i.minLevel;
+	const suggestFor = (i: { held: number; minLevel: number }) =>
+		Math.max(Math.ceil(i.minLevel * 2 - i.held), 1);
+	// A line picked by hand starts with no quantity: the box shows the suggestion as its placeholder (QA DEF-099).
 	const add = (i: StockItemRow & { held: number }) =>
 		setLines((ls) => [
 			...ls,
@@ -646,16 +653,21 @@ function OrderPanel({
 				itemId: i.id,
 				name: i.name,
 				unit: i.unit,
-				quantity: String(Math.max(Math.ceil(i.minLevel * 2 - i.held), 1)),
+				quantity: "",
 				unitCost: String(i.unitCost),
 			},
 		]);
-	const valid =
-		!!supplier &&
-		lines.length > 0 &&
-		lines.every((l) => Number(l.quantity) > 0 && Number(l.unitCost) >= 0);
-	const save = (submit: boolean) =>
-		run(
+	const qtyError = (l: Line) =>
+		!(Number(l.quantity) > 0) ? "Enter how many" : undefined;
+	const costError = (l: Line) =>
+		l.unitCost.trim() === "" || !(Number(l.unitCost) >= 0)
+			? "Enter the cost"
+			: undefined;
+	const ready = !!supplier && lines.length > 0;
+	const save = (submit: boolean) => {
+		setTried(true);
+		if (lines.some((l) => qtyError(l) || costError(l))) return;
+		return run(
 			() =>
 				withDeliveries(
 					saveOrder({
@@ -676,6 +688,7 @@ function OrderPanel({
 			sentMessage,
 			(o) => onSaved(o.id),
 		);
+	};
 
 	return (
 		<SidePanel
@@ -697,7 +710,7 @@ function OrderPanel({
 					<button
 						type="button"
 						className={btn.secondary}
-						disabled={!valid || pending}
+						disabled={!ready || pending}
 						onClick={() => void save(false)}
 					>
 						Save draft
@@ -705,7 +718,7 @@ function OrderPanel({
 					<button
 						type="button"
 						className={btn.primary}
-						disabled={!valid || pending}
+						disabled={!ready || pending}
 						onClick={() => void save(true)}
 					>
 						<SendIcon className="mr-1 inline size-4" /> Send
@@ -764,6 +777,10 @@ function OrderPanel({
 										type="number"
 										min={0}
 										aria-label={`Quantity of ${l.name}`}
+										placeholder={(() => {
+											const c = catalogue.find((x) => x.id === l.itemId);
+											return c ? `e.g. ${q(suggestFor(c))}` : "How many";
+										})()}
 										value={l.quantity}
 										onChange={(e) =>
 											setLines((ls) =>
@@ -772,8 +789,15 @@ function OrderPanel({
 												),
 											)
 										}
-										className={`${input} py-[7px] text-right`}
+										className={cn(
+											input,
+											"py-[7px] text-right",
+											tried && qtyError(l) && "border-danger",
+										)}
 									/>
+									{tried && qtyError(l) && (
+										<span className="text-xs text-danger">{qtyError(l)}</span>
+									)}
 								</label>
 								<label className="flex min-w-0 flex-col gap-1">
 									<span className="text-[11px] font-medium text-ink-3">Unit cost (₦)</span>
@@ -789,25 +813,36 @@ function OrderPanel({
 												),
 											)
 										}
-										className={`${input} py-[7px] text-right`}
+										className={cn(
+											input,
+											"py-[7px] text-right",
+											tried && costError(l) && "border-danger",
+										)}
 									/>
+									{tried && costError(l) && (
+										<span className="text-xs text-danger">{costError(l)}</span>
+									)}
 								</label>
 							</div>
 						</div>
 					))}
+					{/* Items running low come first in the list, marked "low"; nothing else sits under the box (QA DEF-098). */}
 					<SelectField
+						key={pickKey}
 						label="Add an item"
 						value={pick}
 						onChange={(v) => {
 							const i = catalogue.find((x) => x.id === v);
 							if (i) add(i);
 							setPick("");
+							setPickKey((k) => k + 1);
 						}}
 						options={candidates
 							.filter((i) => !lines.some((l) => l.itemId === i.id))
+							.sort((a, b) => Number(isLow(b)) - Number(isLow(a)))
 							.map((i) => ({
 								value: i.id,
-								label: i.name,
+								label: isLow(i) ? `${i.name} · low` : i.name,
 								hint: `${q(i.held)} ${i.unit} held · min ${q(i.minLevel)}`,
 							}))}
 						placeholder={
@@ -816,20 +851,6 @@ function OrderPanel({
 								: "Any item…"
 						}
 					/>
-					{lowSuggestions.length > 0 && (
-						<div className="flex flex-wrap gap-1">
-							{lowSuggestions.slice(0, 10).map((i) => (
-								<button
-									key={i.id}
-									type="button"
-									onClick={() => add(i)}
-									className="rounded-pill border border-warning/40 bg-warning-soft px-2 py-[3px] text-[11px] font-medium text-warning"
-								>
-									+ {i.name} (low)
-								</button>
-							))}
-						</div>
-					)}
 				</PanelSection>
 				<TotalsList
 					rows={[{ label: "Order total", value: naira(total), strong: true }]}
@@ -847,7 +868,7 @@ function OrderPanel({
 					onChange={setExpected}
 				/>
 				<TextareaField
-					label="Note to supplier"
+					label="Note to supplier (optional)"
 					value={note}
 					onChange={setNote}
 					rows={2}
