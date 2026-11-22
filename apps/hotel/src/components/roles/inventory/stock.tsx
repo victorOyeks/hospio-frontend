@@ -30,11 +30,10 @@ import {
 	fmtDay,
 	fmtWhen,
 	naira,
-	nairaShort,
 	plural,
 } from "@hospio/ui/shared/format";
 import { KpiCard } from "@hospio/ui/shared/kpi-card";
-import { Modal } from "@hospio/ui/shared/modal";
+import { ConfirmModal, Modal } from "@hospio/ui/shared/modal";
 import { PageHeader } from "@hospio/ui/shared/page-header";
 import { PillTabs } from "@hospio/ui/shared/pill-tabs";
 import { ProgressBar } from "@hospio/ui/shared/progress-bar";
@@ -153,6 +152,8 @@ export function StockScreen({
 	const [moving, setMoving] = useState(false);
 	const [storeEdit, setStoreEdit] = useState<StoreRow | "new" | null>(null);
 	const [detail, setDetail] = useState<StockItemDetail | null>(null);
+	const [stopping, setStopping] = useState(false);
+	const stopper = useAction();
 	const active = tab ?? "all";
 	const onOrderIds = new Set(
 		orders
@@ -348,13 +349,13 @@ export function StockScreen({
 				/>
 				<KpiCard
 					label="On order"
-					value={nairaShort(value?.onOrder ?? 0)}
+					value={naira(value?.onOrder ?? 0)}
 					icon={TruckIcon}
-					hint={`${plural(orders.filter((o) => o.status === "SENT" || o.status === "PARTIAL").length, "order")} still to arrive`}
+					hint={`${plural(value?.ordersOnTheWay ?? orders.filter((o) => o.status === "SENT" || o.status === "PARTIAL").length, "order")} still to arrive`}
 				/>
 				<KpiCard
 					label="Stock value"
-					value={nairaShort(total)}
+					value={naira(total)}
 					icon={PackageIcon}
 					hint="At average cost"
 				/>
@@ -529,6 +530,14 @@ export function StockScreen({
 						<>
 							<button
 								type="button"
+								className={btn.ghost}
+								disabled={!detail}
+								onClick={() => setStopping(true)}
+							>
+								Stop stocking
+							</button>
+							<button
+								type="button"
 								className={btn.secondary}
 								disabled={!detail}
 								onClick={() => setEditing(detail)}
@@ -657,6 +666,45 @@ export function StockScreen({
 				)}
 			</SidePanel>
 
+			{detail && (
+				<ConfirmModal
+					open={stopping}
+					onOpenChange={setStopping}
+					title={`Stop stocking ${detail.name}?`}
+					subtitle="It leaves the item list, orders and counts. Its movements are kept."
+					tone="danger"
+					confirmLabel="Stop stocking"
+					pending={stopper.pending}
+					confirmDisabled={detail.levels.some((l) => l.quantity > 0)}
+					onConfirm={() =>
+						void stopper.run(
+							() => saveItem({ id: detail.id, name: detail.name, active: false }),
+							`${detail.name} is no longer stocked`,
+							() => {
+								setStopping(false);
+								void setOpenId(null);
+								void setAt(null);
+							},
+						)
+					}
+				>
+					{(() => {
+						// The same refusal inventory-service gives (docs/inventory-stores.md · Items).
+						const held = detail.levels.find((l) => l.quantity > 0);
+						return held ? (
+							<Note tone="danger">
+								{detail.name} still has {q(held.quantity)} {detail.unit} in{" "}
+								{held.storeName} · count it out or move it first
+							</Note>
+						) : (
+							<Note tone="info">
+								No store holds any {detail.name}. You can add it again later
+								as a new item.
+							</Note>
+						);
+					})()}
+				</ConfirmModal>
+			)}
 			{row && (
 				<CorrectModal
 					open={correcting}
@@ -843,6 +891,11 @@ function ItemPanel({
 	const [cost, setCost] = useState<number | "">("");
 	const { run, pending } = useAction();
 	const main = stores.find((s) => s.kind === "MAIN") ?? stores[0];
+	// The same check as inventory-service (QA DEF-107): blank or 0 reorder-up-to means twice the minimum.
+	const parError =
+		num(f.par) && num(f.min) && (num(f.par) ?? 0) < (num(f.min) ?? 0)
+			? `The reorder-up-to level can't be below the minimum (${q(num(f.min) ?? 0)})`
+			: undefined;
 	useEffect(() => {
 		if (!open) return;
 		if (item) {
@@ -898,7 +951,7 @@ function ItemPanel({
 					<button
 						type="button"
 						className={btn.primary}
-						disabled={!f.name.trim() || pending}
+						disabled={!f.name.trim() || !!parError || pending}
 						onClick={() =>
 							void run(
 								() =>
@@ -983,6 +1036,7 @@ function ItemPanel({
 						value={f.par}
 						onChange={set("par")}
 						hint="Blank = twice the minimum"
+						error={parError}
 					/>
 				</FieldRow>
 				<FieldRow>
@@ -1007,7 +1061,7 @@ function ItemPanel({
 				{item && (
 					<ToggleField
 						label="Still stocked"
-						hint="Turn off to stop tracking it (only once no store holds any)"
+						hint="Turn off to stop tracking it (only once no store holds any) · or use Stop stocking on the item"
 						checked={f.active}
 						onChange={(v) => setF((x) => ({ ...x, active: v }))}
 					/>
@@ -1176,11 +1230,11 @@ function MoveModal({
 					}
 				/>
 				<TextareaField
-					label="Note"
+					label="Note (optional)"
 					value={note}
 					onChange={setNote}
 					rows={2}
-					placeholder="Why it moved (optional)"
+					placeholder="Why it moved"
 				/>
 			</div>
 		</Modal>

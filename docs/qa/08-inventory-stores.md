@@ -52,7 +52,8 @@ Godwin open **Inventory** in their menu and get the same screens as tabs along t
 - Reload the page (Ctrl/Cmd + R) whenever you are told a new version was deployed.
 - Purchase orders are emailed to the supplier for real. A message card at the top shows what was sent, marked
   "Email sent to …"; close it with **Close**. SMS and WhatsApp are "coming soon".
-- The **API** button at the bottom left lists every call the screen made, with the answer.
+- The **API** button at the bottom right lists every call the screen made, with the answer. While a side panel or
+  window is open it moves to the bottom left so it never covers the panel's buttons (22 Nov, DEF-104).
 - Quantities are shown with up to 2 decimals; money in naira.
 
 ## 1 · Stores & stock (Jide)
@@ -61,8 +62,8 @@ Godwin open **Inventory** in their menu and get the same screens as tabs along t
    order (₦ still to arrive), Stock value. Below them a card per store with its kind and value (e.g. "Main store
    · ₦…"), its item count and a red "N low" pill when items are at or below their minimum, and an **Add a store**
    card.
-2. **Do:** add up the store card values. **Expect:** they equal the Stock value tile (the tile is rounded, e.g.
-   ₦4.5M).
+2. **Do:** add up the store card values. **Expect:** they equal the Stock value tile (since 22 Nov the tiles show full
+   naira, e.g. ₦4,512,300, not ₦4.5M; On order reads e.g. ₦41,770 with "2 orders still to arrive").
 3. **Do:** click a store card. **Expect:** the table shows only that store's items; click it again to show all.
 4. **Expect:** a **Running low** card lists low items with Left, Minimum, a **Suggest** quantity (up to the
    reorder-up-to level, or twice the minimum) and the usual supplier, each with **Reorder**.
@@ -111,7 +112,10 @@ Godwin open **Inventory** in their menu and get the same screens as tabs along t
 1. **Do:** Suppliers. **Expect:** In use / Stopped tabs; each supplier with contact, terms, items, open orders,
    received in the last 30 days and last order.
 2. **Do:** **Add supplier** → Company "QA Linen Co <initials>", Phone `123` → **Save supplier**. **Expect:** red
-   "Enter a phone number like 0803 123 4567"; the panel stays open.
+   "Enter a phone number like 0803 123 4567" under Phone; the panel stays open. (22 Nov: the panel also has
+   **Contact person (optional)** and **Contact phone (optional)**; a contact phone like `0000000` gets the same red
+   message, and a number typed as the contact person's name gets "Enter the contact person's name · their number goes
+   under Contact phone". Saving a supplier with no items is allowed on purpose: see QA 91, DEF-096.)
 3. **Do:** Phone `0803 555 0777`, Email `orders@qalinen.ng`, Terms 14 days, add "QA Pillow case …" under **Items
    they supply** → **Save supplier**. **Expect:** "… added"; its panel lists the item.
 4. **Do:** **Edit** → Address "12 Allen Avenue" → Save. **Expect:** "… saved", Address shown.
@@ -121,7 +125,9 @@ Godwin open **Inventory** in their menu and get the same screens as tabs along t
 1. **Do:** Stores & stock → **Reorder** on a low item. **Expect:** Purchase orders opens **New purchase order**
    with that item and the suggested quantity, the usual supplier picked, Deliver to Main store, Expected in 2
    days.
-2. **Do:** **Order stock** (or **New order**) → Supplier "QA Linen Co …" → add "QA Pillow case …" 20 at ₦1,500 →
+2. **Do:** **Order stock** (or **New order**) → Supplier "QA Linen Co …" → add "QA Pillow case …" (from 22 Nov a line
+   picked by hand starts with an empty quantity showing a suggestion like "e.g. 20"; type the quantity; items running
+   low are first in **Add an item**, marked "· low") 20 at ₦1,500 →
    **Save draft**. **Expect:** "Saved as a draft"; the panel shows Draft with the lines and total ₦30,000.
 3. **Do:** **Edit** → change to 25 → **Save draft**, then **Send**. **Expect:** "PO-… sent to QA Linen Co …";
    the notice shows the **Email to orders@qalinen.ng** with every line, the total, the store and the date. The
@@ -162,9 +168,11 @@ Godwin open **Inventory** in their menu and get the same screens as tabs along t
    a count open (started by Jide Alabi) · finish or cancel it first".
 3. **Do:** enter every quantity, one 2 fewer than the system → **Submit count**. **Expect:** "Count submitted · a
    manager approves the difference"; the card says "Missing worth ₦…" (2 × the item's cost); Jide sees "Waiting
-   on a manager".
+   on a manager". Since 22 Nov Tunde's bell shows "Stock count to approve · Housekeeping store" ("Jide Alabi counted
+   the Housekeeping store · missing worth ₦…"); its link opens the count.
 4. **Do:** as Tunde → Inventory → Stock counts → open it → **Approve**. **Expect:** "Count approved · levels
    corrected"; the item drops by 2 (sales or issues since the count are kept); status Approved by Tunde Bakare.
+   Since 22 Nov Jide's bell shows "Your count was approved · Housekeeping store".
 5. **Do:** as Jide start another count → **Cancel count** → Reason "Wrong store". **Expect:** Cancelled.
 6. **Do:** as Segun → Bar stock → **End-of-night count** → submit. **Expect:** it is submitted for approval and
    shows on Stock counts as Needs approval; doing it again before Tunde approves is refused: "The Bar store
@@ -195,7 +203,7 @@ Check at the same moment (nobody moving stock in between):
 |---|---|---|
 | Jide | Add an item called "rice" | "There's already an item called rice" |
 | Jide | Item with Minimum 10, Reorder up to 5 | "The reorder-up-to level can't be below the minimum (10)" |
-| Jide | Stop stocking an item that still has stock | "<item> still has 12 kg in Main store · count it out or move it first" |
+| Jide | Stop stocking an item that still has stock (item panel → **Stop stocking**, or Edit → Still stocked off) | "<item> still has 12 kg in Main store · count it out or move it first" (shown in the Stop stocking window; Stop stocking stays greyed) |
 | Jide | Add a store named "main store" | "There's already a store called main store" |
 | Jide | Close the Main store | "Main store still holds stock (N items) · move or count it out first" |
 | Jide | Move stock from a store to itself | "Pick two different stores" |
@@ -205,6 +213,7 @@ Check at the same moment (nobody moving stock in between):
 | Jide | Decline with no reason (API) | "Give a reason so the team knows why" |
 | Grace | Ask the store for the kitchen (API `fromTeam:"KITCHEN"`) | 403 "You can only ask the store for your own team (HOUSEKEEPING)" |
 | Jide | Supplier phone 0000000000 / email "nope" | "Enter a phone number like 0803 123 4567" / "Enter an email address like orders@supplier.ng" |
+| Jide | Supplier contact phone 0000000 | "Enter a phone number like 0803 123 4567" under Contact phone (API: "… for the contact person") |
 | Jide | Order with the same item twice / quantity 0 / expected yesterday (API) | "<item> is on the order twice" / "Enter a quantity above zero for <item>" / "The expected date is in the past" |
 | Jide | Edit a sent order (API) | "Only a draft can be changed · PO-… is sent" |
 | Jide | Close an order nothing has arrived on | "Nothing has been received on PO-… · cancel it instead" |

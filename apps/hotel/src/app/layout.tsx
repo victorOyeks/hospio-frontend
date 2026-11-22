@@ -54,12 +54,7 @@ export default async function RootLayout({
 			>
 				<Providers>
 					{children}
-					<Toaster
-						richColors
-						theme="light"
-						duration={5000}
-						position="bottom-right"
-					/>
+					<Toaster theme="light" />
 					<UpdateNotice />
 					<ServiceWorker />
 					<ApiLog />

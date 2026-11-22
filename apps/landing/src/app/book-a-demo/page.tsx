@@ -55,7 +55,10 @@ const included = [
 	"Every feature, for hotels, lounges, bars and restaurants",
 ];
 
-/** /book-a-demo: the public "Book a demo" form (it replaces self sign-up), with what happens next beside it. */
+/**
+ * /book-a-demo: the public "Book a demo" form (it replaces self sign-up), with what happens next beside it on laptops and below
+ * it on phones and tablets (22 Nov 2026: the Meta ad's visitors are on phones and the form must be on the first screen).
+ */
 export default async function BookDemoPage({
 	searchParams,
 }: {
@@ -69,17 +72,21 @@ export default async function BookDemoPage({
 				<div
 					className={cn(
 						container,
-						"flex flex-col gap-8 py-10 md:gap-12 md:py-16",
+						"flex flex-col gap-5 py-6 md:gap-8 md:py-10 lg:gap-12 lg:py-16",
 					)}
 				>
-					<div className="flex min-w-0 max-w-[760px] flex-col gap-4">
+					<div className="flex min-w-0 max-w-[760px] flex-col gap-2 lg:gap-4">
 						<p className="text-[13px] font-bold uppercase tracking-[0.1em] text-brand">
 							Book a demo
 						</p>
-						<h1 className="text-[32px] font-bold leading-[1.1] tracking-[-0.02em] text-ink md:text-[48px]">
+						<h1 className="text-[28px] font-bold leading-[1.1] tracking-[-0.02em] text-ink md:text-[40px] lg:text-[48px]">
 							See Hospio360 on a business like yours
 						</h1>
-						<p className="text-[17px] leading-[1.55] text-ink-2 md:text-[18px]">
+						{/* Phones and tablets: one short line, so the form starts on the first screen (the Meta ad's visitors). */}
+						<p className="text-[16px] leading-[1.5] text-ink-2 md:text-[17px] lg:hidden">
+							We call you within 1 working day and set everything up with you.
+						</p>
+						<p className="hidden text-[18px] leading-[1.55] text-ink-2 lg:block">
 							Tell us about your hotel, lounge, bar or restaurant. Our team calls
 							you within 1 working day, shows you Hospio360 and sets everything up
 							with you.
@@ -87,10 +94,11 @@ export default async function BookDemoPage({
 					</div>
 
 					<div className="grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_400px] lg:gap-8">
-						<div className="order-2 min-w-0 lg:order-1">
+						{/* The form first on every screen; on laptops What happens next sits beside it. */}
+						<div className="min-w-0">
 							<BookDemoForm referralCode={referralCode} />
 						</div>
-						<aside className="order-1 flex min-w-0 flex-col gap-6 lg:sticky lg:top-[111px] lg:order-2">
+						<aside className="flex min-w-0 flex-col gap-6 lg:sticky lg:top-[111px]">
 							<div className="flex flex-col gap-[18px] rounded-[16px] bg-brand p-6 md:p-8">
 								<h2 className="text-[22px] font-bold text-white">
 									What happens next

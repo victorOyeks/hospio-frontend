@@ -112,6 +112,18 @@ QA Lounge has no rooms, so it has no front office.
 5. **Do:** a cash refund of the manager's bar payment (Payments → the payment → Refund → approve). **Expect:** needs the bar till
    open ("This cash refund comes out of the bar till…"), like a bar attendant's cash.
 
+## 6. When the till can't be checked (22 Nov)
+
+Before 22 Nov, if the finance service was down, cash went through with no till, so it was in no drawer at the close. Now it is refused.
+Only run this on staging with the developer, who stops `hospio-finance-service` for a minute and starts it again.
+
+1. **Do:** with finance stopped, a bar attendant (and then a manager) picks **Cash** on a bar sale. **Expect:** "We couldn't check the
+   till just now, so cash can't be taken yet. Try again in a moment. Card and transfer still work"; cash can't be sent.
+2. **Do:** approve a cash refund while finance is stopped. **Expect:** "We couldn't check the till just now, so this cash refund can't
+   be approved yet. Try again in a moment".
+3. **Do:** start finance again and retry. **Expect:** the normal till rules (sections 1–5).
+4. **Bug if:** any cash is recorded while finance is stopped, or the till page shows cash taken with no till.
+
 ## Known limits
 
 - The owner's approval of a refund sent to them arrives after the decision; it is not refused if the till has closed since. The

@@ -381,7 +381,7 @@ export function StoreScreen({
 						/>
 					</PanelSection>
 					<TextareaField
-						label="Note for the store"
+						label="Note for the store (optional)"
 						value={note}
 						onChange={setNote}
 						placeholder="e.g. needed before dinner service"

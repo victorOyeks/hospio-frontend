@@ -489,7 +489,7 @@ export function CountsScreen({
 							</tbody>
 						</table>
 						<TextareaField
-							label="Note"
+							label="Note (optional)"
 							value={note}
 							onChange={setNote}
 							rows={2}

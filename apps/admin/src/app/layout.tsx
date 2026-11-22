@@ -37,7 +37,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
 			<body className={cn("min-h-screen bg-background font-sans text-foreground antialiased", dmSans.variable)}>
 				<Providers>
 					{children}
-					<Toaster richColors theme="light" duration={5000} position="bottom-right" />
+					<Toaster theme="light" />
 					<UpdateNotice />
 					<ServiceWorker />
 					<ApiLog />

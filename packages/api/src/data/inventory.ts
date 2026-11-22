@@ -173,6 +173,7 @@ export function toSupplierRow(x: z.infer<typeof InvSupplier>): SupplierRow {
 		id: x.id,
 		name: x.name,
 		contactName: x.contactName ?? "",
+		contactPhone: s(x.contactPhone),
 		phone: x.phone ?? "",
 		email: s(x.email),
 		terms: x.paymentTerms ?? "",
@@ -275,6 +276,7 @@ function toValue(v: z.infer<typeof InvValue>): StockValue {
 			supplierName: s(l.supplierName),
 		})),
 		onOrder: n(v.onOrder),
+		ordersOnTheWay: n(v.ordersOnTheWay),
 	};
 }
 

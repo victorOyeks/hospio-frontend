@@ -665,7 +665,7 @@ function ReceivePanel({
 					<span />
 				</FieldRow>
 				<TextareaField
-					label="Note"
+					label="Note (optional)"
 					value={note}
 					onChange={setNote}
 					rows={2}

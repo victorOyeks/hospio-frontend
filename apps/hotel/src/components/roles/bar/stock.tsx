@@ -164,7 +164,7 @@ export function BarStockScreen({
 						setupLink="reasons"
 					/>
 					<TextareaField
-						label="Note"
+						label="Note (optional)"
 						value={broken.note}
 						onChange={(v) => setBroken({ ...broken, note: v })}
 						rows={2}

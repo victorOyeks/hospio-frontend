@@ -50,12 +50,14 @@ function Panel() {
 
 	return (
 		<>
-			{/* Bottom-right, small and faded until hovered: clear of the sidebar's menu and person row (it sat over the last link). */}
+			{/* Bottom-right, small and faded until hovered: clear of the sidebar's menu and person row (it sat over the last link).
+			    While a side panel or modal is open it moves to the bottom-left, over the dimmed page, so it never covers the
+			    panel's buttons (QA DEF-104: it sat on "Charge to room"). */}
 			<button
 				type="button"
 				onClick={() => setOpen(true)}
 				title="Staging API log: the backend calls made for this session"
-				className="fixed bottom-[12px] right-[12px] z-[60] rounded-full bg-neutral-900/80 px-[10px] py-[4px] font-mono text-[11px] font-semibold text-white opacity-60 shadow-md transition-opacity hover:bg-neutral-800 hover:opacity-100 focus-visible:opacity-100"
+				className="fixed bottom-[12px] right-[12px] z-[60] [body:has([role=dialog])_&]:left-[12px] [body:has([role=dialog])_&]:right-auto rounded-full bg-neutral-900/80 px-[10px] py-[4px] font-mono text-[11px] font-semibold text-white opacity-60 shadow-md transition-opacity hover:bg-neutral-800 hover:opacity-100 focus-visible:opacity-100"
 			>
 				API
 			</button>

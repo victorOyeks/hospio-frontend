@@ -26,7 +26,7 @@ const kindOf = (k: string): HotelApplicationNoteRow["kind"] => (k === "STATUS" |
 export const toHotelApplicationRow = (a: HotelApplication): HotelApplicationRow => ({
 	id: a.id,
 	ownerName: a.ownerName,
-	email: a.email,
+	email: a.email ?? "",
 	phone: a.phone ?? "",
 	businessName: a.businessName,
 	businessType: a.businessType,

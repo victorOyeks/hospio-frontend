@@ -13,6 +13,7 @@ import {
 import { btn, input as inputCls } from "@hospio/ui/shared/ui";
 import { cn } from "@hospio/ui/utils";
 import { btnLg } from "@/components/site";
+import { trackMeta } from "@/lib/meta-pixel";
 import { submitPartnerApplication } from "@/partners/actions";
 import {
 	BUSINESS_COUNTS,
@@ -143,6 +144,8 @@ export function PartnerApplyForm() {
 		start(async () => {
 			const r = await submitPartnerApplication(values);
 			if (r.ok) {
+				// The Meta Pixel (production only); never the form's contents.
+				trackMeta("CompleteRegistration", { content_name: "Partner application" });
 				setDone(r.message || RECEIVED_MESSAGE);
 				window.scrollTo({ top: 0, behavior: "smooth" });
 				return;
