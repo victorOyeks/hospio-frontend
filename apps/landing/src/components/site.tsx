@@ -172,6 +172,7 @@ const footerColumns: {
 			{ href: "/legal/terms", label: "Terms of Service" },
 			{ href: "/legal/privacy", label: "Privacy Policy" },
 			{ href: "/legal/fees", label: "Fees" },
+			{ href: "#cookie-settings", label: "Cookie settings" },
 		],
 	},
 ];

@@ -120,3 +120,21 @@ Owner decisions (22 Nov 2026):
   PageView on load and on a header link to /features, one Lead per request (`content_name` Book a demo), Contact on the
   WhatsApp button, no name / phone / email / business in any request. Built without the id: no facebook request at all.
 - QA rows deleted afterwards. Screenshots: `~/Desktop/Hospio test screenshots/Short demo form (22 Nov 2026)/` 01–15, 20.
+
+## Cookie notice (22 Nov, owner: consent before the Meta Pixel)
+
+Production landing only (the notice and the pixel exist only when NEXT_PUBLIC_META_PIXEL_ID is set; staging and local builds show
+neither). Use a private window so no earlier answer is remembered.
+
+1. **Do:** open hospio360.com/book-a-demo on a phone. **Expect:** a white notice at the bottom: "We use cookies to measure our adverts
+   on Facebook and Instagram. We never share what you type into our forms. Privacy Policy" with **No thanks** and **Accept**. The
+   form's first fields are still visible above it. Nothing from facebook.com / facebook.net loads yet (browser network tab).
+2. **Do:** tap **No thanks**, reload. **Expect:** no notice, still nothing from Meta.
+3. **Do:** footer → **Cookie settings**. **Expect:** the notice again. Tap **Accept**. **Expect:** fbevents.js loads, Events Manager
+   (Hospio360 website → Test events, or Overview after a few minutes) shows a PageView. Reload: no notice.
+4. **Do:** Cookie settings → **No thanks** after accepting. **Expect:** the page reloads and Meta's code no longer loads.
+5. **Bug if:** anything from Meta loads before Accept, the notice covers the whole form, or the answer isn't remembered.
+
+Local run 22 Nov (pixel ID set, facebook requests blocked so no test events reached Meta), phone 390 and laptop 1440: notice shown,
+0 Meta requests before an answer; No thanks + reload: none; Cookie settings reopens it; Accept loads fbevents.js; reload: no notice.
+Screenshots: Desktop/Hospio test screenshots/Cookie banner (22 Nov 2026).
